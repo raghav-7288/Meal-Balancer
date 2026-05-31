@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import "./App.css";
 import {
     Activity,
     BarChart3,
     Copy,
+    Database,
     Leaf,
     Plus,
     Sparkles,
@@ -12,6 +13,7 @@ import {
 import { FOODS } from "./data/foods";
 import { APP_CONFIG } from "./data/config";
 import { scoreMeal, scoreDay } from "./engines/scoringEngine";
+import SupabaseTest from "./components/SupabaseTest";
 
 const MEALS = ["Breakfast", "Lunch", "Dinner", "Snacks"];
 const ACTIVITY_OPTIONS = ["sedentary", "moderate", "heavy"];
@@ -163,9 +165,17 @@ function App() {
 
     const [plans, setPlans] = useState(starterPlans);
     const [activePlanId, setActivePlanId] = useState(starterPlans[0].id);
-    const [selectedMeal, setSelectedMeal] = useState("Breakfast");
-    const [selectedFoodId, setSelectedFoodId] = useState(FOODS[0]?.id || "");
-    const [grams, setGrams] = useState(100);
+    const [selectedMeal, setSelectedMeal] = useState("");
+    const [selectedFoodId, setSelectedFoodId] = useState("");
+    const [grams, setGrams] = useState("");
+    const [toast, setToast] = useState(null);
+
+    useEffect(() => {
+        if (toast) {
+            const timer = setTimeout(() => setToast(null), 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [toast]);
 
     const activePlan = plans.find((p) => p.id === activePlanId) || plans[0];
 
@@ -264,7 +274,7 @@ function App() {
     }
 
     function addFood() {
-        if (!selectedFoodId) return;
+        if (!selectedMeal || !selectedFoodId || !grams) return;
         const food = foodById(selectedFoodId);
         if (!food) return;
 
@@ -288,6 +298,11 @@ function App() {
                     : plan
             )
         );
+
+        setToast(`"${food.name}" added to ${selectedMeal}`);
+        setSelectedMeal("");
+        setSelectedFoodId("");
+        setGrams("");
     }
 
     function saveNewPlan() {
@@ -305,12 +320,16 @@ function App() {
         setPlans((prev) =>
             prev.map((plan) =>
                 plan.id === activePlanId
-                    ? createPlan("New plan", {
-                        Breakfast: [],
-                        Lunch: [],
-                        Dinner: [],
-                        Snacks: [],
-                    })
+                    ? {
+                        ...plan,
+                        name: "New plan",
+                        meals: {
+                            Breakfast: [],
+                            Lunch: [],
+                            Dinner: [],
+                            Snacks: [],
+                        },
+                    }
                     : plan
             )
         );
@@ -327,6 +346,7 @@ function App() {
 
     return (
         <div className="app-shell">
+            {toast && <div className="toast-popup">{toast}</div>}
             <header className="hero">
                 <div>
                     <div className="eyebrow">
@@ -498,6 +518,7 @@ function App() {
                         <div className="builder-row">
                             <Field label="Meal slot">
                                 <select value={selectedMeal} onChange={(e) => setSelectedMeal(e.target.value)}>
+                                    <option value="" disabled>Select slot</option>
                                     {MEALS.map((m) => (
                                         <option key={m} value={m}>
                                             {m}
@@ -511,6 +532,7 @@ function App() {
                                     value={selectedFoodId}
                                     onChange={(e) => setSelectedFoodId(e.target.value)}
                                 >
+                                    <option value="" disabled>Select item</option>
                                     {FOODS.map((food) => (
                                         <option key={food.id} value={food.id}>
                                             {food.name}
@@ -523,6 +545,7 @@ function App() {
                                 <input
                                     type="number"
                                     value={grams}
+                                    placeholder="Select grams"
                                     onChange={(e) => setGrams(e.target.value)}
                                 />
                             </Field>
@@ -730,6 +753,10 @@ function App() {
                                 <li>Keep added sugar and oil editable and profile-specific.</li>
                             </ul>
                         </div>
+                    </Section>
+
+                    <Section title="Database connection" icon={<Database size={16} />}>
+                        <SupabaseTest />
                     </Section>
                 </main>
             </div>

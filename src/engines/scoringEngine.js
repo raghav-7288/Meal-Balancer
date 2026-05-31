@@ -8,6 +8,12 @@ export function scoreMeal(totals) {
     const sugarG = totals.addedSugar ?? 0;
     const visibleFatG = totals.visibleFat ?? 0;
 
+    // If there's no food at all, return a neutral zero score
+    const hasFood = (totals.protein || 0) + (totals.carbs || 0) + (totals.fat || 0) > 0;
+    if (!hasFood) {
+        return { score: 0, band: "No items", reasons: ["Add food items to see a score."] };
+    }
+
     let score = 100;
     const reasons = [];
 
@@ -58,6 +64,12 @@ export function scoreDay(dayTotals) {
     const fibreG = dayTotals.fibre ?? 0;
     const sugarG = dayTotals.addedSugar ?? 0;
     const visibleFatG = dayTotals.visibleFat ?? 0;
+
+    // If there's no food at all, return a neutral zero score
+    const hasFood = (dayTotals.protein || 0) + (dayTotals.carbs || 0) + (dayTotals.fat || 0) > 0;
+    if (!hasFood) {
+        return { score: 0, band: "No items", reasons: ["Add food items to see a score."] };
+    }
 
     let score = 100;
     const reasons = [];
