@@ -1,0 +1,137 @@
+import { supabase } from "../lib/supabaseClient";
+
+/**
+ * Sign up a new user with email and password.
+ * @param {string} email
+ * @param {string} password
+ * @returns {Promise<{user: object, session: object}>}
+ */
+export async function signUp(email, password) {
+    const { data, error } = await supabase.auth.signUp({ email, password });
+
+    if (error) {
+        throw new Error(error.message);
+    }
+
+    return data;
+}
+
+/**
+ * Sign in an existing user with email and password.
+ * @param {string} email
+ * @param {string} password
+ * @returns {Promise<{user: object, session: object}>}
+ */
+export async function signIn(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+        throw new Error(error.message);
+    }
+
+    return data;
+}
+
+/**
+ * Sign out the current user.
+ */
+export async function signOut() {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+        throw new Error(error.message);
+    }
+}
+
+/**
+ * Get the current authenticated user (from local session).
+ * @returns {Promise<object|null>}
+ */
+export async function getCurrentUser() {
+    const { data: { user }, error } = await supabase.auth.getUser();
+
+    if (error) {
+        return null;
+    }
+
+    return user;
+}
+
+/**
+ * Get the current session.
+ * @returns {Promise<object|null>}
+ */
+export async function getSession() {
+    const { data: { session }, error } = await supabase.auth.getSession();
+
+    if (error) {
+        return null;
+    }
+
+    return session;
+}
+
+/**
+ * Fetch user profile from user_profiles table.
+ * @param {string} userId - The auth user UUID.
+ * @returns {Promise<object|null>}
+ */
+export async function fetchUserProfile(userId) {
+    const { data, error } = await supabase
+        .from("user_profiles")
+        .select("user_id, username, full_name, created_at")
+        .eq("user_id", userId)
+        .single();
+
+    if (error) {
+        if (error.code === "PGRST116") {
+            // No row found
+            return null;
+        }
+        throw new Error(`Failed to fetch user profile: ${error.message}`);
+    }
+
+    return data;
+}
+
+/**
+ * Create a user profile row if one does not already exist.
+ * @param {string} userId - The auth user UUID.
+ * @param {string} username
+ * @param {string} fullName
+ * @returns {Promise<object>}
+ */
+export async function createUserProfile(userId, username, fullName) {
+    const existing = await fetchUserProfile(userId);
+
+    if (existing) {
+        return existing;
+    }
+
+    const { data, error } = await supabase
+        .from("user_profiles")
+        .insert({
+            user_id: userId,
+            username,
+            full_name: fullName,
+        })
+        .select()
+        .single();
+
+    if (error) {
+        throw new Error(`Failed to create user profile: ${error.message}`);
+    }
+
+    return data;
+}
+
+/**
+ * Subscribe to auth state changes.
+ * @param {function} callback - Receives (event, session).
+ * @returns {object} subscription with unsubscribe method.
+ */
+export function onAuthStateChange(callback) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(callback);
+    return subscription;
+}
+

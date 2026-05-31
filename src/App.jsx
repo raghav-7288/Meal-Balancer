@@ -9,11 +9,15 @@ import {
     Plus,
     Sparkles,
     Trash2,
+    User,
 } from "lucide-react";
 import { FOODS } from "./data/foods";
 import { APP_CONFIG } from "./data/config";
 import { scoreMeal, scoreDay } from "./engines/scoringEngine";
 import SupabaseTest from "./components/SupabaseTest";
+import AuthPage from "./components/AuthPage";
+import UserProfile from "./components/UserProfile";
+import { useAuth } from "./hooks/useAuth";
 
 const MEALS = ["Breakfast", "Lunch", "Dinner", "Snacks"];
 const ACTIVITY_OPTIONS = ["sedentary", "moderate", "heavy"];
@@ -154,6 +158,25 @@ function combineDay(mealTotals) {
 }
 
 function App() {
+    const { isAuthenticated, loading: authLoading } = useAuth();
+
+    if (authLoading) {
+        return (
+            <div className="auth-loading-screen">
+                <div className="auth-loading-spinner" />
+                <p>Loading…</p>
+            </div>
+        );
+    }
+
+    if (!isAuthenticated) {
+        return <AuthPage />;
+    }
+
+    return <Dashboard />;
+}
+
+function Dashboard() {
     const [profile, setProfile] = useState({
         activity: "moderate",
         goal: "maintenance",
@@ -370,6 +393,10 @@ function App() {
 
             <div className="dashboard">
                 <aside className="sidebar">
+                    <Section title="My account" icon={<User size={16} />}>
+                        <UserProfile />
+                    </Section>
+
                     <Section title="Profile setup" icon={<Activity size={16} />}>
                         <Field label="Activity level">
                             <select
