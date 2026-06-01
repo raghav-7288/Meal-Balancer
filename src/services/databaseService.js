@@ -1,5 +1,108 @@
 import { supabase } from "../lib/supabaseClient";
 
+// ─── Health Goals ───────────────────────────────────────────────────────────
+
+/**
+ * @typedef {Object} HealthGoal
+ * @property {number} health_goal_id
+ * @property {string} goal_code
+ * @property {string} goal_name
+ * @property {string|null} description
+ * @property {boolean} is_active
+ * @property {number} display_order
+ */
+
+/**
+ * @typedef {Object} UserProfileHealthGoal
+ * @property {string} user_id
+ * @property {number} health_goal_id
+ * @property {string} created_at
+ */
+
+/**
+ * Fetch all active health goals ordered by display_order.
+ * @returns {Promise<HealthGoal[]>}
+ */
+export async function getHealthGoals() {
+    const { data, error } = await supabase
+        .from("health_goals")
+        .select("health_goal_id, goal_code, goal_name, description, is_active, display_order")
+        .eq("is_active", true)
+        .order("display_order");
+
+    if (error) {
+        throw new Error(`Failed to fetch health goals: ${error.message}`);
+    }
+
+    return data;
+}
+
+/**
+ * Fetch health goals selected by a specific user.
+ * @param {string} userId - The user's UUID.
+ * @returns {Promise<UserProfileHealthGoal[]>}
+ */
+export async function getUserHealthGoals(userId) {
+    const { data, error } = await supabase
+        .from("user_profile_health_goals")
+        .select("user_id, health_goal_id, created_at")
+        .eq("user_id", userId);
+
+    if (error) {
+        throw new Error(`Failed to fetch user health goals: ${error.message}`);
+    }
+
+    return data;
+}
+
+/**
+ * Save (sync) the user's selected health goals.
+ * Removes deselected goals and inserts newly selected ones.
+ * @param {string} userId - The user's UUID.
+ * @param {number[]} selectedGoalIds - Array of health_goal_id values to save.
+ * @returns {Promise<void>}
+ */
+export async function saveUserHealthGoals(userId, selectedGoalIds) {
+    // 1. Fetch current selections
+    const current = await getUserHealthGoals(userId);
+    const currentIds = current.map((row) => row.health_goal_id);
+
+    // 2. Determine inserts and deletes
+    const toInsert = selectedGoalIds.filter((id) => !currentIds.includes(id));
+    const toDelete = currentIds.filter((id) => !selectedGoalIds.includes(id));
+
+    // 3. Delete removed goals
+    if (toDelete.length > 0) {
+        const { error: deleteError } = await supabase
+            .from("user_profile_health_goals")
+            .delete()
+            .eq("user_id", userId)
+            .in("health_goal_id", toDelete);
+
+        if (deleteError) {
+            throw new Error(`Failed to remove health goals: ${deleteError.message}`);
+        }
+    }
+
+    // 4. Insert new goals
+    if (toInsert.length > 0) {
+        const rows = toInsert.map((goalId) => ({
+            user_id: userId,
+            health_goal_id: goalId,
+        }));
+
+        const { error: insertError } = await supabase
+            .from("user_profile_health_goals")
+            .insert(rows);
+
+        if (insertError) {
+            throw new Error(`Failed to save health goals: ${insertError.message}`);
+        }
+    }
+}
+
+// ─── Major Groups & Foods ───────────────────────────────────────────────────
+
 /**
  * Fetch all major food groups.
  * @returns {Promise<Array>} List of major_groups rows.

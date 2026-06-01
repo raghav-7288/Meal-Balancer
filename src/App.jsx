@@ -17,6 +17,7 @@ import {
 import { FOODS } from "./data/foods";
 import { APP_CONFIG } from "./data/config";
 import { scoreMeal, scoreDay } from "./engines/scoringEngine";
+import { getHealthGoals, getUserHealthGoals, saveUserHealthGoals } from "./services/databaseService";
 import SupabaseTest from "./components/SupabaseTest";
 import AuthPage from "./components/AuthPage";
 import UserProfile from "./components/UserProfile";
@@ -27,15 +28,6 @@ const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 const ACTIVITY_OPTIONS = ["sedentary", "moderate", "heavy"];
 const GOAL_OPTIONS = ["maintenance", "weight loss", "weight gain", "metabolic improvement"];
 const DIET_OPTIONS = ["vegetarian", "eggetarian", "non-vegetarian", "Jain-compatible"];
-const CONDITION_OPTIONS = [
-    "diabetes risk",
-    "obesity",
-    "hypertension",
-    "dyslipidemia",
-    "PCOS",
-    "fatty liver",
-    "general wellness",
-];
 
 function createPlan(name, meals) {
     return {
@@ -186,7 +178,6 @@ function Dashboard() {
         goal: "maintenance",
         dietType: "vegetarian",
         sex: "female",
-        conditions: ["general wellness"],
         bmiTarget: "22",
     });
 
@@ -201,6 +192,7 @@ function Dashboard() {
     const [instructions, setInstructions] = useState("");
     const [toast, setToast] = useState(null);
     const [currentPage, setCurrentPage] = useState("home");
+    const [userGoalNames, setUserGoalNames] = useState([]);
 
     useEffect(() => {
         if (toast) {
@@ -208,6 +200,29 @@ function Dashboard() {
             return () => clearTimeout(timer);
         }
     }, [toast]);
+
+    const { user } = useAuth();
+
+    // Load user's health goals for display on dashboard
+    useEffect(() => {
+        async function loadUserGoals() {
+            if (!user?.id) return;
+            try {
+                const [allGoals, userGoals] = await Promise.all([
+                    getHealthGoals(),
+                    getUserHealthGoals(user.id),
+                ]);
+                const selectedIds = userGoals.map((ug) => ug.health_goal_id);
+                const names = allGoals
+                    .filter((g) => selectedIds.includes(g.health_goal_id))
+                    .map((g) => g.goal_name);
+                setUserGoalNames(names);
+            } catch (err) {
+                console.error("Failed to load user goals:", err);
+            }
+        }
+        loadUserGoals();
+    }, [user?.id, currentPage]);
 
     const activePlan = plans.find((p) => p.id === activePlanId) || plans[0];
 
@@ -479,6 +494,20 @@ function Dashboard() {
                                     <strong>{visibleFatLimit} g/day</strong>
                                     <span>{profile.sex} · {profile.activity}</span>
                                 </div>
+                            </Section>
+
+                            <Section title="My health goals" icon={<Activity size={16} />}>
+                                {userGoalNames.length > 0 ? (
+                                    <div className="goals-tags">
+                                        {userGoalNames.map((name) => (
+                                            <span key={name} className="goal-tag">{name}</span>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="small-copy">
+                                        No goals selected. Go to Profile to set your health goals.
+                                    </p>
+                                )}
                             </Section>
                         </aside>
 
@@ -834,8 +863,70 @@ function WelcomePage({ onGetStarted, dayScore, scoreTone }) {
 }
 
 function ProfilePage({ profile, setProfile, visibleFatLimit }) {
+    const { user } = useAuth();
+    const [healthGoals, setHealthGoals] = useState([]);
+    const [selectedGoalIds, setSelectedGoalIds] = useState([]);
+    const [goalsLoading, setGoalsLoading] = useState(true);
+    const [goalsSaving, setGoalsSaving] = useState(false);
+    const [goalsError, setGoalsError] = useState(null);
+    const [goalsToast, setGoalsToast] = useState(null);
+
+    useEffect(() => {
+        if (goalsToast) {
+            const timer = setTimeout(() => setGoalsToast(null), 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [goalsToast]);
+
+    // Fetch available health goals and user's selections on mount
+    useEffect(() => {
+        async function loadGoals() {
+            try {
+                setGoalsLoading(true);
+                setGoalsError(null);
+
+                const [goals, userGoals] = await Promise.all([
+                    getHealthGoals(),
+                    user?.id ? getUserHealthGoals(user.id) : Promise.resolve([]),
+                ]);
+
+                setHealthGoals(goals);
+                setSelectedGoalIds(userGoals.map((ug) => ug.health_goal_id));
+            } catch (err) {
+                setGoalsError(err.message);
+            } finally {
+                setGoalsLoading(false);
+            }
+        }
+
+        loadGoals();
+    }, [user?.id]);
+
+    function toggleGoal(goalId) {
+        setSelectedGoalIds((prev) =>
+            prev.includes(goalId)
+                ? prev.filter((id) => id !== goalId)
+                : [...prev, goalId]
+        );
+    }
+
+    async function handleSaveGoals() {
+        if (!user?.id) return;
+        try {
+            setGoalsSaving(true);
+            setGoalsError(null);
+            await saveUserHealthGoals(user.id, selectedGoalIds);
+            setGoalsToast("Health goals saved successfully!");
+        } catch (err) {
+            setGoalsError(err.message);
+        } finally {
+            setGoalsSaving(false);
+        }
+    }
+
     return (
         <div className="profile-page">
+            {goalsToast && <div className="toast-popup">{goalsToast}</div>}
             <div className="profile-page-grid">
                 <Section title="My account" icon={<User size={16} />}>
                     <UserProfile />
@@ -891,26 +982,37 @@ function ProfilePage({ profile, setProfile, visibleFatLimit }) {
                             onChange={(e) => setProfile({ ...profile, bmiTarget: e.target.value })}
                         />
                     </Field>
+                </Section>
 
-                    <div className="tag-grid">
-                        {CONDITION_OPTIONS.map((tag) => (
-                            <label key={tag} className="check-chip">
-                                <input
-                                    type="checkbox"
-                                    checked={profile.conditions.includes(tag)}
-                                    onChange={(e) => {
-                                        setProfile((p) => ({
-                                            ...p,
-                                            conditions: e.target.checked
-                                                ? Array.from(new Set([...p.conditions.filter((x) => x !== "general wellness"), tag]))
-                                                : p.conditions.filter((x) => x !== tag),
-                                        }));
-                                    }}
-                                />
-                                <span>{tag}</span>
-                            </label>
-                        ))}
-                    </div>
+                <Section title="Health goals & conditions" icon={<Activity size={16} />}>
+                    {goalsLoading ? (
+                        <p className="small-copy">Loading health goals…</p>
+                    ) : goalsError ? (
+                        <p className="error-text">{goalsError}</p>
+                    ) : (
+                        <>
+                            <p className="small-copy" style={{ marginBottom: 12 }}>
+                                Select all conditions and goals that apply to you.
+                            </p>
+                            <div className="tag-grid">
+                                {healthGoals.map((goal) => (
+                                    <label key={goal.health_goal_id} className="check-chip">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedGoalIds.includes(goal.health_goal_id)}
+                                            onChange={() => toggleGoal(goal.health_goal_id)}
+                                        />
+                                        <span>{goal.goal_name}</span>
+                                    </label>
+                                ))}
+                            </div>
+                            <div className="button-row" style={{ marginTop: 14 }}>
+                                <button onClick={handleSaveGoals} disabled={goalsSaving}>
+                                    {goalsSaving ? "Saving…" : "Save goals"}
+                                </button>
+                            </div>
+                        </>
+                    )}
                 </Section>
 
                 <Section title="Visible fat reference" icon={<Leaf size={16} />}>
