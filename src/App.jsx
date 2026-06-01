@@ -20,6 +20,7 @@ import UserProfile from "./components/UserProfile";
 import { useAuth } from "./hooks/useAuth";
 
 const MEALS = ["Breakfast", "Lunch", "Dinner", "Snacks"];
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const ACTIVITY_OPTIONS = ["sedentary", "moderate", "heavy"];
 const GOAL_OPTIONS = ["maintenance", "weight loss", "weight gain", "metabolic improvement"];
 const DIET_OPTIONS = ["vegetarian", "eggetarian", "non-vegetarian", "Jain-compatible"];
@@ -188,9 +189,13 @@ function Dashboard() {
 
     const [plans, setPlans] = useState(starterPlans);
     const [activePlanId, setActivePlanId] = useState(starterPlans[0].id);
+    const [vegetableTarget, setVegetableTarget] = useState(APP_CONFIG.vegetableBenchmarkG);
+    const [sugarLimit, setSugarLimit] = useState(APP_CONFIG.addedSugarLimitG);
     const [selectedMeal, setSelectedMeal] = useState("");
     const [selectedFoodId, setSelectedFoodId] = useState("");
     const [grams, setGrams] = useState("");
+    const [selectedDay, setSelectedDay] = useState("");
+    const [instructions, setInstructions] = useState("");
     const [toast, setToast] = useState(null);
 
     useEffect(() => {
@@ -314,6 +319,8 @@ function Dashboard() {
                                     id: crypto.randomUUID(),
                                     foodId: selectedFoodId,
                                     grams: Number(grams),
+                                    day: selectedDay || "",
+                                    instructions: instructions || "",
                                 },
                             ],
                         },
@@ -326,6 +333,8 @@ function Dashboard() {
         setSelectedMeal("");
         setSelectedFoodId("");
         setGrams("");
+        setSelectedDay("");
+        setInstructions("");
     }
 
     function saveNewPlan() {
@@ -385,9 +394,18 @@ function Dashboard() {
 
                 <div className="hero-stats">
                     <StatCard label="Daily score" value={dayScore} tone={scoreTone} />
-                    <StatCard label="Vegetable target" value={`${APP_CONFIG.vegetableBenchmarkG}g`} />
-                    <StatCard label="Sugar limit" value={`${APP_CONFIG.addedSugarLimitG}g`} />
-                    <StatCard label="Best plan" value={bestSummary?.plan?.name || "-"} />
+                    <EditableStatCard
+                        label="Vegetable target"
+                        value={vegetableTarget}
+                        unit="g"
+                        onChange={(v) => setVegetableTarget(Number(v))}
+                    />
+                    <EditableStatCard
+                        label="Sugar limit"
+                        value={sugarLimit}
+                        unit="g"
+                        onChange={(v) => setSugarLimit(Number(v))}
+                    />
                 </div>
             </header>
 
@@ -543,6 +561,17 @@ function Dashboard() {
 
                     <Section title="Meal builder" icon={<Plus size={16} />}>
                         <div className="builder-row">
+                            <Field label="Day">
+                                <select value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)}>
+                                    <option value="" disabled>Select day</option>
+                                    {DAYS.map((d) => (
+                                        <option key={d} value={d}>
+                                            {d}
+                                        </option>
+                                    ))}
+                                </select>
+                            </Field>
+
                             <Field label="Meal slot">
                                 <select value={selectedMeal} onChange={(e) => setSelectedMeal(e.target.value)}>
                                     <option value="" disabled>Select slot</option>
@@ -580,6 +609,17 @@ function Dashboard() {
                             <button onClick={addFood}>Add food</button>
                         </div>
 
+                        <div className="builder-instructions-row">
+                            <Field label="Instructions (optional)">
+                                <input
+                                    type="text"
+                                    value={instructions}
+                                    placeholder="e.g. lightly roasted, no oil, with salt..."
+                                    onChange={(e) => setInstructions(e.target.value)}
+                                />
+                            </Field>
+                        </div>
+
                         <div className="meal-panels">
                             {MEALS.map((meal) => {
                                 const mealItems = activePlan.meals[meal] || [];
@@ -605,8 +645,10 @@ function Dashboard() {
                                                 <tr>
                                                     <th>Food</th>
                                                     <th>g</th>
+                                                    <th>Day</th>
                                                     <th>Group</th>
                                                     <th>Exchange</th>
+                                                    <th>Instructions</th>
                                                     <th>Actions</th>
                                                 </tr>
                                                 </thead>
@@ -626,8 +668,10 @@ function Dashboard() {
                                                                         onChange={(e) => updateMealItem(meal, item.id, e.target.value)}
                                                                     />
                                                                 </td>
+                                                                <td>{item.day || "-"}</td>
                                                                 <td>{food?.group || "-"}</td>
                                                                 <td>{exchange.toFixed(2)}</td>
+                                                                <td className="instructions-cell">{item.instructions || "-"}</td>
                                                                 <td>
                                                                     <div className="icon-row">
                                                                         <button
@@ -649,7 +693,7 @@ function Dashboard() {
                                                     })
                                                 ) : (
                                                     <tr>
-                                                        <td colSpan={5} className="empty-cell">
+                                                        <td colSpan={7} className="empty-cell">
                                                             No items yet.
                                                         </td>
                                                     </tr>
@@ -829,6 +873,23 @@ function StatCard({ label, value, tone = "neutral" }) {
         <div className={`stat-card ${tone}`}>
             <div className="kpi-label">{label}</div>
             <div className="kpi-value">{value}</div>
+        </div>
+    );
+}
+
+function EditableStatCard({ label, value, unit, onChange }) {
+    return (
+        <div className="stat-card editable">
+            <div className="kpi-label">{label}</div>
+            <div className="kpi-value editable-value">
+                <input
+                    type="number"
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="stat-input"
+                />
+                <span className="stat-unit">{unit}</span>
+            </div>
         </div>
     );
 }
