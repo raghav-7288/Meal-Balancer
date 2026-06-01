@@ -5,11 +5,14 @@ import {
     BarChart3,
     Copy,
     Database,
+    Home,
     Leaf,
+    Menu,
     Plus,
     Sparkles,
     Trash2,
     User,
+    UtensilsCrossed,
 } from "lucide-react";
 import { FOODS } from "./data/foods";
 import { APP_CONFIG } from "./data/config";
@@ -197,6 +200,7 @@ function Dashboard() {
     const [selectedDay, setSelectedDay] = useState("");
     const [instructions, setInstructions] = useState("");
     const [toast, setToast] = useState(null);
+    const [currentPage, setCurrentPage] = useState("home");
 
     useEffect(() => {
         if (toast) {
@@ -379,162 +383,106 @@ function Dashboard() {
     return (
         <div className="app-shell">
             {toast && <div className="toast-popup">{toast}</div>}
-            <header className="hero">
-                <div>
-                    <div className="eyebrow">
-                        <Activity size={14} />
-                        Indian diet planning dashboard
+
+            <nav className="top-nav">
+                <div className="nav-brand">
+                    <UtensilsCrossed size={20} />
+                    <span>Meal Balancer</span>
+                </div>
+                <div className="nav-links">
+                    <button
+                        className={`nav-link ${currentPage === "home" ? "active" : ""}`}
+                        onClick={() => setCurrentPage("home")}
+                    >
+                        <Home size={16} /> Home
+                    </button>
+                    <button
+                        className={`nav-link ${currentPage === "dashboard" ? "active" : ""}`}
+                        onClick={() => setCurrentPage("dashboard")}
+                    >
+                        <BarChart3 size={16} /> Dashboard
+                    </button>
+                    <button
+                        className={`nav-link ${currentPage === "profile" ? "active" : ""}`}
+                        onClick={() => setCurrentPage("profile")}
+                    >
+                        <User size={16} /> Profile
+                    </button>
+                </div>
+            </nav>
+
+            {currentPage === "home" && (
+                <WelcomePage onGetStarted={() => setCurrentPage("dashboard")} dayScore={dayScore} scoreTone={scoreTone} />
+            )}
+
+            {currentPage === "profile" && (
+                <ProfilePage
+                    profile={profile}
+                    setProfile={setProfile}
+                    visibleFatLimit={visibleFatLimit}
+                />
+            )}
+
+            {currentPage === "dashboard" && (
+                <div className="dashboard-page">
+                    <div className="hero-stats">
+                        <StatCard label="Daily score" value={dayScore} tone={scoreTone} />
+                        <EditableStatCard
+                            label="Vegetable target"
+                            value={vegetableTarget}
+                            unit="g"
+                            onChange={(v) => setVegetableTarget(Number(v))}
+                        />
+                        <EditableStatCard
+                            label="Sugar limit"
+                            value={sugarLimit}
+                            unit="g"
+                            onChange={(v) => setSugarLimit(Number(v))}
+                        />
                     </div>
-                    <h1>Meal Balancer</h1>
-                    <p>
-                        Build meals in grams, convert them into exchange-style categories, and score
-                        the pattern with transparent reasons.
-                    </p>
-                </div>
 
-                <div className="hero-stats">
-                    <StatCard label="Daily score" value={dayScore} tone={scoreTone} />
-                    <EditableStatCard
-                        label="Vegetable target"
-                        value={vegetableTarget}
-                        unit="g"
-                        onChange={(v) => setVegetableTarget(Number(v))}
-                    />
-                    <EditableStatCard
-                        label="Sugar limit"
-                        value={sugarLimit}
-                        unit="g"
-                        onChange={(v) => setSugarLimit(Number(v))}
-                    />
-                </div>
-            </header>
-
-            <div className="dashboard">
-                <aside className="sidebar">
-                    <Section title="My account" icon={<User size={16} />}>
-                        <UserProfile />
-                    </Section>
-
-                    <Section title="Profile setup" icon={<Activity size={16} />}>
-                        <Field label="Activity level">
-                            <select
-                                value={profile.activity}
-                                onChange={(e) => setProfile({ ...profile, activity: e.target.value })}
-                            >
-                                {ACTIVITY_OPTIONS.map((x) => (
-                                    <option key={x} value={x}>
-                                        {x}
-                                    </option>
-                                ))}
-                            </select>
-                        </Field>
-
-                        <Field label="BMI / weight goal">
-                            <select
-                                value={profile.goal}
-                                onChange={(e) => setProfile({ ...profile, goal: e.target.value })}
-                            >
-                                {GOAL_OPTIONS.map((x) => (
-                                    <option key={x} value={x}>
-                                        {x}
-                                    </option>
-                                ))}
-                            </select>
-                        </Field>
-
-                        <Field label="Diet type">
-                            <select
-                                value={profile.dietType}
-                                onChange={(e) => setProfile({ ...profile, dietType: e.target.value })}
-                            >
-                                {DIET_OPTIONS.map((x) => (
-                                    <option key={x} value={x}>
-                                        {x}
-                                    </option>
-                                ))}
-                            </select>
-                        </Field>
-
-                        <Field label="Sex / reference profile">
-                            <select
-                                value={profile.sex}
-                                onChange={(e) => setProfile({ ...profile, sex: e.target.value })}
-                            >
-                                <option value="female">female</option>
-                                <option value="male">male</option>
-                            </select>
-                        </Field>
-
-                        <Field label="BMI target">
-                            <input
-                                value={profile.bmiTarget}
-                                onChange={(e) => setProfile({ ...profile, bmiTarget: e.target.value })}
-                            />
-                        </Field>
-
-                        <div className="tag-grid">
-                            {CONDITION_OPTIONS.map((tag) => (
-                                <label key={tag} className="check-chip">
-                                    <input
-                                        type="checkbox"
-                                        checked={profile.conditions.includes(tag)}
-                                        onChange={(e) => {
-                                            setProfile((p) => ({
-                                                ...p,
-                                                conditions: e.target.checked
-                                                    ? Array.from(new Set([...p.conditions.filter((x) => x !== "general wellness"), tag]))
-                                                    : p.conditions.filter((x) => x !== tag),
-                                            }));
-                                        }}
-                                    />
-                                    <span>{tag}</span>
-                                </label>
-                            ))}
-                        </div>
-                    </Section>
-
-                    <Section title="Plan controls" icon={<Sparkles size={16} />}>
-                        <div className="button-row">
-                            <button onClick={saveNewPlan}>
-                                <Plus size={14} /> Save plan
-                            </button>
-                            <button className="secondary" onClick={resetActivePlan}>
-                                Reset
-                            </button>
-                        </div>
-
-                        <div className="saved-plans">
-                            {plans.map((plan) => {
-                                const summary = summaries.find((s) => s.plan.id === plan.id);
-                                const active = plan.id === activePlanId;
-                                return (
-                                    <button
-                                        key={plan.id}
-                                        className={`plan-row ${active ? "active" : ""}`}
-                                        onClick={() => setActivePlanId(plan.id)}
-                                    >
-                                        <span>{plan.name}</span>
-                                        <strong>{summary?.dayScore?.score || 0}</strong>
+                    <div className="dashboard">
+                        <aside className="sidebar">
+                            <Section title="Plan controls" icon={<Sparkles size={16} />}>
+                                <div className="button-row">
+                                    <button onClick={saveNewPlan}>
+                                        <Plus size={14} /> Save plan
                                     </button>
-                                );
-                            })}
-                        </div>
-                    </Section>
+                                    <button className="secondary" onClick={resetActivePlan}>
+                                        Reset
+                                    </button>
+                                </div>
 
-                    <Section title="Visible fat reference" icon={<Leaf size={16} />}>
-                        <p className="small-copy">
-                            Current editable benchmark for this profile:
-                        </p>
-                        <div className="fat-box">
-                            <strong>{visibleFatLimit} g/day</strong>
-                            <span>
-                {profile.sex} · {profile.activity}
-              </span>
-                        </div>
-                    </Section>
-                </aside>
+                                <div className="saved-plans">
+                                    {plans.map((plan) => {
+                                        const summary = summaries.find((s) => s.plan.id === plan.id);
+                                        const active = plan.id === activePlanId;
+                                        return (
+                                            <button
+                                                key={plan.id}
+                                                className={`plan-row ${active ? "active" : ""}`}
+                                                onClick={() => setActivePlanId(plan.id)}
+                                            >
+                                                <span>{plan.name}</span>
+                                                <strong>{summary?.dayScore?.score || 0}</strong>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </Section>
 
-                <main className="content">
+                            <Section title="Visible fat reference" icon={<Leaf size={16} />}>
+                                <p className="small-copy">
+                                    Current editable benchmark for this profile:
+                                </p>
+                                <div className="fat-box">
+                                    <strong>{visibleFatLimit} g/day</strong>
+                                    <span>{profile.sex} · {profile.activity}</span>
+                                </div>
+                            </Section>
+                        </aside>
+
+                        <main className="content">
                     <div className="kpi-grid">
                         <Kpi
                             label="Day score"
@@ -830,6 +778,150 @@ function Dashboard() {
                         <SupabaseTest />
                     </Section>
                 </main>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+function WelcomePage({ onGetStarted, dayScore, scoreTone }) {
+    const { user } = useAuth();
+    return (
+        <div className="welcome-page">
+            <div className="welcome-card">
+                <div className="welcome-icon">
+                    <UtensilsCrossed size={48} />
+                </div>
+                <h1>Welcome{user?.email ? `, ${user.email.split("@")[0]}` : ""}!</h1>
+                <p className="welcome-subtitle">
+                    Your personal Indian diet planning dashboard
+                </p>
+                <p className="welcome-desc">
+                    Build meals in grams, convert them into exchange-style categories, and score
+                    your dietary pattern with transparent reasons. Track your nutrition across the week
+                    with personalized targets.
+                </p>
+                <div className="welcome-highlights">
+                    <div className="welcome-highlight-item">
+                        <Activity size={20} />
+                        <div>
+                            <strong>Personalized Scoring</strong>
+                            <p>Get scores based on your activity level, goals, and conditions</p>
+                        </div>
+                    </div>
+                    <div className="welcome-highlight-item">
+                        <BarChart3 size={20} />
+                        <div>
+                            <strong>Nutrient Tracking</strong>
+                            <p>Monitor carbs, protein, fats, fibre, vitamins & minerals</p>
+                        </div>
+                    </div>
+                    <div className="welcome-highlight-item">
+                        <Sparkles size={20} />
+                        <div>
+                            <strong>Smart Recommendations</strong>
+                            <p>Compare plans and get actionable improvement tips</p>
+                        </div>
+                    </div>
+                </div>
+                <button className="welcome-cta" onClick={onGetStarted}>
+                    Go to Dashboard <BarChart3 size={16} />
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function ProfilePage({ profile, setProfile, visibleFatLimit }) {
+    return (
+        <div className="profile-page">
+            <div className="profile-page-grid">
+                <Section title="My account" icon={<User size={16} />}>
+                    <UserProfile />
+                </Section>
+
+                <Section title="Profile setup" icon={<Activity size={16} />}>
+                    <Field label="Activity level">
+                        <select
+                            value={profile.activity}
+                            onChange={(e) => setProfile({ ...profile, activity: e.target.value })}
+                        >
+                            {ACTIVITY_OPTIONS.map((x) => (
+                                <option key={x} value={x}>{x}</option>
+                            ))}
+                        </select>
+                    </Field>
+
+                    <Field label="BMI / weight goal">
+                        <select
+                            value={profile.goal}
+                            onChange={(e) => setProfile({ ...profile, goal: e.target.value })}
+                        >
+                            {GOAL_OPTIONS.map((x) => (
+                                <option key={x} value={x}>{x}</option>
+                            ))}
+                        </select>
+                    </Field>
+
+                    <Field label="Diet type">
+                        <select
+                            value={profile.dietType}
+                            onChange={(e) => setProfile({ ...profile, dietType: e.target.value })}
+                        >
+                            {DIET_OPTIONS.map((x) => (
+                                <option key={x} value={x}>{x}</option>
+                            ))}
+                        </select>
+                    </Field>
+
+                    <Field label="Sex / reference profile">
+                        <select
+                            value={profile.sex}
+                            onChange={(e) => setProfile({ ...profile, sex: e.target.value })}
+                        >
+                            <option value="female">female</option>
+                            <option value="male">male</option>
+                        </select>
+                    </Field>
+
+                    <Field label="BMI target">
+                        <input
+                            value={profile.bmiTarget}
+                            onChange={(e) => setProfile({ ...profile, bmiTarget: e.target.value })}
+                        />
+                    </Field>
+
+                    <div className="tag-grid">
+                        {CONDITION_OPTIONS.map((tag) => (
+                            <label key={tag} className="check-chip">
+                                <input
+                                    type="checkbox"
+                                    checked={profile.conditions.includes(tag)}
+                                    onChange={(e) => {
+                                        setProfile((p) => ({
+                                            ...p,
+                                            conditions: e.target.checked
+                                                ? Array.from(new Set([...p.conditions.filter((x) => x !== "general wellness"), tag]))
+                                                : p.conditions.filter((x) => x !== tag),
+                                        }));
+                                    }}
+                                />
+                                <span>{tag}</span>
+                            </label>
+                        ))}
+                    </div>
+                </Section>
+
+                <Section title="Visible fat reference" icon={<Leaf size={16} />}>
+                    <p className="small-copy">
+                        Current editable benchmark for this profile:
+                    </p>
+                    <div className="fat-box">
+                        <strong>{visibleFatLimit} g/day</strong>
+                        <span>{profile.sex} · {profile.activity}</span>
+                    </div>
+                </Section>
             </div>
         </div>
     );
