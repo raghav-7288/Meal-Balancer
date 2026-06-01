@@ -462,6 +462,120 @@ button.secondary {
     color: white;
 }
 
+.plan-toggle {
+    display: flex;
+    gap: 0;
+    margin-bottom: 0.75rem;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+
+.plan-toggle .toggle-btn {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border: none;
+    background: #f8fafc;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.plan-toggle .toggle-btn.active {
+    background: #0f172a;
+    color: white;
+}
+
+.plan-toggle .toggle-btn:hover:not(.active) {
+    background: #e5e7eb;
+}
+
+.plan-row-wrapper {
+    display: flex;
+    align-items: stretch;
+    gap: 4px;
+}
+
+.plan-row-wrapper .plan-row {
+    flex: 1;
+    border-radius: 8px 0 0 8px;
+}
+
+.plan-row-wrapper .copy-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    background: #f0f9ff;
+    border: 1px solid #e5e7eb;
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    color: #3b82f6;
+    transition: background 0.2s;
+}
+
+.plan-row-wrapper .copy-btn:hover {
+    background: #dbeafe;
+}
+
+.plan-row-wrapper.active .copy-btn {
+    background: #1e3a5f;
+    border-color: #0f172a;
+    color: white;
+}
+
+.plan-row-wrapper .delete-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    background: #fef2f2;
+    border: 1px solid #e5e7eb;
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    color: #dc2626;
+    transition: background 0.2s;
+}
+
+.plan-row-wrapper .delete-btn:hover {
+    background: #fecaca;
+}
+
+.plan-row-wrapper.active .delete-btn {
+    background: #5f1e1e;
+    border-color: #0f172a;
+    color: white;
+}
+
+.new-plan-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.new-plan-row .plan-name-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 13px;
+    background: #f8fafc;
+}
+
+.new-plan-row .plan-name-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.new-plan-row button {
+    white-space: nowrap;
+}
+
 .small-copy {
     margin: 0;
     color: #6b7280;

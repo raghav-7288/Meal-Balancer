@@ -68,6 +68,60 @@ const starterPlans = [
         ],
         Snacks: [{ id: crypto.randomUUID(), foodId: "banana", grams: 100 }],
     }),
+    createPlan("High-protein day", {
+        Breakfast: [
+            { id: crypto.randomUUID(), foodId: "egg", grams: 100 },
+            { id: crypto.randomUUID(), foodId: "curd", grams: 200 },
+            { id: crypto.randomUUID(), foodId: "banana", grams: 100 },
+        ],
+        Lunch: [
+            { id: crypto.randomUUID(), foodId: "dal", grams: 200 },
+            { id: crypto.randomUUID(), foodId: "roti", grams: 60 },
+            { id: crypto.randomUUID(), foodId: "mixedveg", grams: 100 },
+        ],
+        Dinner: [
+            { id: crypto.randomUUID(), foodId: "egg", grams: 100 },
+            { id: crypto.randomUUID(), foodId: "dal", grams: 150 },
+            { id: crypto.randomUUID(), foodId: "rice", grams: 100 },
+        ],
+        Snacks: [{ id: crypto.randomUUID(), foodId: "curd", grams: 150 }],
+    }),
+    createPlan("Light veggie day", {
+        Breakfast: [
+            { id: crypto.randomUUID(), foodId: "banana", grams: 100 },
+            { id: crypto.randomUUID(), foodId: "curd", grams: 100 },
+        ],
+        Lunch: [
+            { id: crypto.randomUUID(), foodId: "mixedveg", grams: 200 },
+            { id: crypto.randomUUID(), foodId: "roti", grams: 30 },
+            { id: crypto.randomUUID(), foodId: "dal", grams: 100 },
+        ],
+        Dinner: [
+            { id: crypto.randomUUID(), foodId: "mixedveg", grams: 200 },
+            { id: crypto.randomUUID(), foodId: "roti", grams: 30 },
+        ],
+        Snacks: [{ id: crypto.randomUUID(), foodId: "banana", grams: 100 }],
+    }),
+    createPlan("Dal & roti comfort", {
+        Breakfast: [
+            { id: crypto.randomUUID(), foodId: "roti", grams: 90 },
+            { id: crypto.randomUUID(), foodId: "curd", grams: 150 },
+        ],
+        Lunch: [
+            { id: crypto.randomUUID(), foodId: "dal", grams: 200 },
+            { id: crypto.randomUUID(), foodId: "roti", grams: 90 },
+            { id: crypto.randomUUID(), foodId: "mixedveg", grams: 100 },
+        ],
+        Dinner: [
+            { id: crypto.randomUUID(), foodId: "dal", grams: 150 },
+            { id: crypto.randomUUID(), foodId: "roti", grams: 60 },
+            { id: crypto.randomUUID(), foodId: "mixedveg", grams: 100 },
+        ],
+        Snacks: [
+            { id: crypto.randomUUID(), foodId: "banana", grams: 100 },
+            { id: crypto.randomUUID(), foodId: "curd", grams: 100 },
+        ],
+    }),
 ];
 
 function foodById(id) {
@@ -181,7 +235,10 @@ function Dashboard() {
         bmiTarget: "22",
     });
 
-    const [plans, setPlans] = useState(starterPlans);
+    const [presetPlans] = useState(() => starterPlans.map(p => ({ ...p, isPreset: true })));
+    const [userPlans, setUserPlans] = useState([]);
+    const [planView, setPlanView] = useState("preset"); // "preset" | "user"
+    const plans = useMemo(() => [...presetPlans, ...userPlans], [presetPlans, userPlans]);
     const [activePlanId, setActivePlanId] = useState(starterPlans[0].id);
     const [vegetableTarget, setVegetableTarget] = useState(APP_CONFIG.vegetableBenchmarkG);
     const [sugarLimit, setSugarLimit] = useState(APP_CONFIG.addedSugarLimitG);
@@ -191,6 +248,7 @@ function Dashboard() {
     const [selectedDay, setSelectedDay] = useState("");
     const [instructions, setInstructions] = useState("");
     const [toast, setToast] = useState(null);
+    const [newPlanName, setNewPlanName] = useState("");
     const [currentPage, setCurrentPage] = useState("home");
     const [userGoalNames, setUserGoalNames] = useState([]);
 
@@ -268,7 +326,7 @@ function Dashboard() {
     const bestSummary = [...summaries].sort((a, b) => b.dayScore.score - a.dayScore.score)[0];
 
     function updateMealItem(mealName, itemId, newGrams) {
-        setPlans((prev) =>
+        setUserPlans((prev) =>
             prev.map((plan) =>
                 plan.id === activePlanId
                     ? {
@@ -286,7 +344,7 @@ function Dashboard() {
     }
 
     function removeMealItem(mealName, itemId) {
-        setPlans((prev) =>
+        setUserPlans((prev) =>
             prev.map((plan) =>
                 plan.id === activePlanId
                     ? {
@@ -302,7 +360,7 @@ function Dashboard() {
     }
 
     function duplicateMealItem(mealName, item) {
-        setPlans((prev) =>
+        setUserPlans((prev) =>
             prev.map((plan) =>
                 plan.id === activePlanId
                     ? {
@@ -325,30 +383,52 @@ function Dashboard() {
         const food = foodById(selectedFoodId);
         if (!food) return;
 
-        setPlans((prev) =>
-            prev.map((plan) =>
-                plan.id === activePlanId
-                    ? {
-                        ...plan,
-                        meals: {
-                            ...plan.meals,
-                            [selectedMeal]: [
-                                ...plan.meals[selectedMeal],
-                                {
-                                    id: crypto.randomUUID(),
-                                    foodId: selectedFoodId,
-                                    grams: Number(grams),
-                                    day: selectedDay || "",
-                                    instructions: instructions || "",
-                                },
-                            ],
-                        },
-                    }
-                    : plan
-            )
-        );
-
-        setToast(`"${food.name}" added to ${selectedMeal}`);
+        // If active plan is a preset, copy it to user plans first
+        const isPresetActive = presetPlans.some(p => p.id === activePlanId);
+        if (isPresetActive) {
+            const presetPlan = presetPlans.find(p => p.id === activePlanId);
+            const newPlan = createPlan(`${presetPlan.name} (copy)`, {
+                Breakfast: presetPlan.meals.Breakfast.map(i => ({ ...i, id: crypto.randomUUID() })),
+                Lunch: presetPlan.meals.Lunch.map(i => ({ ...i, id: crypto.randomUUID() })),
+                Dinner: presetPlan.meals.Dinner.map(i => ({ ...i, id: crypto.randomUUID() })),
+                Snacks: presetPlan.meals.Snacks.map(i => ({ ...i, id: crypto.randomUUID() })),
+            });
+            newPlan.meals[selectedMeal].push({
+                id: crypto.randomUUID(),
+                foodId: selectedFoodId,
+                grams: Number(grams),
+                day: selectedDay || "",
+                instructions: instructions || "",
+            });
+            setUserPlans((prev) => [...prev, newPlan]);
+            setActivePlanId(newPlan.id);
+            setPlanView("user");
+            setToast(`Copied preset & added "${food.name}" to ${selectedMeal}`);
+        } else {
+            setUserPlans((prev) =>
+                prev.map((plan) =>
+                    plan.id === activePlanId
+                        ? {
+                            ...plan,
+                            meals: {
+                                ...plan.meals,
+                                [selectedMeal]: [
+                                    ...plan.meals[selectedMeal],
+                                    {
+                                        id: crypto.randomUUID(),
+                                        foodId: selectedFoodId,
+                                        grams: Number(grams),
+                                        day: selectedDay || "",
+                                        instructions: instructions || "",
+                                    },
+                                ],
+                            },
+                        }
+                        : plan
+                )
+            );
+            setToast(`"${food.name}" added to ${selectedMeal}`);
+        }
         setSelectedMeal("");
         setSelectedFoodId("");
         setGrams("");
@@ -357,23 +437,51 @@ function Dashboard() {
     }
 
     function saveNewPlan() {
-        const nextPlan = createPlan(`Plan ${plans.length + 1}`, {
+        const name = newPlanName.trim() || `My Plan ${userPlans.length + 1}`;
+        const nextPlan = createPlan(name, {
             Breakfast: [],
             Lunch: [],
             Dinner: [],
             Snacks: [],
         });
-        setPlans((prev) => [...prev, nextPlan]);
+        setUserPlans((prev) => [...prev, nextPlan]);
         setActivePlanId(nextPlan.id);
+        setPlanView("user");
+        setNewPlanName("");
+    }
+
+    function deleteUserPlan(planId) {
+        setUserPlans((prev) => prev.filter((p) => p.id !== planId));
+        if (activePlanId === planId) {
+            const remaining = userPlans.filter((p) => p.id !== planId);
+            if (remaining.length > 0) {
+                setActivePlanId(remaining[0].id);
+            } else {
+                setActivePlanId(presetPlans[0].id);
+                setPlanView("preset");
+            }
+        }
+    }
+
+    function duplicatePresetAsUserPlan(presetPlan) {
+        const newPlan = createPlan(`${presetPlan.name} (copy)`, {
+            Breakfast: presetPlan.meals.Breakfast.map(i => ({ ...i, id: crypto.randomUUID() })),
+            Lunch: presetPlan.meals.Lunch.map(i => ({ ...i, id: crypto.randomUUID() })),
+            Dinner: presetPlan.meals.Dinner.map(i => ({ ...i, id: crypto.randomUUID() })),
+            Snacks: presetPlan.meals.Snacks.map(i => ({ ...i, id: crypto.randomUUID() })),
+        });
+        setUserPlans((prev) => [...prev, newPlan]);
+        setActivePlanId(newPlan.id);
+        setPlanView("user");
+        setToast(`Copied "${presetPlan.name}" as your own plan`);
     }
 
     function resetActivePlan() {
-        setPlans((prev) =>
+        setUserPlans((prev) =>
             prev.map((plan) =>
                 plan.id === activePlanId
                     ? {
                         ...plan,
-                        name: "New plan",
                         meals: {
                             Breakfast: [],
                             Lunch: [],
@@ -459,31 +567,107 @@ function Dashboard() {
                     <div className="dashboard">
                         <aside className="sidebar">
                             <Section title="Plan controls" icon={<Sparkles size={16} />}>
-                                <div className="button-row">
+                                <div className="new-plan-row">
+                                    <input
+                                        type="text"
+                                        placeholder={`My Plan ${userPlans.length + 1}`}
+                                        value={newPlanName}
+                                        onChange={(e) => setNewPlanName(e.target.value)}
+                                        className="plan-name-input"
+                                    />
                                     <button onClick={saveNewPlan}>
-                                        <Plus size={14} /> Save plan
+                                        <Plus size={14} /> Create
                                     </button>
-                                    <button className="secondary" onClick={resetActivePlan}>
-                                        Reset
+                                </div>
+                                <div className="button-row">
+                                    <button className="secondary" onClick={resetActivePlan} disabled={presetPlans.some(p => p.id === activePlanId)}>
+                                        Reset meals
                                     </button>
                                 </div>
 
-                                <div className="saved-plans">
-                                    {plans.map((plan) => {
-                                        const summary = summaries.find((s) => s.plan.id === plan.id);
-                                        const active = plan.id === activePlanId;
-                                        return (
-                                            <button
-                                                key={plan.id}
-                                                className={`plan-row ${active ? "active" : ""}`}
-                                                onClick={() => setActivePlanId(plan.id)}
-                                            >
-                                                <span>{plan.name}</span>
-                                                <strong>{summary?.dayScore?.score || 0}</strong>
-                                            </button>
-                                        );
-                                    })}
+                                <div className="plan-toggle">
+                                    <button
+                                        className={`toggle-btn ${planView === "preset" ? "active" : ""}`}
+                                        onClick={() => setPlanView("preset")}
+                                    >
+                                        ⭐ Pre-saved
+                                    </button>
+                                    <button
+                                        className={`toggle-btn ${planView === "user" ? "active" : ""}`}
+                                        onClick={() => setPlanView("user")}
+                                    >
+                                        👤 My Plans
+                                    </button>
                                 </div>
+
+                                {planView === "preset" && (
+                                    <>
+                                        <p className="small-copy" style={{ marginBottom: "0.5rem", fontStyle: "italic", opacity: 0.8 }}>
+                                            Ready-made templates — click to preview, use "Copy" to make your own
+                                        </p>
+                                        <div className="saved-plans">
+                                            {presetPlans.map((plan) => {
+                                                const summary = summaries.find((s) => s.plan.id === plan.id);
+                                                const active = plan.id === activePlanId;
+                                                return (
+                                                    <div key={plan.id} className={`plan-row-wrapper ${active ? "active" : ""}`}>
+                                                        <button
+                                                            className={`plan-row ${active ? "active" : ""}`}
+                                                            onClick={() => setActivePlanId(plan.id)}
+                                                        >
+                                                            <span>{plan.name}</span>
+                                                            <strong>{summary?.dayScore?.score || 0}</strong>
+                                                        </button>
+                                                        <button
+                                                            className="copy-btn"
+                                                            title="Copy as my plan"
+                                                            onClick={() => duplicatePresetAsUserPlan(plan)}
+                                                        >
+                                                            <Copy size={12} />
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </>
+                                )}
+
+                                {planView === "user" && (
+                                    <>
+                                        <p className="small-copy" style={{ marginBottom: "0.5rem", opacity: 0.8 }}>
+                                            Your custom plans — fully editable
+                                        </p>
+                                        <div className="saved-plans">
+                                            {userPlans.length === 0 && (
+                                                <p className="small-copy" style={{ textAlign: "center", padding: "1rem 0" }}>
+                                                    No plans yet. Click "Create" or copy a pre-saved template.
+                                                </p>
+                                            )}
+                                            {userPlans.map((plan) => {
+                                                const summary = summaries.find((s) => s.plan.id === plan.id);
+                                                const active = plan.id === activePlanId;
+                                                return (
+                                                    <div key={plan.id} className={`plan-row-wrapper ${active ? "active" : ""}`}>
+                                                        <button
+                                                            className={`plan-row ${active ? "active" : ""}`}
+                                                            onClick={() => setActivePlanId(plan.id)}
+                                                        >
+                                                            <span>{plan.name}</span>
+                                                            <strong>{summary?.dayScore?.score || 0}</strong>
+                                                        </button>
+                                                        <button
+                                                            className="delete-btn"
+                                                            title="Delete plan"
+                                                            onClick={() => deleteUserPlan(plan.id)}
+                                                        >
+                                                            <Trash2 size={12} />
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </>
+                                )}
                             </Section>
 
                             <Section title="Visible fat reference" icon={<Leaf size={16} />}>
