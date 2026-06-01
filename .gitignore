@@ -13,6 +13,9 @@ dist-ssr
 *.local
 .env
 
+# Generated context file
+CONTEXT.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
