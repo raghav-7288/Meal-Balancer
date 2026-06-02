@@ -19,6 +19,8 @@ export function AuthProvider({ children }) {
 
     // Restore session on mount
     useEffect(() => {
+        let timeout;
+
         async function init() {
             try {
                 const currentSession = await getSession();
@@ -32,9 +34,15 @@ export function AuthProvider({ children }) {
             } catch (err) {
                 console.error("Auth init error:", err);
             } finally {
+                clearTimeout(timeout);
                 setLoading(false);
             }
         }
+
+        // Safety timeout: if auth takes more than 5s, stop loading and show login
+        timeout = setTimeout(() => {
+            setLoading(false);
+        }, 5000);
 
         init();
 
@@ -56,6 +64,7 @@ export function AuthProvider({ children }) {
         });
 
         return () => {
+            clearTimeout(timeout);
             subscription.unsubscribe();
         };
     }, []);

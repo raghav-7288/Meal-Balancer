@@ -13,11 +13,34 @@ import AuthPage from "./components/AuthPage";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
 import { useAuth } from "./hooks/useAuth";
 
+// Retry wrapper: if a lazy chunk fails to load (stale deploy), reload the page once
+function lazyWithRetry(importFn) {
+    return lazy(() =>
+        importFn().catch(() => {
+            // If chunk load fails, it's likely a stale deploy — reload once
+            const hasReloaded = sessionStorage.getItem("chunk-reload");
+            if (!hasReloaded) {
+                sessionStorage.setItem("chunk-reload", "1");
+                window.location.reload();
+                return new Promise(() => {}); // never resolves, page is reloading
+            }
+            sessionStorage.removeItem("chunk-reload");
+            // If already reloaded once and still failing, show error
+            return Promise.reject(new Error("Failed to load page. Please refresh."));
+        })
+    );
+}
+
+// Clear the reload flag on successful load
+if (sessionStorage.getItem("chunk-reload")) {
+    sessionStorage.removeItem("chunk-reload");
+}
+
 // Lazy-loaded pages for code splitting
-const WelcomePage = lazy(() => import("./components/pages/WelcomePage"));
-const DashboardPage = lazy(() => import("./components/pages/DashboardPage"));
-const ProfilePage = lazy(() => import("./components/pages/ProfilePage"));
-const FoodSearchPage = lazy(() => import("./components/FoodSearchPage"));
+const WelcomePage = lazyWithRetry(() => import("./components/pages/WelcomePage"));
+const DashboardPage = lazyWithRetry(() => import("./components/pages/DashboardPage"));
+const ProfilePage = lazyWithRetry(() => import("./components/pages/ProfilePage"));
+const FoodSearchPage = lazyWithRetry(() => import("./components/FoodSearchPage"));
 
 function PageLoader() {
     return (
