@@ -1158,3 +1158,56 @@ th {
         grid-template-columns: 1fr;
     }
 }
+
+/* Error Boundary */
+.error-boundary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    padding: 2rem;
+    color: #64748b;
+    gap: 1rem;
+}
+
+.error-boundary h2 {
+    color: #1e293b;
+    margin: 0;
+}
+
+.error-boundary p {
+    max-width: 400px;
+    color: #ef4444;
+    font-size: 0.875rem;
+}
+
+.error-boundary button {
+    padding: 0.5rem 1.5rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.error-boundary button:hover {
+    background: #2563eb;
+}
+
+/* Spin animation */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Nav links as anchor tags (react-router NavLink) */
+a.nav-link {
+    text-decoration: none;
+}
