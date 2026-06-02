@@ -22,6 +22,7 @@ import SupabaseTest from "./components/SupabaseTest";
 import AuthPage from "./components/AuthPage";
 import UserProfile from "./components/UserProfile";
 import { useAuth } from "./hooks/useAuth";
+import FoodSearchPage from "./components/FoodSearchPage";
 
 const MEALS = ["Breakfast", "Lunch", "Dinner", "Snacks"];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -526,6 +527,12 @@ function Dashboard() {
                         <BarChart3 size={16} /> Dashboard
                     </button>
                     <button
+                        className={`nav-link ${currentPage === "foods" ? "active" : ""}`}
+                        onClick={() => setCurrentPage("foods")}
+                    >
+                        <Database size={16} /> Food Explorer
+                    </button>
+                    <button
                         className={`nav-link ${currentPage === "profile" ? "active" : ""}`}
                         onClick={() => setCurrentPage("profile")}
                     >
@@ -545,6 +552,8 @@ function Dashboard() {
                     visibleFatLimit={visibleFatLimit}
                 />
             )}
+
+            {currentPage === "foods" && <FoodSearchPage />}
 
             {currentPage === "dashboard" && (
                 <div className="dashboard-page">
