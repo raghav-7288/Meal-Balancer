@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Search, X, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import "./FoodSearchPage.css";
@@ -49,15 +49,19 @@ function FoodSearchPage() {
 
     // Search foods — with nutrient-based ranking
     useEffect(() => {
-        if (debouncedQuery.length < 2) {
-            setResults([]);
-            setActiveIndex(-1);
-            setIsNutrientSearch(false);
-            setMatchedNutrientName("");
-            return;
-        }
-
         let cancelled = false;
+
+        if (debouncedQuery.length < 2) {
+            // Use a microtask to avoid synchronous setState in effect body
+            queueMicrotask(() => {
+                if (cancelled) return;
+                setResults([]);
+                setActiveIndex(-1);
+                setIsNutrientSearch(false);
+                setMatchedNutrientName("");
+            });
+            return () => { cancelled = true; };
+        }
 
         async function search() {
             setLoading(true);
@@ -122,12 +126,15 @@ function FoodSearchPage() {
 
     // Fetch nutrient details for selected food
     useEffect(() => {
-        if (!selectedFood) {
-            setNutrients([]);
-            return;
-        }
-
         let cancelled = false;
+
+        if (!selectedFood) {
+            queueMicrotask(() => {
+                if (cancelled) return;
+                setNutrients([]);
+            });
+            return () => { cancelled = true; };
+        }
 
         async function fetchNutrients() {
             setNutrientsLoading(true);
