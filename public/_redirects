@@ -1,0 +1,3 @@
+/* Redirect all routes to index.html for SPA (react-router) */
+/*    /index.html   200
+
