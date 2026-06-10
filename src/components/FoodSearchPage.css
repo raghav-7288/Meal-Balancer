@@ -459,67 +459,206 @@
 }
 
 /* ==========================================
-   MOBILE RESPONSIVE
+   DARK MODE
    ========================================== */
 
-@media (max-width: 768px) {
-    .food-search-page {
-        height: auto;
-        min-height: calc(100vh - 60px);
-    }
-
-    .food-search-bar-container {
-        padding: 1rem;
-    }
-
-    .food-search-layout {
-        flex-direction: column;
-        overflow: visible;
-    }
-
-    .food-search-results-panel {
-        width: 100%;
-        min-width: unset;
-        border-right: none;
-        border-bottom: 1px solid #e2e8f0;
-        max-height: 40vh;
-        overflow-y: auto;
-    }
-
-    .food-detail-panel {
-        width: 100%;
-        padding: 1rem;
-        overflow-y: visible;
-    }
-
-    .food-detail-name {
-        font-size: 1.25rem;
-    }
-
-    .food-nutrient-table td,
-    .food-nutrient-table thead th {
-        padding: 0.5rem 0.75rem;
-    }
-
-    .food-filter-chips {
-        margin-top: 0.5rem;
-    }
+body.dark-mode .food-search-page {
+    background: #0f172a;
 }
 
-@media (max-width: 480px) {
-    .food-search-bar {
-        padding: 0.625rem 0.75rem;
-    }
+body.dark-mode .food-search-bar-container {
+    background: #1e293b;
+    border-bottom-color: #334155;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
 
-    .food-result-meta {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.25rem;
-    }
+body.dark-mode .food-search-bar {
+    background: #0f172a;
+    border-color: #334155;
+}
 
-    .food-detail-meta {
-        flex-direction: column;
-        align-items: flex-start;
+body.dark-mode .food-search-bar:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    background: #1e293b;
+}
+
+body.dark-mode .food-search-icon {
+    color: #64748b;
+}
+
+body.dark-mode .food-search-input {
+    color: #e2e8f0;
+}
+
+body.dark-mode .food-search-input::placeholder {
+    color: #64748b;
+}
+
+body.dark-mode .food-search-clear {
+    background: #334155;
+    color: #94a3b8;
+}
+
+body.dark-mode .food-search-clear:hover {
+    background: #475569;
+    color: #e2e8f0;
+}
+
+body.dark-mode .food-filter-chip {
+    background: #1e293b;
+    border-color: #334155;
+    color: #94a3b8;
+}
+
+body.dark-mode .food-filter-chip:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+body.dark-mode .food-filter-chip.active {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: #ffffff;
+}
+
+body.dark-mode .food-search-results-panel {
+    background: #1e293b;
+    border-right-color: #334155;
+}
+
+body.dark-mode .food-detail-panel {
+    background: #0f172a;
+}
+
+body.dark-mode .food-search-empty-state {
+    color: #64748b;
+}
+
+body.dark-mode .food-nutrient-search-badge {
+    background: #1e3a5f;
+    border-color: #1e40af;
+    color: #93c5fd;
+}
+
+body.dark-mode .food-result-card {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+body.dark-mode .food-result-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+body.dark-mode .food-result-card.selected {
+    border-color: #3b82f6;
+    background: #1e3a5f;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+body.dark-mode .food-result-card.keyboard-active {
+    border-color: #3b82f6;
+    background: #172554;
+    outline-color: rgba(59, 130, 246, 0.4);
+}
+
+body.dark-mode .food-result-name {
+    color: #e2e8f0;
+}
+
+body.dark-mode .food-result-nutrient-value {
+    color: #5eead4;
+    background: #0f2a2a;
+    border-color: #134e4a;
+}
+
+body.dark-mode .food-result-nutrient-value small {
+    color: #94a3b8;
+}
+
+body.dark-mode .food-result-code {
+    color: #94a3b8;
+    background: #334155;
+}
+
+body.dark-mode .food-result-group {
+    color: #94a3b8;
+}
+
+body.dark-mode .food-search-highlight {
+    background: #854d0e;
+    color: #fef08a;
+}
+
+body.dark-mode .food-detail-header {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .food-detail-name {
+    color: #f1f5f9;
+}
+
+body.dark-mode .food-detail-code {
+    color: #93c5fd;
+    background: #1e3a5f;
+}
+
+body.dark-mode .food-detail-group-badge {
+    color: #6ee7b7;
+    background: #064e3b;
+}
+
+body.dark-mode .food-nutrient-group {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .food-nutrient-group-header {
+    background: #0f172a;
+    border-bottom-color: #334155;
+}
+
+body.dark-mode .food-nutrient-group-header:hover {
+    background: #1e293b;
+}
+
+body.dark-mode .food-nutrient-group-header h3 {
+    color: #e2e8f0;
+}
+
+body.dark-mode .food-nutrient-table thead th {
+    color: #94a3b8;
+    background: #0f172a;
+    border-bottom-color: #334155;
+}
+
+body.dark-mode .food-nutrient-table tbody tr:hover {
+    background: #0f172a;
+}
+
+body.dark-mode .food-nutrient-table tbody tr:not(:last-child) {
+    border-bottom-color: #334155;
+}
+
+body.dark-mode .food-nutrient-name {
+    color: #e2e8f0;
+}
+
+body.dark-mode .food-nutrient-value {
+    color: #f1f5f9;
+}
+
+body.dark-mode .food-nutrient-unit {
+    color: #94a3b8;
+}
+
+@media (max-width: 768px) {
+    body.dark-mode .food-search-results-panel {
+        border-bottom-color: #334155;
     }
 }
 

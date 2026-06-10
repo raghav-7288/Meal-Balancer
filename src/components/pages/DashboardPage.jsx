@@ -454,19 +454,17 @@ function DashboardPage({ profile }) {
             <div className="dashboard">
                 <aside className="sidebar">
                     <Section title="Plan controls" icon={<Sparkles size={16} />}>
-                        <div className="new-plan-row">
-                            <input
-                                type="text"
-                                placeholder={`My Plan ${userPlans.length + 1}`}
-                                value={newPlanName}
-                                onChange={(e) => setNewPlanName(e.target.value)}
-                                className="plan-name-input"
-                            />
+                        <input
+                            type="text"
+                            placeholder={`My Plan ${userPlans.length + 1}`}
+                            value={newPlanName}
+                            onChange={(e) => setNewPlanName(e.target.value)}
+                            className="plan-name-input"
+                        />
+                        <div className="button-row">
                             <button onClick={saveNewPlan}>
                                 <Plus size={14} /> Create
                             </button>
-                        </div>
-                        <div className="button-row">
                             <button className="secondary" onClick={resetActivePlan} disabled={presetPlans.some(p => p.id === activePlanId)}>
                                 Reset meals
                             </button>

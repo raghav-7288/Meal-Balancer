@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from "react-router-dom";
 import "./App.css";
 import {
@@ -83,6 +83,15 @@ function AppShell() {
         bmiTarget: "22",
     });
 
+    const [darkMode, setDarkMode] = useState(() => {
+        return localStorage.getItem("meal-balancer-dark-mode") === "true";
+    });
+
+    useEffect(() => {
+        document.body.classList.toggle("dark-mode", darkMode);
+        localStorage.setItem("meal-balancer-dark-mode", String(darkMode));
+    }, [darkMode]);
+
     return (
         <div className="app-shell">
             <nav className="top-nav">
@@ -112,7 +121,7 @@ function AppShell() {
                         <Route path="/" element={<WelcomePage />} />
                         <Route path="/dashboard" element={<DashboardPage profile={profile} />} />
                         <Route path="/foods" element={<FoodSearchPage />} />
-                        <Route path="/profile" element={<ProfilePage profile={profile} setProfile={setProfile} />} />
+                        <Route path="/profile" element={<ProfilePage profile={profile} setProfile={setProfile} darkMode={darkMode} setDarkMode={setDarkMode} />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </Suspense>
