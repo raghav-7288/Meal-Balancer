@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm install --prefer-offline --no-audit --no-fund",
+  "installCommand": "npx --yes npm@10 install",
   "buildCommand": "npm run build",
   "outputDirectory": "dist"
 }
