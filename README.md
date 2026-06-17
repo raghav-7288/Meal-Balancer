@@ -72,14 +72,16 @@ npm run build
 npm run preview   # preview the production build locally
 ```
 
-### Deploy to Netlify
+### Deploy to Vercel
+
+The app is deployed on Vercel at [https://meal-balancer-three.vercel.app/](https://meal-balancer-three.vercel.app/).
 
 ```bash
 npm run build
-# Upload the dist/ folder to Netlify
+# Push to GitHub — Vercel auto-deploys from main branch
 ```
 
-The `public/_redirects` file handles SPA routing on Netlify automatically.
+SPA routing is handled by `vercel.json` rewrites. Make sure to set the environment variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`) in Vercel Project Settings → Environment Variables.
 
 ## 📁 Project Structure
 
