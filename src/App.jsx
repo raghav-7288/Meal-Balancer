@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from "react-router-dom";
 import "./App.css";
 import {
@@ -12,6 +12,7 @@ import {
 import AuthPage from "./components/AuthPage";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
 import { useAuth } from "./hooks/useAuth";
+import { ProfileProvider } from "./context/ProfileContext";
 
 // Retry wrapper: if a lazy chunk fails to load (stale deploy), reload the page once
 function lazyWithRetry(importFn) {
@@ -44,7 +45,7 @@ const FoodSearchPage = lazyWithRetry(() => import("./components/FoodSearchPage")
 
 function PageLoader() {
     return (
-        <div className="auth-loading-screen">
+        <div className="auth-loading-screen" role="status" aria-label="Loading page">
             <Loader2 size={32} className="spin" />
             <p>Loading…</p>
         </div>
@@ -56,7 +57,7 @@ function App() {
 
     if (authLoading) {
         return (
-            <div className="auth-loading-screen">
+            <div className="auth-loading-screen" role="status" aria-label="Authenticating">
                 <div className="auth-loading-spinner" />
                 <p>Loading…</p>
             </div>
@@ -68,33 +69,18 @@ function App() {
     }
 
     return (
-        <BrowserRouter>
-            <AppShell />
-        </BrowserRouter>
+        <ProfileProvider>
+            <BrowserRouter>
+                <AppShell />
+            </BrowserRouter>
+        </ProfileProvider>
     );
 }
 
 function AppShell() {
-    const [profile, setProfile] = useState({
-        activity: "moderate",
-        goal: "maintenance",
-        dietType: "vegetarian",
-        sex: "female",
-        bmiTarget: "22",
-    });
-
-    const [darkMode, setDarkMode] = useState(() => {
-        return localStorage.getItem("meal-balancer-dark-mode") === "true";
-    });
-
-    useEffect(() => {
-        document.body.classList.toggle("dark-mode", darkMode);
-        localStorage.setItem("meal-balancer-dark-mode", String(darkMode));
-    }, [darkMode]);
-
     return (
         <div className="app-shell">
-            <nav className="top-nav">
+            <nav className="top-nav" role="navigation" aria-label="Main navigation">
                 <div className="nav-brand">
                     <UtensilsCrossed size={20} />
                     <span>Meal Balancer</span>
@@ -119,9 +105,9 @@ function AppShell() {
                 <Suspense fallback={<PageLoader />}>
                     <Routes>
                         <Route path="/" element={<WelcomePage />} />
-                        <Route path="/dashboard" element={<DashboardPage profile={profile} />} />
+                        <Route path="/dashboard" element={<DashboardPage />} />
                         <Route path="/foods" element={<FoodSearchPage />} />
-                        <Route path="/profile" element={<ProfilePage profile={profile} setProfile={setProfile} darkMode={darkMode} setDarkMode={setDarkMode} />} />
+                        <Route path="/profile" element={<ProfilePage />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </Suspense>

@@ -233,6 +233,11 @@ function FoodSearchPage() {
                         onChange={(e) => setQuery(e.target.value)}
                         onKeyDown={handleKeyDown}
                         autoFocus
+                        role="combobox"
+                        aria-expanded={filteredResults.length > 0}
+                        aria-controls="food-search-results"
+                        aria-activedescendant={activeIndex >= 0 ? `food-result-${activeIndex}` : undefined}
+                        aria-label="Search foods, nutrients, or food groups"
                     />
                     {query && (
                         <button
