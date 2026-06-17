@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, NavLink, Navigate } from "react-router-do
 import "./App.css";
 import {
     BarChart3,
+    ClipboardList,
     Database,
     Home,
     Loader2,
@@ -13,33 +14,32 @@ import AuthPage from "./components/AuthPage";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
 import { useAuth } from "./hooks/useAuth";
 import { ProfileProvider } from "./context/ProfileContext";
+import { PlanProvider } from "./context/PlanContext";
 
 // Retry wrapper: if a lazy chunk fails to load (stale deploy), reload the page once
 function lazyWithRetry(importFn) {
     return lazy(() =>
         importFn().catch(() => {
-            // If chunk load fails, it's likely a stale deploy — reload once
             const hasReloaded = sessionStorage.getItem("chunk-reload");
             if (!hasReloaded) {
                 sessionStorage.setItem("chunk-reload", "1");
                 window.location.reload();
-                return new Promise(() => {}); // never resolves, page is reloading
+                return new Promise(() => {});
             }
             sessionStorage.removeItem("chunk-reload");
-            // If already reloaded once and still failing, show error
             return Promise.reject(new Error("Failed to load page. Please refresh."));
         })
     );
 }
 
-// Clear the reload flag on successful load
 if (sessionStorage.getItem("chunk-reload")) {
     sessionStorage.removeItem("chunk-reload");
 }
 
 // Lazy-loaded pages for code splitting
 const WelcomePage = lazyWithRetry(() => import("./components/pages/WelcomePage"));
-const DashboardPage = lazyWithRetry(() => import("./components/pages/DashboardPage"));
+const MealPlannerPage = lazyWithRetry(() => import("./components/pages/MealPlannerPage"));
+const MyPlansPage = lazyWithRetry(() => import("./components/pages/MyPlansPage"));
 const ProfilePage = lazyWithRetry(() => import("./components/pages/ProfilePage"));
 const FoodSearchPage = lazyWithRetry(() => import("./components/FoodSearchPage"));
 
@@ -70,9 +70,11 @@ function App() {
 
     return (
         <ProfileProvider>
-            <BrowserRouter>
-                <AppShell />
-            </BrowserRouter>
+            <PlanProvider>
+                <BrowserRouter>
+                    <AppShell />
+                </BrowserRouter>
+            </PlanProvider>
         </ProfileProvider>
     );
 }
@@ -89,8 +91,11 @@ function AppShell() {
                     <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
                         <Home size={16} /> Home
                     </NavLink>
-                    <NavLink to="/dashboard" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <BarChart3 size={16} /> Dashboard
+                    <NavLink to="/planner" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
+                        <BarChart3 size={16} /> Meal Planner
+                    </NavLink>
+                    <NavLink to="/plans" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
+                        <ClipboardList size={16} /> My Plans
                     </NavLink>
                     <NavLink to="/foods" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
                         <Database size={16} /> Food Explorer
@@ -105,7 +110,8 @@ function AppShell() {
                 <Suspense fallback={<PageLoader />}>
                     <Routes>
                         <Route path="/" element={<WelcomePage />} />
-                        <Route path="/dashboard" element={<DashboardPage />} />
+                        <Route path="/planner" element={<MealPlannerPage />} />
+                        <Route path="/plans" element={<MyPlansPage />} />
                         <Route path="/foods" element={<FoodSearchPage />} />
                         <Route path="/profile" element={<ProfilePage />} />
                         <Route path="*" element={<Navigate to="/" replace />} />

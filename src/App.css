@@ -1489,6 +1489,12 @@ body.dark-mode .dark-mode-toggle {
 }
 
 body.dark-mode .dark-mode-toggle span {
+body.dark-mode .plan-select-dropdown {
+    background: #1a2332;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+
     color: #e2e8f0;
 }
 

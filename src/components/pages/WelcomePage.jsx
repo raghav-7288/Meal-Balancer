@@ -44,8 +44,8 @@ function WelcomePage() {
                         </div>
                     </div>
                 </div>
-                <button className="welcome-cta" onClick={() => navigate("/dashboard")}>
-                    Go to Dashboard <BarChart3 size={16} />
+                <button className="welcome-cta" onClick={() => navigate("/planner")}>
+                    Start Planning <BarChart3 size={16} />
                 </button>
             </div>
         </div>
