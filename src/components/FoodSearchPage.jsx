@@ -40,6 +40,7 @@ function FoodSearchPage() {
     const [nutrientsLoading, setNutrientsLoading] = useState(false);
     const [activeFilter, setActiveFilter] = useState("All");
     const [activeIndex, setActiveIndex] = useState(-1);
+    const [searchError, setSearchError] = useState("");
     const resultListRef = useRef(null);
     const inputRef = useRef(null);
 
@@ -65,6 +66,7 @@ function FoodSearchPage() {
 
         async function search() {
             setLoading(true);
+            setSearchError("");
             try {
                 // First, check if the query matches a nutrient name
                 const { data: nutrientMatches, error: nutrientError } = await supabase
@@ -114,6 +116,7 @@ function FoodSearchPage() {
                     setResults([]);
                     setIsNutrientSearch(false);
                     setMatchedNutrientName("");
+                    setSearchError("Could not connect to database. Check your network connection and try again.");
                 }
             } finally {
                 if (!cancelled) setLoading(false);
@@ -277,9 +280,15 @@ function FoodSearchPage() {
                         </div>
                     )}
 
-                    {debouncedQuery.length >= 2 && !loading && filteredResults.length === 0 && (
+                    {debouncedQuery.length >= 2 && !loading && filteredResults.length === 0 && !searchError && (
                         <div className="food-search-empty-state">
                             <p>No matching foods found</p>
+                        </div>
+                    )}
+
+                    {searchError && (
+                        <div className="food-search-empty-state" style={{ color: "#ef4444" }}>
+                            <p>{searchError}</p>
                         </div>
                     )}
 
