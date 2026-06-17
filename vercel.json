@@ -1,6 +1,6 @@
 {
-  "installCommand": "npm ci",
-  "buildCommand": "npm run build",
+  "installCommand": "yarn install --no-lockfile",
+  "buildCommand": "yarn run build",
   "outputDirectory": "dist"
 }
 
