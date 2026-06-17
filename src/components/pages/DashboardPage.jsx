@@ -8,7 +8,6 @@ import { getHealthGoals, getUserHealthGoals } from "../../services/databaseServi
 import { useAuth } from "../../hooks/useAuth";
 import { useProfile } from "../../context/ProfileContext";
 import { useLocalStorageState } from "../../hooks/useLocalStorage";
-import SupabaseTest from "../SupabaseTest";
 import Section from "../ui/Section";
 import Kpi from "../ui/Kpi";
 import { StatCard, EditableStatCard } from "../ui/StatCard";
@@ -352,10 +351,6 @@ function DashboardPage() {
                     </Section>
 
                     <ComparisonSection summaries={summaries} bestSummary={bestSummary} />
-
-                    <Section title="Database connection" icon={<Database size={16} />}>
-                        <SupabaseTest />
-                    </Section>
                 </main>
             </div>
         </div>
