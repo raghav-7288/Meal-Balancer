@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Activity, Leaf, Moon, User } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
+import { useProfile } from "../../context/ProfileContext";
 import { getHealthGoals, getUserHealthGoals, saveUserHealthGoals } from "../../services/databaseService";
 import Section from "../ui/Section";
 import Field from "../ui/Field";
@@ -11,8 +12,9 @@ const ACTIVITY_OPTIONS = ["sedentary", "moderate", "heavy"];
 const GOAL_OPTIONS = ["maintenance", "weight loss", "weight gain", "metabolic improvement"];
 const DIET_OPTIONS = ["vegetarian", "eggetarian", "non-vegetarian", "Jain-compatible"];
 
-function ProfilePage({ profile, setProfile, darkMode, setDarkMode }) {
+function ProfilePage() {
     const { user } = useAuth();
+    const { profile, setProfile, darkMode, setDarkMode } = useProfile();
     const [healthGoals, setHealthGoals] = useState([]);
     const [selectedGoalIds, setSelectedGoalIds] = useState([]);
     const [goalsLoading, setGoalsLoading] = useState(true);
@@ -194,4 +196,3 @@ function ProfilePage({ profile, setProfile, darkMode, setDarkMode }) {
 }
 
 export default ProfilePage;
-

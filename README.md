@@ -168,6 +168,14 @@ Scores start at **100** and deduct points for imbalances:
 ## 🔮 Roadmap
 
 - Weekly planner view
+## 🧰 Development Tooling
+
+- **Prettier** — Auto-formats code on save/commit (`.prettierrc`)
+- **Husky + lint-staged** — Pre-commit hooks run format + lint on staged files
+- **GitHub Actions CI** — Lint, test, and build on every push/PR (`.github/workflows/ci.yml`)
+- **@testing-library/react** — Component testing with jsdom environment
+- **Query Cache** — In-memory TTL cache for Supabase API calls (`src/utils/queryCache.js`)
+
 - Persist plans to Supabase (currently localStorage)
 - PDF export
 - Recharts nutrient visualizations
