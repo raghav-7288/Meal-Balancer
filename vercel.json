@@ -1,5 +1,5 @@
 {
-  "installCommand": "npx --yes npm@10 install",
+  "installCommand": "npm ci",
   "buildCommand": "npm run build",
   "outputDirectory": "dist"
 }
