@@ -18,26 +18,42 @@ function MacroChart({ dayTotals }) {
         { name: "Fibre", value: Math.round(dayTotals.fibre * 2) }, // approx kcal from fibre
     ].filter((d) => d.value > 0);
 
+    const total = data.reduce((sum, d) => sum + d.value, 0);
+    const legendData = data.map((d) => ({
+        ...d,
+        pct: total > 0 ? Math.round((d.value / total) * 100) : 0,
+    }));
+
     return (
         <div className="macro-chart" role="img" aria-label="Macronutrient distribution pie chart">
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={180}>
                 <PieChart>
                     <Pie
                         data={data}
                         cx="50%"
                         cy="50%"
-                        innerRadius={45}
-                        outerRadius={80}
+                        innerRadius={35}
+                        outerRadius={60}
                         paddingAngle={3}
                         dataKey="value"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        label={false}
+                        labelLine={false}
                     >
                         {data.map((entry, index) => (
                             <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
                         ))}
                     </Pie>
                     <Tooltip formatter={(value) => `${value} kcal`} />
-                    <Legend />
+                    <Legend
+                        layout="horizontal"
+                        verticalAlign="bottom"
+                        align="center"
+                        formatter={(value) => {
+                            const item = legendData.find((d) => d.name === value);
+                            return `${value} ${item ? item.pct : 0}%`;
+                        }}
+                        wrapperStyle={{ fontSize: "11px", paddingTop: "4px" }}
+                    />
                 </PieChart>
             </ResponsiveContainer>
         </div>

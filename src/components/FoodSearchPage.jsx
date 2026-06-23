@@ -98,15 +98,18 @@ function FoodSearchPage() {
                         setActiveIndex(-1);
                     }
                 } else {
-                    // No nutrient match — fall back to regular food search
-                    const { data, error } = await supabase.rpc("search_foods", {
-                        search_text: debouncedQuery,
-                    });
+                    // No nutrient match — full text field search via RPC
+                    const { data, error } = await supabase.rpc(
+                        "search_foods_all_fields",
+                        { search_text: debouncedQuery }
+                    );
+
                     if (error) throw error;
+
                     if (!cancelled) {
                         setIsNutrientSearch(false);
                         setMatchedNutrientName("");
-                        setResults((data || []).slice(0, 20));
+                        setResults(data || []);
                         setActiveIndex(-1);
                     }
                 }

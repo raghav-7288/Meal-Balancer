@@ -1,5 +1,6 @@
-import { Activity, Copy, Leaf, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Activity, Copy, Database, Download, Leaf, Plus, Sparkles, Trash2 } from "lucide-react";
 import Section from "../ui/Section";
+import MacroChart from "./MacroChart";
 
 function PlanSidebar({
     presetPlans,
@@ -14,10 +15,12 @@ function PlanSidebar({
     onCreatePlan,
     onResetPlan,
     onDeletePlan,
+    onDownloadPlan,
     onDuplicatePreset,
     visibleFatLimit,
     profile,
     userGoalNames,
+    dayTotals,
 }) {
     return (
         <aside className="sidebar" role="complementary" aria-label="Plan controls sidebar">
@@ -121,20 +124,34 @@ function PlanSidebar({
                                             <span>{plan.name}</span>
                                             <strong>{summary?.dayScore?.score || 0}</strong>
                                         </button>
-                                        <button
-                                            className="delete-btn"
-                                            title="Delete plan"
-                                            onClick={() => onDeletePlan(plan.id)}
-                                            aria-label={`Delete plan: ${plan.name}`}
-                                        >
-                                            <Trash2 size={12} />
-                                        </button>
+                                        <div className="plan-action-btns">
+                                            <button
+                                                className="download-btn tooltip-btn"
+                                                data-tooltip="Save Plan"
+                                                onClick={() => onDownloadPlan(plan.id)}
+                                                aria-label={`Download plan: ${plan.name} as PDF`}
+                                            >
+                                                <Download size={18} />
+                                            </button>
+                                            <button
+                                                className="delete-btn tooltip-btn"
+                                                data-tooltip="Delete Plan"
+                                                onClick={() => onDeletePlan(plan.id)}
+                                                aria-label={`Delete plan: ${plan.name}`}
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
                                     </div>
                                 );
                             })}
                         </div>
                     </>
                 )}
+            </Section>
+
+            <Section title="Macronutrient distribution" icon={<Database size={16} />}>
+                <MacroChart dayTotals={dayTotals} />
             </Section>
 
             <Section title="Visible fat reference" icon={<Leaf size={16} />}>

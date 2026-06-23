@@ -1,5 +1,4 @@
 import { useMemo, useState, useEffect } from "react";
-import { Database } from "lucide-react";
 import { APP_CONFIG } from "../../data/config";
 import { PRESET_PLANS, MEALS } from "../../data/presetPlans";
 import { aggregateMeal, combineDay, foodById } from "../../engines/nutrientEngine";
@@ -8,6 +7,7 @@ import { getHealthGoals, getUserHealthGoals } from "../../services/databaseServi
 import { useAuth } from "../../hooks/useAuth";
 import { useProfile } from "../../context/ProfileContext";
 import { useLocalStorageState } from "../../hooks/useLocalStorage";
+import { downloadPlanAsPdf } from "../../utils/generatePlanPdf";
 import Section from "../ui/Section";
 import Kpi from "../ui/Kpi";
 import { StatCard, EditableStatCard } from "../ui/StatCard";
@@ -15,7 +15,6 @@ import PlanSidebar from "../dashboard/PlanSidebar";
 import MealBuilder from "../dashboard/MealBuilder";
 import NutrientSummary from "../dashboard/NutrientSummary";
 import ComparisonSection from "../dashboard/ComparisonSection";
-import MacroChart from "../dashboard/MacroChart";
 
 function createPlan(name, meals) {
     return { id: crypto.randomUUID(), name, meals };
@@ -38,8 +37,11 @@ function DashboardPage() {
     const [selectedDay, setSelectedDay] = useState("");
     const [instructions, setInstructions] = useState("");
     const [toast, setToast] = useState(null);
+    const [deleteToast, setDeleteToast] = useState(null);
     const [newPlanName, setNewPlanName] = useState("");
     const [userGoalNames, setUserGoalNames] = useState([]);
+    const [copyModal, setCopyModal] = useState(null);
+    const [copyPlanName, setCopyPlanName] = useState("");
 
     useEffect(() => {
         if (toast) {
@@ -47,6 +49,13 @@ function DashboardPage() {
             return () => clearTimeout(timer);
         }
     }, [toast]);
+
+    useEffect(() => {
+        if (deleteToast) {
+            const timer = setTimeout(() => setDeleteToast(null), 10000);
+            return () => clearTimeout(timer);
+        }
+    }, [deleteToast]);
 
     useEffect(() => {
         async function loadUserGoals() {
@@ -233,6 +242,9 @@ function DashboardPage() {
     }
 
     function deleteUserPlan(planId) {
+        const deletedPlan = userPlans.find((p) => p.id === planId);
+        if (!deletedPlan) return;
+
         setUserPlans((prev) => prev.filter((p) => p.id !== planId));
         if (activePlanId === planId) {
             const remaining = userPlans.filter((p) => p.id !== planId);
@@ -243,19 +255,46 @@ function DashboardPage() {
                 setPlanView("preset");
             }
         }
+
+        setDeleteToast({
+            planName: deletedPlan.name,
+            undoAction: () => {
+                setUserPlans((prev) => [...prev, deletedPlan]);
+                setActivePlanId(deletedPlan.id);
+                setPlanView("user");
+                setDeleteToast(null);
+            },
+        });
+    }
+
+    function downloadUserPlanPdf(planId) {
+        const plan = userPlans.find((p) => p.id === planId);
+        const summary = summaries.find((s) => s.plan.id === planId);
+        if (plan && summary) {
+            downloadPlanAsPdf(plan, summary);
+        }
     }
 
     function duplicatePresetAsUserPlan(presetPlan) {
-        const newPlan = createPlan(`${presetPlan.name} (copy)`, {
-            Breakfast: presetPlan.meals.Breakfast.map(i => ({ ...i, id: crypto.randomUUID() })),
-            Lunch: presetPlan.meals.Lunch.map(i => ({ ...i, id: crypto.randomUUID() })),
-            Dinner: presetPlan.meals.Dinner.map(i => ({ ...i, id: crypto.randomUUID() })),
-            Snacks: presetPlan.meals.Snacks.map(i => ({ ...i, id: crypto.randomUUID() })),
+        setCopyPlanName(`${presetPlan.name} (copy)`);
+        setCopyModal(presetPlan);
+    }
+
+    function confirmCopyPlan() {
+        if (!copyModal) return;
+        const name = copyPlanName.trim() || `${copyModal.name} (copy)`;
+        const newPlan = createPlan(name, {
+            Breakfast: copyModal.meals.Breakfast.map(i => ({ ...i, id: crypto.randomUUID() })),
+            Lunch: copyModal.meals.Lunch.map(i => ({ ...i, id: crypto.randomUUID() })),
+            Dinner: copyModal.meals.Dinner.map(i => ({ ...i, id: crypto.randomUUID() })),
+            Snacks: copyModal.meals.Snacks.map(i => ({ ...i, id: crypto.randomUUID() })),
         });
         setUserPlans((prev) => [...prev, newPlan]);
         setActivePlanId(newPlan.id);
         setPlanView("user");
-        setToast(`Copied "${presetPlan.name}" as your own plan`);
+        setToast(`Copied "${copyModal.name}" as "${name}"`);
+        setCopyModal(null);
+        setCopyPlanName("");
     }
 
     function resetActivePlan() {
@@ -275,6 +314,37 @@ function DashboardPage() {
     return (
         <div className="dashboard-page">
             {toast && <div className="toast-popup" role="alert" aria-live="polite">{toast}</div>}
+
+            {deleteToast && (
+                <div className="delete-toast-popup" role="alert" aria-live="assertive">
+                    <span>Plan &ldquo;{deleteToast.planName}&rdquo; deleted</span>
+                    <div className="delete-toast-actions">
+                        <button className="undo-btn" onClick={deleteToast.undoAction}>Undo</button>
+                        <button className="close-btn" onClick={() => setDeleteToast(null)}>✕</button>
+                    </div>
+                </div>
+            )}
+
+            {copyModal && (
+                <div className="modal-overlay" onClick={() => setCopyModal(null)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <h3>Save plan as:</h3>
+                        <input
+                            type="text"
+                            className="modal-input"
+                            value={copyPlanName}
+                            onChange={(e) => setCopyPlanName(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && confirmCopyPlan()}
+                            autoFocus
+                            placeholder="Enter plan name"
+                        />
+                        <div className="modal-actions">
+                            <button onClick={confirmCopyPlan}>Save</button>
+                            <button className="secondary" onClick={() => setCopyModal(null)}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="hero-stats">
                 <StatCard label="Daily score" value={dayScore} tone={scoreTone} />
@@ -306,10 +376,12 @@ function DashboardPage() {
                     onCreatePlan={saveNewPlan}
                     onResetPlan={resetActivePlan}
                     onDeletePlan={deleteUserPlan}
+                    onDownloadPlan={downloadUserPlanPdf}
                     onDuplicatePreset={duplicatePresetAsUserPlan}
                     visibleFatLimit={visibleFatLimit}
                     profile={profile}
                     userGoalNames={userGoalNames}
+                    dayTotals={activeSummary?.dayTotals}
                 />
 
                 <main className="content">
@@ -346,9 +418,6 @@ function DashboardPage() {
                         selectedMeal={selectedMeal}
                     />
 
-                    <Section title="Macronutrient distribution" icon={<Database size={16} />}>
-                        <MacroChart dayTotals={activeSummary?.dayTotals} />
-                    </Section>
 
                     <ComparisonSection summaries={summaries} bestSummary={bestSummary} />
                 </main>
