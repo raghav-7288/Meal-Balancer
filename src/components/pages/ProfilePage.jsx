@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Activity, Leaf, Moon, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Activity, CheckCircle, Leaf, Moon, Phone, Ruler, User } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useProfile } from "../../context/ProfileContext";
 import { getHealthGoals, getUserHealthGoals, saveUserHealthGoals } from "../../services/databaseService";
@@ -13,7 +14,8 @@ const GOAL_OPTIONS = ["maintenance", "weight loss", "weight gain", "metabolic im
 const DIET_OPTIONS = ["vegetarian", "eggetarian", "non-vegetarian", "Jain-compatible"];
 
 function ProfilePage() {
-    const { user } = useAuth();
+    const { user, profile: dbProfile, updateProfile: updateDbProfile } = useAuth();
+    const navigate = useNavigate();
     const { profile, setProfile, darkMode, setDarkMode } = useProfile();
     const [healthGoals, setHealthGoals] = useState([]);
     const [selectedGoalIds, setSelectedGoalIds] = useState([]);
@@ -21,6 +23,41 @@ function ProfilePage() {
     const [goalsSaving, setGoalsSaving] = useState(false);
     const [goalsError, setGoalsError] = useState(null);
     const [goalsToast, setGoalsToast] = useState(null);
+    const [profileSaving, setProfileSaving] = useState(false);
+
+    // Body measurement local state (initialized from DB)
+    const [height, setHeight] = useState("");
+    const [weight, setWeight] = useState("");
+    const [age, setAge] = useState("");
+    const [contactNumber, setContactNumber] = useState("");
+
+    // Sync from DB profile on load
+    useEffect(() => {
+        if (dbProfile) {
+            setHeight(dbProfile.height_cm ? String(dbProfile.height_cm) : "");
+            setWeight(dbProfile.weight_kg ? String(dbProfile.weight_kg) : "");
+            setAge(dbProfile.age ? String(dbProfile.age) : "");
+            setContactNumber(dbProfile.contact_number || "");
+        }
+    }, [dbProfile]);
+
+    // Calculate current BMI
+    const heightM = height ? parseFloat(height) / 100 : 0;
+    const weightKg = weight ? parseFloat(weight) : 0;
+    const currentBmi = heightM > 0 && weightKg > 0
+        ? (weightKg / (heightM * heightM)).toFixed(1)
+        : null;
+
+    // Profile completeness check
+    const isProfileComplete = !!(
+        profile.activity &&
+        profile.goal &&
+        profile.dietType &&
+        profile.sex &&
+        height &&
+        weight &&
+        age
+    );
 
     const visibleFatLimit =
         APP_CONFIG.visibleFat?.[profile.sex]?.[profile.activity] ||
@@ -149,6 +186,100 @@ function ProfilePage() {
                         />
                     </Field>
                 </Section>
+
+                <Section title="Body measurements" icon={<Ruler size={16} />}>
+                    <Field label="Height (cm)">
+                        <input
+                            type="number"
+                            placeholder="e.g. 165"
+                            value={height}
+                            onChange={(e) => setHeight(e.target.value)}
+                        />
+                    </Field>
+
+                    <Field label="Weight (kg)">
+                        <input
+                            type="number"
+                            placeholder="e.g. 60"
+                            value={weight}
+                            onChange={(e) => setWeight(e.target.value)}
+                        />
+                    </Field>
+
+                    <Field label="Age">
+                        <input
+                            type="number"
+                            placeholder="e.g. 25"
+                            value={age}
+                            onChange={(e) => setAge(e.target.value)}
+                        />
+                    </Field>
+
+                    <Field label="Contact number">
+                        <input
+                            type="tel"
+                            placeholder="e.g. +91 9876543210"
+                            value={contactNumber}
+                            onChange={(e) => setContactNumber(e.target.value)}
+                        />
+                    </Field>
+
+                    <Field label="Current BMI">
+                        <div className="bmi-display">
+                            {currentBmi ? (
+                                <>
+                                    <strong className="bmi-value">{currentBmi}</strong>
+                                    <span className={`bmi-badge ${
+                                        currentBmi < 18.5 ? "underweight" :
+                                        currentBmi < 25 ? "normal" :
+                                        currentBmi < 30 ? "overweight" : "obese"
+                                    }`}>
+                                        {currentBmi < 18.5 ? "Underweight" :
+                                         currentBmi < 25 ? "Normal" :
+                                         currentBmi < 30 ? "Overweight" : "Obese"}
+                                    </span>
+                                </>
+                            ) : (
+                                <span className="bmi-placeholder">Enter height & weight above</span>
+                            )}
+                        </div>
+                    </Field>
+                </Section>
+
+                <div className="profile-complete-section">
+                    <button
+                        className={`profile-complete-btn ${isProfileComplete ? "complete" : "incomplete"}`}
+                        disabled={profileSaving}
+                        onClick={async () => {
+                            if (!isProfileComplete) {
+                                setGoalsToast("Please fill in all fields to complete your profile.");
+                                return;
+                            }
+                            try {
+                                setProfileSaving(true);
+                                // Save to Supabase DB
+                                await updateDbProfile({
+                                    height_cm: parseFloat(height) || null,
+                                    weight_kg: parseFloat(weight) || null,
+                                    current_bmi: currentBmi ? parseFloat(currentBmi) : null,
+                                    age: parseInt(age) || null,
+                                    contact_number: contactNumber || null,
+                                });
+                                // Also sync to local profile context
+                                setProfile({ ...profile, height, weight });
+                                setGoalsToast("Profile saved successfully! ✓");
+                                navigate("/bmi-calculator");
+                            } catch (err) {
+                                setGoalsToast(`Error saving profile: ${err.message}`);
+                            } finally {
+                                setProfileSaving(false);
+                            }
+                        }}
+                    >
+                        <CheckCircle size={18} />
+                        {profileSaving ? "Saving…" : isProfileComplete ? "Profile Complete — Save & Continue" : "Complete Your Profile"}
+                    </button>
+                </div>
 
                 <Section title="Health goals & conditions" icon={<Activity size={16} />}>
                     {goalsLoading ? (

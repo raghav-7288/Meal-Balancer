@@ -132,8 +132,21 @@ export function downloadPlanAsPdf(plan, summary) {
         });
     }
 
+    // Add watermark to all pages (bottom-most layer, top-right, subtle shadow)
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "italic");
+        doc.setTextColor(210, 210, 210);
+        doc.text("Meal Balancer by Dt. Bhakti Shrivastava", pageWidth - 14, 12, {
+            align: "right",
+        });
+        doc.setTextColor(0);
+    }
+
     // Save
-    const fileName = `${plan.name.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_diet_plan.pdf`;
+    const fileName = `${plan.name}.pdf`;
     doc.save(fileName);
 }
 

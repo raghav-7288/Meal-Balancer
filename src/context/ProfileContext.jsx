@@ -9,6 +9,8 @@ const DEFAULT_PROFILE = {
     dietType: "vegetarian",
     sex: "female",
     bmiTarget: "22",
+    height: "",
+    weight: "",
 };
 
 export function ProfileProvider({ children }) {

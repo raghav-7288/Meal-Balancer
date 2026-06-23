@@ -2,6 +2,7 @@ import { createContext, useState, useEffect } from "react";
 import {
     getSession,
     fetchUserProfile,
+    updateUserProfile as authUpdateProfile,
     signIn as authSignIn,
     signUp as authSignUp,
     signOut as authSignOut,
@@ -103,6 +104,20 @@ export function AuthProvider({ children }) {
         setProfile(null);
     }
 
+    async function updateProfile(fields) {
+        if (!user?.id) throw new Error("No authenticated user");
+        const updated = await authUpdateProfile(user.id, fields);
+        setProfile(updated);
+        return updated;
+    }
+
+    async function refreshProfile() {
+        if (!user?.id) return;
+        const userProfile = await fetchUserProfile(user.id);
+        setProfile(userProfile);
+        return userProfile;
+    }
+
     const value = {
         user,
         profile,
@@ -111,6 +126,8 @@ export function AuthProvider({ children }) {
         signUp,
         signIn,
         signOut,
+        updateProfile,
+        refreshProfile,
         isAuthenticated: !!user,
     };
 

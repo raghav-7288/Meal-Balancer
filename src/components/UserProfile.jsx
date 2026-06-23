@@ -30,6 +30,26 @@ function UserProfile() {
                     <span>{user?.email || "—"}</span>
                 </div>
                 <div className="profile-row">
+                    <span className="profile-label">Age</span>
+                    <span>{profile?.age ? `${profile.age} years` : "—"}</span>
+                </div>
+                <div className="profile-row">
+                    <span className="profile-label">Contact</span>
+                    <span>{profile?.contact_number || "—"}</span>
+                </div>
+                <div className="profile-row">
+                    <span className="profile-label">Height</span>
+                    <span>{profile?.height_cm ? `${profile.height_cm} cm` : "—"}</span>
+                </div>
+                <div className="profile-row">
+                    <span className="profile-label">Weight</span>
+                    <span>{profile?.weight_kg ? `${profile.weight_kg} kg` : "—"}</span>
+                </div>
+                <div className="profile-row">
+                    <span className="profile-label">BMI</span>
+                    <span>{profile?.current_bmi || "—"}</span>
+                </div>
+                <div className="profile-row">
                     <span className="profile-label">Member since</span>
                     <span>
                         {profile?.created_at

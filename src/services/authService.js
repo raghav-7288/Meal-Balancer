@@ -79,7 +79,7 @@ export async function getSession() {
 export async function fetchUserProfile(userId) {
     const { data, error } = await supabase
         .from("user_profiles")
-        .select("user_id, username, full_name, created_at")
+        .select("user_id, username, full_name, created_at, height_cm, weight_kg, current_bmi, age, contact_number")
         .eq("user_id", userId)
         .single();
 
@@ -89,6 +89,27 @@ export async function fetchUserProfile(userId) {
             return null;
         }
         throw new Error(`Failed to fetch user profile: ${error.message}`);
+    }
+
+    return data;
+}
+
+/**
+ * Update user profile fields in user_profiles table.
+ * @param {string} userId - The auth user UUID.
+ * @param {object} fields - Fields to update (height_cm, weight_kg, current_bmi, age, contact_number, full_name).
+ * @returns {Promise<object>}
+ */
+export async function updateUserProfile(userId, fields) {
+    const { data, error } = await supabase
+        .from("user_profiles")
+        .update(fields)
+        .eq("user_id", userId)
+        .select()
+        .single();
+
+    if (error) {
+        throw new Error(`Failed to update user profile: ${error.message}`);
     }
 
     return data;
