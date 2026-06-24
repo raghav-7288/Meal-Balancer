@@ -1,43 +1,51 @@
 # 🍽️ Meal Balancer
 
-A React-based single-page application for **Indian diet planning**. Build meals in grams, convert to exchange-style categories, and score dietary patterns with transparent reasons.
+A React 19 single-page application for **Indian diet planning**. Build meals in grams, convert to exchange-style categories, score dietary patterns with transparent reasons, and export styled PDF reports — all backed by Supabase.
+
+🔗 **Live App:** [https://meal-balancer-three.vercel.app/](https://meal-balancer-three.vercel.app/)
 
 ## ✨ Features
 
 - **Meal Builder** — Add foods (Breakfast / Lunch / Dinner / Snacks) with gram quantities
 - **Scoring Engine** — 0-100 score with detailed reasons (Excellent / Good / Moderate / Poor)
 - **Food Explorer** — Google-style search across 500+ foods with nutrient-ranked results
+- **BMI Calculator** — Height, weight, age & activity-based BMI calculation
+- **PDF Export** — Download styled meal plan reports (jsPDF + autoTable)
 - **Pre-saved Plans** — 5 read-only templates for quick start
-- **User Plans** — Create, name, edit, reset, and delete your own plans (persisted to localStorage)
+- **User Plans** — Create, name, edit, reset, and delete your own plans
 - **Exchange Conversion** — Indian exchange system (grams → exchanges)
 - **Nutrient Tracking** — Carbs, protein, fat, fibre, vitamins, minerals, kcal
-- **Combination Comparison** — Compare plans side-by-side + best recommendation
+- **Plan Comparison** — Compare plans side-by-side + best recommendation
 - **Health Goals** — Personalised goals fetched from Supabase
 - **Auth** — Email/password sign-up & sign-in via Supabase
-- **Profile Management** — View and update user profile
-- **Client-side Routing** — Real URLs with browser back/forward support
-- **Code Splitting** — Lazy-loaded pages for fast initial load
+- **Profile Management** — Body measurements, diet preferences & health goals
+- **Dark Mode** — System-aware + manual toggle (flash-free)
+- **Code Splitting** — Lazy-loaded pages with retry logic for fast initial load
 - **Error Boundary** — Graceful crash recovery
+- **Query Cache** — 5-min TTL in-memory cache for API calls
 
 ## 🛠️ Tech Stack
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
 | Framework | React (JSX) | ^19.2.6 |
-| Routing | React Router | ^7.16.0 |
+| Routing | React Router DOM | ^7.16.0 |
 | Build | Vite | ^8.0.12 |
 | Styling | CSS + Tailwind CSS | ^4.3.0 |
 | Icons | lucide-react | ^1.17.0 |
 | Charts | Recharts | ^3.8.1 |
+| PDF | jsPDF + jspdf-autotable | ^4.2.1 / ^5.0.8 |
 | Backend | Supabase | ^2.106.2 |
-| Testing | Vitest | ^4.1.8 |
-| Node | — | 22.x |
+| Testing | Vitest + Testing Library | ^4.1.8 / ^16.3.2 |
+| Linting | ESLint + Prettier | ^10.3.0 / ^3.8.4 |
+| Git Hooks | Husky + lint-staged | ^9.1.7 / ^16.4.0 |
+| Node | — | 20.x |
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 22.x
+- Node.js 20.x
 - npm 10+
 
 ### Installation
@@ -81,36 +89,36 @@ npm run build
 # Push to GitHub — Vercel auto-deploys from main branch
 ```
 
-SPA routing is handled by `vercel.json` rewrites. Make sure to set the environment variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`) in Vercel Project Settings → Environment Variables.
+SPA routing is handled by `vercel.json` rewrites. Set environment variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`) in Vercel Project Settings → Environment Variables.
 
 ## 📁 Project Structure
 
 ```
-├── public/                  Static assets + Netlify _redirects
+├── public/                  Static assets (favicon, logos, headers)
 ├── scripts/                 Tooling scripts
-│   └── generate-context.js
+│   └── generate-context.js  Auto-generate CONTEXT.md
 ├── src/
 │   ├── assets/              Images & SVGs
 │   ├── components/
-│   │   ├── pages/           Page-level components (Welcome, Dashboard, Profile)
-│   │   ├── ui/              Reusable UI (Section, Field, Kpi, StatCard, ErrorBoundary)
-│   │   ├── AuthPage.jsx
-│   │   ├── FoodSearchPage.jsx
-│   │   ├── SupabaseTest.jsx
-│   │   └── UserProfile.jsx
-│   ├── context/             React context providers (Auth)
-│   ├── data/                Static config & food data
+│   │   ├── dashboard/       Dashboard sub-components (MealBuilder, PlanSidebar, etc.)
+│   │   ├── pages/           Page-level components (Welcome, Dashboard, Profile, BMI)
+│   │   ├── ui/              Reusable UI primitives (Section, Field, Kpi, StatCard, ErrorBoundary)
+│   │   ├── AuthPage.jsx     Login / Sign-up form
+│   │   ├── FoodSearchPage.* Food explorer (search + nutrient details)
+│   │   └── UserProfile.jsx  User profile display
+│   ├── context/             React context providers (Auth, Profile)
+│   ├── data/                Static config, food data & preset plans
 │   ├── engines/             Core logic (scoring, nutrients)
-│   ├── hooks/               Custom hooks (useAuth, useLocalStorage)
+│   ├── hooks/               Custom hooks (useAuth, useDebounce, useLocalStorage)
 │   ├── lib/                 Third-party client setup (Supabase)
 │   ├── services/            API service layers (auth, database)
-│   ├── utils/               Utility helpers
+│   ├── styles/              Page-specific CSS modules
+│   ├── utils/               Helpers (PDF export, query cache)
 │   ├── App.jsx              Router shell + layout
 │   ├── App.css              Global styles
+│   ├── index.css            Tailwind imports + base styles
 │   └── main.jsx             Entry point
-├── tests/                   Unit tests (Vitest)
-│   ├── scoringEngine.test.js
-│   └── nutrientEngine.test.js
+├── tests/                   Unit & component tests (Vitest)
 ├── CONTEXT.md               Auto-generated project context
 ├── package.json
 └── vite.config.js
@@ -124,8 +132,11 @@ SPA routing is handled by `vercel.json` rewrites. Make sure to set the environme
 | `npm run build` | Production build (output: `dist/`) |
 | `npm run preview` | Preview production build locally |
 | `npm run lint` | Run ESLint |
+| `npm run format` | Auto-format all source files (Prettier) |
+| `npm run format:check` | Check formatting without modifying files |
 | `npm test` | Run unit tests (Vitest) |
 | `npm run test:watch` | Run tests in watch mode |
+| `npm run test:coverage` | Run tests with coverage report |
 | `npm run context` | Regenerate `CONTEXT.md` |
 
 ## 🌐 Routes
@@ -133,6 +144,7 @@ SPA routing is handled by `vercel.json` rewrites. Make sure to set the environme
 | Path | Page | Description |
 |------|------|-------------|
 | `/` | Welcome | Landing page with feature overview |
+| `/bmi-calculator` | BMI Calculator | Height, weight & age-based BMI |
 | `/dashboard` | Dashboard | Meal builder, scoring, comparisons |
 | `/foods` | Food Explorer | Search foods & view nutrient profiles |
 | `/profile` | Profile | Account settings & health goals |
@@ -165,21 +177,24 @@ Scores start at **100** and deduct points for imbalances:
 
 `health_goals` · `user_profile_health_goals` · `user_profiles` · `major_groups` · `food_items` · `nutrient_groups` · `nutrient_definitions` · `food_nutrient_values` · `food_search_view`
 
-## 🔮 Roadmap
-
-- Weekly planner view
 ## 🧰 Development Tooling
 
 - **Prettier** — Auto-formats code on save/commit (`.prettierrc`)
 - **Husky + lint-staged** — Pre-commit hooks run format + lint on staged files
-- **GitHub Actions CI** — Lint, test, and build on every push/PR (`.github/workflows/ci.yml`)
 - **@testing-library/react** — Component testing with jsdom environment
 - **Query Cache** — In-memory TTL cache for Supabase API calls (`src/utils/queryCache.js`)
+- **Error Boundary** — Catches React render errors with recovery option
 
-- Persist plans to Supabase (currently localStorage)
-- PDF export
-- Recharts nutrient visualizations
-- Mobile UX improvements
+## 🔮 Roadmap
+
+- [ ] Persist plans to Supabase (replace localStorage)
+- [ ] Weekly planner view
+- [ ] Recharts nutrient visualizations
+- [ ] Mobile-first responsive redesign
+- [ ] Water intake tracker
+- [ ] Meal history & progress tracking
+- [ ] Cache invalidation on plan/goal updates
+- [ ] Expanded test coverage (component + integration tests)
 
 ## 📄 License
 
