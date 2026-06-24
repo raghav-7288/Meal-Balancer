@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { Search, X, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { Search, ArrowRight, ChevronDown, ChevronUp, Info, Loader2 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import "./FoodSearchPage.css";
 
@@ -250,8 +250,9 @@ function FoodSearchPage() {
                                 setResults([]);
                                 inputRef.current?.focus();
                             }}
+                            aria-label="Clear search"
                         >
-                            <X size={16} />
+                            <ArrowRight size={18} />
                         </button>
                     )}
                     {loading && <Loader2 size={18} className="food-search-spinner" />}
@@ -268,6 +269,10 @@ function FoodSearchPage() {
                             {filter}
                         </button>
                     ))}
+                </div>
+                <div className="food-source-note">
+                    <Info size={14} />
+                    <span>Nutrient values are per 100g of food, based on IFCT 2017 data.</span>
                 </div>
             </div>
 

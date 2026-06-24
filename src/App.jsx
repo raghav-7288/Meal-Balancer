@@ -10,7 +10,6 @@ import {
     Moon,
     Sun,
     User,
-    UtensilsCrossed,
 } from "lucide-react";
 import AuthPage from "./components/AuthPage";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
@@ -50,8 +49,8 @@ const FoodSearchPage = lazyWithRetry(() => import("./components/FoodSearchPage")
 function PageLoader() {
     return (
         <div className="auth-loading-screen" role="status" aria-label="Loading page">
-            <Loader2 size={32} className="spin" />
-            <p>Loading…</p>
+            <Loader2 size={32} className="spin" style={{ color: '#3b82f6' }} />
+            <p style={{ fontSize: '14px', fontWeight: 500, color: '#64748b' }}>Loading…</p>
         </div>
     );
 }
@@ -88,27 +87,27 @@ function AppShell() {
         <div className="app-shell">
             <nav className="top-nav" role="navigation" aria-label="Main navigation">
                 <div className="nav-brand">
-                    <UtensilsCrossed size={20} />
-                    <div className="nav-brand-text">
-                        <span>Meal Balancer</span>
-                        <small>by Dt. Bhakti Shrivastava</small>
-                    </div>
+                    <img
+                        src={darkMode ? "/logo-dark.svg" : "/logo.svg"}
+                        alt="Meal Balancer by Dt. Bhakti Shrivastava"
+                        className="nav-logo-img"
+                    />
                 </div>
                 <div className="nav-links">
                     <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <Home size={16} /> Home
+                        <Home size={16} /> <span>Home</span>
                     </NavLink>
                     <NavLink to="/bmi-calculator" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <Calculator size={16} /> BMI Calculator
+                        <Calculator size={16} /> <span>BMI</span>
                     </NavLink>
                     <NavLink to="/dashboard" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <BarChart3 size={16} /> Dashboard
+                        <BarChart3 size={16} /> <span>Dashboard</span>
                     </NavLink>
                     <NavLink to="/foods" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <Database size={16} /> Food Explorer
+                        <Database size={16} /> <span>Foods</span>
                     </NavLink>
                     <NavLink to="/profile" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <User size={16} /> Profile
+                        <User size={16} /> <span>Profile</span>
                     </NavLink>
                 </div>
                 <button

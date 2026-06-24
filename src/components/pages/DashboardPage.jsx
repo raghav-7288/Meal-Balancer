@@ -21,7 +21,7 @@ function createPlan(name, meals) {
 }
 
 function DashboardPage() {
-    const { user } = useAuth();
+    const { user, profile: dbProfile } = useAuth();
     const { profile } = useProfile();
 
     const [presetPlans] = useState(() => PRESET_PLANS.map(p => ({ ...p, isPreset: true })));
@@ -271,7 +271,16 @@ function DashboardPage() {
         const plan = userPlans.find((p) => p.id === planId);
         const summary = summaries.find((s) => s.plan.id === planId);
         if (plan && summary) {
-            downloadPlanAsPdf(plan, summary);
+            const userInfo = {
+                fullName: dbProfile?.full_name || dbProfile?.username || "",
+                email: user?.email || "",
+                age: dbProfile?.age || "",
+                heightCm: dbProfile?.height_cm || "",
+                weightKg: dbProfile?.weight_kg || "",
+                bmi: dbProfile?.current_bmi ? String(dbProfile.current_bmi) : "",
+                contactNumber: dbProfile?.contact_number || "",
+            };
+            downloadPlanAsPdf(plan, summary, userInfo, profile);
         }
     }
 

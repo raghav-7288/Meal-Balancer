@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Activity, BarChart3, Sparkles, UtensilsCrossed } from "lucide-react";
+import { Activity, ArrowRight, BarChart3, Sparkles, UtensilsCrossed } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 
 function WelcomePage() {
@@ -45,7 +45,7 @@ function WelcomePage() {
                     </div>
                 </div>
                 <button className="welcome-cta" onClick={() => navigate("/dashboard")}>
-                    Go to Dashboard <BarChart3 size={16} />
+                    Go to Dashboard <ArrowRight size={16} />
                 </button>
             </div>
         </div>
@@ -53,4 +53,3 @@ function WelcomePage() {
 }
 
 export default WelcomePage;
-
