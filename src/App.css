@@ -5802,3 +5802,39 @@ body.dark-mode .progress-empty-state h2 {
         min-width: 800px;
     }
 }
+
+/* Footer */
+.app-footer {
+    text-align: center;
+    padding: 24px 16px;
+    margin-top: 40px;
+    border-top: 1px solid #e5e7eb;
+    background: #f8fafc;
+}
+
+.app-footer p {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.app-footer-sub {
+    margin-top: 4px !important;
+    font-size: 12px !important;
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .app-footer {
+    background: #1e293b;
+    border-top-color: #334155;
+}
+
+body.dark-mode .app-footer p {
+    color: #94a3b8;
+}
+
+body.dark-mode .app-footer-sub {
+    color: #64748b !important;
+}
+

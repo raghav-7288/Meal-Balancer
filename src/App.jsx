@@ -144,6 +144,11 @@ function AppShell() {
                     </Routes>
                 </Suspense>
             </ErrorBoundary>
+
+            <footer className="app-footer">
+                <p>© {new Date().getFullYear()} Meal Balancer. All rights reserved.</p>
+                <p className="app-footer-sub">Built with ❤️ for healthier living</p>
+            </footer>
         </div>
     );
 }
