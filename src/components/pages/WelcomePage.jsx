@@ -1,10 +1,20 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Activity, ArrowRight, BarChart3, Sparkles, UtensilsCrossed } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
+import OnboardingFlow from "./OnboardingFlow";
 
 function WelcomePage() {
     const navigate = useNavigate();
     const { user } = useAuth();
+
+    const [showOnboarding, setShowOnboarding] = useState(() => {
+        return localStorage.getItem("meal-balancer-onboarding-done") !== "true";
+    });
+
+    if (showOnboarding) {
+        return <OnboardingFlow onComplete={() => setShowOnboarding(false)} />;
+    }
 
     return (
         <div className="welcome-page">

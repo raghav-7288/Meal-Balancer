@@ -49,7 +49,11 @@ export function foodById(id) {
 
 /**
  * Aggregate nutrient totals for a single meal's items.
- * @param {Array<{foodId: string, grams: number}>} items
+ * Supports both:
+ *   - DB items with `nutrients` property (values per 100g)
+ *   - Legacy local items looked up via foodById (using gramsPerExchange)
+ *
+ * @param {Array<{foodId: string, grams: number, nutrients?: object, foodGroup?: string}>} items
  * @returns {object} Aggregated totals including exchange info.
  */
 export function aggregateMeal(items) {
@@ -60,22 +64,46 @@ export function aggregateMeal(items) {
     };
 
     for (const item of items) {
-        const food = foodById(item.foodId);
-        if (!food) continue;
-        const factor = item.grams / food.gramsPerExchange;
-        const kcal = food.kcal * factor;
+        // If the item has nutrients stored from DB (per 100g values)
+        if (item.nutrients) {
+            const factor = item.grams / 100;
+            const kcal = (item.nutrients.kcal || 0) * factor;
 
-        totals.kcal += kcal;
-        totals.carbs += food.carbs * factor;
-        totals.protein += food.protein * factor;
-        totals.fat += food.fat * factor;
-        totals.fibre += food.fibre * factor;
-        totals.vitamins += food.vitamins * factor;
-        totals.minerals += food.minerals * factor;
-        totals.visibleFat += food.group === "fats" ? item.grams : 0;
-        totals.vegetablesG += food.group === "vegetables" ? item.grams : 0;
-        totals.cerealEnergy += food.group === "cereals" ? kcal : 0;
-        totals.exchangeTotals[food.group] = (totals.exchangeTotals[food.group] || 0) + factor;
+            totals.kcal += kcal;
+            totals.carbs += (item.nutrients.carbs || 0) * factor;
+            totals.protein += (item.nutrients.protein || 0) * factor;
+            totals.fat += (item.nutrients.fat || 0) * factor;
+            totals.fibre += (item.nutrients.fibre || 0) * factor;
+            totals.vitamins += (item.nutrients.vitamins || 0) * factor;
+            totals.minerals += (item.nutrients.minerals || 0) * factor;
+
+            // Use foodGroup stored on item for group-based calculations
+            const group = item.foodGroup || "";
+            totals.visibleFat += group === "fats" ? item.grams : 0;
+            totals.vegetablesG += group === "vegetables" ? item.grams : 0;
+            totals.cerealEnergy += group === "cereals" ? kcal : 0;
+            if (group) {
+                totals.exchangeTotals[group] = (totals.exchangeTotals[group] || 0) + factor;
+            }
+        } else {
+            // Fallback: legacy local food lookup
+            const food = foodById(item.foodId);
+            if (!food) continue;
+            const factor = item.grams / food.gramsPerExchange;
+            const kcal = food.kcal * factor;
+
+            totals.kcal += kcal;
+            totals.carbs += food.carbs * factor;
+            totals.protein += food.protein * factor;
+            totals.fat += food.fat * factor;
+            totals.fibre += food.fibre * factor;
+            totals.vitamins += food.vitamins * factor;
+            totals.minerals += food.minerals * factor;
+            totals.visibleFat += food.group === "fats" ? item.grams : 0;
+            totals.vegetablesG += food.group === "vegetables" ? item.grams : 0;
+            totals.cerealEnergy += food.group === "cereals" ? kcal : 0;
+            totals.exchangeTotals[food.group] = (totals.exchangeTotals[food.group] || 0) + factor;
+        }
     }
 
     totals.cerealEnergyPct = totals.kcal > 0 ? (totals.cerealEnergy / totals.kcal) * 100 : 0;

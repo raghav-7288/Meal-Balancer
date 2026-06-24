@@ -3,12 +3,14 @@ import { BrowserRouter, Routes, Route, NavLink, Navigate } from "react-router-do
 import "./App.css";
 import {
     BarChart3,
-    Calculator,
+    Calendar,
     Database,
+    Heart,
     Home,
     Loader2,
     Moon,
     Sun,
+    TrendingUp,
     User,
 } from "lucide-react";
 import AuthPage from "./components/AuthPage";
@@ -41,8 +43,10 @@ if (sessionStorage.getItem("chunk-reload")) {
 
 // Lazy-loaded pages for code splitting
 const WelcomePage = lazyWithRetry(() => import("./components/pages/WelcomePage"));
-const BmiCalculatorPage = lazyWithRetry(() => import("./components/pages/BmiCalculatorPage"));
+const HealthToolsPage = lazyWithRetry(() => import("./components/pages/HealthToolsPage"));
 const DashboardPage = lazyWithRetry(() => import("./components/pages/DashboardPage"));
+const WeeklyPlannerPage = lazyWithRetry(() => import("./components/pages/WeeklyPlannerPage"));
+const ProgressPage = lazyWithRetry(() => import("./components/pages/ProgressPage"));
 const ProfilePage = lazyWithRetry(() => import("./components/pages/ProfilePage"));
 const FoodSearchPage = lazyWithRetry(() => import("./components/FoodSearchPage"));
 
@@ -97,11 +101,17 @@ function AppShell() {
                     <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
                         <Home size={16} /> <span>Home</span>
                     </NavLink>
-                    <NavLink to="/bmi-calculator" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <Calculator size={16} /> <span>BMI</span>
+                    <NavLink to="/health-tools" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
+                        <Heart size={16} /> <span>Health Tools</span>
                     </NavLink>
                     <NavLink to="/dashboard" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
                         <BarChart3 size={16} /> <span>Dashboard</span>
+                    </NavLink>
+                    <NavLink to="/weekly-planner" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
+                        <Calendar size={16} /> <span>Planner</span>
+                    </NavLink>
+                    <NavLink to="/progress" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
+                        <TrendingUp size={16} /> <span>Progress</span>
                     </NavLink>
                     <NavLink to="/foods" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
                         <Database size={16} /> <span>Foods</span>
@@ -124,8 +134,10 @@ function AppShell() {
                 <Suspense fallback={<PageLoader />}>
                     <Routes>
                         <Route path="/" element={<WelcomePage />} />
-                        <Route path="/bmi-calculator" element={<BmiCalculatorPage />} />
+                        <Route path="/health-tools" element={<HealthToolsPage />} />
                         <Route path="/dashboard" element={<DashboardPage />} />
+                        <Route path="/weekly-planner" element={<WeeklyPlannerPage />} />
+                        <Route path="/progress" element={<ProgressPage />} />
                         <Route path="/foods" element={<FoodSearchPage />} />
                         <Route path="/profile" element={<ProfilePage />} />
                         <Route path="*" element={<Navigate to="/" replace />} />

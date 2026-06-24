@@ -159,7 +159,7 @@ function ProfilePage() {
             });
             setProfile({ ...profile, height, weight });
             setToast("Profile saved successfully! ✓");
-            navigate("/bmi-calculator");
+            navigate("/health-tools");
         } catch (err) {
             setToast(`Error: ${err.message}`);
         } finally {
