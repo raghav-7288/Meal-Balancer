@@ -55,7 +55,7 @@ select {
 }
 
 body.dark-mode .nav-brand-text small {
-    color: #94a3b8;
+    color: #94a3b8 !important;
 }
 
 .nav-links {
@@ -139,12 +139,12 @@ body.dark-mode .nav-brand-text small {
 }
 
 body.dark-mode .nav-theme-toggle {
-    color: #fbbf24;
+    color: #fbbf24 !important;
 }
 
 body.dark-mode .nav-theme-toggle:hover {
-    background: #334155;
-    color: #fde68a;
+    background: #334155 !important;
+    color: #fde68a !important;
 }
 
 body.dark-mode .nav-theme-toggle::after {
@@ -1604,32 +1604,33 @@ a.nav-link {
 
 /* Dark Mode Styles */
 body.dark-mode {
-    background: #0f1219;
-    color: #e2e8f0;
+    background: #0f1219 !important;
+    color: #e2e8f0 !important;
+    color-scheme: dark !important;
 }
 
 body.dark-mode .top-nav {
-    background: #1e293b;
-    border-bottom-color: #334155;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    background: #1e293b !important;
+    border-bottom-color: #334155 !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
 body.dark-mode .nav-brand {
-    color: #f1f5f9;
+    color: #f1f5f9 !important;
 }
 
 body.dark-mode .nav-link {
-    color: #94a3b8;
+    color: #94a3b8 !important;
 }
 
 body.dark-mode .nav-link:hover {
-    background: #334155;
-    color: #f1f5f9;
+    background: #334155 !important;
+    color: #f1f5f9 !important;
 }
 
 body.dark-mode .nav-link.active {
-    background: #f1f5f9;
-    color: #0f172a;
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
 }
 
 body.dark-mode .section {

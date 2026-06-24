@@ -12,6 +12,12 @@
     <title>Meal Balancer — Diet Planning Dashboard</title>
   </head>
   <body>
+    <script>
+      // Apply dark mode class immediately to prevent flash of light theme
+      if (localStorage.getItem('meal-balancer-dark-mode') === 'true') {
+        document.body.classList.add('dark-mode');
+      }
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
