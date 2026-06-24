@@ -1795,6 +1795,10 @@ body.dark-mode .welcome-highlight-item {
     border-color: #334155;
 }
 
+body.dark-mode .welcome-highlight-item svg {
+    color: #e2e8f0;
+}
+
 body.dark-mode .welcome-subtitle,
 body.dark-mode .welcome-desc,
 body.dark-mode .welcome-highlight-item p {
