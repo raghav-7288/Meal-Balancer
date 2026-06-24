@@ -43,7 +43,7 @@ select {
 }
 
 .nav-logo-img {
-    height: 38px;
+    height: 48px;
     width: auto;
     display: block;
 }
@@ -984,6 +984,85 @@ th {
     gap: 14px;
 }
 
+/* Recharts wrappers */
+.nutrient-chart-wrap {
+    margin: -8px -4px;
+}
+
+.comparison-radar-wrap {
+    margin: -4px 0;
+}
+
+.macro-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.macro-chart-ring-area {
+    position: relative;
+}
+
+.macro-chart-center-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+}
+
+.macro-center-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+}
+
+.macro-center-unit {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.macro-chart-legend {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.macro-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+}
+
+.macro-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.macro-legend-name {
+    color: #374151;
+    font-weight: 500;
+}
+
+.macro-legend-pct {
+    margin-left: auto;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.macro-chart-empty {
+    text-align: center;
+    padding: 2rem 0;
+}
+
 .compare-card {
     border: 1px solid #e5e7eb;
     border-radius: 18px;
@@ -1489,7 +1568,7 @@ body.dark-mode .modal-input {
     }
 
     .nav-logo-img {
-        height: 32px;
+        height: 40px;
     }
 
     .nav-link span {
@@ -1750,6 +1829,43 @@ body.dark-mode .compare-card.best {
     border-color: #065f46;
 }
 
+body.dark-mode .macro-center-value {
+    color: #f1f5f9;
+}
+
+body.dark-mode .macro-center-unit {
+    color: #94a3b8;
+}
+
+body.dark-mode .macro-legend-name {
+    color: #cbd5e1;
+}
+
+body.dark-mode .macro-legend-pct {
+    color: #f1f5f9;
+}
+
+/* Recharts dark mode text override */
+body.dark-mode .recharts-text {
+    fill: #94a3b8;
+}
+
+body.dark-mode .recharts-polar-grid-concentric circle,
+body.dark-mode .recharts-polar-grid line {
+    stroke: #334155;
+}
+
+body.dark-mode .recharts-cartesian-axis-line,
+body.dark-mode .recharts-cartesian-grid line {
+    stroke: #334155;
+}
+
+body.dark-mode .recharts-tooltip-wrapper .recharts-default-tooltip {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #e2e8f0;
+}
+
 body.dark-mode .recommendation {
     background: #1a2332;
     border-color: #334155;
@@ -1889,7 +2005,7 @@ body.dark-mode .plan-action-btns .download-btn {
 }
 
 /* ─── BMI Calculator Page ─── */
-.bmi-calculator-page {
+.bmi-calculator-embedded {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -2275,3 +2391,1558 @@ body.dark-mode .profile-complete-btn.incomplete {
     background: #334155;
     color: #94a3b8;
 }
+
+/* ═══════════════════════════════════════════ */
+/* ─── Health Tools Hub Page ─── */
+/* ═══════════════════════════════════════════ */
+
+.health-tools-page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.health-tools-tabs {
+    display: flex;
+    gap: 6px;
+    background: #f1f5f9;
+    padding: 5px;
+    border-radius: 16px;
+    margin-bottom: 28px;
+}
+
+.health-tools-tab {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.health-tools-tab:hover {
+    background: rgba(255, 255, 255, 0.6);
+    color: #0f172a;
+}
+
+.health-tools-tab.active {
+    background: #ffffff;
+    color: var(--tab-color, #0f172a);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.health-tools-content {
+    animation: health-tool-fade-in 0.3s ease;
+}
+
+@keyframes health-tool-fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* BMI embedded (no full-page centering) */
+.bmi-calculator-embedded {
+    display: flex;
+    justify-content: center;
+}
+
+.bmi-calculator-embedded .bmi-calculator-card {
+    max-width: 580px;
+    width: 100%;
+}
+
+/* ─── Water Tracker ─── */
+.water-tracker-tool {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 28px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.06);
+}
+
+.water-tracker-header {
+    margin-bottom: 28px;
+}
+
+.water-tracker-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    background: #ecfeff;
+    color: #06b6d4;
+    margin-bottom: 16px;
+    animation: float 3s ease-in-out infinite;
+}
+
+.water-tracker-header h2 {
+    margin: 0 0 8px;
+    font-size: 28px;
+}
+
+.water-tracker-subtitle {
+    margin: 0;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+/* Progress ring */
+.water-progress-section {
+    margin-bottom: 28px;
+}
+
+.water-progress-ring {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 20px;
+}
+
+.water-ring-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.water-ring-bg {
+    color: #e5e7eb;
+}
+
+.water-ring-fill {
+    color: #06b6d4;
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.water-progress-ring.complete .water-ring-fill {
+    color: #10b981;
+}
+
+.water-ring-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.water-ring-count {
+    font-size: 42px;
+    font-weight: 800;
+    color: #06b6d4;
+    line-height: 1;
+}
+
+.water-progress-ring.complete .water-ring-count {
+    color: #10b981;
+}
+
+.water-ring-label {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.water-stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+}
+
+.water-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.water-stat-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.water-stat-label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+/* Controls */
+.water-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.water-ctrl-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 18px;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.water-ctrl-btn.add {
+    background: #06b6d4;
+    color: white;
+    border-color: #06b6d4;
+    padding: 12px 24px;
+}
+
+.water-ctrl-btn.add:hover {
+    background: #0891b2;
+    transform: scale(1.03);
+}
+
+.water-ctrl-btn.minus {
+    background: #f8fafc;
+    color: #64748b;
+}
+
+.water-ctrl-btn.minus:hover:not(:disabled) {
+    background: #e2e8f0;
+}
+
+.water-ctrl-btn.reset {
+    background: #f8fafc;
+    color: #64748b;
+}
+
+.water-ctrl-btn.reset:hover:not(:disabled) {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.water-ctrl-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Glass grid */
+.water-glass-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.water-glass-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    background: #f8fafc;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.water-glass-icon:hover {
+    border-color: #06b6d4;
+    color: #06b6d4;
+    transform: scale(1.08);
+}
+
+.water-glass-icon.filled {
+    background: #ecfeff;
+    border-color: #06b6d4;
+    color: #06b6d4;
+}
+
+/* Target section */
+.water-target-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 16px;
+}
+
+.water-target-section svg {
+    flex-shrink: 0;
+    color: #6b7280;
+}
+
+.water-target-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.water-target-edit input {
+    width: 60px;
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.water-target-edit button {
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.water-edit-target-btn {
+    background: none;
+    border: none;
+    color: #2563eb;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 8px;
+    font-size: 13px;
+    text-decoration: underline;
+}
+
+.water-complete-banner {
+    padding: 14px 20px;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 14px;
+    color: #065f46;
+    font-size: 15px;
+    font-weight: 600;
+    animation: health-tool-fade-in 0.3s ease;
+}
+
+/* ─── Calorie Calculator ─── */
+.calorie-calc-tool {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 28px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.06);
+}
+
+.calorie-calc-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.calorie-calc-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    background: #fff7ed;
+    color: #f97316;
+    margin-bottom: 16px;
+    animation: float 3s ease-in-out infinite;
+}
+
+.calorie-calc-header h2 {
+    margin: 0 0 8px;
+    font-size: 28px;
+}
+
+.calorie-calc-subtitle {
+    margin: 0;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+.calorie-calc-form {
+    margin-bottom: 28px;
+}
+
+.calorie-calc-inputs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.calorie-input-group {
+    text-align: left;
+}
+
+.calorie-input-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.calorie-input-group input,
+.calorie-input-group select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    font-size: 15px;
+    background: #fff;
+    transition: border-color 0.15s;
+}
+
+.calorie-input-group input:focus,
+.calorie-input-group select:focus {
+    outline: none;
+    border-color: #f97316;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.calorie-selector-group {
+    margin-bottom: 20px;
+}
+
+.calorie-selector-group > label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.calorie-option-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.calorie-option-grid--goals {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.calorie-option-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 12px 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+}
+
+.calorie-option-btn strong {
+    font-size: 13px;
+    color: #0f172a;
+}
+
+.calorie-option-btn span {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.calorie-option-btn:hover {
+    border-color: #f97316;
+    background: #fff7ed;
+}
+
+.calorie-option-btn.active {
+    border-color: #f97316;
+    background: #fff7ed;
+    box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+}
+
+.calorie-option-btn.active strong {
+    color: #ea580c;
+}
+
+/* Results */
+.calorie-results {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 28px;
+    animation: health-tool-fade-in 0.3s ease;
+}
+
+.calorie-results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.calorie-results-header h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.calorie-goal-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ea580c;
+}
+
+.calorie-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.calorie-kpi {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 18px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    background: #f8fafc;
+}
+
+.calorie-kpi.highlight {
+    background: #fff7ed;
+    border-color: #fed7aa;
+}
+
+.calorie-kpi-value {
+    font-size: 32px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.03em;
+}
+
+.calorie-kpi.highlight .calorie-kpi-value {
+    color: #ea580c;
+}
+
+.calorie-kpi-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.calorie-kpi-hint {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+/* Macro section */
+.calorie-macros-section {
+    margin-bottom: 20px;
+}
+
+.calorie-macros-section h4 {
+    margin: 0 0 14px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.calorie-macro-bar {
+    display: flex;
+    height: 32px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 14px;
+}
+
+.calorie-macro-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    transition: width 0.4s ease;
+}
+
+.calorie-macro-segment.carbs {
+    background: #3b82f6;
+}
+
+.calorie-macro-segment.protein {
+    background: #10b981;
+}
+
+.calorie-macro-segment.fat {
+    background: #f59e0b;
+}
+
+.calorie-macro-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.calorie-macro-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+}
+
+.calorie-macro-card div {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.calorie-macro-card strong {
+    font-size: 13px;
+    color: #0f172a;
+}
+
+.calorie-macro-card span {
+    font-size: 12px;
+    color: #374151;
+}
+
+.macro-percent {
+    font-size: 11px !important;
+    color: #6b7280 !important;
+}
+
+.macro-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.macro-dot.carbs {
+    background: #3b82f6;
+}
+
+.macro-dot.protein {
+    background: #10b981;
+}
+
+.macro-dot.fat {
+    background: #f59e0b;
+}
+
+.calorie-info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 12px;
+    text-align: left;
+}
+
+.calorie-info-box svg {
+    flex-shrink: 0;
+    color: #f97316;
+    margin-top: 2px;
+}
+
+.calorie-info-box p {
+    margin: 0;
+    font-size: 13px;
+    color: #374151;
+}
+
+/* ─── Dark Mode: Health Tools ─── */
+body.dark-mode .health-tools-tabs {
+    background: #0f172a;
+}
+
+body.dark-mode .health-tools-tab {
+    color: #94a3b8;
+}
+
+body.dark-mode .health-tools-tab:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #f1f5f9;
+}
+
+body.dark-mode .health-tools-tab.active {
+    background: #334155;
+    color: var(--tab-color, #f1f5f9);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark: Water tracker */
+body.dark-mode .water-tracker-tool {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark-mode .water-tracker-icon-wrap {
+    background: #164e63;
+    color: #22d3ee;
+}
+
+body.dark-mode .water-tracker-header h2 {
+    color: #f1f5f9;
+}
+
+body.dark-mode .water-tracker-subtitle {
+    color: #94a3b8;
+}
+
+body.dark-mode .water-ring-bg {
+    color: #334155;
+}
+
+body.dark-mode .water-ring-fill {
+    color: #22d3ee;
+}
+
+body.dark-mode .water-progress-ring.complete .water-ring-fill {
+    color: #34d399;
+}
+
+body.dark-mode .water-ring-count {
+    color: #22d3ee;
+}
+
+body.dark-mode .water-progress-ring.complete .water-ring-count {
+    color: #34d399;
+}
+
+body.dark-mode .water-ring-label {
+    color: #94a3b8;
+}
+
+body.dark-mode .water-stat-value {
+    color: #f1f5f9;
+}
+
+body.dark-mode .water-stat-label {
+    color: #94a3b8;
+}
+
+body.dark-mode .water-ctrl-btn.add {
+    background: #0891b2;
+    border-color: #0891b2;
+}
+
+body.dark-mode .water-ctrl-btn.minus,
+body.dark-mode .water-ctrl-btn.reset {
+    background: #1a2332;
+    border-color: #334155;
+    color: #94a3b8;
+}
+
+body.dark-mode .water-glass-icon {
+    background: #1a2332;
+    border-color: #334155;
+    color: #475569;
+}
+
+body.dark-mode .water-glass-icon.filled {
+    background: #164e63;
+    border-color: #0891b2;
+    color: #22d3ee;
+}
+
+body.dark-mode .water-target-section {
+    background: #1a2332;
+    border-color: #334155;
+    color: #cbd5e1;
+}
+
+body.dark-mode .water-target-edit input {
+    background: #0f172a;
+    border-color: #475569;
+    color: #f1f5f9;
+}
+
+body.dark-mode .water-complete-banner {
+    background: #064e3b;
+    border-color: #065f46;
+    color: #6ee7b7;
+}
+
+/* Dark: Calorie calculator */
+body.dark-mode .calorie-calc-tool {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark-mode .calorie-calc-icon-wrap {
+    background: #431407;
+    color: #fb923c;
+}
+
+body.dark-mode .calorie-calc-header h2 {
+    color: #f1f5f9;
+}
+
+body.dark-mode .calorie-calc-subtitle {
+    color: #94a3b8;
+}
+
+body.dark-mode .calorie-input-group label,
+body.dark-mode .calorie-selector-group > label {
+    color: #cbd5e1;
+}
+
+body.dark-mode .calorie-input-group input,
+body.dark-mode .calorie-input-group select {
+    background: #0f172a;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+
+body.dark-mode .calorie-option-btn {
+    background: #1a2332;
+    border-color: #334155;
+}
+
+body.dark-mode .calorie-option-btn strong {
+    color: #e2e8f0;
+}
+
+body.dark-mode .calorie-option-btn span {
+    color: #94a3b8;
+}
+
+body.dark-mode .calorie-option-btn:hover,
+body.dark-mode .calorie-option-btn.active {
+    background: #431407;
+    border-color: #ea580c;
+}
+
+body.dark-mode .calorie-results {
+    border-top-color: #334155;
+}
+
+body.dark-mode .calorie-results-header h3 {
+    color: #f1f5f9;
+}
+
+body.dark-mode .calorie-goal-badge {
+    background: #431407;
+    border-color: #ea580c;
+    color: #fb923c;
+}
+
+body.dark-mode .calorie-kpi {
+    background: #1a2332;
+    border-color: #334155;
+}
+
+body.dark-mode .calorie-kpi.highlight {
+    background: #431407;
+    border-color: #ea580c;
+}
+
+body.dark-mode .calorie-kpi-value {
+    color: #f1f5f9;
+}
+
+body.dark-mode .calorie-kpi.highlight .calorie-kpi-value {
+    color: #fb923c;
+}
+
+body.dark-mode .calorie-kpi-label {
+    color: #cbd5e1;
+}
+
+body.dark-mode .calorie-kpi-hint {
+    color: #94a3b8;
+}
+
+body.dark-mode .calorie-macros-section h4 {
+    color: #f1f5f9;
+}
+
+body.dark-mode .calorie-macro-card {
+    background: #1a2332;
+    border-color: #334155;
+}
+
+body.dark-mode .calorie-macro-card strong {
+    color: #e2e8f0;
+}
+
+body.dark-mode .calorie-macro-card span {
+    color: #cbd5e1;
+}
+
+body.dark-mode .calorie-info-box {
+    background: #2d1b00;
+    border-color: #78350f;
+}
+
+body.dark-mode .calorie-info-box svg {
+    color: #fbbf24;
+}
+
+body.dark-mode .calorie-info-box p {
+    color: #fde68a;
+}
+
+/* ─── Responsive: Health Tools ─── */
+@media (max-width: 640px) {
+    .health-tools-page {
+        padding: 16px;
+    }
+
+    .health-tools-tab span {
+        display: none;
+    }
+
+    .health-tools-tab {
+        padding: 10px 14px;
+    }
+
+    .water-tracker-tool,
+    .calorie-calc-tool {
+        padding: 24px 18px;
+    }
+
+    .water-controls {
+        flex-wrap: wrap;
+    }
+
+    .calorie-calc-inputs-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .calorie-option-grid,
+    .calorie-option-grid--goals {
+        grid-template-columns: 1fr;
+    }
+
+    .calorie-kpi-row {
+        grid-template-columns: 1fr;
+    }
+
+    .calorie-macro-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .water-stats-row {
+        gap: 16px;
+    }
+}
+
+/* ═══════════════════════════════════════════ */
+/* ─── Onboarding Flow ─── */
+/* ═══════════════════════════════════════════ */
+
+.onboarding-overlay {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: calc(100vh - 60px);
+    padding: 40px 24px;
+    animation: health-tool-fade-in 0.3s ease;
+}
+
+.onboarding-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 28px;
+    padding: 40px;
+    max-width: 640px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.06);
+}
+
+/* Progress bar */
+.onboarding-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 32px;
+    position: relative;
+}
+
+.onboarding-progress-line {
+    position: absolute;
+    top: 50%;
+    left: 20%;
+    right: 20%;
+    height: 3px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    transform: translateY(-50%);
+    z-index: 0;
+}
+
+.onboarding-progress-fill {
+    height: 100%;
+    background: #0f172a;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+}
+
+.onboarding-step-dot {
+    position: relative;
+    z-index: 1;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    background: #e5e7eb;
+    color: #6b7280;
+    transition: all 0.3s ease;
+}
+
+.onboarding-step-dot.active {
+    background: #0f172a;
+    color: #ffffff;
+}
+
+.onboarding-step-dot.current {
+    box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.15);
+}
+
+/* Step content */
+.onboarding-step {
+    animation: health-tool-fade-in 0.35s ease;
+}
+
+.onboarding-step-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.onboarding-step-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: #f0fdf4;
+    color: #059669;
+    margin-bottom: 14px;
+}
+
+.onboarding-step-icon.plan {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.onboarding-step-icon.score {
+    background: #fff7ed;
+    color: #ea580c;
+}
+
+.onboarding-step-header h2 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.onboarding-step-header p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+/* Form */
+.onboarding-form {
+    display: grid;
+    gap: 22px;
+    margin-bottom: 28px;
+}
+
+.onboarding-field > label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+}
+
+.onboarding-option-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.onboarding-option-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.onboarding-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    background: #f8fafc;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    transition: all 0.15s ease;
+    text-align: left;
+}
+
+.onboarding-chip:hover {
+    border-color: #0f172a;
+    background: #f1f5f9;
+}
+
+.onboarding-chip.active {
+    border-color: #0f172a;
+    background: #0f172a;
+    color: #ffffff;
+}
+
+.onboarding-chip .chip-emoji {
+    font-size: 18px;
+}
+
+.onboarding-chip div {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.onboarding-chip div strong {
+    font-size: 13px;
+}
+
+.onboarding-chip .chip-desc {
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 0.7;
+}
+
+/* Plans */
+.onboarding-plans {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 28px;
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.onboarding-plan-card {
+    position: relative;
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 16px 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.onboarding-plan-card:hover {
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+
+.onboarding-plan-card.active {
+    border-color: #2563eb;
+    background: #eff6ff;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.onboarding-plan-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+.onboarding-plan-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.onboarding-plan-meta span {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.onboarding-plan-check {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    color: #2563eb;
+}
+
+/* Score display */
+.onboarding-score-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 28px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+}
+
+.onboarding-score-ring {
+    position: relative;
+    width: 140px;
+    height: 140px;
+}
+
+.onboarding-ring-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.onboarding-ring-bg {
+    color: #e5e7eb;
+}
+
+.onboarding-ring-fill {
+    transition: stroke-dashoffset 0.8s ease;
+}
+
+.onboarding-ring-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    padding-top: 52px;
+}
+
+.onboarding-score-value {
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.onboarding-score-label {
+    font-size: 16px;
+    color: #6b7280;
+    font-weight: 600;
+    margin-left: 2px;
+}
+
+.onboarding-score-band {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.onboarding-score-reasons {
+    width: 100%;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 14px;
+    padding: 14px 18px;
+    text-align: left;
+}
+
+.onboarding-score-reasons strong {
+    display: block;
+    font-size: 13px;
+    color: #92400e;
+    margin-bottom: 6px;
+}
+
+.onboarding-score-reasons ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13px;
+    color: #78350f;
+}
+
+.onboarding-score-reasons li {
+    margin-bottom: 3px;
+}
+
+.onboarding-score-perfect {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #065f46;
+}
+
+.onboarding-finish-hint {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.onboarding-finish-hint p {
+    margin: 0;
+    font-size: 15px;
+    color: #374151;
+    line-height: 1.6;
+}
+
+/* Actions */
+.onboarding-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.onboarding-next-btn,
+.onboarding-finish-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 24px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 14px;
+    background: #0f172a;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+.onboarding-finish-btn {
+    background: #059669;
+}
+
+.onboarding-next-btn:hover,
+.onboarding-finish-btn:hover {
+    transform: scale(1.02);
+}
+
+.onboarding-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 12px;
+    background: #f1f5f9;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.onboarding-back-btn:hover {
+    background: #e2e8f0;
+}
+
+/* ─── Dark Mode: Onboarding ─── */
+body.dark-mode .onboarding-card {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark-mode .onboarding-progress-line {
+    background: #334155;
+}
+
+body.dark-mode .onboarding-step-dot {
+    background: #334155;
+    color: #94a3b8;
+}
+
+body.dark-mode .onboarding-step-dot.active {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+body.dark-mode .onboarding-step-header h2 {
+    color: #f1f5f9;
+}
+
+body.dark-mode .onboarding-step-header p {
+    color: #94a3b8;
+}
+
+body.dark-mode .onboarding-step-icon {
+    background: #064e3b;
+    color: #34d399;
+}
+
+body.dark-mode .onboarding-step-icon.plan {
+    background: #1e3a5f;
+    color: #60a5fa;
+}
+
+body.dark-mode .onboarding-step-icon.score {
+    background: #431407;
+    color: #fb923c;
+}
+
+body.dark-mode .onboarding-field > label {
+    color: #94a3b8;
+}
+
+body.dark-mode .onboarding-chip {
+    background: #1a2332;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+body.dark-mode .onboarding-chip:hover {
+    border-color: #64748b;
+    background: #334155;
+}
+
+body.dark-mode .onboarding-chip.active {
+    background: #f1f5f9;
+    border-color: #f1f5f9;
+    color: #0f172a;
+}
+
+body.dark-mode .onboarding-plan-card {
+    background: #1a2332;
+    border-color: #334155;
+}
+
+body.dark-mode .onboarding-plan-card:hover {
+    background: #1e3a5f;
+    border-color: #3b82f6;
+}
+
+body.dark-mode .onboarding-plan-card.active {
+    background: #1e3a5f;
+    border-color: #3b82f6;
+}
+
+body.dark-mode .onboarding-plan-name {
+    color: #f1f5f9;
+}
+
+body.dark-mode .onboarding-plan-meta span {
+    color: #94a3b8;
+}
+
+body.dark-mode .onboarding-plan-check {
+    color: #60a5fa;
+}
+
+body.dark-mode .onboarding-score-section {
+    background: #1a2332;
+    border-color: #334155;
+}
+
+body.dark-mode .onboarding-ring-bg {
+    color: #334155;
+}
+
+body.dark-mode .onboarding-score-label {
+    color: #94a3b8;
+}
+
+body.dark-mode .onboarding-score-reasons {
+    background: #2d1b00;
+    border-color: #78350f;
+}
+
+body.dark-mode .onboarding-score-reasons strong {
+    color: #fbbf24;
+}
+
+body.dark-mode .onboarding-score-reasons ul {
+    color: #fde68a;
+}
+
+body.dark-mode .onboarding-score-perfect {
+    background: #064e3b;
+    border-color: #065f46;
+    color: #6ee7b7;
+}
+
+body.dark-mode .onboarding-finish-hint p {
+    color: #cbd5e1;
+}
+
+body.dark-mode .onboarding-back-btn {
+    background: #334155;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+
+body.dark-mode .onboarding-back-btn:hover {
+    background: #475569;
+}
+
+/* ─── Responsive: Onboarding ─── */
+@media (max-width: 640px) {
+    .onboarding-overlay {
+        padding: 16px;
+    }
+
+    .onboarding-card {
+        padding: 24px 20px;
+    }
+
+    .onboarding-option-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .onboarding-option-row {
+        flex-direction: column;
+    }
+
+    .onboarding-step-header h2 {
+        font-size: 20px;
+    }
+
+    .onboarding-plans {
+        max-height: 260px;
+    }
+
+    .onboarding-actions {
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+
+    .onboarding-next-btn,
+    .onboarding-finish-btn,
+    .onboarding-back-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+

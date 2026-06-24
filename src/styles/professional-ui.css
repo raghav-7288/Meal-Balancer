@@ -83,7 +83,8 @@ body.dark-mode .nav-link.active {
 .welcome-page,
 .dashboard-page,
 .profile-page,
-.bmi-calculator-page,
+.bmi-calculator-embedded,
+.health-tools-page,
 .food-search-page {
     animation: pageEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -418,7 +419,6 @@ body.dark-mode .profile-details:hover {
     }
 
     .nav-logo-img {
-        height: 28px !important;
     }
 
     .welcome-card {

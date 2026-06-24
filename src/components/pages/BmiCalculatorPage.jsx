@@ -150,7 +150,7 @@ function BmiCalculatorPage() {
             : `${kgToLbs(parseFloat(idealWeightMin))} – ${kgToLbs(parseFloat(idealWeightMax))} lbs`;
 
     return (
-        <div className="bmi-calculator-page">
+        <div className="bmi-calculator-embedded">
             <div className="bmi-calculator-card">
                 <div className="bmi-calc-header">
                     <div className="bmi-calc-icon">
