@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Activity, CheckCircle, Leaf, Moon, Phone, Ruler, User } from "lucide-react";
+import { Activity, CheckCircle, Leaf, Phone, Ruler, User } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useProfile } from "../../context/ProfileContext";
 import { getHealthGoals, getUserHealthGoals, saveUserHealthGoals } from "../../services/databaseService";
@@ -16,7 +16,7 @@ const DIET_OPTIONS = ["vegetarian", "eggetarian", "non-vegetarian", "Jain-compat
 function ProfilePage() {
     const { user, profile: dbProfile, updateProfile: updateDbProfile } = useAuth();
     const navigate = useNavigate();
-    const { profile, setProfile, darkMode, setDarkMode } = useProfile();
+    const { profile, setProfile } = useProfile();
     const [healthGoals, setHealthGoals] = useState([]);
     const [selectedGoalIds, setSelectedGoalIds] = useState([]);
     const [goalsLoading, setGoalsLoading] = useState(true);
@@ -124,16 +124,6 @@ function ProfilePage() {
                     <UserProfile />
                 </Section>
 
-                <Section title="Appearance" icon={<Moon size={16} />}>
-                    <div className="dark-mode-toggle">
-                        <span>Dark mode</span>
-                        <button
-                            className={`toggle-switch ${darkMode ? "active" : ""}`}
-                            onClick={() => setDarkMode(!darkMode)}
-                            aria-label="Toggle dark mode"
-                        />
-                    </div>
-                </Section>
 
                 <Section title="Profile setup" icon={<Activity size={16} />}>
                     <Field label="Activity level">

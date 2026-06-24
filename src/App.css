@@ -42,6 +42,22 @@ select {
     color: #0f172a;
 }
 
+.nav-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.nav-brand-text small {
+    font-size: 11px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+body.dark-mode .nav-brand-text small {
+    color: #94a3b8;
+}
+
 .nav-links {
     display: flex;
     gap: 6px;
@@ -70,6 +86,70 @@ select {
 .nav-link.active {
     background: #0f172a;
     color: #ffffff;
+}
+
+.nav-theme-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.15s;
+    flex-shrink: 0;
+}
+
+.nav-theme-toggle:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    transform: scale(1.1);
+}
+
+.nav-theme-toggle:active {
+    transform: scale(0.95);
+}
+
+/* Instant tooltip */
+.nav-theme-toggle::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -36px;
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    background: #1e293b;
+    color: #f8fafc;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s, transform 0.15s;
+}
+
+.nav-theme-toggle:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
+
+body.dark-mode .nav-theme-toggle {
+    color: #fbbf24;
+}
+
+body.dark-mode .nav-theme-toggle:hover {
+    background: #334155;
+    color: #fde68a;
+}
+
+body.dark-mode .nav-theme-toggle::after {
+    background: #f8fafc;
+    color: #0f172a;
 }
 
 /* Welcome Page */

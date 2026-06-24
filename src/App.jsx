@@ -7,13 +7,15 @@ import {
     Database,
     Home,
     Loader2,
+    Moon,
+    Sun,
     User,
     UtensilsCrossed,
 } from "lucide-react";
 import AuthPage from "./components/AuthPage";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
 import { useAuth } from "./hooks/useAuth";
-import { ProfileProvider } from "./context/ProfileContext";
+import { ProfileProvider, useProfile } from "./context/ProfileContext";
 
 // Retry wrapper: if a lazy chunk fails to load (stale deploy), reload the page once
 function lazyWithRetry(importFn) {
@@ -80,12 +82,17 @@ function App() {
 }
 
 function AppShell() {
+    const { darkMode, setDarkMode } = useProfile();
+
     return (
         <div className="app-shell">
             <nav className="top-nav" role="navigation" aria-label="Main navigation">
                 <div className="nav-brand">
                     <UtensilsCrossed size={20} />
-                    <span>Meal Balancer</span>
+                    <div className="nav-brand-text">
+                        <span>Meal Balancer</span>
+                        <small>by Dt. Bhakti Shrivastava</small>
+                    </div>
                 </div>
                 <div className="nav-links">
                     <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
@@ -104,6 +111,14 @@ function AppShell() {
                         <User size={16} /> Profile
                     </NavLink>
                 </div>
+                <button
+                    className="nav-theme-toggle"
+                    onClick={() => setDarkMode(!darkMode)}
+                    aria-label="Toggle dark mode"
+                    data-tooltip={darkMode ? "Light mode" : "Dark mode"}
+                >
+                    {darkMode ? <Sun size={34} /> : <Moon size={34} />}
+                </button>
             </nav>
 
             <ErrorBoundary>
