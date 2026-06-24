@@ -63,6 +63,54 @@ describe("aggregateMeal", () => {
         ]);
         expect(result.exchangeTotals.cereals).toBe(4); // 200/100 + 60/30
     });
+
+    it("calculates correctly using DB nutrients (per 100g)", () => {
+        const result = aggregateMeal([
+            {
+                foodId: "999",
+                foodName: "DB Food",
+                grams: 200,
+                nutrients: { kcal: 150, carbs: 30, protein: 5, fat: 2, fibre: 3, vitamins: 1, minerals: 1 },
+                foodGroup: "cereals",
+            },
+        ]);
+        // 200g / 100 = factor 2
+        expect(result.kcal).toBe(300);
+        expect(result.carbs).toBe(60);
+        expect(result.protein).toBe(10);
+        expect(result.fat).toBe(4);
+        expect(result.fibre).toBe(6);
+        expect(result.cerealEnergy).toBe(300);
+        expect(result.cerealEnergyPct).toBe(100);
+    });
+
+    it("tracks vegetablesG for DB items with vegetable group", () => {
+        const result = aggregateMeal([
+            {
+                foodId: "1000",
+                foodName: "DB Veggie",
+                grams: 150,
+                nutrients: { kcal: 25, carbs: 5, protein: 1, fat: 0, fibre: 3, vitamins: 4, minerals: 3 },
+                foodGroup: "vegetables",
+            },
+        ]);
+        expect(result.vegetablesG).toBe(150);
+    });
+
+    it("mixes DB items and local items correctly", () => {
+        const result = aggregateMeal([
+            { foodId: "rice", grams: 100 }, // local: kcal=130
+            {
+                foodId: "1001",
+                foodName: "DB Protein",
+                grams: 100,
+                nutrients: { kcal: 100, carbs: 0, protein: 20, fat: 3, fibre: 0, vitamins: 0, minerals: 0 },
+                foodGroup: "pulses",
+            },
+        ]);
+        expect(result.kcal).toBe(230); // 130 + 100
+        expect(result.protein).toBe(22.5); // 2.5 + 20
+    });
 });
 
 describe("combineDay", () => {

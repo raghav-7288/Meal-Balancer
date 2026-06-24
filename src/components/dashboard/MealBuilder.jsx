@@ -1,77 +1,109 @@
 import { Plus, Copy, Trash2 } from "lucide-react";
-import { FOODS } from "../../data/foods";
-import { MEALS, DAYS } from "../../data/presetPlans";
+import { MEALS } from "../../data/presetPlans";
 import { foodById } from "../../engines/nutrientEngine";
 import Section from "../ui/Section";
 import Field from "../ui/Field";
+import FoodAutocomplete from "./FoodAutocomplete";
+import "./FoodAutocomplete.css";
 
 function MealBuilder({
     activePlan,
     activeSummary,
     isPresetActive,
+    viewDay,
     selectedMeal,
     setSelectedMeal,
-    selectedFoodId,
     setSelectedFoodId,
+    selectedFoodName,
+    setSelectedFoodName,
+    setSelectedFoodGroupId,
     grams,
     setGrams,
-    selectedDay,
-    setSelectedDay,
     instructions,
     setInstructions,
     onAddFood,
+    isAddingFood,
     onUpdateMealItem,
     onRemoveMealItem,
     onDuplicateMealItem,
 }) {
     return (
-        <Section title="Meal builder" icon={<Plus size={16} />}>
-            <div className="builder-row">
-                <Field label="Day">
-                    <select value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)} aria-label="Select day">
-                        <option value="" disabled>Select day</option>
-                        {DAYS.map((d) => <option key={d} value={d}>{d}</option>)}
-                    </select>
-                </Field>
-                <Field label="Meal slot">
-                    <select value={selectedMeal} onChange={(e) => setSelectedMeal(e.target.value)} aria-label="Select meal slot">
-                        <option value="" disabled>Select slot</option>
-                        {MEALS.map((m) => <option key={m} value={m}>{m}</option>)}
-                    </select>
-                </Field>
-                <Field label="Food item">
-                    <select value={selectedFoodId} onChange={(e) => setSelectedFoodId(e.target.value)} aria-label="Select food item">
-                        <option value="" disabled>Select item</option>
-                        {FOODS.map((food) => <option key={food.id} value={food.id}>{food.name}</option>)}
-                    </select>
-                </Field>
-                <Field label="Grams">
-                    <input
-                        type="number"
-                        value={grams}
-                        placeholder="Select grams"
-                        onChange={(e) => setGrams(e.target.value)}
-                        aria-label="Food quantity in grams"
-                    />
-                </Field>
-                <button onClick={onAddFood} aria-label="Add food to meal">Add food</button>
-            </div>
+        <Section title={`Meal builder — ${viewDay}`} icon={<Plus size={16} />}>
+            {!isPresetActive && (
+                <>
+                    <div className="builder-row builder-row--no-day">
+                        <Field label="Meal slot">
+                            <select value={selectedMeal} onChange={(e) => setSelectedMeal(e.target.value)} aria-label="Select meal slot">
+                                <option value="" disabled>Select slot</option>
+                                {MEALS.map((m) => <option key={m} value={m}>{m}</option>)}
+                            </select>
+                        </Field>
+                        <Field label="Food item">
+                            <FoodAutocomplete
+                                value={selectedFoodName}
+                                onChange={(val) => {
+                                    setSelectedFoodName(val);
+                                    if (!val) {
+                                        setSelectedFoodId("");
+                                        setSelectedFoodGroupId(null);
+                                    }
+                                }}
+                                onSelect={(item) => {
+                                    setSelectedFoodId(String(item.food_id));
+                                    setSelectedFoodName(item.food_name);
+                                    setSelectedFoodGroupId(item.major_group_id);
+                                }}
+                                placeholder="Type to search food..."
+                            />
+                        </Field>
+                        <Field label="Grams">
+                            <input
+                                type="number"
+                                min="0"
+                                value={grams}
+                                placeholder="Enter grams"
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === "" || Number(val) >= 0) setGrams(val);
+                                }}
+                                aria-label="Food quantity in grams"
+                            />
+                        </Field>
+                        <button
+                            onClick={onAddFood}
+                            disabled={isAddingFood || !selectedMeal || !selectedFoodName || !grams || Number(grams) <= 0}
+                            aria-label="Add food to meal"
+                        >
+                            {isAddingFood ? "Adding..." : "Add food"}
+                        </button>
+                    </div>
 
-            <div className="builder-instructions-row">
-                <Field label="Instructions (optional)">
-                    <input
-                        type="text"
-                        value={instructions}
-                        placeholder="e.g. lightly roasted, no oil, with salt..."
-                        onChange={(e) => setInstructions(e.target.value)}
-                        aria-label="Cooking instructions"
-                    />
-                </Field>
-            </div>
+                    <div className="builder-instructions-row">
+                        <Field label="Instructions (optional)">
+                            <input
+                                type="text"
+                                value={instructions}
+                                placeholder="e.g. lightly roasted, no oil, with salt..."
+                                onChange={(e) => setInstructions(e.target.value)}
+                                aria-label="Cooking instructions"
+                            />
+                        </Field>
+                    </div>
+                </>
+            )}
+
+            {isPresetActive && (
+                <p className="small-copy" style={{ marginBottom: "1rem", fontStyle: "italic", opacity: 0.8 }}>
+                    This is a pre-saved plan. Copy it to &quot;My Plans&quot; to add or edit food items.
+                </p>
+            )}
 
             <div className="meal-panels">
                 {MEALS.map((meal) => {
-                    const mealItems = activePlan.meals[meal] || [];
+                    // Filter items to show only the selected day (backward compat: items without day show always)
+                    const mealItems = (activePlan.meals[meal] || []).filter(
+                        (i) => i.day === viewDay || !i.day
+                    );
                     const mealScore = activeSummary?.mealScores?.[meal]?.score || 0;
                     const mealBand = activeSummary?.mealScores?.[meal]?.band || "Poor balance";
                     const mealReasons = activeSummary?.mealScores?.[meal]?.reasons || [];
@@ -94,27 +126,28 @@ function MealBuilder({
                                 <table>
                                     <thead>
                                         <tr>
-                                            <th>Food</th><th>g</th><th>Day</th><th>Group</th><th>Exchange</th><th>Instructions</th><th>Actions</th>
+                                            <th>Food</th><th>g</th><th>Group</th><th>Exchange</th><th>Instructions</th><th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {mealItems.length ? mealItems.map((item) => {
                                             const food = foodById(item.foodId);
-                                            const exchange = food ? item.grams / food.gramsPerExchange : 0;
+                                            const foodName = food?.name || item.foodName || "-";
+                                            const foodGroup = food?.group || item.foodGroup || "-";
+                                            const exchange = food ? item.grams / food.gramsPerExchange : (item.grams / 100);
                                             return (
                                                 <tr key={item.id}>
-                                                    <td>{food?.name || "-"}</td>
+                                                    <td>{foodName}</td>
                                                     <td>
                                                         <input
                                                             type="number"
                                                             value={item.grams}
                                                             onChange={(e) => onUpdateMealItem(meal, item.id, e.target.value)}
                                                             disabled={isPresetActive}
-                                                            aria-label={`Grams for ${food?.name || "item"}`}
+                                                            aria-label={`Grams for ${foodName}`}
                                                         />
                                                     </td>
-                                                    <td>{item.day || "-"}</td>
-                                                    <td>{food?.group || "-"}</td>
+                                                    <td>{foodGroup}</td>
                                                     <td>{exchange.toFixed(2)}</td>
                                                     <td className="instructions-cell">{item.instructions || "-"}</td>
                                                     <td>
@@ -123,7 +156,7 @@ function MealBuilder({
                                                                 className="icon-btn"
                                                                 onClick={() => onDuplicateMealItem(meal, item)}
                                                                 disabled={isPresetActive}
-                                                                aria-label={`Duplicate ${food?.name || "item"}`}
+                                                                aria-label={`Duplicate ${foodName}`}
                                                             >
                                                                 <Copy size={14} />
                                                             </button>
@@ -131,7 +164,7 @@ function MealBuilder({
                                                                 className="icon-btn danger"
                                                                 onClick={() => onRemoveMealItem(meal, item.id)}
                                                                 disabled={isPresetActive}
-                                                                aria-label={`Remove ${food?.name || "item"}`}
+                                                                aria-label={`Remove ${foodName}`}
                                                             >
                                                                 <Trash2 size={14} />
                                                             </button>
@@ -140,7 +173,7 @@ function MealBuilder({
                                                 </tr>
                                             );
                                         }) : (
-                                            <tr><td colSpan={7} className="empty-cell">No items yet.</td></tr>
+                                            <tr><td colSpan={6} className="empty-cell">No items for {viewDay}.</td></tr>
                                         )}
                                     </tbody>
                                 </table>
@@ -158,4 +191,3 @@ function MealBuilder({
 }
 
 export default MealBuilder;
-

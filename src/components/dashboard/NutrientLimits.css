@@ -1,0 +1,304 @@
+/* ─── Nutrient Limits Strip ─── */
+.nutrient-limits-strip {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.nutrient-limits-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+}
+
+.nutrient-limits-header:hover {
+    background: #f8fafc;
+}
+
+.nutrient-limits-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+}
+
+.nutrient-limits-toggle {
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+}
+
+.nutrient-limits-toggle:hover {
+    background: #e2e8f0;
+}
+
+.nutrient-limits-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.nutrient-limits-badge.warn {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.nutrient-limits-badge.ok {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+}
+
+/* Body (expanded) */
+.nutrient-limits-body {
+    padding: 0 18px 16px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.nutrient-limits-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.nutrient-limit-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.nutrient-limit-item.exceeded {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.nutrient-limit-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+}
+
+.nutrient-limit-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.nutrient-limit-actual {
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 1px 5px;
+}
+
+.nutrient-limit-actual.ok {
+    color: #059669;
+    background: #ecfdf5;
+}
+
+.nutrient-limit-actual.over {
+    color: #dc2626;
+    background: #fef2f2;
+}
+
+.nutrient-limit-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.nutrient-limit-input {
+    width: 100%;
+    height: 28px;
+    border: 1px solid #dbe2ea;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    background: white;
+    outline: none;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+}
+
+.nutrient-limit-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+}
+
+.nutrient-limit-unit {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+/* Progress bar */
+.nutrient-limit-bar {
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.nutrient-limit-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.nutrient-limit-bar-fill.ok {
+    background: #10b981;
+}
+
+.nutrient-limit-bar-fill.over {
+    background: #ef4444;
+}
+
+/* Warning pills */
+.nutrient-warnings-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.nutrient-warn-pill {
+    font-size: 11px;
+    font-weight: 600;
+    color: #dc2626;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+/* Dark mode */
+body.dark-mode .nutrient-limits-strip {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .nutrient-limits-header:hover {
+    background: #1a2332;
+}
+
+body.dark-mode .nutrient-limits-title {
+    color: #e2e8f0;
+}
+
+body.dark-mode .nutrient-limits-toggle {
+    color: #94a3b8;
+}
+
+body.dark-mode .nutrient-limits-toggle:hover {
+    background: #334155;
+}
+
+body.dark-mode .nutrient-limits-badge.warn {
+    background: #1c1917;
+    border-color: #7f1d1d;
+    color: #f87171;
+}
+
+body.dark-mode .nutrient-limits-badge.ok {
+    background: #064e3b;
+    border-color: #065f46;
+    color: #6ee7b7;
+}
+
+body.dark-mode .nutrient-limits-body {
+    border-top-color: #334155;
+}
+
+body.dark-mode .nutrient-limit-item {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+body.dark-mode .nutrient-limit-item.exceeded {
+    background: #1c1917;
+    border-color: #7f1d1d;
+}
+
+body.dark-mode .nutrient-limit-label {
+    color: #94a3b8;
+}
+
+body.dark-mode .nutrient-limit-actual.ok {
+    color: #6ee7b7;
+    background: #064e3b;
+}
+
+body.dark-mode .nutrient-limit-actual.over {
+    color: #fca5a5;
+    background: #7f1d1d;
+}
+
+body.dark-mode .nutrient-limit-input {
+    background: #1a2332;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+
+body.dark-mode .nutrient-limit-input:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.12);
+}
+
+body.dark-mode .nutrient-limit-bar {
+    background: #334155;
+}
+
+body.dark-mode .nutrient-warnings-inline {
+    border-top-color: #334155;
+}
+
+body.dark-mode .nutrient-warn-pill {
+    color: #fca5a5;
+    background: #1c1917;
+    border-color: #7f1d1d;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .nutrient-limits-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .nutrient-limits-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+

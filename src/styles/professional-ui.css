@@ -85,7 +85,9 @@ body.dark-mode .nav-link.active {
 .profile-page,
 .bmi-calculator-embedded,
 .health-tools-page,
-.food-search-page {
+.food-search-page,
+.weekly-planner-page,
+.progress-page {
     animation: pageEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

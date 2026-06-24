@@ -1,4 +1,4 @@
-import { Activity, Copy, Database, Download, Leaf, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Activity, Copy, Database, Leaf, Plus, Sparkles, Trash2 } from "lucide-react";
 import Section from "../ui/Section";
 import MacroChart from "./MacroChart";
 
@@ -15,7 +15,6 @@ function PlanSidebar({
     onCreatePlan,
     onResetPlan,
     onDeletePlan,
-    onDownloadPlan,
     onDuplicatePreset,
     visibleFatLimit,
     profile,
@@ -125,14 +124,6 @@ function PlanSidebar({
                                             <strong>{summary?.dayScore?.score || 0}</strong>
                                         </button>
                                         <div className="plan-action-btns">
-                                            <button
-                                                className="download-btn tooltip-btn"
-                                                data-tooltip="Save Plan"
-                                                onClick={() => onDownloadPlan(plan.id)}
-                                                aria-label={`Download plan: ${plan.name} as PDF`}
-                                            >
-                                                <Download size={18} />
-                                            </button>
                                             <button
                                                 className="delete-btn tooltip-btn"
                                                 data-tooltip="Delete Plan"

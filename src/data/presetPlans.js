@@ -1,98 +1,121 @@
-function createPlan(name, meals) {
-    return {
-        id: crypto.randomUUID(),
-        name,
-        meals,
-    };
+export const MEALS = ["Early morning", "Breakfast", "Post breakfast snack", "Lunch", "Post lunch snack", "Dinner", "Bed time"];
+export const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+function createWeeklyPlan(name, dayTemplate) {
+    const meals = {};
+    for (const slot of MEALS) {
+        meals[slot] = [];
+        for (const day of DAYS) {
+            for (const item of dayTemplate[slot] || []) {
+                meals[slot].push({
+                    id: crypto.randomUUID(),
+                    foodId: item.foodId,
+                    grams: item.grams,
+                    day,
+                });
+            }
+        }
+    }
+    return { id: crypto.randomUUID(), name, meals };
 }
 
 export const PRESET_PLANS = [
-    createPlan("Balanced office day", {
+    createWeeklyPlan("Balanced office day", {
+        "Early morning": [{ foodId: "banana", grams: 100 }],
         Breakfast: [
-            { id: crypto.randomUUID(), foodId: "banana", grams: 100 },
-            { id: crypto.randomUUID(), foodId: "curd", grams: 150 },
-            { id: crypto.randomUUID(), foodId: "roti", grams: 60 },
+            { foodId: "curd", grams: 150 },
+            { foodId: "roti", grams: 60 },
         ],
+        "Post breakfast snack": [],
         Lunch: [
-            { id: crypto.randomUUID(), foodId: "dal", grams: 150 },
-            { id: crypto.randomUUID(), foodId: "mixedveg", grams: 150 },
-            { id: crypto.randomUUID(), foodId: "roti", grams: 60 },
+            { foodId: "dal", grams: 150 },
+            { foodId: "mixedveg", grams: 150 },
+            { foodId: "roti", grams: 60 },
         ],
+        "Post lunch snack": [{ foodId: "banana", grams: 100 }],
         Dinner: [
-            { id: crypto.randomUUID(), foodId: "rice", grams: 150 },
-            { id: crypto.randomUUID(), foodId: "egg", grams: 50 },
-            { id: crypto.randomUUID(), foodId: "mixedveg", grams: 100 },
+            { foodId: "rice", grams: 150 },
+            { foodId: "egg", grams: 50 },
+            { foodId: "mixedveg", grams: 100 },
         ],
-        Snacks: [{ id: crypto.randomUUID(), foodId: "banana", grams: 100 }],
+        "Bed time": [],
     }),
-    createPlan("Cereal-heavy pattern", {
-        Breakfast: [{ id: crypto.randomUUID(), foodId: "rice", grams: 250 }],
+    createWeeklyPlan("Cereal-heavy pattern", {
+        "Early morning": [],
+        Breakfast: [{ foodId: "rice", grams: 250 }],
+        "Post breakfast snack": [],
         Lunch: [
-            { id: crypto.randomUUID(), foodId: "rice", grams: 300 },
-            { id: crypto.randomUUID(), foodId: "roti", grams: 60 },
+            { foodId: "rice", grams: 300 },
+            { foodId: "roti", grams: 60 },
         ],
+        "Post lunch snack": [{ foodId: "banana", grams: 100 }],
         Dinner: [
-            { id: crypto.randomUUID(), foodId: "rice", grams: 200 },
-            { id: crypto.randomUUID(), foodId: "roti", grams: 60 },
+            { foodId: "rice", grams: 200 },
+            { foodId: "roti", grams: 60 },
         ],
-        Snacks: [{ id: crypto.randomUUID(), foodId: "banana", grams: 100 }],
+        "Bed time": [],
     }),
-    createPlan("High-protein day", {
+    createWeeklyPlan("High-protein day", {
+        "Early morning": [{ foodId: "banana", grams: 100 }],
         Breakfast: [
-            { id: crypto.randomUUID(), foodId: "egg", grams: 100 },
-            { id: crypto.randomUUID(), foodId: "curd", grams: 200 },
-            { id: crypto.randomUUID(), foodId: "banana", grams: 100 },
+            { foodId: "egg", grams: 100 },
+            { foodId: "curd", grams: 200 },
         ],
+        "Post breakfast snack": [],
         Lunch: [
-            { id: crypto.randomUUID(), foodId: "dal", grams: 200 },
-            { id: crypto.randomUUID(), foodId: "roti", grams: 60 },
-            { id: crypto.randomUUID(), foodId: "mixedveg", grams: 100 },
+            { foodId: "dal", grams: 200 },
+            { foodId: "roti", grams: 60 },
+            { foodId: "mixedveg", grams: 100 },
         ],
+        "Post lunch snack": [{ foodId: "curd", grams: 150 }],
         Dinner: [
-            { id: crypto.randomUUID(), foodId: "egg", grams: 100 },
-            { id: crypto.randomUUID(), foodId: "dal", grams: 150 },
-            { id: crypto.randomUUID(), foodId: "rice", grams: 100 },
+            { foodId: "egg", grams: 100 },
+            { foodId: "dal", grams: 150 },
+            { foodId: "rice", grams: 100 },
         ],
-        Snacks: [{ id: crypto.randomUUID(), foodId: "curd", grams: 150 }],
+        "Bed time": [],
     }),
-    createPlan("Light veggie day", {
+    createWeeklyPlan("Light veggie day", {
+        "Early morning": [],
         Breakfast: [
-            { id: crypto.randomUUID(), foodId: "banana", grams: 100 },
-            { id: crypto.randomUUID(), foodId: "curd", grams: 100 },
+            { foodId: "banana", grams: 100 },
+            { foodId: "curd", grams: 100 },
         ],
+        "Post breakfast snack": [],
         Lunch: [
-            { id: crypto.randomUUID(), foodId: "mixedveg", grams: 200 },
-            { id: crypto.randomUUID(), foodId: "roti", grams: 30 },
-            { id: crypto.randomUUID(), foodId: "dal", grams: 100 },
+            { foodId: "mixedveg", grams: 200 },
+            { foodId: "roti", grams: 30 },
+            { foodId: "dal", grams: 100 },
         ],
+        "Post lunch snack": [{ foodId: "banana", grams: 100 }],
         Dinner: [
-            { id: crypto.randomUUID(), foodId: "mixedveg", grams: 200 },
-            { id: crypto.randomUUID(), foodId: "roti", grams: 30 },
+            { foodId: "mixedveg", grams: 200 },
+            { foodId: "roti", grams: 30 },
         ],
-        Snacks: [{ id: crypto.randomUUID(), foodId: "banana", grams: 100 }],
+        "Bed time": [],
     }),
-    createPlan("Dal & roti comfort", {
+    createWeeklyPlan("Dal & roti comfort", {
+        "Early morning": [],
         Breakfast: [
-            { id: crypto.randomUUID(), foodId: "roti", grams: 90 },
-            { id: crypto.randomUUID(), foodId: "curd", grams: 150 },
+            { foodId: "roti", grams: 90 },
+            { foodId: "curd", grams: 150 },
         ],
+        "Post breakfast snack": [],
         Lunch: [
-            { id: crypto.randomUUID(), foodId: "dal", grams: 200 },
-            { id: crypto.randomUUID(), foodId: "roti", grams: 90 },
-            { id: crypto.randomUUID(), foodId: "mixedveg", grams: 100 },
+            { foodId: "dal", grams: 200 },
+            { foodId: "roti", grams: 90 },
+            { foodId: "mixedveg", grams: 100 },
         ],
+        "Post lunch snack": [],
         Dinner: [
-            { id: crypto.randomUUID(), foodId: "dal", grams: 150 },
-            { id: crypto.randomUUID(), foodId: "roti", grams: 60 },
-            { id: crypto.randomUUID(), foodId: "mixedveg", grams: 100 },
+            { foodId: "dal", grams: 150 },
+            { foodId: "roti", grams: 60 },
+            { foodId: "mixedveg", grams: 100 },
         ],
-        Snacks: [
-            { id: crypto.randomUUID(), foodId: "banana", grams: 100 },
-            { id: crypto.randomUUID(), foodId: "curd", grams: 100 },
+        "Bed time": [
+            { foodId: "banana", grams: 100 },
+            { foodId: "curd", grams: 100 },
         ],
     }),
 ];
-
-export const MEALS = ["Breakfast", "Lunch", "Dinner", "Snacks"];
-export const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 

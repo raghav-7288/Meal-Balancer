@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { foodById } from "../engines/nutrientEngine";
-import { MEALS } from "../data/presetPlans";
+import { MEALS, DAYS } from "../data/presetPlans";
 
 /* ─── Color Palette ─── */
 const COLORS = {
@@ -212,12 +212,14 @@ function capitalize(str) {
 
 /**
  * Generate and download a PDF for a given diet plan.
+ * When daySummaries is provided, generates a full weekly plan PDF.
  * @param {object} plan - The plan object with { id, name, meals }
  * @param {object} summary - The computed summary with dayTotals, mealTotals, dayScore
  * @param {object} [userInfo] - User information { fullName, email, age, heightCm, weightKg, bmi, contactNumber }
  * @param {object} [profile] - Local profile { activity, goal, dietType, sex }
+ * @param {object} [daySummaries] - Optional: per-day summaries keyed by day name for weekly format
  */
-export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}) {
+export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, daySummaries = null) {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -247,13 +249,17 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}) {
     doc.setTextColor(...COLORS.dark);
     doc.text(plan.name, pageWidth / 2, 35, { align: "center" });
 
-    // Score badge
-    const score = summary?.dayScore?.score || 0;
-    const band = summary?.dayScore?.band || "";
+    // Subtitle - Weekly Plan
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...COLORS.text);
-    doc.text(`Daily Score: ${score} / 100  \u2022  ${band}`, pageWidth / 2, 43, { align: "center" });
+    if (daySummaries) {
+        doc.text("Weekly Nutrition Plan", pageWidth / 2, 43, { align: "center" });
+    } else {
+        const score = summary?.dayScore?.score || 0;
+        const band = summary?.dayScore?.band || "";
+        doc.text(`Daily Score: ${score} / 100  \u2022  ${band}`, pageWidth / 2, 43, { align: "center" });
+    }
 
     doc.setTextColor(0);
 
@@ -264,106 +270,249 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}) {
         yPos = drawClientInfo(doc, userInfo, profile, yPos, pageWidth);
     }
 
-    // ─── MEAL SECTIONS ───
-    for (const mealName of MEALS) {
-        const items = plan.meals[mealName] || [];
-        if (items.length === 0) continue;
+    // ─── WEEKLY FORMAT ───
+    if (daySummaries) {
+        for (const day of DAYS) {
+            const daySummary = daySummaries[day];
+            const dayScore = daySummary?.dayScore?.score || 0;
+            const dayTotals = daySummary?.dayTotals;
+            const hasFood = dayTotals && (dayTotals.protein || 0) + (dayTotals.carbs || 0) + (dayTotals.fat || 0) > 0;
 
-        // Check if we need a new page (need at least 50px for a table)
-        if (yPos > 240) {
-            doc.addPage();
-            yPos = drawPageHeader(doc, pageWidth);
-        }
+            if (!hasFood) continue;
 
-        // Meal header with colored indicator
-        doc.setFillColor(...COLORS.primary);
-        doc.roundedRect(14, yPos - 4.5, 3, 6, 1, 1, "F");
-        doc.setFontSize(13);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(...COLORS.dark);
-        doc.text(mealName, 20, yPos);
-        doc.setTextColor(0);
-        yPos += 4;
+            // Check page space
+            if (yPos > 220) {
+                doc.addPage();
+                yPos = drawPageHeader(doc, pageWidth);
+            }
 
-        // Build table data
-        const tableBody = items.map((item) => {
-            const food = foodById(item.foodId);
-            const name = food?.name || item.foodId;
-            const grams = item.grams;
-            const factor = food ? grams / food.gramsPerExchange : 0;
-            const kcal = food ? Math.round(food.kcal * factor) : 0;
-            const protein = food ? (food.protein * factor).toFixed(1) : "0";
-            const carbs = food ? (food.carbs * factor).toFixed(1) : "0";
-            const fat = food ? (food.fat * factor).toFixed(1) : "0";
-            const fibre = food ? (food.fibre * factor).toFixed(1) : "0";
-            return [name, `${grams}g`, kcal, protein, carbs, fat, fibre];
-        });
+            // Day header
+            doc.setFillColor(...COLORS.primaryDark);
+            doc.roundedRect(14, yPos - 5, pageWidth - 28, 9, 2, 2, "F");
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(...COLORS.white);
+            doc.text(`${day}`, 18, yPos);
+            doc.text(`Score: ${dayScore}/100`, pageWidth - 18, yPos, { align: "right" });
+            doc.setTextColor(0);
+            yPos += 10;
 
-        // Meal totals row
-        const mealTotals = summary?.mealTotals?.[mealName];
-        if (mealTotals) {
-            tableBody.push([
-                "TOTAL",
-                "",
-                Math.round(mealTotals.kcal),
-                mealTotals.protein.toFixed(1),
-                mealTotals.carbs.toFixed(1),
-                mealTotals.fat.toFixed(1),
-                mealTotals.fibre.toFixed(1),
-            ]);
-        }
+            // Meals for this day
+            for (const mealName of MEALS) {
+                const items = (plan.meals[mealName] || []).filter(
+                    (i) => i.day === day || !i.day
+                );
+                if (items.length === 0) continue;
 
-        autoTable(doc, {
-            startY: yPos,
-            head: [["Food Item", "Qty", "Kcal", "Protein (g)", "Carbs (g)", "Fat (g)", "Fibre (g)"]],
-            body: tableBody,
-            theme: "grid",
-            headStyles: {
-                fillColor: COLORS.headerBg,
-                textColor: COLORS.white,
-                fontSize: 8.5,
-                fontStyle: "bold",
-                cellPadding: 3,
-                halign: "center",
-            },
-            bodyStyles: {
-                fontSize: 8.5,
-                textColor: COLORS.text,
-                cellPadding: 2.5,
-            },
-            columnStyles: {
-                0: { halign: "left", cellWidth: 52 },
-                1: { halign: "center", cellWidth: 18 },
-                2: { halign: "center" },
-                3: { halign: "center" },
-                4: { halign: "center" },
-                5: { halign: "center" },
-                6: { halign: "center" },
-            },
-            styles: {
-                lineColor: COLORS.border,
-                lineWidth: 0.2,
-            },
-            alternateRowStyles: {
-                fillColor: [248, 250, 252],
-            },
-            didParseCell: (data) => {
-                // Bold + highlight the totals row
-                if (data.row.index === tableBody.length - 1 && mealTotals) {
-                    data.cell.styles.fontStyle = "bold";
-                    data.cell.styles.fillColor = COLORS.totalRowBg;
-                    data.cell.styles.textColor = COLORS.primaryDark;
+                // Check if we need a new page
+                if (yPos > 250) {
+                    doc.addPage();
+                    yPos = drawPageHeader(doc, pageWidth);
                 }
-            },
-            margin: { left: 14, right: 14 },
-        });
 
-        yPos = doc.lastAutoTable.finalY + 10;
+                // Meal subheader
+                doc.setFillColor(...COLORS.primary);
+                doc.roundedRect(14, yPos - 3.5, 2.5, 5, 1, 1, "F");
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(...COLORS.dark);
+                doc.text(mealName, 19, yPos);
+                doc.setTextColor(0);
+                yPos += 3;
+
+                // Build table data
+                const tableBody = items.map((item) => {
+                    const food = foodById(item.foodId);
+                    const name = food?.name || item.foodName || item.foodId;
+                    const grams = item.grams;
+                    const instructions = item.instructions || "";
+                    let kcal = 0, protein = "0", carbs = "0", fat = "0";
+
+                    if (item.nutrients) {
+                        const factor = grams / 100;
+                        kcal = Math.round((item.nutrients.kcal || 0) * factor);
+                        protein = ((item.nutrients.protein || 0) * factor).toFixed(1);
+                        carbs = ((item.nutrients.carbs || 0) * factor).toFixed(1);
+                        fat = ((item.nutrients.fat || 0) * factor).toFixed(1);
+                    } else if (food) {
+                        const factor = grams / food.gramsPerExchange;
+                        kcal = Math.round(food.kcal * factor);
+                        protein = (food.protein * factor).toFixed(1);
+                        carbs = (food.carbs * factor).toFixed(1);
+                        fat = (food.fat * factor).toFixed(1);
+                    }
+
+                    return [name, `${grams}g`, instructions, kcal, protein, carbs, fat];
+                });
+
+                autoTable(doc, {
+                    startY: yPos,
+                    head: [["Food Item", "Qty", "Instructions", "Kcal", "Protein (g)", "Carbs (g)", "Fat (g)"]],
+                    body: tableBody,
+                    theme: "grid",
+                    headStyles: {
+                        fillColor: COLORS.headerBg,
+                        textColor: COLORS.white,
+                        fontSize: 7.5,
+                        fontStyle: "bold",
+                        cellPadding: 2,
+                        halign: "center",
+                    },
+                    bodyStyles: {
+                        fontSize: 7.5,
+                        textColor: COLORS.text,
+                        cellPadding: 2,
+                    },
+                    columnStyles: {
+                        0: { halign: "left", cellWidth: 40 },
+                        1: { halign: "center", cellWidth: 14 },
+                        2: { halign: "left", cellWidth: 36 },
+                        3: { halign: "center" },
+                        4: { halign: "center" },
+                        5: { halign: "center" },
+                        6: { halign: "center" },
+                    },
+                    styles: {
+                        lineColor: COLORS.border,
+                        lineWidth: 0.2,
+                    },
+                    alternateRowStyles: {
+                        fillColor: [248, 250, 252],
+                    },
+                    margin: { left: 14, right: 14 },
+                });
+
+                yPos = doc.lastAutoTable.finalY + 5;
+            }
+
+            // Day total summary row
+            if (dayTotals && yPos < 260) {
+                doc.setFontSize(7.5);
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(...COLORS.text);
+                doc.text(
+                    `Day Total: ${Math.round(dayTotals.kcal)} kcal | Protein: ${dayTotals.protein.toFixed(1)}g | Carbs: ${dayTotals.carbs.toFixed(1)}g | Fat: ${dayTotals.fat.toFixed(1)}g | Fibre: ${dayTotals.fibre.toFixed(1)}g`,
+                    14, yPos + 2
+                );
+                doc.setTextColor(0);
+                yPos += 10;
+            }
+
+            yPos += 4;
+        }
+
+    } else {
+        // ─── SINGLE DAY FORMAT (fallback) ───
+        for (const mealName of MEALS) {
+            const items = plan.meals[mealName] || [];
+            if (items.length === 0) continue;
+
+            if (yPos > 240) {
+                doc.addPage();
+                yPos = drawPageHeader(doc, pageWidth);
+            }
+
+            doc.setFillColor(...COLORS.primary);
+            doc.roundedRect(14, yPos - 4.5, 3, 6, 1, 1, "F");
+            doc.setFontSize(13);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(...COLORS.dark);
+            doc.text(mealName, 20, yPos);
+            doc.setTextColor(0);
+            yPos += 4;
+
+            const tableBody = items.map((item) => {
+                const food = foodById(item.foodId);
+                const name = food?.name || item.foodName || item.foodId;
+                const grams = item.grams;
+                const instructions = item.instructions || "";
+                let kcal = 0, protein = "0", carbs = "0", fat = "0", fibre = "0";
+
+                if (item.nutrients) {
+                    const factor = grams / 100;
+                    kcal = Math.round((item.nutrients.kcal || 0) * factor);
+                    protein = ((item.nutrients.protein || 0) * factor).toFixed(1);
+                    carbs = ((item.nutrients.carbs || 0) * factor).toFixed(1);
+                    fat = ((item.nutrients.fat || 0) * factor).toFixed(1);
+                    fibre = ((item.nutrients.fibre || 0) * factor).toFixed(1);
+                } else if (food) {
+                    const factor = grams / food.gramsPerExchange;
+                    kcal = Math.round(food.kcal * factor);
+                    protein = (food.protein * factor).toFixed(1);
+                    carbs = (food.carbs * factor).toFixed(1);
+                    fat = (food.fat * factor).toFixed(1);
+                    fibre = (food.fibre * factor).toFixed(1);
+                }
+
+                return [name, `${grams}g`, instructions, kcal, protein, carbs, fat, fibre];
+            });
+
+            const mealTotals = summary?.mealTotals?.[mealName];
+            if (mealTotals) {
+                tableBody.push([
+                    "TOTAL",
+                    "",
+                    "",
+                    Math.round(mealTotals.kcal),
+                    mealTotals.protein.toFixed(1),
+                    mealTotals.carbs.toFixed(1),
+                    mealTotals.fat.toFixed(1),
+                    mealTotals.fibre.toFixed(1),
+                ]);
+            }
+
+            autoTable(doc, {
+                startY: yPos,
+                head: [["Food Item", "Qty", "Instructions", "Kcal", "Protein (g)", "Carbs (g)", "Fat (g)", "Fibre (g)"]],
+                body: tableBody,
+                theme: "grid",
+                headStyles: {
+                    fillColor: COLORS.headerBg,
+                    textColor: COLORS.white,
+                    fontSize: 8,
+                    fontStyle: "bold",
+                    cellPadding: 3,
+                    halign: "center",
+                },
+                bodyStyles: {
+                    fontSize: 8,
+                    textColor: COLORS.text,
+                    cellPadding: 2.5,
+                },
+                columnStyles: {
+                    0: { halign: "left", cellWidth: 38 },
+                    1: { halign: "center", cellWidth: 15 },
+                    2: { halign: "left", cellWidth: 34 },
+                    3: { halign: "center" },
+                    4: { halign: "center" },
+                    5: { halign: "center" },
+                    6: { halign: "center" },
+                    7: { halign: "center" },
+                },
+                styles: {
+                    lineColor: COLORS.border,
+                    lineWidth: 0.2,
+                },
+                alternateRowStyles: {
+                    fillColor: [248, 250, 252],
+                },
+                didParseCell: (data) => {
+                    if (data.row.index === tableBody.length - 1 && mealTotals) {
+                        data.cell.styles.fontStyle = "bold";
+                        data.cell.styles.fillColor = COLORS.totalRowBg;
+                        data.cell.styles.textColor = COLORS.primaryDark;
+                    }
+                },
+                margin: { left: 14, right: 14 },
+            });
+
+            yPos = doc.lastAutoTable.finalY + 10;
+        }
     }
 
     // ─── DAILY NUTRITION SUMMARY ───
     const dayTotals = summary?.dayTotals;
-    if (dayTotals) {
+    if (dayTotals && !daySummaries) {
         if (yPos > 210) {
             doc.addPage();
             yPos = drawPageHeader(doc, pageWidth);
