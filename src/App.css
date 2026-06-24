@@ -3234,6 +3234,401 @@ body.dark-mode .profile-complete-btn.incomplete {
     color: #374151;
 }
 
+/* ─── Step Tracker ─── */
+.step-tracker-tool {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 28px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.06);
+}
+
+.step-tracker-header {
+    margin-bottom: 28px;
+}
+
+.step-tracker-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    background: #ecfdf5;
+    color: #10b981;
+    margin-bottom: 16px;
+    animation: float 3s ease-in-out infinite;
+}
+
+.step-tracker-header h2 {
+    margin: 0 0 8px;
+    font-size: 28px;
+}
+
+.step-tracker-subtitle {
+    margin: 0;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+/* Progress ring */
+.step-progress-section {
+    margin-bottom: 28px;
+}
+
+.step-progress-ring {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 20px;
+}
+
+.step-ring-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.step-ring-bg {
+    color: #e5e7eb;
+}
+
+.step-ring-fill {
+    color: #10b981;
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.step-progress-ring.complete .step-ring-fill {
+    color: #059669;
+}
+
+.step-ring-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.step-ring-count {
+    font-size: 28px;
+    font-weight: 800;
+    color: #10b981;
+    line-height: 1;
+}
+
+.step-progress-ring.complete .step-ring-count {
+    color: #059669;
+}
+
+.step-ring-label {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.step-stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.step-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.step-stat-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.step-stat-label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+/* Quick add */
+.step-quick-add {
+    margin-bottom: 16px;
+}
+
+.step-quick-add-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 10px;
+}
+
+.step-quick-add-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.step-quick-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    border-radius: 12px;
+    border: 1px solid #d1fae5;
+    background: #ecfdf5;
+    color: #059669;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.step-quick-btn:hover {
+    background: #d1fae5;
+    border-color: #10b981;
+    transform: scale(1.03);
+}
+
+/* Custom input */
+.step-custom-input {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.step-custom-input input {
+    width: 140px;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    font-size: 15px;
+    text-align: center;
+    transition: border-color 0.15s;
+}
+
+.step-custom-input input:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.step-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: 12px;
+    border: none;
+    background: #10b981;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.step-add-btn:hover:not(:disabled) {
+    background: #059669;
+    transform: scale(1.03);
+}
+
+.step-add-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.step-reset-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    background: #f8fafc;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.step-reset-btn:hover:not(:disabled) {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+.step-reset-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Progress bar */
+.step-progress-bar-section {
+    margin-bottom: 24px;
+}
+
+.step-progress-bar-track {
+    height: 10px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.step-progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #059669);
+    border-radius: 999px;
+    transition: width 0.5s ease;
+}
+
+.step-progress-bar-text {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+/* Target setting */
+.step-target-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 20px;
+}
+
+.step-target-section svg {
+    flex-shrink: 0;
+    color: #6b7280;
+}
+
+.step-target-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.step-target-edit input {
+    width: 80px;
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.step-target-edit button {
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.step-edit-target-btn {
+    background: none;
+    border: none;
+    color: #2563eb;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 8px;
+    font-size: 13px;
+    text-decoration: underline;
+}
+
+/* Weekly overview */
+.step-weekly-overview {
+    padding: 20px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    margin-bottom: 16px;
+}
+
+.step-weekly-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.step-weekly-bars {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    align-items: flex-end;
+    height: 80px;
+}
+
+.step-weekly-bar-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+}
+
+.step-weekly-bar-col.today .step-weekly-bar-label {
+    color: #10b981;
+    font-weight: 700;
+}
+
+.step-weekly-bar-track {
+    width: 100%;
+    max-width: 28px;
+    height: 60px;
+    background: #e5e7eb;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+}
+
+.step-weekly-bar-fill {
+    width: 100%;
+    background: #10b981;
+    border-radius: 6px;
+    transition: height 0.3s ease;
+    min-height: 2px;
+}
+
+.step-weekly-bar-fill.met {
+    background: #059669;
+}
+
+.step-weekly-bar-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.step-complete-banner {
+    padding: 14px 20px;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 14px;
+    color: #065f46;
+    font-size: 15px;
+    font-weight: 600;
+    animation: health-tool-fade-in 0.3s ease;
+}
+
 /* ─── Dark Mode: Health Tools ─── */
 body.dark-mode .health-tools-tabs {
     background: #0f172a;
@@ -3342,6 +3737,123 @@ body.dark-mode .water-target-edit input {
 }
 
 body.dark-mode .water-complete-banner {
+    background: #064e3b;
+    border-color: #065f46;
+    color: #6ee7b7;
+}
+
+/* Dark: Step tracker */
+body.dark-mode .step-tracker-tool {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark-mode .step-tracker-icon-wrap {
+    background: #064e3b;
+    color: #34d399;
+}
+
+body.dark-mode .step-tracker-header h2 {
+    color: #f1f5f9;
+}
+
+body.dark-mode .step-tracker-subtitle {
+    color: #94a3b8;
+}
+
+body.dark-mode .step-ring-bg {
+    color: #334155;
+}
+
+body.dark-mode .step-ring-fill {
+    color: #34d399;
+}
+
+body.dark-mode .step-progress-ring.complete .step-ring-fill {
+    color: #10b981;
+}
+
+body.dark-mode .step-ring-count {
+    color: #34d399;
+}
+
+body.dark-mode .step-progress-ring.complete .step-ring-count {
+    color: #10b981;
+}
+
+body.dark-mode .step-ring-label {
+    color: #94a3b8;
+}
+
+body.dark-mode .step-stat-value {
+    color: #f1f5f9;
+}
+
+body.dark-mode .step-stat-label {
+    color: #94a3b8;
+}
+
+body.dark-mode .step-quick-btn {
+    background: #064e3b;
+    border-color: #065f46;
+    color: #34d399;
+}
+
+body.dark-mode .step-quick-btn:hover {
+    background: #065f46;
+    border-color: #10b981;
+}
+
+body.dark-mode .step-custom-input input {
+    background: #0f172a;
+    border-color: #475569;
+    color: #f1f5f9;
+}
+
+body.dark-mode .step-add-btn {
+    background: #059669;
+}
+
+body.dark-mode .step-reset-btn {
+    background: #1a2332;
+    border-color: #334155;
+    color: #94a3b8;
+}
+
+body.dark-mode .step-progress-bar-track {
+    background: #334155;
+}
+
+body.dark-mode .step-target-section {
+    background: #1a2332;
+    border-color: #334155;
+    color: #cbd5e1;
+}
+
+body.dark-mode .step-target-edit input {
+    background: #0f172a;
+    border-color: #475569;
+    color: #f1f5f9;
+}
+
+body.dark-mode .step-weekly-overview {
+    background: #1a2332;
+    border-color: #334155;
+}
+
+body.dark-mode .step-weekly-header {
+    color: #cbd5e1;
+}
+
+body.dark-mode .step-weekly-bar-track {
+    background: #334155;
+}
+
+body.dark-mode .step-weekly-bar-label {
+    color: #94a3b8;
+}
+
+body.dark-mode .step-complete-banner {
     background: #064e3b;
     border-color: #065f46;
     color: #6ee7b7;
@@ -3482,7 +3994,8 @@ body.dark-mode .calorie-info-box p {
     }
 
     .water-tracker-tool,
-    .calorie-calc-tool {
+    .calorie-calc-tool,
+    .step-tracker-tool {
         padding: 24px 18px;
     }
 
