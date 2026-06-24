@@ -16,6 +16,9 @@ dist-ssr
 # Generated context file
 CONTEXT.md
 
+# Personal suggestions / roadmap
+SUGGESTIONS.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
