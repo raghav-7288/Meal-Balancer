@@ -417,6 +417,10 @@ body.dark-mode .profile-details:hover {
         font-size: 15px !important;
     }
 
+    .nav-logo-img {
+        height: 28px !important;
+    }
+
     .welcome-card {
         border-radius: 20px !important;
     }

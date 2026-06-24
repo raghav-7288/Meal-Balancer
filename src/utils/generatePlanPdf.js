@@ -4,6 +4,56 @@ import { foodById } from "../engines/nutrientEngine";
 import { MEALS } from "../data/presetPlans";
 
 /**
+ * Draw the Meal Balancer logo on the PDF at the given position.
+ * Includes: circle icon with utensils + "Meal Balancer" + "by Dt. Bhakti Shrivastava"
+ */
+function drawLogo(doc, x, y) {
+    const circleX = x + 7;
+    const circleY = y + 7;
+    const radius = 7;
+
+    // Dark circle background
+    doc.setFillColor(30, 41, 59);
+    doc.circle(circleX, circleY, radius, "F");
+
+    // Draw utensils icon (simplified fork + knife in white)
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(0.5);
+
+    // Fork prongs
+    doc.line(circleX - 2.5, circleY - 4, circleX - 2.5, circleY - 1);
+    doc.line(circleX - 1, circleY - 4, circleX - 1, circleY - 1);
+    doc.line(circleX + 0.5, circleY - 4, circleX + 0.5, circleY - 1);
+    // Fork handle
+    doc.line(circleX - 1, circleY - 1, circleX - 1, circleY + 4);
+
+    // Knife
+    doc.line(circleX + 2.5, circleY - 4, circleX + 2.5, circleY + 4);
+    doc.line(circleX + 2.5, circleY - 4, circleX + 3.5, circleY - 2);
+    doc.line(circleX + 3.5, circleY - 2, circleX + 2.5, circleY);
+
+    // Reset line color
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.2);
+
+    // "Meal Balancer" text
+    const textX = x + 16;
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(15, 23, 42);
+    doc.text("Meal Balancer", textX, y + 6);
+
+    // "by Dt. Bhakti Shrivastava" subtitle
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 116, 139);
+    doc.text("by Dt. Bhakti Shrivastava", textX, y + 11);
+
+    // Reset text color
+    doc.setTextColor(0);
+}
+
+/**
  * Generate and download a PDF for a given diet plan.
  * @param {object} plan - The plan object with { id, name, meals }
  * @param {object} summary - The computed summary with dayTotals, mealTotals, dayScore
@@ -12,25 +62,36 @@ export function downloadPlanAsPdf(plan, summary) {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
 
+    // Logo at top-left
+    drawLogo(doc, 14, 8);
+
+    // Separator line below logo
+    doc.setDrawColor(229, 231, 235);
+    doc.setLineWidth(0.3);
+    doc.line(14, 24, pageWidth - 14, 24);
+    doc.setDrawColor(0);
+
     // Title
     doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
-    doc.text(plan.name, pageWidth / 2, 20, { align: "center" });
+    doc.setTextColor(15, 23, 42);
+    doc.text(plan.name, pageWidth / 2, 36, { align: "center" });
 
     // Score badge
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
+    doc.setTextColor(71, 85, 105);
     const score = summary?.dayScore?.score || 0;
     const band = summary?.dayScore?.band || "";
-    doc.text(`Daily Score: ${score} (${band})`, pageWidth / 2, 30, { align: "center" });
+    doc.text(`Daily Score: ${score} (${band})`, pageWidth / 2, 44, { align: "center" });
 
     // Date
     doc.setFontSize(9);
-    doc.setTextColor(100);
-    doc.text(`Generated on ${new Date().toLocaleDateString()}`, pageWidth / 2, 36, { align: "center" });
+    doc.setTextColor(148, 163, 184);
+    doc.text(`Generated on ${new Date().toLocaleDateString()}`, pageWidth / 2, 50, { align: "center" });
     doc.setTextColor(0);
 
-    let yPos = 44;
+    let yPos = 58;
 
     // Each meal section
     for (const mealName of MEALS) {
@@ -40,7 +101,9 @@ export function downloadPlanAsPdf(plan, summary) {
         // Meal header
         doc.setFontSize(14);
         doc.setFont("helvetica", "bold");
+        doc.setTextColor(15, 23, 42);
         doc.text(mealName, 14, yPos);
+        doc.setTextColor(0);
         yPos += 2;
 
         // Build table data
@@ -108,7 +171,9 @@ export function downloadPlanAsPdf(plan, summary) {
 
         doc.setFontSize(14);
         doc.setFont("helvetica", "bold");
+        doc.setTextColor(15, 23, 42);
         doc.text("Daily Nutrition Summary", 14, yPos);
+        doc.setTextColor(0);
         yPos += 2;
 
         autoTable(doc, {
@@ -132,17 +197,16 @@ export function downloadPlanAsPdf(plan, summary) {
         });
     }
 
-    // Add watermark to all pages (bottom-most layer, top-right, subtle shadow)
+    // Add logo to all pages (top-left on every page)
     const totalPages = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= totalPages; i++) {
+    for (let i = 2; i <= totalPages; i++) {
         doc.setPage(i);
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "italic");
-        doc.setTextColor(210, 210, 210);
-        doc.text("Meal Balancer by Dt. Bhakti Shrivastava", pageWidth - 14, 12, {
-            align: "right",
-        });
-        doc.setTextColor(0);
+        drawLogo(doc, 14, 6);
+        // Separator line
+        doc.setDrawColor(229, 231, 235);
+        doc.setLineWidth(0.3);
+        doc.line(14, 20, pageWidth - 14, 20);
+        doc.setDrawColor(0);
     }
 
     // Save

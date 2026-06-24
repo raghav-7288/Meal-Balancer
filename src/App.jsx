@@ -10,7 +10,6 @@ import {
     Moon,
     Sun,
     User,
-    UtensilsCrossed,
 } from "lucide-react";
 import AuthPage from "./components/AuthPage";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
@@ -88,11 +87,11 @@ function AppShell() {
         <div className="app-shell">
             <nav className="top-nav" role="navigation" aria-label="Main navigation">
                 <div className="nav-brand">
-                    <UtensilsCrossed size={20} />
-                    <div className="nav-brand-text">
-                        <span>Meal Balancer</span>
-                        <small>by Dt. Bhakti Shrivastava</small>
-                    </div>
+                    <img
+                        src={darkMode ? "/logo-dark.svg" : "/logo.svg"}
+                        alt="Meal Balancer by Dt. Bhakti Shrivastava"
+                        className="nav-logo-img"
+                    />
                 </div>
                 <div className="nav-links">
                     <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>

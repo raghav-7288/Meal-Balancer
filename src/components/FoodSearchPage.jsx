@@ -272,7 +272,7 @@ function FoodSearchPage() {
                 </div>
                 <div className="food-source-note">
                     <Info size={14} />
-                    <span>Nutrient values are per 100g of food, based on ICMR–NIN data.</span>
+                    <span>Nutrient values are per 100g of food, based on IFCT 2017 data.</span>
                 </div>
             </div>
 

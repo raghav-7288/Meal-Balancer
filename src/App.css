@@ -42,6 +42,12 @@ select {
     color: #0f172a;
 }
 
+.nav-logo-img {
+    height: 38px;
+    width: auto;
+    display: block;
+}
+
 .nav-brand-text {
     display: flex;
     flex-direction: column;
@@ -1480,6 +1486,10 @@ body.dark-mode .modal-input {
 
     .nav-brand-text span {
         font-size: 15px;
+    }
+
+    .nav-logo-img {
+        height: 32px;
     }
 
     .nav-link span {
