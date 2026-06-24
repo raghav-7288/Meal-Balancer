@@ -18,39 +18,117 @@ function getBmiCategory(bmi) {
     return BMI_CATEGORIES[3];
 }
 
+// Conversion helpers
+const CM_PER_INCH = 2.54;
+const LBS_PER_KG = 2.20462;
+
+function cmToFtIn(cm) {
+    const totalInches = cm / CM_PER_INCH;
+    const ft = Math.floor(totalInches / 12);
+    const inches = Math.round(totalInches % 12);
+    return { ft, inches };
+}
+
+function ftInToCm(ft, inches) {
+    return ((parseFloat(ft) || 0) * 12 + (parseFloat(inches) || 0)) * CM_PER_INCH;
+}
+
+function kgToLbs(kg) {
+    return (kg * LBS_PER_KG).toFixed(1);
+}
+
+function lbsToKg(lbs) {
+    return parseFloat(lbs) / LBS_PER_KG;
+}
+
 function BmiCalculatorPage() {
     const navigate = useNavigate();
     const { profile, setProfile } = useProfile();
     const { profile: dbProfile, updateProfile: updateDbProfile } = useAuth();
     const [saving, setSaving] = useState(false);
+    const [unit, setUnit] = useState("metric"); // "metric" | "us"
 
-    const [height, setHeight] = useState(
+    // Internal state always stored in metric (cm / kg)
+    const [heightCm, setHeightCm] = useState(
         dbProfile?.height_cm ? String(dbProfile.height_cm) : (profile.height || "")
     );
-    const [weight, setWeight] = useState(
+    const [weightKg, setWeightKgState] = useState(
         dbProfile?.weight_kg ? String(dbProfile.weight_kg) : (profile.weight || "")
     );
 
-    const heightM = height ? parseFloat(height) / 100 : 0;
-    const weightKg = weight ? parseFloat(weight) : 0;
-    const bmi = heightM > 0 && weightKg > 0
-        ? (weightKg / (heightM * heightM)).toFixed(1)
-        : null;
+    // US-unit local display state
+    const initFtIn = heightCm ? cmToFtIn(parseFloat(heightCm)) : { ft: "", inches: "" };
+    const [ft, setFt] = useState(initFtIn.ft || "");
+    const [inches, setInches] = useState(initFtIn.inches || "");
+    const [lbs, setLbs] = useState(
+        weightKg ? kgToLbs(parseFloat(weightKg)) : ""
+    );
+
+    // Derived metric values for BMI calculation
+    const heightM = heightCm ? parseFloat(heightCm) / 100 : 0;
+    const weightKgNum = weightKg ? parseFloat(weightKg) : 0;
+    const bmi =
+        heightM > 0 && weightKgNum > 0
+            ? (weightKgNum / (heightM * heightM)).toFixed(1)
+            : null;
     const category = bmi ? getBmiCategory(parseFloat(bmi)) : null;
 
     // Ideal weight range for normal BMI (18.5–24.9)
     const idealWeightMin = heightM > 0 ? (18.5 * heightM * heightM).toFixed(1) : null;
     const idealWeightMax = heightM > 0 ? (24.9 * heightM * heightM).toFixed(1) : null;
 
+    // --- Handlers for metric inputs ---
+    function handleHeightCmChange(e) {
+        const val = e.target.value;
+        setHeightCm(val);
+        // Sync US fields
+        if (val) {
+            const { ft: f, inches: i } = cmToFtIn(parseFloat(val));
+            setFt(f);
+            setInches(i);
+        } else {
+            setFt("");
+            setInches("");
+        }
+    }
+
+    function handleWeightKgChange(e) {
+        const val = e.target.value;
+        setWeightKgState(val);
+        setLbs(val ? kgToLbs(parseFloat(val)) : "");
+    }
+
+    // --- Handlers for US inputs ---
+    function handleFtChange(e) {
+        const val = e.target.value;
+        setFt(val);
+        setHeightCm(String(ftInToCm(val, inches).toFixed(1)));
+    }
+
+    function handleInchesChange(e) {
+        const val = e.target.value;
+        setInches(val);
+        setHeightCm(String(ftInToCm(ft, val).toFixed(1)));
+    }
+
+    function handleLbsChange(e) {
+        const val = e.target.value;
+        setLbs(val);
+        setWeightKgState(val ? lbsToKg(val).toFixed(1) : "");
+    }
+
+    // Toggle handler – just switches the view; data stays synced
+    function handleToggle(newUnit) {
+        setUnit(newUnit);
+    }
+
     async function handleSaveAndContinue() {
         try {
             setSaving(true);
-            // Save to local profile context
-            setProfile({ ...profile, height, weight });
-            // Save to Supabase DB
+            setProfile({ ...profile, height: heightCm, weight: weightKg });
             await updateDbProfile({
-                height_cm: parseFloat(height) || null,
-                weight_kg: parseFloat(weight) || null,
+                height_cm: parseFloat(heightCm) || null,
+                weight_kg: parseFloat(weightKg) || null,
                 current_bmi: bmi ? parseFloat(bmi) : null,
             });
         } catch (err) {
@@ -60,6 +138,16 @@ function BmiCalculatorPage() {
             navigate("/dashboard");
         }
     }
+
+    // Display strings for info box
+    const heightDisplay =
+        unit === "metric"
+            ? `${heightCm} cm`
+            : `${ft}′${inches}″`;
+    const weightRangeDisplay =
+        unit === "metric"
+            ? `${idealWeightMin} – ${idealWeightMax} kg`
+            : `${kgToLbs(parseFloat(idealWeightMin))} – ${kgToLbs(parseFloat(idealWeightMax))} lbs`;
 
     return (
         <div className="bmi-calculator-page">
@@ -74,32 +162,89 @@ function BmiCalculatorPage() {
                     </p>
                 </div>
 
-                <div className="bmi-calc-inputs">
-                    <div className="bmi-input-group">
-                        <label htmlFor="bmi-height">Height (cm)</label>
-                        <input
-                            id="bmi-height"
-                            type="number"
-                            placeholder="e.g. 165"
-                            value={height}
-                            onChange={(e) => setHeight(e.target.value)}
-                            min="50"
-                            max="300"
-                        />
-                    </div>
-                    <div className="bmi-input-group">
-                        <label htmlFor="bmi-weight">Weight (kg)</label>
-                        <input
-                            id="bmi-weight"
-                            type="number"
-                            placeholder="e.g. 60"
-                            value={weight}
-                            onChange={(e) => setWeight(e.target.value)}
-                            min="10"
-                            max="500"
-                        />
-                    </div>
+                {/* ── Unit Toggle ── */}
+                <div className="bmi-unit-toggle">
+                    <button
+                        className={`bmi-unit-btn ${unit === "metric" ? "active" : ""}`}
+                        onClick={() => handleToggle("metric")}
+                    >
+                        Metric
+                    </button>
+                    <button
+                        className={`bmi-unit-btn ${unit === "us" ? "active" : ""}`}
+                        onClick={() => handleToggle("us")}
+                    >
+                        US Units
+                    </button>
                 </div>
+
+                {unit === "metric" ? (
+                    <div className="bmi-calc-inputs">
+                        <div className="bmi-input-group">
+                            <label htmlFor="bmi-height">Height (cm)</label>
+                            <input
+                                id="bmi-height"
+                                type="number"
+                                placeholder="e.g. 165"
+                                value={heightCm}
+                                onChange={handleHeightCmChange}
+                                min="50"
+                                max="300"
+                            />
+                        </div>
+                        <div className="bmi-input-group">
+                            <label htmlFor="bmi-weight">Weight (kg)</label>
+                            <input
+                                id="bmi-weight"
+                                type="number"
+                                placeholder="e.g. 60"
+                                value={weightKg}
+                                onChange={handleWeightKgChange}
+                                min="10"
+                                max="500"
+                            />
+                        </div>
+                    </div>
+                ) : (
+                    <div className="bmi-calc-inputs bmi-calc-inputs--us">
+                        <div className="bmi-input-group">
+                            <label htmlFor="bmi-ft">Height (ft)</label>
+                            <input
+                                id="bmi-ft"
+                                type="number"
+                                placeholder="e.g. 5"
+                                value={ft}
+                                onChange={handleFtChange}
+                                min="1"
+                                max="8"
+                            />
+                        </div>
+                        <div className="bmi-input-group">
+                            <label htmlFor="bmi-in">Height (in)</label>
+                            <input
+                                id="bmi-in"
+                                type="number"
+                                placeholder="e.g. 5"
+                                value={inches}
+                                onChange={handleInchesChange}
+                                min="0"
+                                max="11"
+                            />
+                        </div>
+                        <div className="bmi-input-group bmi-input-weight-us">
+                            <label htmlFor="bmi-lbs">Weight (lbs)</label>
+                            <input
+                                id="bmi-lbs"
+                                type="number"
+                                placeholder="e.g. 132"
+                                value={lbs}
+                                onChange={handleLbsChange}
+                                min="20"
+                                max="1100"
+                            />
+                        </div>
+                    </div>
+                )}
 
                 {bmi && (
                     <div className="bmi-result-section">
@@ -129,8 +274,8 @@ function BmiCalculatorPage() {
                             <div className="bmi-info-box">
                                 <Info size={16} />
                                 <p>
-                                    For your height ({height} cm), a healthy weight range is{" "}
-                                    <strong>{idealWeightMin} – {idealWeightMax} kg</strong>.
+                                    For your height ({heightDisplay}), a healthy weight range is{" "}
+                                    <strong>{weightRangeDisplay}</strong>.
                                 </p>
                             </div>
                         )}
