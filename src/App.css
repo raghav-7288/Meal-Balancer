@@ -182,11 +182,21 @@ body.dark-mode .nav-theme-toggle::after {
     background: #f0fdf4;
     color: #059669;
     margin-bottom: 20px;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
 }
 
 .welcome-card h1 {
     margin: 0 0 8px;
     font-size: 32px;
+    background: linear-gradient(135deg, #0f172a, #1e40af);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .welcome-subtitle {
@@ -351,6 +361,8 @@ body.dark-mode .nav-theme-toggle::after {
 .section-title h2 {
     margin: 0;
     font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
 }
 
 .kpi-grid {
@@ -368,6 +380,27 @@ body.dark-mode .nav-theme-toggle::after {
     padding: 18px;
     min-height: 120px;
     box-shadow: 0 10px 35px rgba(15, 23, 42, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi::before,
+.stat-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+    border-radius: 4px 0 0 4px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.kpi:hover::before,
+.stat-card:hover::before {
+    opacity: 1;
 }
 
 .stat-card.editable {
@@ -1251,6 +1284,10 @@ body.dark-mode .modal-input {
 .auth-title {
     margin: 0 0 4px;
     font-size: 28px;
+    background: linear-gradient(135deg, #0f172a, #1e40af);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .auth-subtitle {
@@ -1441,7 +1478,11 @@ body.dark-mode .modal-input {
         font-size: 24px;
     }
 
-    .nav-brand span {
+    .nav-brand-text span {
+        font-size: 15px;
+    }
+
+    .nav-link span {
         display: none;
     }
 
@@ -1749,6 +1790,13 @@ body.dark-mode .welcome-highlight-item p {
     color: #94a3b8;
 }
 
+body.dark-mode .welcome-card h1 {
+    background: linear-gradient(135deg, #f1f5f9, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
 body.dark-mode .auth-page {
     background: #0f1219;
 }
@@ -1859,6 +1907,7 @@ body.dark-mode .plan-action-btns .download-btn {
     background: #eff6ff;
     color: #2563eb;
     margin-bottom: 16px;
+    animation: float 3s ease-in-out infinite;
 }
 
 .bmi-calc-header h1 {

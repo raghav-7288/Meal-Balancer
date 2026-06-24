@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { LogIn, UserPlus, Loader2 } from "lucide-react";
+import { LogIn, UserPlus, Loader2, UtensilsCrossed } from "lucide-react";
 
 function AuthPage() {
     const [mode, setMode] = useState("signin"); // "signin" | "signup"
@@ -8,8 +8,22 @@ function AuthPage() {
     return (
         <div className="auth-page">
             <div className="auth-card">
-                <h1 className="auth-title">Meal Balancer</h1>
-                <p className="auth-subtitle">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+                    <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '56px',
+                        height: '56px',
+                        borderRadius: '16px',
+                        background: '#f0fdf4',
+                        color: '#059669'
+                    }}>
+                        <UtensilsCrossed size={28} />
+                    </div>
+                </div>
+                <h1 className="auth-title" style={{ textAlign: 'center' }}>Meal Balancer</h1>
+                <p className="auth-subtitle" style={{ textAlign: 'center' }}>
                     {mode === "signin"
                         ? "Sign in to your account"
                         : "Create a new account"}
