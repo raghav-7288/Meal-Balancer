@@ -49,7 +49,7 @@ function MealBuilder({
 
     const handleAdd = (meal) => {
         const f = slotForms[meal];
-        if (!f.foodName || !f.grams || Number(f.grams) <= 0) return;
+        if (!f.foodName || !f.foodId || !f.grams || Number(f.grams) <= 0) return;
         onAddFood(meal, f.foodId, f.foodName, f.grams, f.instructions, f.foodGroupId);
         resetSlotForm(meal);
     };

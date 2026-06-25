@@ -11,7 +11,8 @@ function readLocal() {
     try {
         const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
         return stored ? JSON.parse(stored) : [];
-    } catch {
+    } catch (err) {
+        console.error("Failed to read plans from localStorage:", err);
         return [];
     }
 }

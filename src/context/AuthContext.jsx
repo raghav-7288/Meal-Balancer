@@ -67,7 +67,7 @@ export function AuthProvider({ children }) {
 
         return () => {
             clearTimeout(timeout);
-            subscription.unsubscribe();
+            subscription?.unsubscribe?.();
         };
     }, []);
 

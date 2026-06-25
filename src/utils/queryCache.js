@@ -5,6 +5,30 @@
 const cache = new Map();
 
 const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_SIZE = 100; // Evict oldest entries if cache grows beyond this
+
+/**
+ * Evict expired entries and, if still over limit, remove the oldest.
+ */
+function evictIfNeeded() {
+    if (cache.size <= MAX_CACHE_SIZE) return;
+
+    const now = Date.now();
+    // First pass: remove expired entries
+    for (const [key, entry] of cache) {
+        if (now - entry.timestamp >= DEFAULT_TTL) {
+            cache.delete(key);
+        }
+    }
+    // Second pass: if still over limit, remove oldest entries
+    if (cache.size > MAX_CACHE_SIZE) {
+        const sorted = [...cache.entries()].sort((a, b) => a[1].timestamp - b[1].timestamp);
+        const toRemove = sorted.slice(0, cache.size - MAX_CACHE_SIZE);
+        for (const [key] of toRemove) {
+            cache.delete(key);
+        }
+    }
+}
 
 /**
  * Get a cached value or fetch it.
@@ -23,6 +47,7 @@ export async function cachedFetch(key, fetcher, ttl = DEFAULT_TTL) {
 
     const data = await fetcher();
     cache.set(key, { data, timestamp: now });
+    evictIfNeeded();
     return data;
 }
 

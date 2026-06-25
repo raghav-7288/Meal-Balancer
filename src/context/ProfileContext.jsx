@@ -18,7 +18,8 @@ export function ProfileProvider({ children }) {
         try {
             const stored = localStorage.getItem("meal-balancer-profile");
             return stored ? JSON.parse(stored) : DEFAULT_PROFILE;
-        } catch {
+        } catch (err) {
+            console.error("Failed to parse stored profile:", err);
             return DEFAULT_PROFILE;
         }
     });
