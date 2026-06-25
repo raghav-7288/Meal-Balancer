@@ -479,9 +479,6 @@ body.dark-mode .welcome-page {
     background: linear-gradient(180deg, #f4f7fb 0%, #e8ecf4 100%) !important;
 }
 
-body.dark-mode .auth-page {
-    background: linear-gradient(180deg, #0f1219 0%, #0f172a 100%) !important;
-}
 
 /* ─── Badge/Pill Improvements ─── */
 .goal-tag {

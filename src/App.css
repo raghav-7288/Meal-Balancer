@@ -2042,35 +2042,35 @@ body.dark-mode .nav-link.active {
 }
 
 body.dark-mode .section {
-    background: #1e293b;
-    border-color: #334155;
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2) !important;
 }
 
 body.dark-mode .kpi,
 body.dark-mode .stat-card {
-    background: #1e293b;
-    border-color: #334155;
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2) !important;
 }
 
 body.dark-mode .meal-card {
-    background: #1a2332;
-    border-color: #334155;
+    background: #1a2332 !important;
+    border-color: #334155 !important;
 }
 
 body.dark-mode .table-wrap {
-    background: #1e293b;
-    border-color: #334155;
+    background: #1e293b !important;
+    border-color: #334155 !important;
 }
 
 body.dark-mode th {
-    background: #1a2332;
-    color: #94a3b8;
+    background: #1a2332 !important;
+    color: #94a3b8 !important;
 }
 
 body.dark-mode td {
-    border-bottom-color: #334155;
+    border-bottom-color: #334155 !important;
 }
 
 body.dark-mode .field input,
@@ -2078,324 +2078,324 @@ body.dark-mode .field select,
 body.dark-mode .builder-row input,
 body.dark-mode .builder-row select,
 body.dark-mode .meal-card input {
-    background: #1a2332;
-    border-color: #475569;
-    color: #e2e8f0;
+    background: #1a2332 !important;
+    border-color: #475569 !important;
+    color: #e2e8f0 !important;
 }
 
 body.dark-mode .field input:focus,
 body.dark-mode .field select:focus,
 body.dark-mode .builder-row input:focus,
 body.dark-mode .builder-row select:focus {
-    border-color: #64748b;
-    box-shadow: 0 0 0 4px rgba(100, 116, 139, 0.2);
+    border-color: #64748b !important;
+    box-shadow: 0 0 0 4px rgba(100, 116, 139, 0.2) !important;
 }
 
 body.dark-mode .plan-row {
-    background: #1a2332;
-    border-color: #334155;
-    color: #e2e8f0;
+    background: #1a2332 !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
 }
 
 body.dark-mode .plan-row.active {
-    background: #f1f5f9;
-    color: #0f172a;
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
 }
 
 body.dark-mode .plan-toggle {
-    border-color: #334155;
+    border-color: #334155 !important;
 }
 
 body.dark-mode .plan-toggle .toggle-btn {
-    background: #1a2332;
-    color: #94a3b8;
+    background: #1a2332 !important;
+    color: #94a3b8 !important;
 }
 
 body.dark-mode .plan-toggle .toggle-btn.active {
-    background: #f1f5f9;
-    color: #0f172a;
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
 }
 
 body.dark-mode .plan-toggle .toggle-btn:hover:not(.active) {
-    background: #334155;
+    background: #334155 !important;
 }
 
 body.dark-mode .score-pill {
-    background: #1a2332;
-    border-color: #334155;
+    background: #1a2332 !important;
+    border-color: #334155 !important;
 }
 
 body.dark-mode .nutrient-row {
-    background: #1a2332;
-    border-color: #334155;
+    background: #1a2332 !important;
+    border-color: #334155 !important;
 }
 
 body.dark-mode .bar {
-    background: #334155;
+    background: #334155 !important;
 }
 
 body.dark-mode .bar-fill {
-    background: #60a5fa;
+    background: #60a5fa !important;
 }
 
 body.dark-mode .compare-card {
-    background: #1a2332;
-    border-color: #334155;
+    background: #1a2332 !important;
+    border-color: #334155 !important;
 }
 
 body.dark-mode .compare-card.best {
-    background: #064e3b;
-    border-color: #065f46;
+    background: #064e3b !important;
+    border-color: #065f46 !important;
 }
 
 body.dark-mode .macro-center-value {
-    color: #f1f5f9;
+    color: #f1f5f9 !important;
 }
 
 body.dark-mode .macro-center-unit {
-    color: #94a3b8;
+    color: #94a3b8 !important;
 }
 
 body.dark-mode .macro-legend-name {
-    color: #cbd5e1;
+    color: #cbd5e1 !important;
 }
 
 body.dark-mode .macro-legend-pct {
-    color: #f1f5f9;
+    color: #f1f5f9 !important;
 }
 
 /* Recharts dark mode text override */
 body.dark-mode .recharts-text {
-    fill: #94a3b8;
+    fill: #94a3b8 !important;
 }
 
 body.dark-mode .recharts-polar-grid-concentric circle,
 body.dark-mode .recharts-polar-grid line {
-    stroke: #334155;
+    stroke: #334155 !important;
 }
 
 body.dark-mode .recharts-cartesian-axis-line,
 body.dark-mode .recharts-cartesian-grid line {
-    stroke: #334155;
+    stroke: #334155 !important;
 }
 
 body.dark-mode .recharts-tooltip-wrapper .recharts-default-tooltip {
     background: #1e293b !important;
     border-color: #334155 !important;
-    color: #e2e8f0;
+    color: #e2e8f0 !important;
 }
 
 body.dark-mode .recommendation {
-    background: #1a2332;
-    border-color: #334155;
+    background: #1a2332 !important;
+    border-color: #334155 !important;
 }
 
 body.dark-mode .reason-box {
-    background: #2d1b00;
-    border-color: #78350f;
-    color: #fbbf24;
+    background: #2d1b00 !important;
+    border-color: #78350f !important;
+    color: #fbbf24 !important;
 }
 
 body.dark-mode .reason-box ul {
-    color: #fbbf24;
+    color: #fbbf24 !important;
 }
 
 body.dark-mode .fat-box {
-    background: #1a2332;
-    border-color: #334155;
+    background: #1a2332 !important;
+    border-color: #334155 !important;
 }
 
 body.dark-mode .goal-tag {
-    background: #064e3b;
-    border-color: #065f46;
-    color: #6ee7b7;
+    background: #064e3b !important;
+    border-color: #065f46 !important;
+    color: #6ee7b7 !important;
 }
 
 body.dark-mode .small-copy {
-    color: #94a3b8;
+    color: #94a3b8 !important;
 }
 
 body.dark-mode .kpi-label,
 body.dark-mode .kpi-hint {
-    color: #94a3b8;
+    color: #94a3b8 !important;
 }
 
 body.dark-mode .welcome-card {
-    background: #1e293b;
-    border-color: #334155;
+    background: #1e293b !important;
+    border-color: #334155 !important;
 }
 
 body.dark-mode .welcome-highlight-item {
-    background: #1a2332;
-    border-color: #334155;
+    background: #1a2332 !important;
+    border-color: #334155 !important;
 }
 
 body.dark-mode .welcome-highlight-item svg {
-    color: #e2e8f0;
+    color: #e2e8f0 !important;
 }
 
 body.dark-mode .welcome-subtitle,
 body.dark-mode .welcome-desc,
 body.dark-mode .welcome-highlight-item p {
-    color: #94a3b8;
+    color: #94a3b8 !important;
 }
 
 body.dark-mode .welcome-card h1 {
-    background: linear-gradient(135deg, #f1f5f9, #60a5fa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    background: linear-gradient(135deg, #f1f5f9, #60a5fa) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
 }
 
 body.dark-mode .auth-page {
-    background: #0f1219;
+    background: linear-gradient(180deg, #0f1219 0%, #0f172a 100%) !important;
 }
 
 body.dark-mode .auth-loading-screen {
-    background: #0f1219;
+    background: #0f1219 !important;
     color: #94a3b8;
 }
 
 body.dark-mode .auth-loading-spinner {
-    border-color: #334155;
-    border-top-color: #60a5fa;
+    border-color: #334155 !important;
+    border-top-color: #60a5fa !important;
 }
 
 body.dark-mode .auth-card {
-    background: #1a2332;
-    border-color: #334155;
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.3);
+    background: #1a2332 !important;
+    border-color: #334155 !important;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.3) !important;
 }
 
 body.dark-mode .auth-title {
-    background: linear-gradient(135deg, #e2e8f0, #60a5fa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    background: linear-gradient(135deg, #e2e8f0, #60a5fa) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
 }
 
 body.dark-mode .auth-subtitle {
-    color: #94a3b8;
+    color: #94a3b8 !important;
 }
 
 body.dark-mode .auth-field span {
-    color: #94a3b8;
+    color: #94a3b8 !important;
 }
 
 body.dark-mode .auth-field input {
-    background: #0f172a;
-    border-color: #334155;
-    color: #e2e8f0;
+    background: #0f172a !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
 }
 
 body.dark-mode .auth-field input:focus {
-    border-color: #60a5fa;
-    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15);
+    border-color: #60a5fa !important;
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15) !important;
 }
 
 body.dark-mode .auth-field input::placeholder {
-    color: #64748b;
+    color: #64748b !important;
 }
 
 body.dark-mode .auth-btn {
-    background: #3b82f6;
-    color: #ffffff;
+    background: #3b82f6 !important;
+    color: #ffffff !important;
 }
 
 body.dark-mode .auth-btn:hover {
-    background: #2563eb;
+    background: #2563eb !important;
 }
 
 body.dark-mode .auth-error {
-    background: #1c1917;
-    border-color: #7f1d1d;
-    color: #fca5a5;
+    background: #1c1917 !important;
+    border-color: #7f1d1d !important;
+    color: #fca5a5 !important;
 }
 
 body.dark-mode .auth-success {
-    background: #022c22;
-    border-color: #065f46;
-    color: #6ee7b7;
+    background: #022c22 !important;
+    border-color: #065f46 !important;
+    color: #6ee7b7 !important;
 }
 
 body.dark-mode .auth-switch {
-    color: #94a3b8;
+    color: #94a3b8 !important;
 }
 
 body.dark-mode .link-btn {
-    color: #60a5fa;
+    color: #60a5fa !important;
 }
 
 body.dark-mode .profile-details {
-    background: #1a2332;
-    border-color: #334155;
+    background: #1a2332 !important;
+    border-color: #334155 !important;
 }
 
 body.dark-mode .profile-label {
-    color: #94a3b8;
+    color: #94a3b8 !important;
 }
 
 body.dark-mode .check-chip {
-    background: #1a2332;
-    border-color: #334155;
+    background: #1a2332 !important;
+    border-color: #334155 !important;
 }
 
 body.dark-mode .plan-name-input {
-    background: #1a2332;
-    border-color: #475569;
-    color: #e2e8f0;
+    background: #1a2332 !important;
+    border-color: #475569 !important;
+    color: #e2e8f0 !important;
 }
 
 body.dark-mode .dark-mode-toggle {
-    background: #1a2332;
-    border-color: #334155;
+    background: #1a2332 !important;
+    border-color: #334155 !important;
 }
 
 body.dark-mode .dark-mode-toggle span {
-    color: #e2e8f0;
+    color: #e2e8f0 !important;
 }
 
 body.dark-mode .icon-btn {
-    background: #334155;
-    color: #e2e8f0;
+    background: #334155 !important;
+    color: #e2e8f0 !important;
 }
 
 body.dark-mode .icon-btn.danger {
-    background: #450a0a;
-    color: #fca5a5;
+    background: #450a0a !important;
+    color: #fca5a5 !important;
 }
 
 body.dark-mode button.secondary {
-    background: #334155;
-    color: #e2e8f0;
+    background: #334155 !important;
+    color: #e2e8f0 !important;
 }
 
 body.dark-mode .stat-input {
-    color: #e2e8f0;
-    border-bottom-color: #475569;
+    color: #e2e8f0 !important;
+    border-bottom-color: #475569 !important;
 }
 
 body.dark-mode .stat-unit {
-    color: #94a3b8;
+    color: #94a3b8 !important;
 }
 
 body.dark-mode .plan-row-wrapper .copy-btn {
-    background: #1a2332;
-    border-color: #334155;
-    color: #60a5fa;
+    background: #1a2332 !important;
+    border-color: #334155 !important;
+    color: #60a5fa !important;
 }
 
 body.dark-mode .plan-row-wrapper .delete-btn,
 body.dark-mode .plan-action-btns .delete-btn {
-    background: #dc2626;
-    border-color: #334155;
-    color: #fff;
+    background: #dc2626 !important;
+    border-color: #334155 !important;
+    color: #fff !important;
 }
 
 body.dark-mode .plan-action-btns .download-btn {
-    background: #16a34a;
-    border-color: #334155;
-    color: #fff;
+    background: #16a34a !important;
+    border-color: #334155 !important;
+    color: #fff !important;
 }
 
 /* ─── BMI Calculator Page ─── */
