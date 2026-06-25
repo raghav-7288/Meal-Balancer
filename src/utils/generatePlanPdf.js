@@ -570,20 +570,39 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
         yPos = doc.lastAutoTable.finalY + 10;
     }
 
-    // ─── DISCLAIMER / NOTES ───
-    if (yPos > 260) {
-        doc.addPage();
-        yPos = drawPageHeader(doc, pageWidth);
-    }
+    // ─── PLAN GUIDELINES ───
+    if (plan.guidelines) {
+        if (yPos > 240) {
+            doc.addPage();
+            yPos = drawPageHeader(doc, pageWidth);
+        }
 
-    doc.setFontSize(7);
-    doc.setFont("helvetica", "italic");
-    doc.setTextColor(...COLORS.muted);
-    doc.text(
-        "Note: This nutrition plan is generated for informational purposes. Please consult your dietitian for personalized advice.",
-        pageWidth / 2, yPos + 2, { align: "center", maxWidth: pageWidth - 40 }
-    );
-    doc.setTextColor(0);
+        // Section header
+        doc.setFillColor(...COLORS.accent);
+        doc.roundedRect(14, yPos - 4.5, 3, 6, 1, 1, "F");
+        doc.setFontSize(13);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...COLORS.dark);
+        doc.text("Plan Guidelines", 20, yPos);
+        doc.setTextColor(0);
+        yPos += 6;
+
+        // Guidelines text
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(...COLORS.text);
+        const guidelinesLines = doc.splitTextToSize(plan.guidelines, pageWidth - 36);
+        for (const line of guidelinesLines) {
+            if (yPos > pageHeight - 20) {
+                doc.addPage();
+                yPos = drawPageHeader(doc, pageWidth);
+            }
+            doc.text(line, 14, yPos);
+            yPos += 5;
+        }
+        doc.setTextColor(0);
+        yPos += 4;
+    }
 
     // ─── ADD HEADERS TO PAGES 2+ & FOOTERS TO ALL PAGES ───
     const totalPages = doc.internal.getNumberOfPages();

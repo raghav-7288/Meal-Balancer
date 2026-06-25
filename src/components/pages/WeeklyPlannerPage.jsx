@@ -194,16 +194,6 @@ function WeeklyPlannerPage() {
                 </span>
             </div>
 
-            {/* Plan Guidelines Section */}
-            {activePlan?.guidelines && (
-                <div className="weekly-guidelines-section">
-                    <div className="weekly-guidelines-header">
-                        <BookOpen size={16} />
-                        <h3>Plan Guidelines</h3>
-                    </div>
-                    <p className="weekly-guidelines-text">{activePlan.guidelines}</p>
-                </div>
-            )}
 
             {/* Weekly Summary Bar */}
             <div className="weekly-summary-bar">
@@ -315,6 +305,17 @@ function WeeklyPlannerPage() {
                     })}
                 </div>
             </div>
+
+            {/* Plan Guidelines Section */}
+            {activePlan?.guidelines && (
+                <div className="weekly-guidelines-section">
+                    <div className="weekly-guidelines-header">
+                        <BookOpen size={16} />
+                        <h3>Plan Guidelines</h3>
+                    </div>
+                    <p className="weekly-guidelines-text">{activePlan.guidelines}</p>
+                </div>
+            )}
 
             {/* Weekly Score Chart */}
             <Section title="Daily scores across the week" icon={<BarChart3 size={16} />}>
