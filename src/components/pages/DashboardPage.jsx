@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { APP_CONFIG } from "../../data/config";
-import { PRESET_PLANS, MEALS, DAYS } from "../../data/presetPlans";
+import { MEALS, DAYS } from "../../data/presetPlans";
 import { aggregateMeal, combineDay, foodById } from "../../engines/nutrientEngine";
 import { scoreMeal, scoreDay } from "../../engines/scoringEngine";
 import { getHealthGoals, getUserHealthGoals, getMajorGroups } from "../../services/databaseService";
@@ -9,6 +9,8 @@ import { fetchFoodNutrients } from "../../services/foodSearchService";
 import { useAuth } from "../../hooks/useAuth";
 import { useProfile } from "../../context/ProfileContext";
 import { useLocalStorageState } from "../../hooks/useLocalStorage";
+import { useSyncedPlans } from "../../hooks/useSyncedPlans";
+import { usePresetPlans } from "../../hooks/usePresetPlans";
 import { useMealHistory } from "../../hooks/useMealHistory";
 import Kpi from "../ui/Kpi";
 import PlanSidebar from "../dashboard/PlanSidebar";
@@ -17,7 +19,7 @@ import NutrientSummary from "../dashboard/NutrientSummary";
 import NutrientLimits from "../dashboard/NutrientLimits";
 import "../../components/dashboard/NutrientLimits.css";
 import ComparisonSection from "../dashboard/ComparisonSection";
-import { Calendar } from "lucide-react";
+import { Calendar, Cloud, CloudOff, Loader } from "lucide-react";
 
 /** Get today's weekday name (Monday–Sunday). */
 function getTodayName() {
@@ -30,16 +32,26 @@ function createPlan(name, meals, guidelines = "") {
 }
 
 function DashboardPage() {
-    const { user } = useAuth();
+    const { user, isAuthenticated } = useAuth();
     const { profile } = useProfile();
     const [searchParams] = useSearchParams();
 
-    const [presetPlans] = useState(() => PRESET_PLANS.map(p => ({ ...p, isPreset: true })));
-    const [userPlans, setUserPlans] = useLocalStorageState("meal-balancer-user-plans", []);
+    const { presetPlans } = usePresetPlans();
+    const [userPlans, setUserPlans, { syncStatus }] = useSyncedPlans();
     const [planView, setPlanView] = useState("preset");
     const plans = useMemo(() => [...presetPlans, ...userPlans], [presetPlans, userPlans]);
-    const [activePlanId, setActivePlanId] = useState(PRESET_PLANS[0].id);
+    const [activePlanId, setActivePlanId] = useState(() => presetPlans[0]?.id || "");
     const [viewDay, setViewDay] = useState(getTodayName);
+
+    // Update activePlanId when preset plans load from DB (IDs may change)
+    useEffect(() => {
+        if (presetPlans.length > 0) {
+            setActivePlanId((prev) => {
+                const allIds = [...presetPlans, ...userPlans].map((p) => p.id);
+                return allIds.includes(prev) ? prev : presetPlans[0].id;
+            });
+        }
+    }, [presetPlans]); // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
 
     // Open specific plan from URL query param (e.g., ?plan=<id>)
     useEffect(() => {
@@ -60,12 +72,6 @@ function DashboardPage() {
         salt: APP_CONFIG.saltLimitG,
         fibre: 30,
     });
-    const [selectedMeal, setSelectedMeal] = useState("");
-    const [selectedFoodId, setSelectedFoodId] = useState("");
-    const [selectedFoodName, setSelectedFoodName] = useState("");
-    const [selectedFoodGroupId, setSelectedFoodGroupId] = useState(null);
-    const [grams, setGrams] = useState("");
-    const [instructions, setInstructions] = useState("");
     const [isAddingFood, setIsAddingFood] = useState(false);
     const [majorGroups, setMajorGroups] = useState([]);
     const [toast, setToast] = useState(null);
@@ -236,8 +242,8 @@ function DashboardPage() {
         );
     }
 
-    async function addFood() {
-        if (!selectedMeal || !selectedFoodId || !grams) return;
+    async function addFood(selectedMeal, selectedFoodId, selectedFoodName, gramsVal, instructionsVal, selectedFoodGroupId) {
+        if (!selectedMeal || !selectedFoodId || !gramsVal) return;
         setIsAddingFood(true);
 
         try {
@@ -265,52 +271,30 @@ function DashboardPage() {
                 id: crypto.randomUUID(),
                 foodId: selectedFoodId,
                 foodName: selectedFoodName || foodName,
-                grams: Number(grams),
+                grams: Number(gramsVal),
                 day: viewDay,
-                instructions: instructions || "",
+                instructions: instructionsVal || "",
                 ...(nutrients && { nutrients }),
                 ...(foodGroup && { foodGroup }),
             };
 
-            if (isPresetActive) {
-                const presetPlan = presetPlans.find(p => p.id === activePlanId);
-                const newMeals = {};
-                for (const slot of MEALS) {
-                    newMeals[slot] = (presetPlan.meals[slot] || []).map(i => ({ ...i, id: crypto.randomUUID() }));
-                }
-                const newPlan = createPlan(`${presetPlan.name} (copy)`, newMeals);
-                if (!newPlan.meals[selectedMeal]) newPlan.meals[selectedMeal] = [];
-                newPlan.meals[selectedMeal].push(mealItem);
-                setUserPlans((prev) => [...prev, newPlan]);
-                setActivePlanId(newPlan.id);
-                setPlanView("user");
-                setToast(`Copied preset & added "${foodName}" to ${selectedMeal}`);
-            } else {
-                setUserPlans((prev) =>
-                    prev.map((plan) =>
-                        plan.id === activePlanId
-                            ? {
-                                ...plan,
-                                meals: {
-                                    ...plan.meals,
-                                    [selectedMeal]: [
-                                        ...(plan.meals[selectedMeal] || []),
-                                        mealItem,
-                                    ],
-                                },
-                            }
-                            : plan
-                    )
-                );
-                setToast(`"${foodName}" added to ${selectedMeal} (${viewDay})`);
-            }
-
-            setSelectedMeal("");
-            setSelectedFoodId("");
-            setSelectedFoodName("");
-            setSelectedFoodGroupId(null);
-            setGrams("");
-            setInstructions("");
+            setUserPlans((prev) =>
+                prev.map((plan) =>
+                    plan.id === activePlanId
+                        ? {
+                            ...plan,
+                            meals: {
+                                ...plan.meals,
+                                [selectedMeal]: [
+                                    ...(plan.meals[selectedMeal] || []),
+                                    mealItem,
+                                ],
+                            },
+                        }
+                        : plan
+                )
+            );
+            setToast(`"${foodName}" added to ${selectedMeal} (${viewDay})`);
         } catch (err) {
             console.error("Error adding food:", err);
             setToast("Failed to add food. Please try again.");
@@ -467,6 +451,18 @@ function DashboardPage() {
                     ))}
                 </div>
                 <div className="planner-nav-actions">
+                    {isAuthenticated && (
+                        <span className={`sync-badge sync-badge--${syncStatus}`} title={
+                            syncStatus === "syncing" ? "Syncing plans…" :
+                            syncStatus === "synced" ? "Plans synced to cloud" :
+                            syncStatus === "error" ? "Sync failed — using local data" :
+                            "Plans stored locally"
+                        }>
+                            {syncStatus === "syncing" && <><Loader size={12} className="spin" /> Syncing</>}
+                            {syncStatus === "synced" && <><Cloud size={12} /> Synced</>}
+                            {syncStatus === "error" && <><CloudOff size={12} /> Offline</>}
+                        </span>
+                    )}
                     <button className="log-today-btn" onClick={logToday}>
                         📊 Log today
                     </button>
@@ -511,17 +507,6 @@ function DashboardPage() {
                         activeSummary={activeSummary}
                         isPresetActive={isPresetActive}
                         viewDay={viewDay}
-                        selectedMeal={selectedMeal}
-                        setSelectedMeal={setSelectedMeal}
-                        selectedFoodId={selectedFoodId}
-                        setSelectedFoodId={setSelectedFoodId}
-                        selectedFoodName={selectedFoodName}
-                        setSelectedFoodName={setSelectedFoodName}
-                        setSelectedFoodGroupId={setSelectedFoodGroupId}
-                        grams={grams}
-                        setGrams={setGrams}
-                        instructions={instructions}
-                        setInstructions={setInstructions}
                         onAddFood={addFood}
                         isAddingFood={isAddingFood}
                         onUpdateMealItem={updateMealItem}
@@ -564,7 +549,6 @@ function DashboardPage() {
                     <NutrientSummary
                         activeSummary={activeSummary}
                         activePlan={activePlan}
-                        selectedMeal={selectedMeal}
                     />
 
 

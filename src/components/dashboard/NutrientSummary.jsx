@@ -12,7 +12,7 @@ const NUTRIENT_COLORS = {
     Minerals: "#06b6d4",
 };
 
-function NutrientSummary({ activeSummary, activePlan, selectedMeal }) {
+function NutrientSummary({ activeSummary, activePlan }) {
     const nutrients = [
         { name: "Carbs", value: Number(activeSummary?.dayTotals?.carbs || 0) },
         { name: "Protein", value: Number(activeSummary?.dayTotals?.protein || 0) },
@@ -67,24 +67,27 @@ function NutrientSummary({ activeSummary, activePlan, selectedMeal }) {
 
             <Section title="Exchange conversion table" icon={<Leaf size={16} />}>
                 <div className="table-wrap">
-                    <table aria-label="Exchange conversion for selected meal">
+                    <table aria-label="Exchange conversion for all meals">
                         <thead><tr><th>Food</th><th>g</th><th>Group</th><th>Exchange</th></tr></thead>
                         <tbody>
-                            {(activePlan.meals[selectedMeal] || []).map((item) => {
-                                const food = foodById(item.foodId);
-                                const exchange = food ? item.grams / food.gramsPerExchange : 0;
-                                return (
-                                    <tr key={item.id}>
-                                        <td>{food?.name || "-"}</td>
-                                        <td>{item.grams}</td>
-                                        <td>{food?.group || "-"}</td>
-                                        <td>{exchange.toFixed(2)}</td>
-                                    </tr>
-                                );
-                            })}
-                            {!activePlan.meals[selectedMeal]?.length && (
-                                <tr><td colSpan={4} className="empty-cell">Select a meal and add foods to see exchange conversion.</td></tr>
-                            )}
+                            {(() => {
+                                const allItems = Object.values(activePlan.meals || {}).flat();
+                                if (!allItems.length) {
+                                    return <tr><td colSpan={4} className="empty-cell">Add foods to see exchange conversion.</td></tr>;
+                                }
+                                return allItems.map((item) => {
+                                    const food = foodById(item.foodId);
+                                    const exchange = food ? item.grams / food.gramsPerExchange : 0;
+                                    return (
+                                        <tr key={item.id}>
+                                            <td>{food?.name || item.foodName || "-"}</td>
+                                            <td>{item.grams}</td>
+                                            <td>{food?.group || item.foodGroup || "-"}</td>
+                                            <td>{exchange.toFixed(2)}</td>
+                                        </tr>
+                                    );
+                                });
+                            })()}
                         </tbody>
                     </table>
                 </div>

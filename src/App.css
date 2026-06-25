@@ -335,6 +335,51 @@ body.dark-mode .nav-theme-toggle::after {
     gap: 8px;
 }
 
+/* Sync status badge */
+.sync-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.sync-badge--syncing {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+}
+
+.sync-badge--synced {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+}
+
+.sync-badge--error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.sync-badge--idle {
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
 .planner-nav-link {
     display: inline-flex;
     align-items: center;
@@ -410,6 +455,30 @@ body.dark-mode .planner-nav-link {
 body.dark-mode .planner-nav-link:hover {
     background: #1d4ed8;
     color: #fff;
+}
+
+body.dark-mode .sync-badge--syncing {
+    background: #78350f;
+    color: #fde68a;
+    border-color: #b45309;
+}
+
+body.dark-mode .sync-badge--synced {
+    background: #064e3b;
+    color: #6ee7b7;
+    border-color: #059669;
+}
+
+body.dark-mode .sync-badge--error {
+    background: #7f1d1d;
+    color: #fca5a5;
+    border-color: #dc2626;
+}
+
+body.dark-mode .sync-badge--idle {
+    background: #374151;
+    color: #9ca3af;
+    border-color: #4b5563;
 }
 
 .hero {
@@ -985,6 +1054,21 @@ button.secondary {
     gap: 16px;
     align-items: center;
     margin-bottom: 14px;
+    user-select: none;
+}
+
+.meal-card--collapsed .meal-head {
+    margin-bottom: 0;
+}
+
+.meal-collapse-arrow {
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+    color: #64748b;
+}
+
+.meal-collapse-arrow--collapsed {
+    transform: rotate(-90deg);
 }
 
 .meal-head h3 {
@@ -1058,6 +1142,80 @@ th {
 .icon-btn.danger {
     background: #fee2e2;
     color: #b91c1c;
+}
+
+/* Inline add-food row inside each meal slot */
+.inline-add-row {
+    background: #f0f9ff;
+}
+
+.inline-add-row td {
+    padding: 8px 10px;
+    border-bottom: none;
+    vertical-align: middle;
+}
+
+.inline-add-row input[type="text"],
+.inline-add-row input[type="number"] {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.inline-add-row input:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.inline-add-row .food-autocomplete input {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 13px;
+}
+
+.add-inline-btn {
+    background: #3b82f6 !important;
+    color: #ffffff !important;
+    border-radius: 10px !important;
+    padding: 6px 10px !important;
+    transition: background 0.15s ease;
+}
+
+.add-inline-btn:hover:not(:disabled) {
+    background: #2563eb !important;
+}
+
+.add-inline-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+body.dark-mode .inline-add-row {
+    background: #1e293b;
+}
+
+body.dark-mode .inline-add-row input[type="text"],
+body.dark-mode .inline-add-row input[type="number"] {
+    background: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+body.dark-mode .inline-add-row input:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+}
+
+body.dark-mode .add-inline-btn {
+    background: #2563eb !important;
+}
+
+body.dark-mode .add-inline-btn:hover:not(:disabled) {
+    background: #3b82f6 !important;
 }
 
 .reason-box {

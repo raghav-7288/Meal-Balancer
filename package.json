@@ -17,6 +17,7 @@
     "test:coverage": "vitest run --coverage",
     "preview": "vite preview",
     "context": "node scripts/generate-context.js",
+    "seed:preset-plans": "node scripts/seed-preset-plans.js",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -46,6 +47,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@vitejs/plugin-react": "^6.0.1",
+    "dotenv": "^17.4.2",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",

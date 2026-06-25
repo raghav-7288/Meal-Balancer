@@ -270,6 +270,40 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
         yPos = drawClientInfo(doc, userInfo, profile, yPos, pageWidth);
     }
 
+    // ─── PLAN GUIDELINES ───
+    if (plan.guidelines) {
+        if (yPos > 240) {
+            doc.addPage();
+            yPos = drawPageHeader(doc, pageWidth);
+        }
+
+        // Section header
+        doc.setFillColor(...COLORS.accent);
+        doc.roundedRect(14, yPos - 4.5, 3, 6, 1, 1, "F");
+        doc.setFontSize(13);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...COLORS.dark);
+        doc.text("Plan Guidelines", 20, yPos);
+        doc.setTextColor(0);
+        yPos += 6;
+
+        // Guidelines text
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(...COLORS.text);
+        const guidelinesLines = doc.splitTextToSize(plan.guidelines, pageWidth - 36);
+        for (const line of guidelinesLines) {
+            if (yPos > pageHeight - 20) {
+                doc.addPage();
+                yPos = drawPageHeader(doc, pageWidth);
+            }
+            doc.text(line, 14, yPos);
+            yPos += 5;
+        }
+        doc.setTextColor(0);
+        yPos += 4;
+    }
+
     // ─── WEEKLY FORMAT ───
     if (daySummaries) {
         for (const day of DAYS) {
@@ -566,42 +600,6 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
             },
             margin: { left: 14, right: 14 },
         });
-
-        yPos = doc.lastAutoTable.finalY + 10;
-    }
-
-    // ─── PLAN GUIDELINES ───
-    if (plan.guidelines) {
-        if (yPos > 240) {
-            doc.addPage();
-            yPos = drawPageHeader(doc, pageWidth);
-        }
-
-        // Section header
-        doc.setFillColor(...COLORS.accent);
-        doc.roundedRect(14, yPos - 4.5, 3, 6, 1, 1, "F");
-        doc.setFontSize(13);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(...COLORS.dark);
-        doc.text("Plan Guidelines", 20, yPos);
-        doc.setTextColor(0);
-        yPos += 6;
-
-        // Guidelines text
-        doc.setFontSize(9);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(...COLORS.text);
-        const guidelinesLines = doc.splitTextToSize(plan.guidelines, pageWidth - 36);
-        for (const line of guidelinesLines) {
-            if (yPos > pageHeight - 20) {
-                doc.addPage();
-                yPos = drawPageHeader(doc, pageWidth);
-            }
-            doc.text(line, 14, yPos);
-            yPos += 5;
-        }
-        doc.setTextColor(0);
-        yPos += 4;
     }
 
     // ─── ADD HEADERS TO PAGES 2+ & FOOTERS TO ALL PAGES ───

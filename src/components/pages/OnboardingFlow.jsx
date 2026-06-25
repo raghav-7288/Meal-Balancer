@@ -11,7 +11,8 @@ import {
 } from "lucide-react";
 import { useProfile } from "../../context/ProfileContext";
 import { useAuth } from "../../hooks/useAuth";
-import { PRESET_PLANS, MEALS } from "../../data/presetPlans";
+import { usePresetPlans } from "../../hooks/usePresetPlans";
+import { MEALS } from "../../data/presetPlans";
 import { aggregateMeal, combineDay } from "../../engines/nutrientEngine";
 import { scoreDay } from "../../engines/scoringEngine";
 
@@ -51,6 +52,7 @@ function OnboardingFlow({ onComplete }) {
     const navigate = useNavigate();
     const { profile, setProfile } = useProfile();
     const { user } = useAuth();
+    const { presetPlans } = usePresetPlans();
 
     const [step, setStep] = useState(1);
 
@@ -64,7 +66,7 @@ function OnboardingFlow({ onComplete }) {
     const [selectedPlanIdx, setSelectedPlanIdx] = useState(0);
 
     // Computed score for selected plan (Step 3)
-    const selectedPlan = PRESET_PLANS[selectedPlanIdx];
+    const selectedPlan = presetPlans[selectedPlanIdx];
     const planScore = useMemo(() => {
         if (!selectedPlan) return null;
         const mealTotals = {};
@@ -215,7 +217,7 @@ function OnboardingFlow({ onComplete }) {
                         </div>
 
                         <div className="onboarding-plans">
-                            {PRESET_PLANS.map((plan, idx) => (
+                            {presetPlans.map((plan, idx) => (
                                 <button
                                     key={plan.id}
                                     className={`onboarding-plan-card ${selectedPlanIdx === idx ? "active" : ""}`}

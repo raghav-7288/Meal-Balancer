@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
     Calendar,
@@ -9,10 +9,11 @@ import {
     Download,
     Edit3,
 } from "lucide-react";
-import { PRESET_PLANS, MEALS, DAYS } from "../../data/presetPlans";
+import { MEALS, DAYS } from "../../data/presetPlans";
 import { aggregateMeal, combineDay, foodById } from "../../engines/nutrientEngine";
 import { scoreDay } from "../../engines/scoringEngine";
-import { useLocalStorageState } from "../../hooks/useLocalStorage";
+import { useSyncedPlans } from "../../hooks/useSyncedPlans";
+import { usePresetPlans } from "../../hooks/usePresetPlans";
 import { useAuth } from "../../hooks/useAuth";
 import { useProfile } from "../../context/ProfileContext";
 import { downloadPlanAsPdf } from "../../utils/generatePlanPdf";
@@ -30,12 +31,22 @@ import Section from "../ui/Section";
 function WeeklyPlannerPage() {
     const { user, profile: dbProfile } = useAuth();
     const { profile } = useProfile();
-    const [presetPlans] = useState(() => PRESET_PLANS.map(p => ({ ...p, isPreset: true })));
-    const [userPlans] = useLocalStorageState("meal-balancer-user-plans", []);
+    const { presetPlans } = usePresetPlans();
+    const [userPlans] = useSyncedPlans();
     const allPlans = useMemo(() => [...presetPlans, ...userPlans], [presetPlans, userPlans]);
     const [activePlanId, setActivePlanId] = useState(
-        userPlans[0]?.id || PRESET_PLANS[0]?.id || ""
+        userPlans[0]?.id || presetPlans[0]?.id || ""
     );
+
+    // Update activePlanId when preset plans load from DB
+    useEffect(() => {
+        if (presetPlans.length > 0) {
+            setActivePlanId((prev) => {
+                const allIds = [...presetPlans, ...userPlans].map((p) => p.id);
+                return allIds.includes(prev) ? prev : (userPlans[0]?.id || presetPlans[0].id);
+            });
+        }
+    }, [presetPlans]); // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
 
     const activePlan = allPlans.find((p) => p.id === activePlanId) || allPlans[0];
     const isPresetPlan = presetPlans.some((p) => p.id === activePlanId);
