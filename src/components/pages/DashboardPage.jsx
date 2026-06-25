@@ -46,12 +46,12 @@ function DashboardPage() {
     // Update activePlanId when preset plans load from DB (IDs may change)
     useEffect(() => {
         if (presetPlans.length > 0) {
-            setActivePlanId((prev) => {
+            setActivePlanId((prev) => { // eslint-disable-line react-hooks/set-state-in-effect
                 const allIds = [...presetPlans, ...userPlans].map((p) => p.id);
                 return allIds.includes(prev) ? prev : presetPlans[0].id;
             });
         }
-    }, [presetPlans]); // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+    }, [presetPlans]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Open specific plan from URL query param (e.g., ?plan=<id>)
     useEffect(() => {
@@ -59,7 +59,7 @@ function DashboardPage() {
         if (planId) {
             const isUserPlan = userPlans.some(p => p.id === planId);
             if (isUserPlan) {
-                setActivePlanId(planId);
+                setActivePlanId(planId); // eslint-disable-line react-hooks/set-state-in-effect
                 setPlanView("user");
             }
         }
@@ -127,7 +127,7 @@ function DashboardPage() {
     // Sync guidelines field only when active plan switches
     useEffect(() => {
         const plan = [...presetPlans, ...userPlans].find((p) => p.id === activePlanId);
-        setGuidelines(plan?.guidelines || "");
+        setGuidelines(plan?.guidelines || ""); // eslint-disable-line react-hooks/set-state-in-effect
     }, [activePlanId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function saveGuidelines() {
@@ -189,7 +189,7 @@ function DashboardPage() {
 
     const isPresetActive = presetPlans.some(p => p.id === activePlanId);
 
-    function updateMealItem(mealName, itemId, newGrams) {
+    function updateMealItem(mealName, itemId, updates) {
         setUserPlans((prev) =>
             prev.map((plan) =>
                 plan.id === activePlanId
@@ -198,7 +198,7 @@ function DashboardPage() {
                         meals: {
                             ...plan.meals,
                             [mealName]: plan.meals[mealName].map((item) =>
-                                item.id === itemId ? { ...item, grams: Number(newGrams) } : item
+                                item.id === itemId ? { ...item, ...updates } : item
                             ),
                         },
                     }
@@ -223,24 +223,6 @@ function DashboardPage() {
         );
     }
 
-    function duplicateMealItem(mealName, item) {
-        setUserPlans((prev) =>
-            prev.map((plan) =>
-                plan.id === activePlanId
-                    ? {
-                        ...plan,
-                        meals: {
-                            ...plan.meals,
-                            [mealName]: [
-                                ...plan.meals[mealName],
-                                { ...item, id: crypto.randomUUID() },
-                            ],
-                        },
-                    }
-                    : plan
-            )
-        );
-    }
 
     async function addFood(selectedMeal, selectedFoodId, selectedFoodName, gramsVal, instructionsVal, selectedFoodGroupId) {
         if (!selectedMeal || !selectedFoodId || !gramsVal) return;
@@ -511,7 +493,6 @@ function DashboardPage() {
                         isAddingFood={isAddingFood}
                         onUpdateMealItem={updateMealItem}
                         onRemoveMealItem={removeMealItem}
-                        onDuplicateMealItem={duplicateMealItem}
                     />
 
                     {/* Plan Guidelines */}

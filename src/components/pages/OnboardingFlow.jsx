@@ -10,7 +10,6 @@ import {
     Sparkles,
 } from "lucide-react";
 import { useProfile } from "../../context/ProfileContext";
-import { useAuth } from "../../hooks/useAuth";
 import { usePresetPlans } from "../../hooks/usePresetPlans";
 import { MEALS } from "../../data/presetPlans";
 import { aggregateMeal, combineDay } from "../../engines/nutrientEngine";
@@ -51,7 +50,6 @@ function getScoreColor(score) {
 function OnboardingFlow({ onComplete }) {
     const navigate = useNavigate();
     const { profile, setProfile } = useProfile();
-    const { user } = useAuth();
     const { presetPlans } = usePresetPlans();
 
     const [step, setStep] = useState(1);

@@ -9,11 +9,8 @@ import {
     ArrowUpRight,
     ArrowDownRight,
     Minus,
-    AlertTriangle,
 } from "lucide-react";
 import {
-    LineChart,
-    Line,
     XAxis,
     YAxis,
     Tooltip,

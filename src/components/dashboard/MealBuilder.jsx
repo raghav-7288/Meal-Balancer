@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Copy, Trash2, ChevronDown } from "lucide-react";
+import { Plus, Pencil, Check, Trash2, ChevronDown } from "lucide-react";
 import { MEALS } from "../../data/presetPlans";
 import { foodById } from "../../engines/nutrientEngine";
 import Section from "../ui/Section";
@@ -24,9 +24,10 @@ function MealBuilder({
     isAddingFood,
     onUpdateMealItem,
     onRemoveMealItem,
-    onDuplicateMealItem,
 }) {
     const [collapsedSlots, setCollapsedSlots] = useState({});
+    const [editingItemId, setEditingItemId] = useState(null);
+    const [editValues, setEditValues] = useState({ grams: "", instructions: "" });
     // Per-slot add-food form state
     const [slotForms, setSlotForms] = useState(() => {
         const init = {};
@@ -105,7 +106,7 @@ function MealBuilder({
                                         <table>
                                             <thead>
                                                 <tr>
-                                                    <th>Food</th><th>g</th><th>Group</th><th>Exchange</th><th>Instructions</th><th>Actions</th>
+                                                    <th>Food</th><th>g</th><th>Group</th><th>Exchange</th><th>Instructions</th>{!isPresetActive && <th>Actions</th>}
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -113,38 +114,79 @@ function MealBuilder({
                                                     const food = foodById(item.foodId);
                                                     const foodName = food?.name || item.foodName || "-";
                                                     const foodGroup = food?.group || item.foodGroup || "-";
-                                                    const exchange = food ? item.grams / food.gramsPerExchange : (item.grams / 100);
+                                                    const isEditing = editingItemId === item.id;
+                                                    const displayGrams = isEditing ? editValues.grams : item.grams;
+                                                    const exchange = food ? Number(displayGrams) / food.gramsPerExchange : (Number(displayGrams) / 100);
+
+                                                    const startEditing = () => {
+                                                        setEditingItemId(item.id);
+                                                        setEditValues({ grams: item.grams, instructions: item.instructions || "" });
+                                                    };
+
+                                                    const saveEditing = () => {
+                                                        onUpdateMealItem(meal, item.id, {
+                                                            grams: Number(editValues.grams),
+                                                            instructions: editValues.instructions,
+                                                        });
+                                                        setEditingItemId(null);
+                                                    };
+
                                                     return (
                                                         <tr key={item.id}>
                                                             <td>{foodName}</td>
-                                                            <td>{item.grams}</td>
+                                                            <td>
+                                                                {isEditing ? (
+                                                                    <input
+                                                                        type="number"
+                                                                        min="0"
+                                                                        value={editValues.grams}
+                                                                        onChange={(e) => setEditValues((v) => ({ ...v, grams: e.target.value }))}
+                                                                        aria-label={`Edit grams for ${foodName}`}
+                                                                        style={{ width: "60px" }}
+                                                                    />
+                                                                ) : (
+                                                                    item.grams
+                                                                )}
+                                                            </td>
                                                             <td>{foodGroup}</td>
                                                             <td>{exchange.toFixed(2)}</td>
-                                                            <td className="instructions-cell">{item.instructions || "-"}</td>
-                                                            <td>
-                                                                <div className="icon-row">
-                                                                    <button
-                                                                        className="icon-btn"
-                                                                        onClick={() => onDuplicateMealItem(meal, item)}
-                                                                        disabled={isPresetActive}
-                                                                        aria-label={`Duplicate ${foodName}`}
-                                                                    >
-                                                                        <Copy size={14} />
-                                                                    </button>
-                                                                    <button
-                                                                        className="icon-btn danger"
-                                                                        onClick={() => onRemoveMealItem(meal, item.id)}
-                                                                        disabled={isPresetActive}
-                                                                        aria-label={`Remove ${foodName}`}
-                                                                    >
-                                                                        <Trash2 size={14} />
-                                                                    </button>
-                                                                </div>
+                                                            <td className="instructions-cell">
+                                                                {isEditing ? (
+                                                                    <input
+                                                                        type="text"
+                                                                        value={editValues.instructions}
+                                                                        onChange={(e) => setEditValues((v) => ({ ...v, instructions: e.target.value }))}
+                                                                        aria-label={`Edit instructions for ${foodName}`}
+                                                                        placeholder="Instructions…"
+                                                                    />
+                                                                ) : (
+                                                                    item.instructions || "-"
+                                                                )}
                                                             </td>
+                                                            {!isPresetActive && (
+                                                                <td>
+                                                                    <div className="icon-row">
+                                                                        <button
+                                                                            className="icon-btn"
+                                                                            onClick={isEditing ? saveEditing : startEditing}
+                                                                            aria-label={isEditing ? `Save ${foodName}` : `Edit ${foodName}`}
+                                                                        >
+                                                                            {isEditing ? <Check size={14} /> : <Pencil size={14} />}
+                                                                        </button>
+                                                                        <button
+                                                                            className="icon-btn danger"
+                                                                            onClick={() => onRemoveMealItem(meal, item.id)}
+                                                                            aria-label={`Remove ${foodName}`}
+                                                                        >
+                                                                            <Trash2 size={14} />
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            )}
                                                         </tr>
                                                     );
                                                 }) : (
-                                                    <tr><td colSpan={6} className="empty-cell">No items for {viewDay}.</td></tr>
+                                                    <tr><td colSpan={isPresetActive ? 5 : 6} className="empty-cell">No items for {viewDay}.</td></tr>
                                                 )}
 
                                                 {/* Inline add-food row for this slot */}

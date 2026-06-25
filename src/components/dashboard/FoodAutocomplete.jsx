@@ -15,20 +15,17 @@ function FoodAutocomplete({ value, onChange, onSelect, placeholder = "Type to se
     const debouncedQuery = useDebounce(inputValue, 300);
     const wrapperRef = useRef(null);
     const inputRef = useRef(null);
-    const prevValueRef = useRef(value);
-
-    // Sync external value changes without triggering setState in effect
-    if (prevValueRef.current !== value) {
-        prevValueRef.current = value;
+    // Sync external value changes via effect (not during render)
+    useEffect(() => {
         if (value !== inputValue) {
-            setInputValue(value || "");
+            setInputValue(value || ""); // eslint-disable-line react-hooks/set-state-in-effect
         }
-    }
+    }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Fetch suggestions when debounced query changes
     useEffect(() => {
         if (debouncedQuery.length < 2) {
-            setSuggestions((prev) => prev.length === 0 ? prev : []);
+            setSuggestions([]); // eslint-disable-line react-hooks/set-state-in-effect
             setIsOpen(false);
             return;
         }

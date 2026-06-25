@@ -1,17 +1,14 @@
 import { useState, useEffect } from "react";
 import { fetchPresetPlans } from "../services/presetPlanService";
-import { PRESET_PLANS } from "../data/presetPlans";
 
 /**
  * Hook to load preset plans from the database.
- * Falls back to hardcoded PRESET_PLANS if the fetch fails.
+ * Plans are fetched exclusively from the preset_plans table in Supabase.
  *
  * @returns {{ presetPlans: Array, isLoading: boolean, error: string|null }}
  */
 export function usePresetPlans() {
-    const [presetPlans, setPresetPlans] = useState(() =>
-        PRESET_PLANS.map((p) => ({ ...p, isPreset: true }))
-    );
+    const [presetPlans, setPresetPlans] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -21,15 +18,14 @@ export function usePresetPlans() {
         async function load() {
             try {
                 const plans = await fetchPresetPlans();
-                if (!cancelled && plans && plans.length > 0) {
-                    setPresetPlans(plans);
+                if (!cancelled) {
+                    setPresetPlans(plans || []);
                 }
             } catch (err) {
-                console.warn("Failed to load preset plans from DB, using fallback:", err.message);
+                console.error("Failed to load preset plans from DB:", err.message);
                 if (!cancelled) {
                     setError(err.message);
                 }
-                // Fallback already set in initial state
             } finally {
                 if (!cancelled) {
                     setIsLoading(false);

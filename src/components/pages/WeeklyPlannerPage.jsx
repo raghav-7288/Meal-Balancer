@@ -41,12 +41,12 @@ function WeeklyPlannerPage() {
     // Update activePlanId when preset plans load from DB
     useEffect(() => {
         if (presetPlans.length > 0) {
-            setActivePlanId((prev) => {
+            setActivePlanId((prev) => { // eslint-disable-line react-hooks/set-state-in-effect
                 const allIds = [...presetPlans, ...userPlans].map((p) => p.id);
                 return allIds.includes(prev) ? prev : (userPlans[0]?.id || presetPlans[0].id);
             });
         }
-    }, [presetPlans]); // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+    }, [presetPlans]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const activePlan = allPlans.find((p) => p.id === activePlanId) || allPlans[0];
     const isPresetPlan = presetPlans.some((p) => p.id === activePlanId);

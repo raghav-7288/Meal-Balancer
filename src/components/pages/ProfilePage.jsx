@@ -64,7 +64,7 @@ function ProfilePage() {
     // Sync from DB profile on load
     useEffect(() => {
         if (dbProfile) {
-            setHeight(dbProfile.height_cm ? String(dbProfile.height_cm) : "");
+            setHeight(dbProfile.height_cm ? String(dbProfile.height_cm) : ""); // eslint-disable-line react-hooks/set-state-in-effect
             setWeight(dbProfile.weight_kg ? String(dbProfile.weight_kg) : "");
             setAge(dbProfile.age ? String(dbProfile.age) : "");
             setContactNumber(dbProfile.contact_number || "");

@@ -1,0 +1,719 @@
+table_name,column_name,data_type,is_nullable,column_default
+food_items,food_id,bigint,NO,nextval('food_items_food_id_seq'::regclass)
+food_items,major_group_id,bigint,NO,null
+food_items,food_code,character varying,NO,null
+food_items,food_name,character varying,NO,null
+food_nutrient_values,food_nutrient_value_id,bigint,NO,nextval('food_nutrient_values_food_nutrient_value_id_seq'::regclass)
+food_nutrient_values,food_id,bigint,NO,null
+food_nutrient_values,nutrient_id,bigint,NO,null
+food_nutrient_values,value,numeric,NO,null
+food_nutrient_values_staging,food_id,bigint,NO,null
+food_nutrient_values_staging,n1,numeric,YES,null
+food_nutrient_values_staging,n2,numeric,YES,null
+food_nutrient_values_staging,n3,numeric,YES,null
+food_nutrient_values_staging,n4,numeric,YES,null
+food_nutrient_values_staging,n5,numeric,YES,null
+food_nutrient_values_staging,n6,numeric,YES,null
+food_nutrient_values_staging,n7,numeric,YES,null
+food_nutrient_values_staging,n8,numeric,YES,null
+food_nutrient_values_staging,n9,numeric,YES,null
+food_nutrient_values_staging,n10,numeric,YES,null
+food_nutrient_values_staging,n11,numeric,YES,null
+food_nutrient_values_staging,n12,numeric,YES,null
+food_nutrient_values_staging,n13,numeric,YES,null
+food_nutrient_values_staging,n14,numeric,YES,null
+food_nutrient_values_staging,n15,numeric,YES,null
+food_nutrient_values_staging,n16,numeric,YES,null
+food_nutrient_values_staging,n17,numeric,YES,null
+food_nutrient_values_staging,n18,numeric,YES,null
+food_nutrient_values_staging,n19,numeric,YES,null
+food_nutrient_values_staging,n20,numeric,YES,null
+food_nutrient_values_staging,n21,numeric,YES,null
+food_nutrient_values_staging,n22,numeric,YES,null
+food_nutrient_values_staging,n23,numeric,YES,null
+food_nutrient_values_staging,n24,numeric,YES,null
+food_nutrient_values_staging,n25,numeric,YES,null
+food_nutrient_values_staging,n26,numeric,YES,null
+food_nutrient_values_staging,n27,numeric,YES,null
+food_nutrient_values_staging,n28,numeric,YES,null
+food_nutrient_values_staging,n29,numeric,YES,null
+food_nutrient_values_staging,n30,numeric,YES,null
+food_nutrient_values_staging,n31,numeric,YES,null
+food_nutrient_values_staging,n32,numeric,YES,null
+food_nutrient_values_staging,n33,numeric,YES,null
+food_nutrient_values_staging,n34,numeric,YES,null
+food_nutrient_values_staging,n35,numeric,YES,null
+food_nutrient_values_staging,n36,numeric,YES,null
+food_nutrient_values_staging,n37,numeric,YES,null
+food_nutrient_values_staging,n38,numeric,YES,null
+health_goals,health_goal_id,bigint,NO,nextval('health_goals_health_goal_id_seq'::regclass)
+health_goals,goal_code,character varying,NO,null
+health_goals,goal_name,character varying,NO,null
+health_goals,description,text,YES,null
+health_goals,is_active,boolean,NO,true
+health_goals,display_order,integer,NO,null
+major_groups,major_group_id,bigint,NO,nextval('major_groups_major_group_id_seq'::regclass)
+major_groups,group_code,character varying,NO,null
+major_groups,group_name,character varying,NO,null
+nutrient_definitions,nutrient_id,bigint,NO,nextval('nutrient_definitions_nutrient_id_seq'::regclass)
+nutrient_definitions,nutrient_group_id,bigint,NO,null
+nutrient_definitions,nutrient_name,character varying,NO,null
+nutrient_definitions,nutrient_code,character varying,YES,null
+nutrient_definitions,unit,character varying,NO,null
+nutrient_groups,nutrient_group_id,bigint,NO,nextval('nutrient_groups_nutrient_group_id_seq'::regclass)
+nutrient_groups,group_name,character varying,NO,null
+nutrient_groups,description,text,YES,null
+nutrient_groups,display_order,integer,YES,null
+preset_plans,id,uuid,NO,gen_random_uuid()
+preset_plans,name,text,NO,null
+preset_plans,meals,jsonb,NO,'{}'::jsonb
+preset_plans,guidelines,text,YES,''::text
+preset_plans,display_order,integer,NO,0
+preset_plans,is_active,boolean,NO,true
+preset_plans,created_at,timestamp with time zone,NO,now()
+preset_plans,updated_at,timestamp with time zone,NO,now()
+user_plans,id,uuid,NO,gen_random_uuid()
+user_plans,user_id,uuid,NO,null
+user_plans,name,text,NO,null
+user_plans,meals,jsonb,NO,'{}'::jsonb
+user_plans,guidelines,text,YES,''::text
+user_plans,created_at,timestamp with time zone,NO,now()
+user_plans,updated_at,timestamp with time zone,NO,now()
+user_profile_health_goals,user_id,uuid,NO,null
+user_profile_health_goals,health_goal_id,bigint,NO,null
+user_profile_health_goals,created_at,timestamp with time zone,YES,now()
+user_profiles,user_id,uuid,NO,null
+user_profiles,username,text,NO,null
+user_profiles,full_name,text,YES,null
+user_profiles,created_at,timestamp with time zone,YES,now()
+user_profiles,height_cm,numeric,YES,null
+user_profiles,weight_kg,numeric,YES,null
+user_profiles,current_bmi,numeric,YES,null
+user_profiles,age,integer,YES,null
+user_profiles,contact_number,character varying,YES,null
+
+
+
+view_name,column_name,data_type
+food_search_view,food_id,bigint
+food_search_view,food_code,character varying
+food_search_view,food_name,character varying
+food_search_view,major_group_id,bigint
+food_search_view,group_code,character varying
+food_search_view,food_group,character varying
+food_search_view,nutrient_id,bigint
+food_search_view,nutrient_name,character varying
+food_search_view,nutrient_code,character varying
+food_search_view,unit,character varying
+food_search_view,nutrient_group_id,bigint
+food_search_view,nutrient_group,character varying
+food_search_view,value,numeric
+
+
+
+view_name,view_definition
+food_search_view," SELECT fi.food_id,
+    fi.food_code,
+    fi.food_name,
+    mg.major_group_id,
+    mg.group_code,
+    mg.group_name AS food_group,
+    fnv.nutrient_id,
+    nd.nutrient_name,
+    nd.nutrient_code,
+    nd.unit,
+    ng.nutrient_group_id,
+    ng.group_name AS nutrient_group,
+    fnv.value
+   FROM ((((food_items fi
+     JOIN major_groups mg ON ((mg.major_group_id = fi.major_group_id)))
+     LEFT JOIN food_nutrient_values fnv ON ((fnv.food_id = fi.food_id)))
+     LEFT JOIN nutrient_definitions nd ON ((nd.nutrient_id = fnv.nutrient_id)))
+     LEFT JOIN nutrient_groups ng ON ((ng.nutrient_group_id = nd.nutrient_group_id)));"
+
+
+
+tablename,indexname,indexdef
+food_items,food_items_food_code_key,CREATE UNIQUE INDEX food_items_food_code_key ON public.food_items USING btree (food_code)
+food_items,food_items_pkey,CREATE UNIQUE INDEX food_items_pkey ON public.food_items USING btree (food_id)
+food_items,idx_food_items_food_code_trgm,CREATE INDEX idx_food_items_food_code_trgm ON public.food_items USING gin (food_code gin_trgm_ops)
+food_items,idx_food_items_food_name_trgm,CREATE INDEX idx_food_items_food_name_trgm ON public.food_items USING gin (food_name gin_trgm_ops)
+food_nutrient_values,food_nutrient_values_pkey,CREATE UNIQUE INDEX food_nutrient_values_pkey ON public.food_nutrient_values USING btree (food_nutrient_value_id)
+food_nutrient_values,uq_food_nutrient,"CREATE UNIQUE INDEX uq_food_nutrient ON public.food_nutrient_values USING btree (food_id, nutrient_id)"
+health_goals,health_goals_goal_code_key,CREATE UNIQUE INDEX health_goals_goal_code_key ON public.health_goals USING btree (goal_code)
+health_goals,health_goals_goal_name_key,CREATE UNIQUE INDEX health_goals_goal_name_key ON public.health_goals USING btree (goal_name)
+health_goals,health_goals_pkey,CREATE UNIQUE INDEX health_goals_pkey ON public.health_goals USING btree (health_goal_id)
+major_groups,idx_major_groups_group_name_trgm,CREATE INDEX idx_major_groups_group_name_trgm ON public.major_groups USING gin (group_name gin_trgm_ops)
+major_groups,major_groups_group_code_key,CREATE UNIQUE INDEX major_groups_group_code_key ON public.major_groups USING btree (group_code)
+major_groups,major_groups_pkey,CREATE UNIQUE INDEX major_groups_pkey ON public.major_groups USING btree (major_group_id)
+nutrient_definitions,nutrient_definitions_nutrient_name_key,CREATE UNIQUE INDEX nutrient_definitions_nutrient_name_key ON public.nutrient_definitions USING btree (nutrient_name)
+nutrient_definitions,nutrient_definitions_pkey,CREATE UNIQUE INDEX nutrient_definitions_pkey ON public.nutrient_definitions USING btree (nutrient_id)
+nutrient_groups,nutrient_groups_group_name_key,CREATE UNIQUE INDEX nutrient_groups_group_name_key ON public.nutrient_groups USING btree (group_name)
+nutrient_groups,nutrient_groups_pkey,CREATE UNIQUE INDEX nutrient_groups_pkey ON public.nutrient_groups USING btree (nutrient_group_id)
+preset_plans,preset_plans_pkey,CREATE UNIQUE INDEX preset_plans_pkey ON public.preset_plans USING btree (id)
+user_plans,idx_user_plans_user_id,CREATE INDEX idx_user_plans_user_id ON public.user_plans USING btree (user_id)
+user_plans,user_plans_pkey,CREATE UNIQUE INDEX user_plans_pkey ON public.user_plans USING btree (id)
+user_profile_health_goals,user_profile_health_goals_pkey,"CREATE UNIQUE INDEX user_profile_health_goals_pkey ON public.user_profile_health_goals USING btree (user_id, health_goal_id)"
+user_profiles,user_profiles_pkey,CREATE UNIQUE INDEX user_profiles_pkey ON public.user_profiles USING btree (user_id)
+user_profiles,user_profiles_username_key,CREATE UNIQUE INDEX user_profiles_username_key ON public.user_profiles USING btree (username)
+
+
+
+table_name,column_name,foreign_table,foreign_column,delete_rule
+food_items,major_group_id,major_groups,major_group_id,RESTRICT
+food_nutrient_values,nutrient_id,nutrient_definitions,nutrient_id,CASCADE
+food_nutrient_values,food_id,food_items,food_id,CASCADE
+nutrient_definitions,nutrient_group_id,nutrient_groups,nutrient_group_id,RESTRICT
+user_profile_health_goals,health_goal_id,health_goals,health_goal_id,CASCADE
+user_profile_health_goals,user_id,user_profiles,user_id,CASCADE
+
+
+
+schemaname,tablename,policyname,permissive,roles,cmd,qual,with_check
+public,food_items,Anyone can read food items,PERMISSIVE,{public},SELECT,true,null
+public,food_nutrient_values,Anyone can read food nutrient values,PERMISSIVE,{public},SELECT,true,null
+public,health_goals,Anyone can read active health goals,PERMISSIVE,{public},SELECT,(is_active = true),null
+public,major_groups,Anyone can read major groups,PERMISSIVE,{public},SELECT,true,null
+public,nutrient_definitions,Anyone can read nutrient definitions,PERMISSIVE,{public},SELECT,true,null
+public,nutrient_groups,Anyone can read nutrient groups,PERMISSIVE,{public},SELECT,true,null
+public,preset_plans,Anyone can read preset plans,PERMISSIVE,{public},SELECT,(is_active = true),null
+public,user_plans,Users can create their own plans,PERMISSIVE,{public},INSERT,null,(auth.uid() = user_id)
+public,user_plans,Users can delete their own plans,PERMISSIVE,{public},DELETE,(auth.uid() = user_id),null
+public,user_plans,Users can update their own plans,PERMISSIVE,{public},UPDATE,(auth.uid() = user_id),(auth.uid() = user_id)
+public,user_plans,Users can view their own plans,PERMISSIVE,{public},SELECT,(auth.uid() = user_id),null
+public,user_profile_health_goals,Users can add their own health goals,PERMISSIVE,{public},INSERT,null,(auth.uid() = user_id)
+public,user_profile_health_goals,Users can remove their own health goals,PERMISSIVE,{public},DELETE,(auth.uid() = user_id),null
+public,user_profile_health_goals,Users can update their own health goals,PERMISSIVE,{public},UPDATE,(auth.uid() = user_id),(auth.uid() = user_id)
+public,user_profile_health_goals,Users can view their own health goals,PERMISSIVE,{public},SELECT,(auth.uid() = user_id),null
+public,user_profiles,Users can create their own profile,PERMISSIVE,{public},INSERT,null,(auth.uid() = user_id)
+public,user_profiles,Users can delete their own profile,PERMISSIVE,{public},DELETE,(auth.uid() = user_id),null
+public,user_profiles,Users can update their own profile,PERMISSIVE,{public},UPDATE,(auth.uid() = user_id),(auth.uid() = user_id)
+public,user_profiles,Users can view their own profile,PERMISSIVE,{public},SELECT,(auth.uid() = user_id),null
+
+
+
+table_name,rls_enabled,rls_forced
+food_items,true,false
+food_nutrient_values,true,false
+food_nutrient_values_staging,false,false
+health_goals,true,false
+major_groups,true,false
+nutrient_definitions,true,false
+nutrient_groups,true,false
+preset_plans,true,false
+user_plans,true,false
+user_profile_health_goals,true,false
+user_profiles,true,false
+
+
+function_name,arguments,return_type,source_code,language
+get_food_details,p_food_id bigint,"TABLE(food_id bigint, food_code character varying, food_name character varying, food_group character varying, nutrient_id bigint, nutrient_name character varying, nutrient_code character varying, nutrient_group character varying, unit character varying, value numeric)","
+    select
+        fsv.food_id,
+        fsv.food_code,
+        fsv.food_name,
+        fsv.food_group,
+        fsv.nutrient_id,
+        fsv.nutrient_name,
+        fsv.nutrient_code,
+        fsv.nutrient_group,
+        fsv.unit,
+        fsv.value
+    from public.food_search_view fsv
+    where fsv.food_id = p_food_id
+    order by fsv.nutrient_group, fsv.nutrient_name;
+",sql
+gin_extract_query_trgm,"text, internal, smallint, internal, internal, internal, internal",internal,gin_extract_query_trgm,c
+gin_extract_value_trgm,"text, internal",internal,gin_extract_value_trgm,c
+gin_trgm_consistent,"internal, smallint, text, integer, internal, internal, internal, internal",boolean,gin_trgm_consistent,c
+gin_trgm_triconsistent,"internal, smallint, text, integer, internal, internal, internal","""char""",gin_trgm_triconsistent,c
+gtrgm_compress,internal,internal,gtrgm_compress,c
+gtrgm_consistent,"internal, text, smallint, oid, internal",boolean,gtrgm_consistent,c
+gtrgm_decompress,internal,internal,gtrgm_decompress,c
+gtrgm_distance,"internal, text, smallint, oid, internal",double precision,gtrgm_distance,c
+gtrgm_in,cstring,gtrgm,gtrgm_in,c
+gtrgm_options,internal,void,gtrgm_options,c
+gtrgm_out,gtrgm,cstring,gtrgm_out,c
+gtrgm_penalty,"internal, internal, internal",internal,gtrgm_penalty,c
+gtrgm_picksplit,"internal, internal",internal,gtrgm_picksplit,c
+gtrgm_same,"gtrgm, gtrgm, internal",internal,gtrgm_same,c
+gtrgm_union,"internal, internal",gtrgm,gtrgm_union,c
+handle_updated_at,,trigger,"
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+",plpgsql
+search_foods,search_text text,"TABLE(food_id bigint, food_code character varying, food_name character varying, food_group character varying)","
+    select distinct
+        fsv.food_id,
+        fsv.food_code,
+        fsv.food_name,
+        fsv.food_group
+    from public.food_search_view fsv
+    where
+        fsv.food_name ilike '%' || search_text || '%'
+        or fsv.food_code ilike '%' || search_text || '%'
+        or fsv.food_group ilike '%' || search_text || '%'
+        or fsv.nutrient_name ilike '%' || search_text || '%'
+        or fsv.nutrient_group ilike '%' || search_text || '%'
+    order by fsv.food_name
+    limit 20;
+",sql
+search_foods_all_fields,search_text text,"TABLE(food_id bigint, food_code text, food_name text, food_group text)","
+  SELECT DISTINCT
+    fi.food_id,
+    fi.food_code,
+    fi.food_name,
+    mg.group_name AS food_group
+  FROM food_items fi
+  JOIN major_groups mg ON mg.major_group_id = fi.major_group_id
+  LEFT JOIN food_nutrient_values fnv ON fnv.food_id = fi.food_id
+  LEFT JOIN nutrient_definitions nd ON nd.nutrient_id = fnv.nutrient_id
+  LEFT JOIN nutrient_groups ng ON ng.nutrient_group_id = nd.nutrient_group_id
+  WHERE
+    fi.food_name ILIKE '%' || search_text || '%'
+    OR fi.food_code ILIKE '%' || search_text || '%'
+    OR mg.group_name ILIKE '%' || search_text || '%'
+    OR mg.group_code ILIKE '%' || search_text || '%'
+    OR nd.nutrient_name ILIKE '%' || search_text || '%'
+    OR nd.nutrient_code ILIKE '%' || search_text || '%'
+    OR ng.group_name ILIKE '%' || search_text || '%'
+  ORDER BY fi.food_name
+  LIMIT 500;
+",sql
+search_nutrient_foods,nutrient_search text,"TABLE(food_id bigint, food_code character varying, food_name character varying, food_group character varying, nutrient_name character varying, nutrient_value numeric, unit character varying)","
+select
+    fi.food_id,
+    fi.food_code,
+    fi.food_name,
+    mg.group_name,
+    nd.nutrient_name,
+    fnv.value,
+    nd.unit
+from food_nutrient_values fnv
+join food_items fi
+    on fi.food_id = fnv.food_id
+join major_groups mg
+    on mg.major_group_id = fi.major_group_id
+join nutrient_definitions nd
+    on nd.nutrient_id = fnv.nutrient_id
+where
+    nd.nutrient_name ilike '%' || nutrient_search || '%'
+order by fnv.value desc
+limit 100;
+",sql
+set_limit,real,real,set_limit,c
+show_limit,,real,show_limit,c
+show_trgm,text,text[],show_trgm,c
+similarity,"text, text",real,similarity,c
+similarity_dist,"text, text",real,similarity_dist,c
+similarity_op,"text, text",boolean,similarity_op,c
+strict_word_similarity,"text, text",real,strict_word_similarity,c
+strict_word_similarity_commutator_op,"text, text",boolean,strict_word_similarity_commutator_op,c
+strict_word_similarity_dist_commutator_op,"text, text",real,strict_word_similarity_dist_commutator_op,c
+strict_word_similarity_dist_op,"text, text",real,strict_word_similarity_dist_op,c
+strict_word_similarity_op,"text, text",boolean,strict_word_similarity_op,c
+word_similarity,"text, text",real,word_similarity,c
+word_similarity_commutator_op,"text, text",boolean,word_similarity_commutator_op,c
+word_similarity_dist_commutator_op,"text, text",real,word_similarity_dist_commutator_op,c
+word_similarity_dist_op,"text, text",real,word_similarity_dist_op,c
+word_similarity_op,"text, text",boolean,word_similarity_op,c
+
+
+
+
+
+trigger_name,event_manipulation,event_object_table,action_timing,action_statement
+set_preset_plans_updated_at,UPDATE,preset_plans,BEFORE,EXECUTE FUNCTION handle_updated_at()
+set_user_plans_updated_at,UPDATE,user_plans,BEFORE,EXECUTE FUNCTION handle_updated_at()
+
+
+table_name,approx_row_count
+food_nutrient_values,20064
+food_nutrient_values_staging,528
+food_items,528
+nutrient_definitions,38
+major_groups,20
+health_goals,13
+user_profile_health_goals,7
+preset_plans,5
+user_profiles,4
+nutrient_groups,4
+user_plans,1
+
+grantee,table_name,privilege_type
+anon,food_items,DELETE
+anon,food_items,INSERT
+anon,food_items,REFERENCES
+anon,food_items,SELECT
+anon,food_items,TRIGGER
+anon,food_items,TRUNCATE
+anon,food_items,UPDATE
+authenticated,food_items,DELETE
+authenticated,food_items,INSERT
+authenticated,food_items,REFERENCES
+authenticated,food_items,SELECT
+authenticated,food_items,TRIGGER
+authenticated,food_items,TRUNCATE
+authenticated,food_items,UPDATE
+postgres,food_items,DELETE
+postgres,food_items,INSERT
+postgres,food_items,REFERENCES
+postgres,food_items,SELECT
+postgres,food_items,TRIGGER
+postgres,food_items,TRUNCATE
+postgres,food_items,UPDATE
+service_role,food_items,DELETE
+service_role,food_items,INSERT
+service_role,food_items,REFERENCES
+service_role,food_items,SELECT
+service_role,food_items,TRIGGER
+service_role,food_items,TRUNCATE
+service_role,food_items,UPDATE
+anon,food_nutrient_values,DELETE
+anon,food_nutrient_values,INSERT
+anon,food_nutrient_values,REFERENCES
+anon,food_nutrient_values,SELECT
+anon,food_nutrient_values,TRIGGER
+anon,food_nutrient_values,TRUNCATE
+anon,food_nutrient_values,UPDATE
+authenticated,food_nutrient_values,DELETE
+authenticated,food_nutrient_values,INSERT
+authenticated,food_nutrient_values,REFERENCES
+authenticated,food_nutrient_values,SELECT
+authenticated,food_nutrient_values,TRIGGER
+authenticated,food_nutrient_values,TRUNCATE
+authenticated,food_nutrient_values,UPDATE
+postgres,food_nutrient_values,DELETE
+postgres,food_nutrient_values,INSERT
+postgres,food_nutrient_values,REFERENCES
+postgres,food_nutrient_values,SELECT
+postgres,food_nutrient_values,TRIGGER
+postgres,food_nutrient_values,TRUNCATE
+postgres,food_nutrient_values,UPDATE
+service_role,food_nutrient_values,DELETE
+service_role,food_nutrient_values,INSERT
+service_role,food_nutrient_values,REFERENCES
+service_role,food_nutrient_values,SELECT
+service_role,food_nutrient_values,TRIGGER
+service_role,food_nutrient_values,TRUNCATE
+service_role,food_nutrient_values,UPDATE
+anon,food_nutrient_values_staging,DELETE
+anon,food_nutrient_values_staging,INSERT
+anon,food_nutrient_values_staging,REFERENCES
+anon,food_nutrient_values_staging,SELECT
+anon,food_nutrient_values_staging,TRIGGER
+anon,food_nutrient_values_staging,TRUNCATE
+anon,food_nutrient_values_staging,UPDATE
+authenticated,food_nutrient_values_staging,DELETE
+authenticated,food_nutrient_values_staging,INSERT
+authenticated,food_nutrient_values_staging,REFERENCES
+authenticated,food_nutrient_values_staging,SELECT
+authenticated,food_nutrient_values_staging,TRIGGER
+authenticated,food_nutrient_values_staging,TRUNCATE
+authenticated,food_nutrient_values_staging,UPDATE
+postgres,food_nutrient_values_staging,DELETE
+postgres,food_nutrient_values_staging,INSERT
+postgres,food_nutrient_values_staging,REFERENCES
+postgres,food_nutrient_values_staging,SELECT
+postgres,food_nutrient_values_staging,TRIGGER
+postgres,food_nutrient_values_staging,TRUNCATE
+postgres,food_nutrient_values_staging,UPDATE
+service_role,food_nutrient_values_staging,DELETE
+service_role,food_nutrient_values_staging,INSERT
+service_role,food_nutrient_values_staging,REFERENCES
+service_role,food_nutrient_values_staging,SELECT
+service_role,food_nutrient_values_staging,TRIGGER
+service_role,food_nutrient_values_staging,TRUNCATE
+service_role,food_nutrient_values_staging,UPDATE
+anon,food_search_view,DELETE
+anon,food_search_view,INSERT
+anon,food_search_view,REFERENCES
+anon,food_search_view,SELECT
+anon,food_search_view,TRIGGER
+anon,food_search_view,TRUNCATE
+anon,food_search_view,UPDATE
+authenticated,food_search_view,DELETE
+authenticated,food_search_view,INSERT
+authenticated,food_search_view,REFERENCES
+authenticated,food_search_view,SELECT
+authenticated,food_search_view,TRIGGER
+authenticated,food_search_view,TRUNCATE
+authenticated,food_search_view,UPDATE
+postgres,food_search_view,DELETE
+postgres,food_search_view,INSERT
+postgres,food_search_view,REFERENCES
+postgres,food_search_view,SELECT
+postgres,food_search_view,TRIGGER
+postgres,food_search_view,TRUNCATE
+postgres,food_search_view,UPDATE
+service_role,food_search_view,DELETE
+service_role,food_search_view,INSERT
+service_role,food_search_view,REFERENCES
+service_role,food_search_view,SELECT
+service_role,food_search_view,TRIGGER
+service_role,food_search_view,TRUNCATE
+service_role,food_search_view,UPDATE
+anon,health_goals,DELETE
+anon,health_goals,INSERT
+anon,health_goals,REFERENCES
+anon,health_goals,SELECT
+anon,health_goals,TRIGGER
+anon,health_goals,TRUNCATE
+anon,health_goals,UPDATE
+authenticated,health_goals,DELETE
+authenticated,health_goals,INSERT
+authenticated,health_goals,REFERENCES
+authenticated,health_goals,SELECT
+authenticated,health_goals,TRIGGER
+authenticated,health_goals,TRUNCATE
+authenticated,health_goals,UPDATE
+postgres,health_goals,DELETE
+postgres,health_goals,INSERT
+postgres,health_goals,REFERENCES
+postgres,health_goals,SELECT
+postgres,health_goals,TRIGGER
+postgres,health_goals,TRUNCATE
+postgres,health_goals,UPDATE
+service_role,health_goals,DELETE
+service_role,health_goals,INSERT
+service_role,health_goals,REFERENCES
+service_role,health_goals,SELECT
+service_role,health_goals,TRIGGER
+service_role,health_goals,TRUNCATE
+service_role,health_goals,UPDATE
+anon,major_groups,DELETE
+anon,major_groups,INSERT
+anon,major_groups,REFERENCES
+anon,major_groups,SELECT
+anon,major_groups,TRIGGER
+anon,major_groups,TRUNCATE
+anon,major_groups,UPDATE
+authenticated,major_groups,DELETE
+authenticated,major_groups,INSERT
+authenticated,major_groups,REFERENCES
+authenticated,major_groups,SELECT
+authenticated,major_groups,TRIGGER
+authenticated,major_groups,TRUNCATE
+authenticated,major_groups,UPDATE
+postgres,major_groups,DELETE
+postgres,major_groups,INSERT
+postgres,major_groups,REFERENCES
+postgres,major_groups,SELECT
+postgres,major_groups,TRIGGER
+postgres,major_groups,TRUNCATE
+postgres,major_groups,UPDATE
+service_role,major_groups,DELETE
+service_role,major_groups,INSERT
+service_role,major_groups,REFERENCES
+service_role,major_groups,SELECT
+service_role,major_groups,TRIGGER
+service_role,major_groups,TRUNCATE
+service_role,major_groups,UPDATE
+anon,nutrient_definitions,DELETE
+anon,nutrient_definitions,INSERT
+anon,nutrient_definitions,REFERENCES
+anon,nutrient_definitions,SELECT
+anon,nutrient_definitions,TRIGGER
+anon,nutrient_definitions,TRUNCATE
+anon,nutrient_definitions,UPDATE
+authenticated,nutrient_definitions,DELETE
+authenticated,nutrient_definitions,INSERT
+authenticated,nutrient_definitions,REFERENCES
+authenticated,nutrient_definitions,SELECT
+authenticated,nutrient_definitions,TRIGGER
+authenticated,nutrient_definitions,TRUNCATE
+authenticated,nutrient_definitions,UPDATE
+postgres,nutrient_definitions,DELETE
+postgres,nutrient_definitions,INSERT
+postgres,nutrient_definitions,REFERENCES
+postgres,nutrient_definitions,SELECT
+postgres,nutrient_definitions,TRIGGER
+postgres,nutrient_definitions,TRUNCATE
+postgres,nutrient_definitions,UPDATE
+service_role,nutrient_definitions,DELETE
+service_role,nutrient_definitions,INSERT
+service_role,nutrient_definitions,REFERENCES
+service_role,nutrient_definitions,SELECT
+service_role,nutrient_definitions,TRIGGER
+service_role,nutrient_definitions,TRUNCATE
+service_role,nutrient_definitions,UPDATE
+anon,nutrient_groups,DELETE
+anon,nutrient_groups,INSERT
+anon,nutrient_groups,REFERENCES
+anon,nutrient_groups,SELECT
+anon,nutrient_groups,TRIGGER
+anon,nutrient_groups,TRUNCATE
+anon,nutrient_groups,UPDATE
+authenticated,nutrient_groups,DELETE
+authenticated,nutrient_groups,INSERT
+authenticated,nutrient_groups,REFERENCES
+authenticated,nutrient_groups,SELECT
+authenticated,nutrient_groups,TRIGGER
+authenticated,nutrient_groups,TRUNCATE
+authenticated,nutrient_groups,UPDATE
+postgres,nutrient_groups,DELETE
+postgres,nutrient_groups,INSERT
+postgres,nutrient_groups,REFERENCES
+postgres,nutrient_groups,SELECT
+postgres,nutrient_groups,TRIGGER
+postgres,nutrient_groups,TRUNCATE
+postgres,nutrient_groups,UPDATE
+service_role,nutrient_groups,DELETE
+service_role,nutrient_groups,INSERT
+service_role,nutrient_groups,REFERENCES
+service_role,nutrient_groups,SELECT
+service_role,nutrient_groups,TRIGGER
+service_role,nutrient_groups,TRUNCATE
+service_role,nutrient_groups,UPDATE
+anon,preset_plans,DELETE
+anon,preset_plans,INSERT
+anon,preset_plans,REFERENCES
+anon,preset_plans,SELECT
+anon,preset_plans,TRIGGER
+anon,preset_plans,TRUNCATE
+anon,preset_plans,UPDATE
+authenticated,preset_plans,DELETE
+authenticated,preset_plans,INSERT
+authenticated,preset_plans,REFERENCES
+authenticated,preset_plans,SELECT
+authenticated,preset_plans,TRIGGER
+authenticated,preset_plans,TRUNCATE
+authenticated,preset_plans,UPDATE
+postgres,preset_plans,DELETE
+postgres,preset_plans,INSERT
+postgres,preset_plans,REFERENCES
+postgres,preset_plans,SELECT
+postgres,preset_plans,TRIGGER
+postgres,preset_plans,TRUNCATE
+postgres,preset_plans,UPDATE
+service_role,preset_plans,DELETE
+service_role,preset_plans,INSERT
+service_role,preset_plans,REFERENCES
+service_role,preset_plans,SELECT
+service_role,preset_plans,TRIGGER
+service_role,preset_plans,TRUNCATE
+service_role,preset_plans,UPDATE
+anon,user_plans,DELETE
+anon,user_plans,INSERT
+anon,user_plans,REFERENCES
+anon,user_plans,SELECT
+anon,user_plans,TRIGGER
+anon,user_plans,TRUNCATE
+anon,user_plans,UPDATE
+authenticated,user_plans,DELETE
+authenticated,user_plans,INSERT
+authenticated,user_plans,REFERENCES
+authenticated,user_plans,SELECT
+authenticated,user_plans,TRIGGER
+authenticated,user_plans,TRUNCATE
+authenticated,user_plans,UPDATE
+postgres,user_plans,DELETE
+postgres,user_plans,INSERT
+postgres,user_plans,REFERENCES
+postgres,user_plans,SELECT
+postgres,user_plans,TRIGGER
+postgres,user_plans,TRUNCATE
+postgres,user_plans,UPDATE
+service_role,user_plans,DELETE
+service_role,user_plans,INSERT
+service_role,user_plans,REFERENCES
+service_role,user_plans,SELECT
+service_role,user_plans,TRIGGER
+service_role,user_plans,TRUNCATE
+service_role,user_plans,UPDATE
+anon,user_profile_health_goals,DELETE
+anon,user_profile_health_goals,INSERT
+anon,user_profile_health_goals,REFERENCES
+anon,user_profile_health_goals,SELECT
+anon,user_profile_health_goals,TRIGGER
+anon,user_profile_health_goals,TRUNCATE
+anon,user_profile_health_goals,UPDATE
+authenticated,user_profile_health_goals,DELETE
+authenticated,user_profile_health_goals,INSERT
+authenticated,user_profile_health_goals,REFERENCES
+authenticated,user_profile_health_goals,SELECT
+authenticated,user_profile_health_goals,TRIGGER
+authenticated,user_profile_health_goals,TRUNCATE
+authenticated,user_profile_health_goals,UPDATE
+postgres,user_profile_health_goals,DELETE
+postgres,user_profile_health_goals,INSERT
+postgres,user_profile_health_goals,REFERENCES
+postgres,user_profile_health_goals,SELECT
+postgres,user_profile_health_goals,TRIGGER
+postgres,user_profile_health_goals,TRUNCATE
+postgres,user_profile_health_goals,UPDATE
+service_role,user_profile_health_goals,DELETE
+service_role,user_profile_health_goals,INSERT
+service_role,user_profile_health_goals,REFERENCES
+service_role,user_profile_health_goals,SELECT
+service_role,user_profile_health_goals,TRIGGER
+service_role,user_profile_health_goals,TRUNCATE
+service_role,user_profile_health_goals,UPDATE
+anon,user_profiles,DELETE
+anon,user_profiles,INSERT
+anon,user_profiles,REFERENCES
+anon,user_profiles,SELECT
+anon,user_profiles,TRIGGER
+anon,user_profiles,TRUNCATE
+anon,user_profiles,UPDATE
+authenticated,user_profiles,DELETE
+authenticated,user_profiles,INSERT
+authenticated,user_profiles,REFERENCES
+authenticated,user_profiles,SELECT
+authenticated,user_profiles,TRIGGER
+authenticated,user_profiles,TRUNCATE
+authenticated,user_profiles,UPDATE
+postgres,user_profiles,DELETE
+postgres,user_profiles,INSERT
+postgres,user_profiles,REFERENCES
+postgres,user_profiles,SELECT
+postgres,user_profiles,TRIGGER
+postgres,user_profiles,TRUNCATE
+postgres,user_profiles,UPDATE
+service_role,user_profiles,DELETE
+service_role,user_profiles,INSERT
+service_role,user_profiles,REFERENCES
+service_role,user_profiles,SELECT
+service_role,user_profiles,TRIGGER
+service_role,user_profiles,TRUNCATE
+service_role,user_profiles,UPDATE
+
+
+
+extname,extversion
+pg_stat_statements,1.11
+pg_trgm,1.6
+pgcrypto,1.3
+plpgsql,1.0
+supabase_vault,0.3.1
+uuid-ossp,1.1
+
+
+table_name,fk_column,index_status
+food_items,major_group_id,❌ NO INDEX
+food_nutrient_values,food_id,✅ Indexed
+food_nutrient_values,nutrient_id,✅ Indexed
+nutrient_definitions,nutrient_group_id,❌ NO INDEX
+user_plans,user_id,✅ Indexed
+user_profile_health_goals,health_goal_id,✅ Indexed
+user_profile_health_goals,user_id,✅ Indexed
+user_profiles,user_id,✅ Indexed
+
+
+id,name,display_order,is_active,breakfast_items,lunch_items,dinner_items,created_at
+dd291fef-a33c-4386-991b-881c4c07ea75,Balanced office day,1,true,14,21,21,2026-06-25 08:42:29.570403+00
+4951baa3-b35e-4aca-a228-5548c037c24d,Cereal-heavy pattern,2,true,7,14,14,2026-06-25 08:42:29.570403+00
+e585f3c5-73ed-4364-ad7f-7156408d5d64,High-protein day,3,true,14,21,21,2026-06-25 08:42:29.570403+00
+d1239486-4102-4b8e-af4e-12433a2268c1,Light veggie day,4,true,14,21,14,2026-06-25 08:42:29.570403+00
+c985d5a2-56ad-4e6b-9a5b-63813fca6ab8,Dal & roti comfort,5,true,14,21,21,2026-06-25 08:42:29.570403+00
+
+
+
+total_foods,foods_with_nutrients,total_nutrient_types,total_nutrient_records
+528,528,38,20064
+
+
+total_user_plans,empty_plans,unique_users_with_plans,total_profiles
+1,0,1,4
