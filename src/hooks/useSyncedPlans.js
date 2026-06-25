@@ -45,7 +45,7 @@ function mergePlans(localPlans, remotePlans) {
         merged.push({
             id: remotePlan.id,
             name: remotePlan.name,
-            meals: remotePlan.meals,
+            meals: remotePlan.meals || {},
             guidelines: remotePlan.guidelines || "",
         });
     }

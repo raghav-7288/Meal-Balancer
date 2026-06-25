@@ -31,7 +31,7 @@ import Section from "../ui/Section";
 function WeeklyPlannerPage() {
     const { user, profile: dbProfile } = useAuth();
     const { profile } = useProfile();
-    const { presetPlans } = usePresetPlans();
+    const { presetPlans, isLoading: presetLoading } = usePresetPlans();
     const [userPlans] = useSyncedPlans();
     const allPlans = useMemo(() => [...presetPlans, ...userPlans], [presetPlans, userPlans]);
     const [activePlanId, setActivePlanId] = useState(
@@ -55,7 +55,8 @@ function WeeklyPlannerPage() {
     const getItems = useCallback(
         (day, meal) => {
             if (!activePlan) return [];
-            return (activePlan.meals[meal] || []).filter(
+            const meals = activePlan.meals || {};
+            return (meals[meal] || []).filter(
                 (item) => item.day === day || !item.day
             );
         },
@@ -66,10 +67,11 @@ function WeeklyPlannerPage() {
     const daySummaries = useMemo(() => {
         if (!activePlan) return {};
         const summaries = {};
+        const planMeals = activePlan.meals || {};
         for (const day of DAYS) {
             const mealTotals = {};
             for (const meal of MEALS) {
-                const items = (activePlan.meals[meal] || []).filter(
+                const items = (planMeals[meal] || []).filter(
                     (i) => i.day === day || !i.day
                 );
                 mealTotals[meal] = aggregateMeal(items);
@@ -140,6 +142,18 @@ function WeeklyPlannerPage() {
         if (score >= 50) return "#d97706";
         return score > 0 ? "#dc2626" : "#cbd5e1";
     };
+
+    // Show loading state until plans are available
+    if (presetLoading && allPlans.length === 0) {
+        return (
+            <div className="weekly-planner-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
+                <div style={{ textAlign: "center" }}>
+                    <Calendar size={32} className="spin" style={{ color: "#3b82f6", marginBottom: "1rem" }} />
+                    <p style={{ fontSize: "14px", color: "#64748b" }}>Loading meal plans…</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="weekly-planner-page">

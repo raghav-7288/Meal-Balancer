@@ -56,6 +56,12 @@ function MealBuilder({
 
     return (
         <Section title={`Meal builder — ${viewDay}`} icon={<Plus size={16} />}>
+            {!activePlan ? (
+                <p className="small-copy" style={{ textAlign: "center", padding: "2rem 0" }}>
+                    Loading plan…
+                </p>
+            ) : (
+            <>
             {isPresetActive && (
                 <p className="small-copy" style={{ marginBottom: "1rem", fontStyle: "italic", opacity: 0.8 }}>
                     This is a pre-saved plan. Copy it to &quot;My Plans&quot; to add or edit food items.
@@ -64,7 +70,7 @@ function MealBuilder({
 
             <div className="meal-panels">
                 {MEALS.map((meal) => {
-                    const mealItems = (activePlan.meals[meal] || []).filter(
+                    const mealItems = ((activePlan.meals || {})[meal] || []).filter(
                         (i) => i.day === viewDay || !i.day
                     );
                     const mealScore = activeSummary?.mealScores?.[meal]?.score || 0;
@@ -260,6 +266,8 @@ function MealBuilder({
                     );
                 })}
             </div>
+            </>
+            )}
         </Section>
     );
 }

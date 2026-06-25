@@ -36,7 +36,7 @@ function DashboardPage() {
     const { profile } = useProfile();
     const [searchParams] = useSearchParams();
 
-    const { presetPlans } = usePresetPlans();
+    const { presetPlans, isLoading: presetLoading } = usePresetPlans();
     const [userPlans, setUserPlans, { syncStatus }] = useSyncedPlans();
     const [planView, setPlanView] = useState("preset");
     const plans = useMemo(() => [...presetPlans, ...userPlans], [presetPlans, userPlans]);
@@ -148,9 +148,10 @@ function DashboardPage() {
         return plans.map((plan) => {
             const mealTotals = {};
             const mealScores = {};
+            const meals = plan.meals || {};
 
             for (const mealName of MEALS) {
-                const allItems = plan.meals[mealName] || [];
+                const allItems = meals[mealName] || [];
                 // Filter items to the selected day (items without a day show on every day)
                 const dayItems = allItems.filter(i => i.day === viewDay || !i.day);
                 const totals = aggregateMeal(dayItems);
@@ -196,8 +197,8 @@ function DashboardPage() {
                     ? {
                         ...plan,
                         meals: {
-                            ...plan.meals,
-                            [mealName]: plan.meals[mealName].map((item) =>
+                            ...(plan.meals || {}),
+                            [mealName]: (plan.meals?.[mealName] || []).map((item) =>
                                 item.id === itemId ? { ...item, ...updates } : item
                             ),
                         },
@@ -214,8 +215,8 @@ function DashboardPage() {
                     ? {
                         ...plan,
                         meals: {
-                            ...plan.meals,
-                            [mealName]: plan.meals[mealName].filter((item) => item.id !== itemId),
+                            ...(plan.meals || {}),
+                            [mealName]: (plan.meals?.[mealName] || []).filter((item) => item.id !== itemId),
                         },
                     }
                     : plan
@@ -266,9 +267,9 @@ function DashboardPage() {
                         ? {
                             ...plan,
                             meals: {
-                                ...plan.meals,
+                                ...(plan.meals || {}),
                                 [selectedMeal]: [
-                                    ...(plan.meals[selectedMeal] || []),
+                                    ...(plan.meals?.[selectedMeal] || []),
                                     mealItem,
                                 ],
                             },
@@ -332,9 +333,10 @@ function DashboardPage() {
     function confirmCopyPlan() {
         if (!copyModal) return;
         const name = copyPlanName.trim() || `${copyModal.name} (copy)`;
+        const copyMeals = copyModal.meals || {};
         const newMeals = {};
         for (const slot of MEALS) {
-            newMeals[slot] = (copyModal.meals[slot] || []).map(i => ({ ...i, id: crypto.randomUUID() }));
+            newMeals[slot] = (copyMeals[slot] || []).map(i => ({ ...i, id: crypto.randomUUID() }));
         }
         const newPlan = createPlan(name, newMeals, copyModal.guidelines || "");
         setUserPlans((prev) => [...prev, newPlan]);
@@ -381,6 +383,18 @@ function DashboardPage() {
     const dayScore = activeSummary?.dayScore?.score || 0;
     const scoreTone =
         dayScore >= 85 ? "good" : dayScore >= 70 ? "neutral" : dayScore >= 50 ? "warn" : "bad";
+
+    // Show loading state until plans are available
+    if (presetLoading && plans.length === 0) {
+        return (
+            <div className="dashboard-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
+                <div style={{ textAlign: "center" }}>
+                    <Loader size={32} className="spin" style={{ color: "#3b82f6", marginBottom: "1rem" }} />
+                    <p style={{ fontSize: "14px", color: "#64748b" }}>Loading meal plans…</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="dashboard-page">

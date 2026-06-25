@@ -22,7 +22,7 @@ export async function fetchPresetPlans() {
         return (data || []).map((plan) => ({
             id: plan.id,
             name: plan.name,
-            meals: plan.meals,
+            meals: plan.meals || {},
             guidelines: plan.guidelines || "",
             isPreset: true,
         }));

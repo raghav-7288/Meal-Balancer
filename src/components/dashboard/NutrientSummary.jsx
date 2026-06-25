@@ -71,7 +71,7 @@ function NutrientSummary({ activeSummary, activePlan }) {
                         <thead><tr><th>Food</th><th>g</th><th>Group</th><th>Exchange</th></tr></thead>
                         <tbody>
                             {(() => {
-                                const allItems = Object.values(activePlan.meals || {}).flat();
+                                const allItems = Object.values(activePlan?.meals || {}).flat();
                                 if (!allItems.length) {
                                     return <tr><td colSpan={4} className="empty-cell">Add foods to see exchange conversion.</td></tr>;
                                 }
