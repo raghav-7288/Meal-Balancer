@@ -17,6 +17,13 @@ const COLORS = {
     headerBg: [37, 99, 235],
     summaryHeaderBg: [16, 185, 129],
     totalRowBg: [239, 246, 255],  // Blue-50
+    // Light pastel section backgrounds
+    dayCardBg: [248, 250, 255],       // Very light blue tint
+    dayCardBorder: [214, 226, 252],   // Soft blue border
+    mealSlotBg: [240, 249, 245],      // Very light emerald tint
+    mealSlotBorder: [209, 237, 225],  // Soft emerald border
+    dayTotalBg: [245, 243, 255],      // Very light indigo tint
+    dayTotalBorder: [224, 220, 252],  // Soft indigo border
 };
 
 /**
@@ -116,33 +123,36 @@ function drawFooter(doc, pageNum, totalPages, pageWidth, pageHeight) {
 }
 
 /**
- * Draw the Client Information card section.
+ * Draw the Client Information card section — personal details only.
  */
 function drawClientInfo(doc, userInfo, profile, y, pageWidth) {
     const cardMargin = 14;
     const cardWidth = pageWidth - cardMargin * 2;
 
-    // Section header
-    doc.setFontSize(11);
+    // Section header with accent bar
+    doc.setFillColor(...COLORS.primary);
+    doc.roundedRect(cardMargin, y - 4.5, 3, 6, 1, 1, "F");
+    doc.setFontSize(13);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...COLORS.dark);
-    doc.text("Client Information", cardMargin, y);
-    y += 3;
+    doc.text("Client Information", cardMargin + 6, y);
+    y += 6;
 
     // Card background
+    const cardHeight = 38;
     doc.setFillColor(...COLORS.light);
     doc.setDrawColor(...COLORS.border);
     doc.setLineWidth(0.3);
-    doc.roundedRect(cardMargin, y, cardWidth, 32, 2, 2, "FD");
+    doc.roundedRect(cardMargin, y, cardWidth, cardHeight, 3, 3, "FD");
     doc.setDrawColor(0);
-    y += 6;
+    y += 8;
 
     // Two-column layout
-    const col1X = cardMargin + 6;
-    const col2X = pageWidth / 2 + 6;
-    const lineHeight = 6.5;
+    const col1X = cardMargin + 8;
+    const col2X = pageWidth / 2 + 8;
+    const lineHeight = 7.5;
 
-    doc.setFontSize(8.5);
+    doc.setFontSize(9);
 
     // Row 1
     drawInfoRow(doc, col1X, y, "Name", userInfo.fullName || "\u2014");
@@ -161,35 +171,59 @@ function drawClientInfo(doc, userInfo, profile, y, pageWidth) {
 
     // Row 4
     drawInfoRow(doc, col1X, y, "BMI", userInfo.bmi || "\u2014");
-    drawInfoRow(doc, col2X, y, "Activity", capitalize(profile.activity || "\u2014"));
-
-    y += lineHeight + 4;
-
-    // Additional info row below card
-    const tagY = y;
-    const tags = [
-        { label: "Goal", value: capitalize(profile.goal || "\u2014") },
-        { label: "Diet", value: capitalize(profile.dietType || "\u2014") },
-    ];
     if (userInfo.contactNumber) {
-        tags.push({ label: "Contact", value: userInfo.contactNumber });
+        drawInfoRow(doc, col2X, y, "Contact", userInfo.contactNumber);
     }
 
-    doc.setFontSize(7.5);
-    let tagX = cardMargin;
-    for (const tag of tags) {
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(...COLORS.muted);
-        doc.text(`${tag.label}: `, tagX, tagY);
-        const labelWidth = doc.getTextWidth(`${tag.label}: `);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(...COLORS.text);
-        doc.text(tag.value, tagX + labelWidth, tagY);
-        tagX += labelWidth + doc.getTextWidth(tag.value) + 12;
-    }
+    y += lineHeight + 2;
+    doc.setTextColor(0);
+    return y + 4;
+}
+
+/**
+ * Draw the Plan Info card section — plan-specific details.
+ */
+function drawPlanInfo(doc, plan, profile, y, pageWidth) {
+    const cardMargin = 14;
+    const cardWidth = pageWidth - cardMargin * 2;
+
+    // Section header with accent bar
+    doc.setFillColor(...COLORS.accent);
+    doc.roundedRect(cardMargin, y - 4.5, 3, 6, 1, 1, "F");
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...COLORS.dark);
+    doc.text("Plan Info", cardMargin + 6, y);
+    y += 6;
+
+    // Card background
+    const cardHeight = 24;
+    doc.setFillColor(...COLORS.mealSlotBg);
+    doc.setDrawColor(...COLORS.mealSlotBorder);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(cardMargin, y, cardWidth, cardHeight, 3, 3, "FD");
+    doc.setDrawColor(0);
+    y += 8;
+
+    const col1X = cardMargin + 8;
+    const col2X = pageWidth / 2 + 8;
+    const lineHeight = 7.5;
+
+    doc.setFontSize(9);
+
+    // Row 1
+    drawInfoRow(doc, col1X, y, "Plan Name", plan.name || "\u2014");
+    drawInfoRow(doc, col2X, y, "Diet Type", capitalize(profile.dietType || "\u2014"));
+    y += lineHeight;
+
+    // Row 2
+    drawInfoRow(doc, col1X, y, "Goal", capitalize(profile.goal || "\u2014"));
+    drawInfoRow(doc, col2X, y, "Activity Level", capitalize(profile.activity || "\u2014"));
+
+    y += lineHeight + 2;
 
     doc.setTextColor(0);
-    return tagY + 8;
+    return y + 4;
 }
 
 /**
@@ -243,36 +277,69 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
     doc.line(14, 23, pageWidth - 14, 23);
     doc.setDrawColor(0);
 
-    // Title
-    doc.setFontSize(20);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...COLORS.dark);
-    doc.text(plan.name, pageWidth / 2, 35, { align: "center" });
-
-    // Subtitle - Weekly Plan
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(...COLORS.text);
-    if (daySummaries) {
-        doc.text("Weekly Nutrition Plan", pageWidth / 2, 43, { align: "center" });
-    } else {
-        const score = summary?.dayScore?.score || 0;
-        const band = summary?.dayScore?.band || "";
-        doc.text(`Daily Score: ${score} / 100  \u2022  ${band}`, pageWidth / 2, 43, { align: "center" });
-    }
-
     doc.setTextColor(0);
 
-    let yPos = 52;
+    let yPos = 34;
 
-    // ─── CLIENT INFO SECTION ───
+    // ─── 1. CLIENT INFO SECTION ───
     if (userInfo.fullName || userInfo.email) {
         yPos = drawClientInfo(doc, userInfo, profile, yPos, pageWidth);
     }
 
-    // ─── PLAN GUIDELINES ───
+    yPos += 8;
+
+    // ─── 2. PLAN INFO SECTION ───
+    yPos = drawPlanInfo(doc, plan, profile, yPos, pageWidth);
+
+    yPos += 8;
+
+    // ─── 3. PLAN GUIDELINES ───
     if (plan.guidelines) {
-        if (yPos > 240) {
+        // Section header
+        doc.setFillColor(...COLORS.primaryDark);
+        doc.roundedRect(14, yPos - 4.5, 3, 6, 1, 1, "F");
+        doc.setFontSize(13);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...COLORS.dark);
+        doc.text("Plan Guidelines", 20, yPos);
+        doc.setTextColor(0);
+        yPos += 6;
+
+        // Guidelines text
+        doc.setFontSize(9.5);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(...COLORS.text);
+        const guidelinesLines = doc.splitTextToSize(plan.guidelines, pageWidth - 36);
+        for (const line of guidelinesLines) {
+            if (yPos > pageHeight - 20) {
+                doc.addPage();
+                yPos = drawPageHeader(doc, pageWidth);
+            }
+            doc.text(line, 16, yPos);
+            yPos += 5.5;
+        }
+        doc.setTextColor(0);
+        yPos += 8;
+    }
+
+    yPos += 4;
+
+    // ─── 4. WEEKLY OVERVIEW STATS (only for weekly plans) ───
+    if (daySummaries) {
+        // Compute weekly averages
+        const daysWithFood = DAYS.filter((d) => {
+            const dt = daySummaries[d]?.dayTotals;
+            return dt && (dt.protein || 0) + (dt.carbs || 0) + (dt.fat || 0) > 0;
+        });
+        const numDays = daysWithFood.length || 1;
+        const avgKcal = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.kcal || 0), 0) / numDays);
+        const avgProtein = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.protein || 0), 0) / numDays);
+        const avgCarbs = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.carbs || 0), 0) / numDays);
+        const avgFat = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.fat || 0), 0) / numDays);
+        const avgFibre = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.fibre || 0), 0) / numDays);
+
+        // Check page space
+        if (yPos > pageHeight - 55) {
             doc.addPage();
             yPos = drawPageHeader(doc, pageWidth);
         }
@@ -283,53 +350,71 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
         doc.setFontSize(13);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(...COLORS.dark);
-        doc.text("Plan Guidelines", 20, yPos);
+        doc.text("Weekly Overview", 20, yPos);
         doc.setTextColor(0);
         yPos += 6;
 
-        // Guidelines text
-        doc.setFontSize(9);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(...COLORS.text);
-        const guidelinesLines = doc.splitTextToSize(plan.guidelines, pageWidth - 36);
-        for (const line of guidelinesLines) {
-            if (yPos > pageHeight - 20) {
-                doc.addPage();
-                yPos = drawPageHeader(doc, pageWidth);
-            }
-            doc.text(line, 14, yPos);
-            yPos += 5;
+        // Stats card
+        const statsCardHeight = 32;
+        doc.setFillColor(...COLORS.dayCardBg);
+        doc.setDrawColor(...COLORS.dayCardBorder);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(14, yPos, pageWidth - 28, statsCardHeight, 3, 3, "FD");
+        doc.setDrawColor(0);
+        yPos += 8;
+
+        // Stats in a row of boxes
+        const statItems = [
+            { label: "Days Planned", value: `${daysWithFood.length}` },
+            { label: "Avg Calories", value: `${avgKcal} kcal` },
+            { label: "Avg Protein", value: `${avgProtein}g` },
+            { label: "Avg Carbs", value: `${avgCarbs}g` },
+            { label: "Avg Fat", value: `${avgFat}g` },
+            { label: "Avg Fibre", value: `${avgFibre}g` },
+        ];
+
+        const statWidth = (pageWidth - 36) / statItems.length;
+        for (let i = 0; i < statItems.length; i++) {
+            const sx = 18 + i * statWidth;
+            // Value
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(...COLORS.primaryDark);
+            doc.text(statItems[i].value, sx + statWidth / 2, yPos + 2, { align: "center" });
+            // Label
+            doc.setFontSize(7);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(...COLORS.muted);
+            doc.text(statItems[i].label, sx + statWidth / 2, yPos + 9, { align: "center" });
         }
         doc.setTextColor(0);
-        yPos += 4;
+
+        yPos += statsCardHeight - 2;
     }
+
 
     // ─── WEEKLY FORMAT ───
     if (daySummaries) {
         for (const day of DAYS) {
             const daySummary = daySummaries[day];
-            const dayScore = daySummary?.dayScore?.score || 0;
             const dayTotals = daySummary?.dayTotals;
             const hasFood = dayTotals && (dayTotals.protein || 0) + (dayTotals.carbs || 0) + (dayTotals.fat || 0) > 0;
 
             if (!hasFood) continue;
 
-            // Check page space
-            if (yPos > 220) {
-                doc.addPage();
-                yPos = drawPageHeader(doc, pageWidth);
-            }
+            // ── Each day starts on a fresh page ──
+            doc.addPage();
+            yPos = drawPageHeader(doc, pageWidth);
 
-            // Day header
+            // ── Day header bar ──
             doc.setFillColor(...COLORS.primaryDark);
-            doc.roundedRect(14, yPos - 5, pageWidth - 28, 9, 2, 2, "F");
-            doc.setFontSize(11);
+            doc.roundedRect(14, yPos - 5.5, pageWidth - 28, 11, 2.5, 2.5, "F");
+            doc.setFontSize(12);
             doc.setFont("helvetica", "bold");
             doc.setTextColor(...COLORS.white);
-            doc.text(`${day}`, 18, yPos);
-            doc.text(`Score: ${dayScore}/100`, pageWidth - 18, yPos, { align: "right" });
+            doc.text(`${day}`, 20, yPos + 1);
             doc.setTextColor(0);
-            yPos += 10;
+            yPos += 14;
 
             // Meals for this day
             for (const mealName of MEALS) {
@@ -338,21 +423,29 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
                 );
                 if (items.length === 0) continue;
 
-                // Check if we need a new page
-                if (yPos > 250) {
+                // Check if we need a new page (overflow within a day)
+                if (yPos > 240) {
                     doc.addPage();
                     yPos = drawPageHeader(doc, pageWidth);
                 }
 
-                // Meal subheader
-                doc.setFillColor(...COLORS.primary);
-                doc.roundedRect(14, yPos - 3.5, 2.5, 5, 1, 1, "F");
-                doc.setFontSize(10);
+                // Meal subheader with light background pill
+                doc.setFillColor(...COLORS.mealSlotBg);
+                doc.setDrawColor(...COLORS.mealSlotBorder);
+                doc.setLineWidth(0.3);
+                doc.roundedRect(16, yPos - 4, pageWidth - 32, 7.5, 1.5, 1.5, "FD");
+                doc.setDrawColor(0);
+
+                // Colored accent dot
+                doc.setFillColor(...COLORS.accent);
+                doc.circle(21, yPos - 0.25, 1.5, "F");
+
+                doc.setFontSize(9.5);
                 doc.setFont("helvetica", "bold");
                 doc.setTextColor(...COLORS.dark);
-                doc.text(mealName, 19, yPos);
+                doc.text(mealName, 25, yPos);
                 doc.setTextColor(0);
-                yPos += 3;
+                yPos += 6;
 
                 // Build table data
                 const tableBody = items.map((item) => {
@@ -385,17 +478,17 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
                     body: tableBody,
                     theme: "grid",
                     headStyles: {
-                        fillColor: COLORS.headerBg,
+                        fillColor: [15, 23, 42],   // Slate-900 (dark contrast)
                         textColor: COLORS.white,
                         fontSize: 7.5,
                         fontStyle: "bold",
-                        cellPadding: 2,
+                        cellPadding: 2.5,
                         halign: "center",
                     },
                     bodyStyles: {
                         fontSize: 7.5,
                         textColor: COLORS.text,
-                        cellPadding: 2,
+                        cellPadding: 2.5,
                     },
                     columnStyles: {
                         0: { halign: "left", cellWidth: 40 },
@@ -411,28 +504,35 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
                         lineWidth: 0.2,
                     },
                     alternateRowStyles: {
-                        fillColor: [248, 250, 252],
+                        fillColor: [248, 250, 252], // Slate-50
                     },
-                    margin: { left: 14, right: 14 },
+                    margin: { left: 18, right: 18 },
                 });
 
-                yPos = doc.lastAutoTable.finalY + 5;
+                yPos = doc.lastAutoTable.finalY + 8;
             }
 
-            // Day total summary row
-            if (dayTotals && yPos < 260) {
-                doc.setFontSize(7.5);
+            // ── Day total summary card ──
+            if (dayTotals) {
+                if (yPos > 265) {
+                    doc.addPage();
+                    yPos = drawPageHeader(doc, pageWidth);
+                }
+                const totalCardHeight = 10;
+                doc.setFillColor(...COLORS.dayTotalBg);
+                doc.setDrawColor(...COLORS.dayTotalBorder);
+                doc.setLineWidth(0.3);
+                doc.roundedRect(16, yPos - 2, pageWidth - 32, totalCardHeight, 2, 2, "FD");
+                doc.setDrawColor(0);
+
+                doc.setFontSize(8);
                 doc.setFont("helvetica", "bold");
-                doc.setTextColor(...COLORS.text);
-                doc.text(
-                    `Day Total: ${Math.round(dayTotals.kcal)} kcal | Protein: ${dayTotals.protein.toFixed(1)}g | Carbs: ${dayTotals.carbs.toFixed(1)}g | Fat: ${dayTotals.fat.toFixed(1)}g | Fibre: ${dayTotals.fibre.toFixed(1)}g`,
-                    14, yPos + 2
-                );
+                doc.setTextColor(...COLORS.primaryDark);
+                const totalText = `Day Total:  ${Math.round(dayTotals.kcal)} kcal  |  Protein: ${dayTotals.protein.toFixed(1)}g  |  Carbs: ${dayTotals.carbs.toFixed(1)}g  |  Fat: ${dayTotals.fat.toFixed(1)}g  |  Fibre: ${dayTotals.fibre.toFixed(1)}g`;
+                doc.text(totalText, pageWidth / 2, yPos + 3.5, { align: "center" });
                 doc.setTextColor(0);
-                yPos += 10;
+                yPos += totalCardHeight + 6;
             }
-
-            yPos += 4;
         }
 
     } else {
@@ -613,4 +713,3 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
     const fileName = `${plan.name.replace(/[^a-zA-Z0-9 ]/g, "").trim()}.pdf`;
     doc.save(fileName);
 }
-
