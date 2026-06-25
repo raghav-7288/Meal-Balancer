@@ -23,12 +23,12 @@ vi.mock("../src/lib/supabaseClient", () => ({
     supabase: {
         from: vi.fn(() => createChainableMock()),
         auth: {
-            signUp: vi.fn((...args) => Promise.resolve(authResult)),
-            signInWithPassword: vi.fn((...args) => Promise.resolve(authResult)),
-            signOut: vi.fn((...args) => Promise.resolve(authResult)),
-            getUser: vi.fn((...args) => Promise.resolve(authResult)),
-            getSession: vi.fn((...args) => Promise.resolve(authResult)),
-            onAuthStateChange: vi.fn((cb) => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+            signUp: vi.fn(() => Promise.resolve(authResult)),
+            signInWithPassword: vi.fn(() => Promise.resolve(authResult)),
+            signOut: vi.fn(() => Promise.resolve(authResult)),
+            getUser: vi.fn(() => Promise.resolve(authResult)),
+            getSession: vi.fn(() => Promise.resolve(authResult)),
+            onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
         },
     },
 }));
@@ -206,7 +206,6 @@ describe("AuthService", () => {
         it("should create new profile when none exists", async () => {
             // First call: fetchUserProfile returns null (PGRST116), second: insert returns new profile
             const newProfile = { user_id: "user-1", username: "newuser", full_name: "New User" };
-            let callCount = 0;
             // Override terminalResult to change between calls - use a different approach
             terminalResult = { data: null, error: { code: "PGRST116", message: "Not found" } };
 

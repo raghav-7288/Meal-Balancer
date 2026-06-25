@@ -25,19 +25,19 @@ vi.mock("../src/lib/supabaseClient", () => ({
     supabase: {
         from: vi.fn(() => createChainableMock()),
         auth: {
-            signUp: vi.fn((...args) => Promise.resolve(authMockResult)),
-            signInWithPassword: vi.fn((...args) => Promise.resolve(authMockResult)),
-            signOut: vi.fn((...args) => Promise.resolve(authMockResult)),
-            getUser: vi.fn((...args) => Promise.resolve(authMockResult)),
-            getSession: vi.fn((...args) => Promise.resolve(authMockResult)),
+            signUp: vi.fn(() => Promise.resolve(authMockResult)),
+            signInWithPassword: vi.fn(() => Promise.resolve(authMockResult)),
+            signOut: vi.fn(() => Promise.resolve(authMockResult)),
+            getUser: vi.fn(() => Promise.resolve(authMockResult)),
+            getSession: vi.fn(() => Promise.resolve(authMockResult)),
             onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
         },
     },
 }));
 
 // Import all services and engines
-import { signUp, signIn, signOut, fetchUserProfile, createUserProfile } from "../src/services/authService";
-import { getHealthGoals, getMajorGroups, getFoodsByGroup, getFoodNutrients } from "../src/services/databaseService";
+import { signUp, signIn, signOut, fetchUserProfile } from "../src/services/authService";
+import { getHealthGoals, getMajorGroups, getFoodsByGroup } from "../src/services/databaseService";
 import { searchFoodItems, fetchFoodNutrients } from "../src/services/foodSearchService";
 import { fetchMealHistory, upsertMealHistoryEntry, dbRowToEntry } from "../src/services/mealHistoryService";
 import { fetchUserPlans, upsertPlan, deletePlan } from "../src/services/planSyncService";

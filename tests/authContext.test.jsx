@@ -3,7 +3,7 @@
  * Tests the React context provider with mocked services
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 import { useContext } from "react";
 
 // Mock auth service - define mock functions INSIDE the factory
@@ -22,9 +22,7 @@ import {
     getSession,
     fetchUserProfile,
     signIn as authSignIn,
-    signUp as authSignUp,
     signOut as authSignOut,
-    createUserProfile,
     onAuthStateChange,
 } from "../src/services/authService";
 
@@ -151,6 +149,7 @@ describe("AuthContext", () => {
 
         let contextValue;
         function Spy() {
+            // eslint-disable-next-line react-hooks/globals
             contextValue = useContext(AuthContext);
             return null;
         }
@@ -183,6 +182,7 @@ describe("AuthContext", () => {
 
         let contextValue;
         function Spy() {
+            // eslint-disable-next-line react-hooks/globals
             contextValue = useContext(AuthContext);
             return null;
         }

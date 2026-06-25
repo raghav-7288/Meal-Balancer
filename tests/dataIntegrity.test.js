@@ -49,6 +49,7 @@ describe("Data Integrity", () => {
             for (const food of FOODS) {
                 expect(typeof food.group).toBe("string");
                 expect(food.group.length).toBeGreaterThan(0);
+                expect(validGroups).toContain(food.group);
             }
         });
 

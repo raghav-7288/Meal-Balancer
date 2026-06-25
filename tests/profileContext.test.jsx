@@ -2,7 +2,7 @@
  * ProfileContext Tests
  * Tests the profile context provider with preferences sync
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import { ProfileProvider, useProfile } from "../src/context/ProfileContext";
 
