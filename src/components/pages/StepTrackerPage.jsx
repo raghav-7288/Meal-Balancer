@@ -1,6 +1,12 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Footprints, Plus, RotateCcw, Target, TrendingUp } from "lucide-react";
 import { useLocalStorageState } from "../../hooks/useLocalStorage";
+import { useAuth } from "../../hooks/useAuth";
+import {
+    fetchDailyHealthData,
+    upsertDailyHealth,
+    dbRowsToStepData,
+} from "../../services/dailyHealthService";
 
 const DEFAULT_TARGET = 10000;
 const QUICK_ADD_OPTIONS = [500, 1000, 2000, 5000];
@@ -15,19 +21,94 @@ function StepTrackerPage() {
     const [editingTarget, setEditingTarget] = useState(false);
     const [targetInput, setTargetInput] = useState(String(target));
     const [customInput, setCustomInput] = useState("");
+    const [syncStatus, setSyncStatus] = useState("idle");
+    const isMounted = useRef(true);
+    const syncTimeoutRef = useRef(null);
+
+    let user = null;
+    let isAuthenticated = false;
+    try {
+        const auth = useAuth();
+        user = auth.user;
+        isAuthenticated = auth.isAuthenticated;
+    } catch {
+        // localStorage-only mode
+    }
+
+    const authRef = useRef({ isAuthenticated, userId: user?.id });
+    useEffect(() => {
+        authRef.current = { isAuthenticated, userId: user?.id };
+    }, [isAuthenticated, user?.id]);
+
+    useEffect(() => {
+        return () => { isMounted.current = false; };
+    }, []);
+
+    // Load step data from Supabase on login
+    useEffect(() => {
+        if (!isAuthenticated || !user?.id) return;
+
+        async function loadFromDb() {
+            try {
+                setSyncStatus("syncing");
+                const remoteRows = await fetchDailyHealthData(user.id);
+                const remoteData = dbRowsToStepData(remoteRows);
+
+                if (isMounted.current) {
+                    setStepData((prev) => {
+                        const merged = { ...prev, ...remoteData };
+                        // Upload local-only entries
+                        for (const [date, steps] of Object.entries(prev)) {
+                            if (!(date in remoteData) && steps > 0) {
+                                upsertDailyHealth(user.id, date, { steps, steps_target: target }).catch((err) =>
+                                    console.error("Failed to upload local step entry:", err)
+                                );
+                            }
+                        }
+                        return merged;
+                    });
+
+                    // Load target from the most recent entry
+                    if (remoteRows.length > 0 && remoteRows[0].steps_target) {
+                        setTarget(remoteRows[0].steps_target);
+                    }
+
+                    setSyncStatus("synced");
+                }
+            } catch (err) {
+                console.error("Failed to load step data from Supabase:", err);
+                if (isMounted.current) setSyncStatus("error");
+            }
+        }
+
+        loadFromDb();
+    }, [isAuthenticated, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const todayKey = getTodayKey();
     const steps = stepData[todayKey] || 0;
 
-    const setSteps = useCallback(
-        (count) => {
-            setStepData((prev) => ({
-                ...prev,
-                [todayKey]: Math.max(0, count),
-            }));
-        },
-        [todayKey, setStepData]
-    );
+    // Debounced sync to Supabase
+    function syncToDb(date, stepCount, dailyTarget) {
+        const { isAuthenticated: authed, userId } = authRef.current;
+        if (!authed || !userId) return;
+
+        if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+        syncTimeoutRef.current = setTimeout(() => {
+            upsertDailyHealth(userId, date, { steps: stepCount, steps_target: dailyTarget }).catch((err) => {
+                console.error("Failed to sync steps:", err);
+                if (isMounted.current) setSyncStatus("error");
+            });
+        }, 500);
+    }
+
+    function setSteps(count) {
+        const newCount = Math.max(0, count);
+        setStepData((prev) => ({
+            ...prev,
+            [todayKey]: newCount,
+        }));
+        syncToDb(todayKey, newCount, target);
+    }
 
     const percentage = Math.min((steps / target) * 100, 100);
     const isComplete = steps >= target;
@@ -79,6 +160,7 @@ function StepTrackerPage() {
         const val = parseInt(targetInput, 10);
         if (val >= 1000 && val <= 50000) {
             setTarget(val);
+            syncToDb(todayKey, steps, val);
         }
         setEditingTarget(false);
     }
@@ -100,6 +182,11 @@ function StepTrackerPage() {
                 <h2>Step Tracker</h2>
                 <p className="step-tracker-subtitle">
                     Keep moving! Track your daily steps and stay active.
+                    {syncStatus === "error" && (
+                        <span style={{ color: "var(--color-error, #ef4444)", fontSize: "12px", marginLeft: "8px" }}>
+                            ⚠ Sync failed
+                        </span>
+                    )}
                 </p>
             </div>
 
@@ -277,5 +364,3 @@ function StepTrackerPage() {
 }
 
 export default StepTrackerPage;
-
-

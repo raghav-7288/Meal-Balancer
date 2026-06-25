@@ -1,13 +1,103 @@
-import { useLocalStorageState } from "./useLocalStorage";
+import { useState, useEffect, useRef } from "react";
+import { useAuth } from "./useAuth";
+import {
+    fetchMealHistory,
+    upsertMealHistoryEntry,
+    deleteMealHistoryEntry,
+    clearMealHistory as clearMealHistoryDb,
+    dbRowToEntry,
+} from "../services/mealHistoryService";
+
+const LOCAL_STORAGE_KEY = "meal-balancer-meal-history";
+
+function readLocal() {
+    try {
+        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch {
+        return [];
+    }
+}
+
+function writeLocal(history) {
+    try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(history));
+    } catch (err) {
+        console.error("Failed to save meal history to localStorage:", err);
+    }
+}
 
 /**
  * Hook for persisting meal history / daily score logs.
- * Stores entries in localStorage under "meal-balancer-meal-history".
+ * Syncs with Supabase when user is authenticated, falls back to localStorage.
  *
  * Each entry: { id, date, timestamp, planName, score, band, kcal, protein, carbs, fat, fibre, vegetablesG, visibleFat }
  */
 export function useMealHistory() {
-    const [history, setHistory] = useLocalStorageState("meal-balancer-meal-history", []);
+    const { user, isAuthenticated } = useAuth();
+    const [history, setHistory] = useState(readLocal);
+    const [syncStatus, setSyncStatus] = useState("idle"); // idle | syncing | synced | error
+    const isMounted = useRef(true);
+    const authRef = useRef({ isAuthenticated, userId: user?.id });
+
+    useEffect(() => {
+        authRef.current = { isAuthenticated, userId: user?.id };
+    }, [isAuthenticated, user?.id]);
+
+    useEffect(() => {
+        return () => { isMounted.current = false; };
+    }, []);
+
+    // Persist to localStorage whenever history changes
+    useEffect(() => {
+        writeLocal(history);
+    }, [history]);
+
+    // Load from Supabase on login
+    useEffect(() => {
+        if (!isAuthenticated || !user?.id) return;
+
+        async function loadFromDb() {
+            try {
+                setSyncStatus("syncing");
+                const remoteRows = await fetchMealHistory(user.id);
+                const remoteEntries = remoteRows.map(dbRowToEntry);
+
+                if (isMounted.current) {
+                    // Merge: remote is source of truth, add any local-only entries
+                    const localHistory = readLocal();
+                    const remoteMap = new Map(remoteEntries.map((e) => [e.date, e]));
+                    const merged = [...remoteEntries];
+
+                    // Upload local-only entries to Supabase
+                    const toUpload = [];
+                    for (const localEntry of localHistory) {
+                        if (!remoteMap.has(localEntry.date)) {
+                            merged.push(localEntry);
+                            toUpload.push(localEntry);
+                        }
+                    }
+
+                    setHistory(merged);
+                    setSyncStatus("synced");
+
+                    // Background upload of local-only entries
+                    if (toUpload.length > 0) {
+                        for (const entry of toUpload) {
+                            upsertMealHistoryEntry(user.id, entry).catch((err) =>
+                                console.error("Failed to upload local meal history entry:", err)
+                            );
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load meal history from Supabase:", err);
+                if (isMounted.current) setSyncStatus("error");
+            }
+        }
+
+        loadFromDb();
+    }, [isAuthenticated, user?.id]);
 
     /**
      * Log (or update) today's meal score.
@@ -34,6 +124,15 @@ export function useMealHistory() {
                 visibleFat: Math.round(entryData.visibleFat ?? 0),
             };
 
+            // Sync to Supabase in background
+            const { isAuthenticated: authed, userId } = authRef.current;
+            if (authed && userId) {
+                upsertMealHistoryEntry(userId, entry).catch((err) => {
+                    console.error("Failed to sync meal history entry:", err);
+                    if (isMounted.current) setSyncStatus("error");
+                });
+            }
+
             if (existingIdx >= 0) {
                 return prev.map((e, i) => (i === existingIdx ? entry : e));
             }
@@ -44,13 +143,30 @@ export function useMealHistory() {
     /** Remove a single history entry by id. */
     function removeEntry(id) {
         setHistory((prev) => prev.filter((e) => e.id !== id));
+
+        // Sync deletion to Supabase
+        const { isAuthenticated: authed, userId } = authRef.current;
+        if (authed && userId) {
+            deleteMealHistoryEntry(userId, id).catch((err) => {
+                console.error("Failed to delete meal history entry from Supabase:", err);
+                if (isMounted.current) setSyncStatus("error");
+            });
+        }
     }
 
     /** Clear all history. */
     function clearHistory() {
         setHistory([]);
+
+        // Clear from Supabase
+        const { isAuthenticated: authed, userId } = authRef.current;
+        if (authed && userId) {
+            clearMealHistoryDb(userId).catch((err) => {
+                console.error("Failed to clear meal history in Supabase:", err);
+                if (isMounted.current) setSyncStatus("error");
+            });
+        }
     }
 
-    return { history, logDay, removeEntry, clearHistory };
+    return { history, logDay, removeEntry, clearHistory, syncStatus };
 }
-

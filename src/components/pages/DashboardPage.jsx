@@ -37,7 +37,7 @@ function DashboardPage() {
     const [searchParams] = useSearchParams();
 
     const { presetPlans, isLoading: presetLoading } = usePresetPlans();
-    const [userPlans, setUserPlans, { syncStatus }] = useSyncedPlans();
+    const [userPlans, setUserPlans, { syncStatus, syncError, retrySync }] = useSyncedPlans();
     const [planView, setPlanView] = useState("preset");
     const plans = useMemo(() => [...presetPlans, ...userPlans], [presetPlans, userPlans]);
     const [activePlanId, setActivePlanId] = useState(() => presetPlans[0]?.id || "");
@@ -451,12 +451,16 @@ function DashboardPage() {
                         <span className={`sync-badge sync-badge--${syncStatus}`} title={
                             syncStatus === "syncing" ? "Syncing plans…" :
                             syncStatus === "synced" ? "Plans synced to cloud" :
-                            syncStatus === "error" ? "Sync failed — using local data" :
+                            syncStatus === "error" ? `Sync failed — ${syncError || "using local data"}` :
                             "Plans stored locally"
                         }>
                             {syncStatus === "syncing" && <><Loader size={12} className="spin" /> Syncing</>}
                             {syncStatus === "synced" && <><Cloud size={12} /> Synced</>}
-                            {syncStatus === "error" && <><CloudOff size={12} /> Offline</>}
+                            {syncStatus === "error" && (
+                                <button className="sync-retry-btn" onClick={retrySync} style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px", color: "inherit", fontSize: "inherit", padding: 0 }}>
+                                    <CloudOff size={12} /> Retry
+                                </button>
+                            )}
                         </span>
                     )}
                     <button className="log-today-btn" onClick={logToday}>

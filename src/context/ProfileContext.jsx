@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { supabase } from "../lib/supabaseClient";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const ProfileContext = createContext(null);
@@ -13,8 +15,30 @@ const DEFAULT_PROFILE = {
     weight: "",
 };
 
+// Map between client-side camelCase keys and DB snake_case columns
+const DB_FIELD_MAP = {
+    activity: "activity",
+    goal: "goal",
+    dietType: "diet_type",
+    sex: "sex",
+    bmiTarget: "bmi_target",
+};
+
+function dbProfileToLocal(dbProfile) {
+    if (!dbProfile) return null;
+    return {
+        activity: dbProfile.activity || DEFAULT_PROFILE.activity,
+        goal: dbProfile.goal || DEFAULT_PROFILE.goal,
+        dietType: dbProfile.diet_type || DEFAULT_PROFILE.dietType,
+        sex: dbProfile.sex || DEFAULT_PROFILE.sex,
+        bmiTarget: dbProfile.bmi_target || DEFAULT_PROFILE.bmiTarget,
+        height: dbProfile.height_cm ? String(dbProfile.height_cm) : "",
+        weight: dbProfile.weight_kg ? String(dbProfile.weight_kg) : "",
+    };
+}
+
 export function ProfileProvider({ children }) {
-    const [profile, setProfile] = useState(() => {
+    const [profile, setProfileInternal] = useState(() => {
         try {
             const stored = localStorage.getItem("meal-balancer-profile");
             return stored ? JSON.parse(stored) : DEFAULT_PROFILE;
@@ -28,6 +52,17 @@ export function ProfileProvider({ children }) {
         return localStorage.getItem("meal-balancer-dark-mode") === "true";
     });
 
+    const [profileSyncStatus, setProfileSyncStatus] = useState("idle"); // idle | syncing | synced | error
+    const isMounted = useRef(true);
+    const syncTimeoutRef = useRef(null);
+
+    const { user, isAuthenticated } = useAuth();
+
+    useEffect(() => {
+        return () => { isMounted.current = false; };
+    }, []);
+
+    // Persist to localStorage whenever profile changes
     useEffect(() => {
         try {
             localStorage.setItem("meal-balancer-profile", JSON.stringify(profile));
@@ -41,11 +76,99 @@ export function ProfileProvider({ children }) {
         localStorage.setItem("meal-balancer-dark-mode", String(darkMode));
     }, [darkMode]);
 
+    // Load profile preferences from Supabase on login
+    useEffect(() => {
+        if (!isAuthenticated || !user?.id) return;
+
+        async function loadFromDb() {
+            try {
+                setProfileSyncStatus("syncing");
+                const { data, error } = await supabase
+                    .from("user_profiles")
+                    .select("activity, goal, diet_type, sex, bmi_target, height_cm, weight_kg")
+                    .eq("user_id", user.id)
+                    .single();
+
+                if (error && error.code !== "PGRST116") {
+                    console.error("Failed to load profile from Supabase:", error);
+                    if (isMounted.current) setProfileSyncStatus("error");
+                    return;
+                }
+
+                if (data && isMounted.current) {
+                    const dbProfile = dbProfileToLocal(data);
+                    if (dbProfile) {
+                        setProfileInternal((prev) => ({
+                            ...prev,
+                            ...dbProfile,
+                            // Keep local height/weight if DB is empty
+                            height: dbProfile.height || prev.height,
+                            weight: dbProfile.weight || prev.weight,
+                        }));
+                    }
+                    setProfileSyncStatus("synced");
+                }
+            } catch (err) {
+                console.error("Failed to load profile from Supabase:", err);
+                if (isMounted.current) setProfileSyncStatus("error");
+            }
+        }
+
+        loadFromDb();
+    }, [isAuthenticated, user?.id]);
+
+    // Save profile to Supabase (debounced)
+    function saveToDb(newProfile) {
+        if (!isAuthenticated || !user?.id) return;
+
+        setProfileSyncStatus("syncing");
+        const dbFields = {};
+        for (const [localKey, dbKey] of Object.entries(DB_FIELD_MAP)) {
+            if (newProfile[localKey] !== undefined) {
+                dbFields[dbKey] = newProfile[localKey];
+            }
+        }
+
+        supabase
+            .from("user_profiles")
+            .update(dbFields)
+            .eq("user_id", user.id)
+            .then(({ error }) => {
+                if (!isMounted.current) return;
+                if (error) {
+                    console.error("Failed to sync profile to Supabase:", error);
+                    setProfileSyncStatus("error");
+                } else {
+                    setProfileSyncStatus("synced");
+                }
+            })
+            .catch((err) => {
+                console.error("Failed to sync profile to Supabase:", err);
+                if (isMounted.current) setProfileSyncStatus("error");
+            });
+    }
+
+    // Wrapper that also triggers DB save (debounced)
+    function setProfile(updater) {
+        setProfileInternal((prev) => {
+            const next = typeof updater === "function" ? updater(prev) : updater;
+
+            // Debounce DB sync by 1 second
+            if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+            syncTimeoutRef.current = setTimeout(() => {
+                saveToDb(next);
+            }, 1000);
+
+            return next;
+        });
+    }
+
     const value = {
         profile,
         setProfile,
         darkMode,
         setDarkMode,
+        profileSyncStatus,
     };
 
     return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;

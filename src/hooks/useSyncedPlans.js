@@ -132,6 +132,27 @@ export function useSyncedPlans() {
         authRef.current = { isAuthenticated, userId: user?.id };
     }, [isAuthenticated, user?.id]);
 
+    // Refs for status setters accessible in syncToSupabase
+    const setSyncStatusRef = useRef(setSyncStatus);
+    const setSyncErrorRef = useRef(setSyncError);
+    const isMountedRef = useRef(isMounted);
+    useEffect(() => { // eslint-disable-line react-hooks/exhaustive-deps
+        setSyncStatusRef.current = setSyncStatus;
+        setSyncErrorRef.current = setSyncError;
+        isMountedRef.current = isMounted;
+    });
+
+    /**
+     * Retry the last failed sync manually.
+     */
+    function retrySync() {
+        if (!isAuthenticated || !user?.id) return;
+        const currentPlans = readLocal();
+        setSyncStatus("syncing");
+        setSyncError(null);
+        syncToSupabase([], currentPlans, user.id, setSyncStatusRef, setSyncErrorRef, isMountedRef);
+    }
+
     /**
      * Wrapper around setPlans that also syncs to Supabase.
      * Accepts a new plans array or an updater function.
@@ -141,23 +162,29 @@ export function useSyncedPlans() {
             const next = typeof updater === "function" ? updater(prev) : updater;
             const { isAuthenticated: authed, userId } = authRef.current;
 
-            // Async Supabase sync (fire-and-forget with error logging)
+            // Async Supabase sync with status tracking
             if (authed && userId) {
-                syncToSupabase(prev, next, userId);
+                syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncErrorRef, isMountedRef);
             }
 
             return next;
         });
     }
 
-    return [plans, setPlans, { syncStatus, syncError }];
+    return [plans, setPlans, { syncStatus, syncError, retrySync }];
 }
 
 /**
  * Determine what changed between prev and next, and sync to Supabase.
+ * Updates syncStatus/syncError via refs so mutation callers get feedback.
  */
-async function syncToSupabase(prev, next, userId) {
+async function syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncErrorRef, isMountedRef) {
     try {
+        if (isMountedRef.current?.current) {
+            setSyncStatusRef.current("syncing");
+            setSyncErrorRef.current(null);
+        }
+
         const prevMap = new Map(prev.map((p) => [p.id, p]));
         const nextMap = new Map(next.map((p) => [p.id, p]));
 
@@ -190,8 +217,16 @@ async function syncToSupabase(prev, next, userId) {
         if (promises.length > 0) {
             await Promise.all(promises);
         }
+
+        if (isMountedRef.current?.current) {
+            setSyncStatusRef.current("synced");
+        }
     } catch (err) {
         console.error("Background plan sync failed:", err);
+        if (isMountedRef.current?.current) {
+            setSyncStatusRef.current("error");
+            setSyncErrorRef.current(err.message);
+        }
     }
 }
 
