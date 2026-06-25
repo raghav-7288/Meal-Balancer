@@ -1089,3 +1089,77 @@ body.dark-mode .pro-detail-label {
 body.dark-mode .pro-detail-value {
     color: #e2e8f0;
 }
+
+/* ─── Sync Status Indicator ─── */
+.pro-sync-status {
+    display: flex;
+    align-items: center;
+}
+
+.pro-sync-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 20px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.pro-sync-syncing {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.pro-sync-synced {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.pro-sync-error {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.pro-sync-error:hover {
+    background: #fee2e2;
+}
+
+button.pro-sync-badge {
+    font-family: inherit;
+}
+
+@keyframes pro-spin {
+    to { transform: rotate(360deg); }
+}
+
+.pro-spin {
+    animation: pro-spin 1s linear infinite;
+}
+
+/* Dark mode variants */
+body.dark-mode .pro-sync-syncing {
+    background: #1e3a5f;
+    color: #93c5fd;
+}
+
+body.dark-mode .pro-sync-synced {
+    background: #14532d;
+    color: #86efac;
+}
+
+body.dark-mode .pro-sync-error {
+    background: #450a0a;
+    color: #fca5a5;
+    border-color: #7f1d1d;
+}
+
+body.dark-mode .pro-sync-error:hover {
+    background: #5a1010;
+}
+

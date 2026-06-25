@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { APP_CONFIG } from "../../data/config";
 import { MEALS, DAYS } from "../../data/presetPlans";
 import { aggregateMeal, combineDay, foodById } from "../../engines/nutrientEngine";
@@ -12,7 +13,11 @@ import { useLocalStorageState } from "../../hooks/useLocalStorage";
 import { useSyncedPlans } from "../../hooks/useSyncedPlans";
 import { usePresetPlans } from "../../hooks/usePresetPlans";
 import { useMealHistory } from "../../hooks/useMealHistory";
+import useHotkeys from "../../hooks/useHotkeys";
+import useFocusTrap from "../../hooks/useFocusTrap";
 import Kpi from "../ui/Kpi";
+import ScoreGauge from "../ui/ScoreGauge";
+import { DashboardSkeleton } from "../ui/Skeleton";
 import PlanSidebar from "../dashboard/PlanSidebar";
 import MealBuilder from "../dashboard/MealBuilder";
 import NutrientSummary from "../dashboard/NutrientSummary";
@@ -35,6 +40,7 @@ function DashboardPage() {
     const { user, isAuthenticated } = useAuth();
     const { profile } = useProfile();
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     const { presetPlans, isLoading: presetLoading } = usePresetPlans();
     const [userPlans, setUserPlans, { syncStatus, syncError, retrySync }] = useSyncedPlans();
@@ -74,7 +80,6 @@ function DashboardPage() {
     });
     const [isAddingFood, setIsAddingFood] = useState(false);
     const [majorGroups, setMajorGroups] = useState([]);
-    const [toast, setToast] = useState(null);
     const [deleteToast, setDeleteToast] = useState(null);
     const [newPlanName, setNewPlanName] = useState("");
     const [userGoalNames, setUserGoalNames] = useState([]);
@@ -83,6 +88,9 @@ function DashboardPage() {
     const [guidelines, setGuidelines] = useState("");
     const { logDay } = useMealHistory();
 
+    // Focus trap for copy modal (#35)
+    const copyModalRef = useFocusTrap(!!copyModal);
+
     // Load major groups on mount for food group classification
     useEffect(() => {
         getMajorGroups()
@@ -90,12 +98,6 @@ function DashboardPage() {
             .catch((err) => console.error("Failed to load major groups:", err));
     }, []);
 
-    useEffect(() => {
-        if (toast) {
-            const timer = setTimeout(() => setToast(null), 2000);
-            return () => clearTimeout(timer);
-        }
-    }, [toast]);
 
     useEffect(() => {
         if (deleteToast) {
@@ -138,7 +140,7 @@ function DashboardPage() {
                     : plan
             )
         );
-        setToast("Guidelines saved! ✅");
+        toast.success("Guidelines saved!");
     }
 
     const activePlan = plans.find((p) => p.id === activePlanId) || plans[0];
@@ -277,10 +279,10 @@ function DashboardPage() {
                         : plan
                 )
             );
-            setToast(`"${foodName}" added to ${selectedMeal} (${viewDay})`);
+            toast.success(`"${foodName}" added to ${selectedMeal} (${viewDay})`);
         } catch (err) {
             console.error("Error adding food:", err);
-            setToast("Failed to add food. Please try again.");
+            toast.error("Failed to add food. Please try again.");
         } finally {
             setIsAddingFood(false);
         }
@@ -342,7 +344,7 @@ function DashboardPage() {
         setUserPlans((prev) => [...prev, newPlan]);
         setActivePlanId(newPlan.id);
         setPlanView("user");
-        setToast(`Copied "${copyModal.name}" as "${name}"`);
+        toast.success(`Copied "${copyModal.name}" as "${name}"`);
         setCopyModal(null);
         setCopyPlanName("");
     }
@@ -377,28 +379,36 @@ function DashboardPage() {
             vegetablesG: dt?.vegetablesG ?? 0,
             visibleFat: dt?.visibleFat ?? 0,
         });
-        setToast("Today's score logged to Progress! 📊");
+        toast.success("Today's score logged to Progress! 📊");
     }
 
     const dayScore = activeSummary?.dayScore?.score || 0;
     const scoreTone =
         dayScore >= 85 ? "good" : dayScore >= 70 ? "neutral" : dayScore >= 50 ? "warn" : "bad";
 
-    // Show loading state until plans are available
+    // Announce score changes to screen readers (#35)
+    useEffect(() => {
+        const el = document.getElementById("score-announcer");
+        if (el && dayScore > 0) {
+            el.textContent = `${viewDay} score: ${dayScore} out of 100`;
+        }
+    }, [dayScore, viewDay]);
+
+    // Keyboard shortcuts (#34)
+    useHotkeys({
+        "ctrl+s": () => { if (!isPresetActive) saveGuidelines(); },
+        "ctrl+n": () => saveNewPlan(),
+        "ctrl+p": () => navigate("/weekly-planner"),
+        "escape": () => { if (copyModal) setCopyModal(null); },
+    });
+
+    // Show skeleton loading state until plans are available (#30)
     if (presetLoading && plans.length === 0) {
-        return (
-            <div className="dashboard-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
-                <div style={{ textAlign: "center" }}>
-                    <Loader size={32} className="spin" style={{ color: "#3b82f6", marginBottom: "1rem" }} />
-                    <p style={{ fontSize: "14px", color: "#64748b" }}>Loading meal plans…</p>
-                </div>
-            </div>
-        );
+        return <DashboardSkeleton />;
     }
 
     return (
         <div className="dashboard-page">
-            {toast && <div className="toast-popup" role="alert" aria-live="polite">{toast}</div>}
 
             {deleteToast && (
                 <div className="delete-toast-popup" role="alert" aria-live="assertive">
@@ -411,8 +421,8 @@ function DashboardPage() {
             )}
 
             {copyModal && (
-                <div className="modal-overlay" onClick={() => setCopyModal(null)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-overlay" onClick={() => setCopyModal(null)} role="dialog" aria-modal="true" aria-label="Copy plan">
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()} ref={copyModalRef}>
                         <h3>Save plan as:</h3>
                         <input
                             type="text"
@@ -495,11 +505,15 @@ function DashboardPage() {
                 />
 
                 <main className="content">
-                    <div className="kpi-grid">
-                        <Kpi label={`${viewDay} score`} value={dayScore} tone={scoreTone} hint={activeSummary?.dayScore?.band || "No band"} />
-                        <Kpi label="Energy" value={Math.round(activeSummary?.dayTotals?.kcal || 0)} hint="kcal/day" />
-                        <Kpi label="Vegetables" value={Math.round(activeSummary?.dayTotals?.vegetablesG || 0)} hint="g/day" />
-                        <Kpi label="Visible fat" value={Math.round(activeSummary?.dayTotals?.visibleFat || 0)} hint="g/day" />
+                    {/* Score gauge + KPI row (#33) */}
+                    <div className="dashboard-score-row">
+                        <ScoreGauge score={dayScore} size={140} label={`${viewDay} score`} />
+                        <div className="kpi-grid kpi-grid--flex">
+                            <Kpi label={`${viewDay} score`} value={dayScore} tone={scoreTone} hint={activeSummary?.dayScore?.band || "No band"} />
+                            <Kpi label="Energy" value={Math.round(activeSummary?.dayTotals?.kcal || 0)} hint="kcal/day" />
+                            <Kpi label="Vegetables" value={Math.round(activeSummary?.dayTotals?.vegetablesG || 0)} hint="g/day" />
+                            <Kpi label="Visible fat" value={Math.round(activeSummary?.dayTotals?.visibleFat || 0)} hint="g/day" />
+                        </div>
                     </div>
 
                     <MealBuilder

@@ -21,6 +21,7 @@ import {
 } from "recharts";
 import { useMealHistory } from "../../hooks/useMealHistory";
 import Section from "../ui/Section";
+import EmptyState from "../ui/EmptyState";
 
 /** Format YYYY-MM-DD to short display: "Jun 24" */
 function fmtDate(dateStr) {
@@ -159,15 +160,13 @@ function ProgressPage() {
     if (sorted.length === 0) {
         return (
             <div className="progress-page">
-                <div className="progress-empty-state">
-                    <TrendingUp size={48} strokeWidth={1.5} />
-                    <h2>No history yet</h2>
-                    <p>
-                        Go to the <strong>Dashboard</strong> and click{" "}
-                        <strong>&ldquo;Log today&rdquo;</strong> to start tracking your meal
-                        scores over time.
-                    </p>
-                </div>
+                <EmptyState
+                    icon={<TrendingUp size={36} strokeWidth={1.5} />}
+                    title="No progress logged yet"
+                    description='Go to the Dashboard and click "Log today" to start tracking your meal scores over time.'
+                    actionLabel="Go to Dashboard"
+                    actionTo="/dashboard"
+                />
             </div>
         );
     }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import {
     Activity,
     CheckCircle,
@@ -16,6 +17,10 @@ import {
     Calendar,
     LogOut,
     Sparkles,
+    Cloud,
+    CloudOff,
+    RefreshCw,
+    Loader,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useProfile } from "../../context/ProfileContext";
@@ -104,13 +109,12 @@ function clampOnBlur(value, min = 0, max = Infinity) {
 
 function ProfilePage() {
     const { user, profile: dbProfile, updateProfile: updateDbProfile, signOut } = useAuth();
-    const { profile, setProfile } = useProfile();
+    const { profile, setProfile, profileSyncStatus, retrySync } = useProfile();
     const [healthGoals, setHealthGoals] = useState([]);
     const [selectedGoalIds, setSelectedGoalIds] = useState([]);
     const [goalsLoading, setGoalsLoading] = useState(true);
     const [goalsSaving, setGoalsSaving] = useState(false);
     const [goalsError, setGoalsError] = useState(null);
-    const [toast, setToast] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [detailsSaving, setDetailsSaving] = useState(false);
 
@@ -163,12 +167,6 @@ function ProfilePage() {
         APP_CONFIG.visibleFat?.female?.moderate ||
         25;
 
-    useEffect(() => {
-        if (toast) {
-            const timer = setTimeout(() => setToast(null), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [toast]);
 
     useEffect(() => {
         async function loadGoals() {
@@ -202,7 +200,7 @@ function ProfilePage() {
             setGoalsSaving(true);
             setGoalsError(null);
             await saveUserHealthGoals(user.id, selectedGoalIds);
-            setToast("Health goals saved successfully!");
+            toast.success("Health goals saved successfully!");
         } catch (err) {
             setGoalsError(err.message);
         } finally {
@@ -224,9 +222,9 @@ function ProfilePage() {
             });
             setProfile({ ...profile, sex: editSex, height, weight });
             setIsEditing(false);
-            setToast("Details saved successfully! ✓");
+            toast.success("Details saved successfully!");
         } catch (err) {
-            setToast(`Error: ${err.message}`);
+            toast.error(`Error: ${err.message}`);
         } finally {
             setDetailsSaving(false);
         }
@@ -263,7 +261,6 @@ function ProfilePage() {
 
     return (
         <div className="pro-profile-page">
-            {toast && <div className="pro-toast">{toast}</div>}
 
             {/* ─── Profile Header Card ─── */}
             <div className="pro-profile-header-card">
@@ -381,6 +378,28 @@ function ProfilePage() {
                                 <Activity size={16} />
                             </div>
                             <h2>Profile Setup</h2>
+                            {/* Sync status indicator */}
+                            <div className="pro-sync-status" style={{ marginLeft: "auto" }}>
+                                {profileSyncStatus === "syncing" && (
+                                    <span className="pro-sync-badge pro-sync-syncing" title="Syncing preferences…">
+                                        <Loader size={13} className="pro-spin" /> Saving…
+                                    </span>
+                                )}
+                                {profileSyncStatus === "synced" && (
+                                    <span className="pro-sync-badge pro-sync-synced" title="Preferences saved to cloud">
+                                        <Cloud size={13} /> Synced
+                                    </span>
+                                )}
+                                {profileSyncStatus === "error" && (
+                                    <button
+                                        className="pro-sync-badge pro-sync-error"
+                                        title="Sync failed — click to retry"
+                                        onClick={retrySync}
+                                    >
+                                        <CloudOff size={13} /> Failed — <RefreshCw size={11} /> Retry
+                                    </button>
+                                )}
+                            </div>
                         </div>
                         <div className="pro-card-body">
                             <div className="pro-field-group">

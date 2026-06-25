@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Search, ArrowRight, ChevronDown, ChevronUp, Info, Loader2 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
+import EmptyState from "./ui/EmptyState";
+import { SkeletonFoodResult } from "./ui/Skeleton";
 import "./FoodSearchPage.css";
 
 const FILTER_OPTIONS = ["All", "Foods", "Groups"];
@@ -281,10 +283,11 @@ function FoodSearchPage() {
                 {/* Left panel - Search results */}
                 <div className="food-search-results-panel">
                     {query.length === 0 && (
-                        <div className="food-search-empty-state">
-                            <Search size={48} className="food-empty-icon" />
-                            <p>Start typing to search foods</p>
-                        </div>
+                        <EmptyState
+                            icon={<Search size={36} strokeWidth={1.5} />}
+                            title="Search the food database"
+                            description="Type a food name, nutrient, or food group to explore 600+ Indian foods with detailed nutrient data."
+                        />
                     )}
 
                     {query.length > 0 && query.length < 2 && (
@@ -294,8 +297,19 @@ function FoodSearchPage() {
                     )}
 
                     {debouncedQuery.length >= 2 && !loading && filteredResults.length === 0 && !searchError && (
-                        <div className="food-search-empty-state">
-                            <p>No matching foods found</p>
+                        <EmptyState
+                            icon={<Search size={36} strokeWidth={1.5} />}
+                            title="No matching foods found"
+                            description="Try a different search term or check your spelling."
+                        />
+                    )}
+
+                    {/* Loading skeletons (#30) */}
+                    {loading && (
+                        <div className="food-search-results-list" aria-label="Loading search results" role="status">
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <SkeletonFoodResult key={i} />
+                            ))}
                         </div>
                     )}
 

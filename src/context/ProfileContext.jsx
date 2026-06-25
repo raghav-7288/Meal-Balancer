@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useRef } from "react";
+import { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../lib/supabaseClient";
 
@@ -56,7 +56,7 @@ export function ProfileProvider({ children }) {
     const isMounted = useRef(true);
     const syncTimeoutRef = useRef(null);
 
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, refreshProfile } = useAuth();
 
     useEffect(() => {
         return () => { isMounted.current = false; };
@@ -117,11 +117,13 @@ export function ProfileProvider({ children }) {
         loadFromDb();
     }, [isAuthenticated, user?.id]);
 
-    // Save profile to Supabase (debounced)
+    // Save profile to Supabase (debounced) — uses upsert to handle missing rows
+    const lastSavedProfile = useRef(null);
+
     function saveToDb(newProfile) {
         if (!isAuthenticated || !user?.id) return;
 
-        setProfileSyncStatus("syncing");
+        // Skip if nothing changed since last save
         const dbFields = {};
         for (const [localKey, dbKey] of Object.entries(DB_FIELD_MAP)) {
             if (newProfile[localKey] !== undefined) {
@@ -129,17 +131,24 @@ export function ProfileProvider({ children }) {
             }
         }
 
+        const serialized = JSON.stringify(dbFields);
+        if (lastSavedProfile.current === serialized) return;
+
+        setProfileSyncStatus("syncing");
+
         supabase
             .from("user_profiles")
-            .update(dbFields)
-            .eq("user_id", user.id)
+            .upsert({ user_id: user.id, ...dbFields }, { onConflict: "user_id" })
             .then(({ error }) => {
                 if (!isMounted.current) return;
                 if (error) {
                     console.error("Failed to sync profile to Supabase:", error);
                     setProfileSyncStatus("error");
                 } else {
+                    lastSavedProfile.current = serialized;
                     setProfileSyncStatus("synced");
+                    // Keep AuthContext profile in sync
+                    refreshProfile?.();
                 }
             })
             .catch((err) => {
@@ -147,6 +156,13 @@ export function ProfileProvider({ children }) {
                 if (isMounted.current) setProfileSyncStatus("error");
             });
     }
+
+    // Retry a failed sync with current profile state
+    const retrySync = useCallback(() => {
+        if (profileSyncStatus !== "error") return;
+        lastSavedProfile.current = null; // force re-save
+        saveToDb(profile);
+    }, [profileSyncStatus, profile, isAuthenticated, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Wrapper that also triggers DB save (debounced)
     function setProfile(updater) {
@@ -169,6 +185,7 @@ export function ProfileProvider({ children }) {
         darkMode,
         setDarkMode,
         profileSyncStatus,
+        retrySync,
     };
 
     return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;

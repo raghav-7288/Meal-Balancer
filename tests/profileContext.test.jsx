@@ -15,6 +15,7 @@ vi.mock("../src/hooks/useAuth", () => ({
 const mockQueryBuilder = {
     select: vi.fn().mockReturnThis(),
     update: vi.fn().mockReturnThis(),
+    upsert: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     single: vi.fn(),
     then: vi.fn(),
@@ -29,7 +30,7 @@ vi.mock("../src/lib/supabaseClient", () => ({
 import { useAuth } from "../src/hooks/useAuth";
 
 function TestConsumer() {
-    const { profile, setProfile, darkMode, setDarkMode, profileSyncStatus } = useProfile();
+    const { profile, setProfile, darkMode, setDarkMode, profileSyncStatus, retrySync } = useProfile();
     return (
         <div>
             <span data-testid="activity">{profile.activity}</span>
@@ -44,6 +45,9 @@ function TestConsumer() {
             <button data-testid="toggle-dark" onClick={() => setDarkMode((d) => !d)}>
                 Toggle Dark
             </button>
+            <button data-testid="retry-sync" onClick={retrySync}>
+                Retry
+            </button>
         </div>
     );
 }
@@ -52,9 +56,10 @@ describe("ProfileContext", () => {
     beforeEach(() => {
         localStorage.clear();
         vi.clearAllMocks();
-        useAuth.mockReturnValue({ user: null, isAuthenticated: false });
+        useAuth.mockReturnValue({ user: null, isAuthenticated: false, refreshProfile: vi.fn() });
         mockQueryBuilder.select.mockReturnValue(mockQueryBuilder);
         mockQueryBuilder.update.mockReturnValue(mockQueryBuilder);
+        mockQueryBuilder.upsert.mockReturnValue(mockQueryBuilder);
         mockQueryBuilder.eq.mockReturnValue(mockQueryBuilder);
     });
 
@@ -140,7 +145,7 @@ describe("ProfileContext", () => {
     });
 
     it("should load profile from Supabase when authenticated", async () => {
-        useAuth.mockReturnValue({ user: { id: "u1" }, isAuthenticated: true });
+        useAuth.mockReturnValue({ user: { id: "u1" }, isAuthenticated: true, refreshProfile: vi.fn() });
         mockQueryBuilder.single.mockResolvedValue({
             data: {
                 activity: "sedentary",
@@ -169,7 +174,7 @@ describe("ProfileContext", () => {
     });
 
     it("should handle Supabase profile load error gracefully", async () => {
-        useAuth.mockReturnValue({ user: { id: "u1" }, isAuthenticated: true });
+        useAuth.mockReturnValue({ user: { id: "u1" }, isAuthenticated: true, refreshProfile: vi.fn() });
         mockQueryBuilder.single.mockResolvedValue({
             data: null,
             error: { code: "42501", message: "Permission denied" },
