@@ -42,8 +42,8 @@ function AuthPage() {
                             width: '56px',
                             height: '56px',
                             borderRadius: '16px',
-                            background: '#f0fdf4',
-                            color: '#059669'
+                            background: darkMode ? '#064e3b' : '#f0fdf4',
+                            color: darkMode ? '#6ee7b7' : '#059669'
                         }}>
                             <UtensilsCrossed size={28} />
                         </div>

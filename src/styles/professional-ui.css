@@ -333,6 +333,20 @@ body.dark-mode .skeleton {
     transform: translateY(-1px) !important;
 }
 
+body.dark-mode .auth-btn {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3) !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .auth-btn:hover:not(:disabled) {
+    box-shadow: 0 8px 28px rgba(59, 130, 246, 0.4) !important;
+}
+
+body.dark-mode .auth-card:hover {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4) !important;
+}
+
 /* ─── Nutrient Bar Fill Animation ─── */
 .bar-fill {
     transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
