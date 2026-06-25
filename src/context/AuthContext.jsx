@@ -75,6 +75,10 @@ export function AuthProvider({ children }) {
         const data = await authSignUp(email, password);
 
         if (data.user) {
+            // Clear onboarding flag so new users always see the onboarding flow
+            localStorage.removeItem("meal-balancer-onboarding-done");
+            // Reset browser URL to "/" so BrowserRouter mounts at home (onboarding)
+            window.history.replaceState(null, "", "/");
             setUser(data.user);
             setSession(data.session);
             const newProfile = await createUserProfile(data.user.id, username, fullName);

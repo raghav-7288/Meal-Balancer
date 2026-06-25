@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import {
     Activity,
     CheckCircle,
-    ChevronRight,
+    Edit2,
     Heart,
     Leaf,
     Mail,
@@ -22,6 +21,35 @@ import { useAuth } from "../../hooks/useAuth";
 import { useProfile } from "../../context/ProfileContext";
 import { getHealthGoals, getUserHealthGoals, saveUserHealthGoals } from "../../services/databaseService";
 import { APP_CONFIG } from "../../data/config";
+
+const COUNTRY_CODES = [
+    { code: "+91", country: "IN", label: "🇮🇳 +91" },
+    { code: "+1", country: "US", label: "🇺🇸 +1" },
+    { code: "+44", country: "GB", label: "🇬🇧 +44" },
+    { code: "+61", country: "AU", label: "🇦🇺 +61" },
+    { code: "+86", country: "CN", label: "🇨🇳 +86" },
+    { code: "+81", country: "JP", label: "🇯🇵 +81" },
+    { code: "+49", country: "DE", label: "🇩🇪 +49" },
+    { code: "+33", country: "FR", label: "🇫🇷 +33" },
+    { code: "+971", country: "AE", label: "🇦🇪 +971" },
+    { code: "+65", country: "SG", label: "🇸🇬 +65" },
+    { code: "+966", country: "SA", label: "🇸🇦 +966" },
+    { code: "+82", country: "KR", label: "🇰🇷 +82" },
+    { code: "+55", country: "BR", label: "🇧🇷 +55" },
+    { code: "+7", country: "RU", label: "🇷🇺 +7" },
+    { code: "+27", country: "ZA", label: "🇿🇦 +27" },
+    { code: "+234", country: "NG", label: "🇳🇬 +234" },
+    { code: "+62", country: "ID", label: "🇮🇩 +62" },
+    { code: "+60", country: "MY", label: "🇲🇾 +60" },
+    { code: "+64", country: "NZ", label: "🇳🇿 +64" },
+    { code: "+39", country: "IT", label: "🇮🇹 +39" },
+    { code: "+34", country: "ES", label: "🇪🇸 +34" },
+    { code: "+52", country: "MX", label: "🇲🇽 +52" },
+    { code: "+977", country: "NP", label: "🇳🇵 +977" },
+    { code: "+94", country: "LK", label: "🇱🇰 +94" },
+    { code: "+880", country: "BD", label: "🇧🇩 +880" },
+    { code: "+92", country: "PK", label: "🇵🇰 +92" },
+];
 
 const ACTIVITY_OPTIONS = [
     { value: "sedentary", label: "Sedentary", desc: "Little or no exercise" },
@@ -43,9 +71,39 @@ const DIET_OPTIONS = [
     { value: "Jain-compatible", label: "Jain-Compatible", icon: "🌱" },
 ];
 
+/** Extract country code and local number from a stored contact string like "+91 9876543210" */
+function parseContactNumber(stored) {
+    if (!stored) return { code: "+91", local: "" };
+    const trimmed = stored.trim();
+    // Try matching a known country code at the start
+    const sorted = [...COUNTRY_CODES].sort((a, b) => b.code.length - a.code.length);
+    for (const cc of sorted) {
+        if (trimmed.startsWith(cc.code)) {
+            return { code: cc.code, local: trimmed.slice(cc.code.length).trim() };
+        }
+    }
+    return { code: "+91", local: trimmed };
+}
+
+/** Allow free typing but strip negatives. Clamp only on blur via validateOnBlur. */
+function sanitizeNumeric(value) {
+    if (value === "") return "";
+    // Strip leading minus / non-numeric chars except dot
+    const cleaned = value.replace(/^-/, "").replace(/[^0-9.]/g, "");
+    if (cleaned === "" || cleaned === ".") return "";
+    return cleaned;
+}
+
+/** Clamp value to [min, max] — call on blur only so user can type freely */
+function clampOnBlur(value, min = 0, max = Infinity) {
+    if (value === "") return "";
+    const num = parseFloat(value);
+    if (isNaN(num)) return "";
+    return String(Math.min(Math.max(num, min), max));
+}
+
 function ProfilePage() {
     const { user, profile: dbProfile, updateProfile: updateDbProfile, signOut } = useAuth();
-    const navigate = useNavigate();
     const { profile, setProfile } = useProfile();
     const [healthGoals, setHealthGoals] = useState([]);
     const [selectedGoalIds, setSelectedGoalIds] = useState([]);
@@ -53,13 +111,16 @@ function ProfilePage() {
     const [goalsSaving, setGoalsSaving] = useState(false);
     const [goalsError, setGoalsError] = useState(null);
     const [toast, setToast] = useState(null);
-    const [profileSaving, setProfileSaving] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [detailsSaving, setDetailsSaving] = useState(false);
 
     // Body measurement local state (initialized from DB)
     const [height, setHeight] = useState("");
     const [weight, setWeight] = useState("");
     const [age, setAge] = useState("");
     const [contactNumber, setContactNumber] = useState("");
+    const [countryCode, setCountryCode] = useState("+91");
+    const [editSex, setEditSex] = useState("");
 
     // Sync from DB profile on load
     useEffect(() => {
@@ -67,9 +128,12 @@ function ProfilePage() {
             setHeight(dbProfile.height_cm ? String(dbProfile.height_cm) : ""); // eslint-disable-line react-hooks/set-state-in-effect
             setWeight(dbProfile.weight_kg ? String(dbProfile.weight_kg) : "");
             setAge(dbProfile.age ? String(dbProfile.age) : "");
-            setContactNumber(dbProfile.contact_number || "");
+            const parsed = parseContactNumber(dbProfile.contact_number);
+            setCountryCode(parsed.code);
+            setContactNumber(parsed.local);
+            setEditSex(dbProfile.sex || profile.sex || "female");
         }
-    }, [dbProfile]);
+    }, [dbProfile]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Calculate current BMI
     const heightM = height ? parseFloat(height) / 100 : 0;
@@ -77,19 +141,22 @@ function ProfilePage() {
     const currentBmi =
         heightM > 0 && weightKg > 0 ? (weightKg / (heightM * heightM)).toFixed(1) : null;
 
-    // Profile completeness
-    const completedFields = [
+    // Profile completeness — based on SAVED (DB) values, not live edits
+    const savedHeight = dbProfile?.height_cm;
+    const savedWeight = dbProfile?.weight_kg;
+    const savedAge = dbProfile?.age;
+    const savedCompletedFields = [
         profile.activity,
         profile.goal,
         profile.dietType,
         profile.sex,
-        height,
-        weight,
-        age,
+        savedHeight,
+        savedWeight,
+        savedAge,
     ].filter(Boolean).length;
     const totalFields = 7;
-    const completionPercent = Math.round((completedFields / totalFields) * 100);
-    const isProfileComplete = completedFields === totalFields;
+    const completionPercent = Math.round((savedCompletedFields / totalFields) * 100);
+    const isProfileComplete = savedCompletedFields === totalFields;
 
     const visibleFatLimit =
         APP_CONFIG.visibleFat?.[profile.sex]?.[profile.activity] ||
@@ -143,29 +210,42 @@ function ProfilePage() {
         }
     }
 
-    async function handleSaveProfile() {
-        if (!isProfileComplete) {
-            setToast("Please fill in all fields to complete your profile.");
-            return;
-        }
+    async function handleSaveDetails() {
         try {
-            setProfileSaving(true);
+            setDetailsSaving(true);
+            const fullContact = contactNumber ? `${countryCode} ${contactNumber}` : null;
             await updateDbProfile({
-                height_cm: parseFloat(height) || null,
                 weight_kg: parseFloat(weight) || null,
-                current_bmi: currentBmi ? parseFloat(currentBmi) : null,
                 age: parseInt(age) || null,
-                contact_number: contactNumber || null,
+                sex: editSex || null,
+                contact_number: fullContact,
+                height_cm: parseFloat(height) || null,
+                current_bmi: currentBmi ? parseFloat(currentBmi) : null,
             });
-            setProfile({ ...profile, height, weight });
-            setToast("Profile saved successfully! ✓");
-            navigate("/health-tools");
+            setProfile({ ...profile, sex: editSex, height, weight });
+            setIsEditing(false);
+            setToast("Details saved successfully! ✓");
         } catch (err) {
             setToast(`Error: ${err.message}`);
         } finally {
-            setProfileSaving(false);
+            setDetailsSaving(false);
         }
     }
+
+    function handleCancelEdit() {
+        // Reset to DB values
+        if (dbProfile) {
+            setWeight(dbProfile.weight_kg ? String(dbProfile.weight_kg) : "");
+            setAge(dbProfile.age ? String(dbProfile.age) : "");
+            const parsed = parseContactNumber(dbProfile.contact_number);
+            setCountryCode(parsed.code);
+            setContactNumber(parsed.local);
+            setEditSex(dbProfile.sex || profile.sex || "female");
+            setHeight(dbProfile.height_cm ? String(dbProfile.height_cm) : "");
+        }
+        setIsEditing(false);
+    }
+
 
     function getBmiCategory(bmi) {
         if (bmi < 18.5) return { label: "Underweight", color: "#3b82f6", bg: "#dbeafe" };
@@ -286,7 +366,7 @@ function ProfilePage() {
                 <p className="pro-completion-hint">
                     {isProfileComplete
                         ? "Your profile is complete! You're all set."
-                        : `Complete ${totalFields - completedFields} more field${totalFields - completedFields > 1 ? "s" : ""} to unlock full features.`}
+                        : `Complete ${totalFields - savedCompletedFields} more field${totalFields - savedCompletedFields > 1 ? "s" : ""} to unlock full features.`}
                 </p>
             </div>
 
@@ -375,33 +455,24 @@ function ProfilePage() {
                                 </div>
                             </div>
 
-                            <div className="pro-inline-fields">
-                                <div className="pro-field-group">
-                                    <label className="pro-field-label">Sex</label>
-                                    <select
-                                        className="pro-select"
-                                        value={profile.sex}
-                                        onChange={(e) =>
-                                            setProfile({ ...profile, sex: e.target.value })
-                                        }
-                                    >
-                                        <option value="female">Female</option>
-                                        <option value="male">Male</option>
-                                    </select>
-                                </div>
-                                <div className="pro-field-group">
+                            <div className="pro-field-group">
                                     <label className="pro-field-label">BMI Target</label>
                                     <input
                                         className="pro-input"
                                         type="number"
                                         step="0.1"
+                                        min="10"
+                                        max="50"
                                         value={profile.bmiTarget}
                                         onChange={(e) =>
-                                            setProfile({ ...profile, bmiTarget: e.target.value })
+                                            setProfile({ ...profile, bmiTarget: sanitizeNumeric(e.target.value) })
                                         }
+                                        onBlur={(e) =>
+                                            setProfile({ ...profile, bmiTarget: clampOnBlur(e.target.value, 10, 50) })
+                                        }
+                                        onKeyDown={(e) => { if (e.key === "-" || e.key === "e") e.preventDefault(); }}
                                     />
                                 </div>
-                            </div>
                         </div>
                     </div>
 
@@ -456,74 +527,172 @@ function ProfilePage() {
 
                 {/* Right Column */}
                 <div className="pro-profile-col">
-                    {/* Body Measurements */}
+                    {/* Body Measurements & Details */}
                     <div className="pro-card">
                         <div className="pro-card-header">
                             <div className="pro-card-icon" style={{ background: "#d1fae5", color: "#059669" }}>
                                 <Ruler size={16} />
                             </div>
-                            <h2>Body Measurements</h2>
+                            <h2>Body Details</h2>
+                            {!isEditing && (
+                                <button
+                                    className="pro-btn pro-btn-edit"
+                                    onClick={() => setIsEditing(true)}
+                                    style={{ marginLeft: "auto" }}
+                                >
+                                    <Edit2 size={14} />
+                                    Edit
+                                </button>
+                            )}
                         </div>
                         <div className="pro-card-body">
-                            <div className="pro-measurements-grid">
-                                <div className="pro-measure-field">
-                                    <label className="pro-field-label">
-                                        <Ruler size={13} /> Height
-                                    </label>
-                                    <div className="pro-input-with-unit">
-                                        <input
-                                            className="pro-input"
-                                            type="number"
-                                            placeholder="165"
-                                            value={height}
-                                            onChange={(e) => setHeight(e.target.value)}
-                                        />
-                                        <span className="pro-unit">cm</span>
+                            {isEditing ? (
+                                /* ── Edit Mode ── */
+                                <>
+                                    <div className="pro-measurements-grid">
+                                        <div className="pro-measure-field">
+                                            <label className="pro-field-label">
+                                                <Ruler size={13} /> Height
+                                            </label>
+                                            <div className="pro-input-with-unit">
+                                                <input
+                                                    className="pro-input"
+                                                    type="number"
+                                                    placeholder="165"
+                                                    min="30"
+                                                    max="300"
+                                                    value={height}
+                                                    onChange={(e) => setHeight(sanitizeNumeric(e.target.value))}
+                                                    onBlur={(e) => setHeight(clampOnBlur(e.target.value, 30, 300))}
+                                                    onKeyDown={(e) => { if (e.key === "-" || e.key === "e") e.preventDefault(); }}
+                                                />
+                                                <span className="pro-unit">cm</span>
+                                            </div>
+                                        </div>
+                                        <div className="pro-measure-field">
+                                            <label className="pro-field-label">
+                                                <Scale size={13} /> Weight
+                                            </label>
+                                            <div className="pro-input-with-unit">
+                                                <input
+                                                    className="pro-input"
+                                                    type="number"
+                                                    placeholder="60"
+                                                    min="1"
+                                                    max="500"
+                                                    value={weight}
+                                                    onChange={(e) => setWeight(sanitizeNumeric(e.target.value))}
+                                                    onBlur={(e) => setWeight(clampOnBlur(e.target.value, 1, 500))}
+                                                    onKeyDown={(e) => { if (e.key === "-" || e.key === "e") e.preventDefault(); }}
+                                                />
+                                                <span className="pro-unit">kg</span>
+                                            </div>
+                                        </div>
+                                        <div className="pro-measure-field">
+                                            <label className="pro-field-label">
+                                                <Calendar size={13} /> Age
+                                            </label>
+                                            <div className="pro-input-with-unit">
+                                                <input
+                                                    className="pro-input"
+                                                    type="number"
+                                                    placeholder="25"
+                                                    min="1"
+                                                    max="150"
+                                                    value={age}
+                                                    onChange={(e) => setAge(sanitizeNumeric(e.target.value))}
+                                                    onBlur={(e) => setAge(clampOnBlur(e.target.value, 1, 150))}
+                                                    onKeyDown={(e) => { if (e.key === "-" || e.key === "e") e.preventDefault(); }}
+                                                />
+                                                <span className="pro-unit">yrs</span>
+                                            </div>
+                                        </div>
+                                        <div className="pro-measure-field">
+                                            <label className="pro-field-label">
+                                                <User size={13} /> Sex
+                                            </label>
+                                            <select
+                                                className="pro-input pro-select"
+                                                value={editSex}
+                                                onChange={(e) => setEditSex(e.target.value)}
+                                            >
+                                                <option value="female">Female</option>
+                                                <option value="male">Male</option>
+                                            </select>
+                                        </div>
+                                        <div className="pro-measure-field pro-measure-full">
+                                            <label className="pro-field-label">
+                                                <Phone size={13} /> Contact
+                                            </label>
+                                            <div className="pro-phone-field">
+                                                <select
+                                                    className="pro-select pro-country-code-select"
+                                                    value={countryCode}
+                                                    onChange={(e) => setCountryCode(e.target.value)}
+                                                >
+                                                    {COUNTRY_CODES.map((cc) => (
+                                                        <option key={cc.code} value={cc.code}>
+                                                            {cc.label}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <input
+                                                    className="pro-input pro-phone-input"
+                                                    type="tel"
+                                                    placeholder="9876543210"
+                                                    maxLength={15}
+                                                    value={contactNumber}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value.replace(/[^0-9\s]/g, "");
+                                                        setContactNumber(val);
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="pro-details-actions">
+                                        <button
+                                            className="pro-btn pro-btn-primary"
+                                            onClick={handleSaveDetails}
+                                            disabled={detailsSaving}
+                                        >
+                                            <Save size={14} />
+                                            {detailsSaving ? "Saving…" : "Save Details"}
+                                        </button>
+                                        <button
+                                            className="pro-btn pro-btn-secondary"
+                                            onClick={handleCancelEdit}
+                                            disabled={detailsSaving}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                /* ── View Mode ── */
+                                <div className="pro-details-view">
+                                    <div className="pro-detail-row">
+                                        <span className="pro-detail-label"><Ruler size={13} /> Height</span>
+                                        <span className="pro-detail-value">{height ? `${height} cm` : "—"}</span>
+                                    </div>
+                                    <div className="pro-detail-row">
+                                        <span className="pro-detail-label"><Scale size={13} /> Weight</span>
+                                        <span className="pro-detail-value">{weight ? `${weight} kg` : "—"}</span>
+                                    </div>
+                                    <div className="pro-detail-row">
+                                        <span className="pro-detail-label"><Calendar size={13} /> Age</span>
+                                        <span className="pro-detail-value">{age ? `${age} yrs` : "—"}</span>
+                                    </div>
+                                    <div className="pro-detail-row">
+                                        <span className="pro-detail-label"><User size={13} /> Sex</span>
+                                        <span className="pro-detail-value">{editSex ? editSex.charAt(0).toUpperCase() + editSex.slice(1) : "—"}</span>
+                                    </div>
+                                    <div className="pro-detail-row">
+                                        <span className="pro-detail-label"><Phone size={13} /> Contact</span>
+                                        <span className="pro-detail-value">{contactNumber ? `${countryCode} ${contactNumber}` : "—"}</span>
                                     </div>
                                 </div>
-                                <div className="pro-measure-field">
-                                    <label className="pro-field-label">
-                                        <Scale size={13} /> Weight
-                                    </label>
-                                    <div className="pro-input-with-unit">
-                                        <input
-                                            className="pro-input"
-                                            type="number"
-                                            placeholder="60"
-                                            value={weight}
-                                            onChange={(e) => setWeight(e.target.value)}
-                                        />
-                                        <span className="pro-unit">kg</span>
-                                    </div>
-                                </div>
-                                <div className="pro-measure-field">
-                                    <label className="pro-field-label">
-                                        <Calendar size={13} /> Age
-                                    </label>
-                                    <div className="pro-input-with-unit">
-                                        <input
-                                            className="pro-input"
-                                            type="number"
-                                            placeholder="25"
-                                            value={age}
-                                            onChange={(e) => setAge(e.target.value)}
-                                        />
-                                        <span className="pro-unit">yrs</span>
-                                    </div>
-                                </div>
-                                <div className="pro-measure-field">
-                                    <label className="pro-field-label">
-                                        <Phone size={13} /> Contact
-                                    </label>
-                                    <input
-                                        className="pro-input"
-                                        type="tel"
-                                        placeholder="+91 9876543210"
-                                        value={contactNumber}
-                                        onChange={(e) => setContactNumber(e.target.value)}
-                                    />
-                                </div>
-                            </div>
+                            )}
                         </div>
                     </div>
 
@@ -551,28 +720,6 @@ function ProfilePage() {
                             </p>
                         </div>
                     </div>
-
-                    {/* Save Button */}
-                    <button
-                        className={`pro-save-btn ${isProfileComplete ? "ready" : "disabled"}`}
-                        onClick={handleSaveProfile}
-                        disabled={profileSaving}
-                    >
-                        {profileSaving ? (
-                            <>Saving…</>
-                        ) : isProfileComplete ? (
-                            <>
-                                <CheckCircle size={18} />
-                                Save & Continue
-                                <ChevronRight size={16} />
-                            </>
-                        ) : (
-                            <>
-                                <Shield size={18} />
-                                Complete Profile to Continue
-                            </>
-                        )}
-                    </button>
                 </div>
             </div>
         </div>

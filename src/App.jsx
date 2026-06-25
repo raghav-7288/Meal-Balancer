@@ -1,5 +1,5 @@
-import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, NavLink, Navigate } from "react-router-dom";
+import { lazy, Suspense, useEffect } from "react";
+import { BrowserRouter, Routes, Route, NavLink, Navigate, useNavigate, useLocation } from "react-router-dom";
 import "./App.css";
 import {
     BarChart3,
@@ -86,6 +86,16 @@ function App() {
 
 function AppShell() {
     const { darkMode, setDarkMode } = useProfile();
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    // Redirect to home if onboarding hasn't been completed yet
+    useEffect(() => {
+        const onboardingDone = localStorage.getItem("meal-balancer-onboarding-done") === "true";
+        if (!onboardingDone && location.pathname !== "/") {
+            navigate("/", { replace: true });
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <div className="app-shell">
