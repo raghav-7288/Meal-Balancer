@@ -18,12 +18,13 @@ function useDebounce(value, delay) {
 
 function HighlightMatch({ text, query }) {
     if (!query || query.length < 2) return <>{text}</>;
-    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
-    const parts = text.split(regex);
+    const splitRegex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+    const testRegex = new RegExp(`^${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
+    const parts = text.split(splitRegex);
     return (
         <>
             {parts.map((part, i) =>
-                regex.test(part) ? (
+                testRegex.test(part) ? (
                     <mark key={i} className="food-search-highlight">{part}</mark>
                 ) : (
                     <span key={i}>{part}</span>

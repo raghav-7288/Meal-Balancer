@@ -180,7 +180,7 @@ function AppShell() {
                     aria-label="Toggle dark mode"
                     data-tooltip={darkMode ? "Light mode" : "Dark mode"}
                 >
-                    {darkMode ? <Sun size={34} /> : <Moon size={34} />}
+                    {darkMode ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
             </nav>
 

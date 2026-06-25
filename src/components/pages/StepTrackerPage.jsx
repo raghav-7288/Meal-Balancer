@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Footprints, Plus, RotateCcw, Target, TrendingUp } from "lucide-react";
 import { useLocalStorageState } from "../../hooks/useLocalStorage";
-import { useAuth } from "../../hooks/useAuth";
+import { useOptionalAuth } from "../../hooks/useAuth";
 import {
     fetchDailyHealthData,
     upsertDailyHealth,
@@ -25,15 +25,7 @@ function StepTrackerPage() {
     const isMounted = useRef(true);
     const syncTimeoutRef = useRef(null);
 
-    let user = null;
-    let isAuthenticated = false;
-    try {
-        const auth = useAuth();
-        user = auth.user;
-        isAuthenticated = auth.isAuthenticated;
-    } catch {
-        // localStorage-only mode
-    }
+    const { user, isAuthenticated } = useOptionalAuth();
 
     const authRef = useRef({ isAuthenticated, userId: user?.id });
     useEffect(() => {

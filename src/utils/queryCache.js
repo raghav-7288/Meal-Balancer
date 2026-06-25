@@ -3,6 +3,7 @@
  * Avoids redundant network calls for the same data within a TTL window.
  */
 const cache = new Map();
+const inflight = new Map(); // Dedup in-flight requests
 
 const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
 const MAX_CACHE_SIZE = 100; // Evict oldest entries if cache grows beyond this
@@ -45,10 +46,23 @@ export async function cachedFetch(key, fetcher, ttl = DEFAULT_TTL) {
         return entry.data;
     }
 
-    const data = await fetcher();
-    cache.set(key, { data, timestamp: now });
-    evictIfNeeded();
-    return data;
+    // Deduplicate in-flight requests for the same key
+    if (inflight.has(key)) {
+        return inflight.get(key);
+    }
+
+    const promise = fetcher().then((data) => {
+        cache.set(key, { data, timestamp: Date.now() });
+        inflight.delete(key);
+        evictIfNeeded();
+        return data;
+    }).catch((err) => {
+        inflight.delete(key);
+        throw err;
+    });
+
+    inflight.set(key, promise);
+    return promise;
 }
 
 /**

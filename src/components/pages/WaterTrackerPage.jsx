@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Droplets, Plus, Minus, RotateCcw, Target } from "lucide-react";
 import { useLocalStorageState } from "../../hooks/useLocalStorage";
-import { useAuth } from "../../hooks/useAuth";
+import { useOptionalAuth } from "../../hooks/useAuth";
 import {
     fetchDailyHealthData,
     upsertDailyHealth,
@@ -23,15 +23,7 @@ function WaterTrackerPage() {
     const isMounted = useRef(true);
     const syncTimeoutRef = useRef(null);
 
-    let user = null;
-    let isAuthenticated = false;
-    try {
-        const auth = useAuth();
-        user = auth.user;
-        isAuthenticated = auth.isAuthenticated;
-    } catch {
-        // localStorage-only mode if not within AuthProvider
-    }
+    const { user, isAuthenticated } = useOptionalAuth();
 
     const authRef = useRef({ isAuthenticated, userId: user?.id });
     useEffect(() => {

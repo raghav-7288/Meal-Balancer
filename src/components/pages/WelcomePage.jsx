@@ -6,7 +6,7 @@ import OnboardingFlow from "./OnboardingFlow";
 
 function WelcomePage() {
     const navigate = useNavigate();
-    const { user, profile } = useAuth();
+    const { profile } = useAuth();
 
     const [showOnboarding, setShowOnboarding] = useState(() => {
         return localStorage.getItem("meal-balancer-onboarding-done") !== "true";
