@@ -1,52 +1,79 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { LogIn, UserPlus, Loader2, UtensilsCrossed } from "lucide-react";
+import { LogIn, UserPlus, Loader2, UtensilsCrossed, Sun, Moon } from "lucide-react";
 
 function AuthPage() {
     const [mode, setMode] = useState("signin"); // "signin" | "signup"
+    const [darkMode, setDarkMode] = useState(() => {
+        return localStorage.getItem("meal-balancer-dark-mode") === "true";
+    });
+
+    useEffect(() => {
+        document.body.classList.toggle("dark-mode", darkMode);
+        localStorage.setItem("meal-balancer-dark-mode", String(darkMode));
+    }, [darkMode]);
 
     return (
-        <div className="auth-page">
-            <div className="auth-card">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
-                    <div style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '56px',
-                        height: '56px',
-                        borderRadius: '16px',
-                        background: '#f0fdf4',
-                        color: '#059669'
-                    }}>
-                        <UtensilsCrossed size={28} />
-                    </div>
+        <div className="app-shell">
+            <nav className="top-nav" role="navigation" aria-label="Main navigation">
+                <div className="nav-brand">
+                    <img
+                        src={darkMode ? "/logo-dark.svg" : "/logo.svg"}
+                        alt="Meal Balancer by Dt. Bhakti Shrivastava"
+                        className="nav-logo-img"
+                    />
                 </div>
-                <h1 className="auth-title" style={{ textAlign: 'center' }}>Meal Balancer</h1>
-                <p className="auth-subtitle" style={{ textAlign: 'center' }}>
-                    {mode === "signin"
-                        ? "Sign in to your account"
-                        : "Create a new account"}
-                </p>
+                <button
+                    className="nav-theme-toggle"
+                    onClick={() => setDarkMode(!darkMode)}
+                    aria-label="Toggle dark mode"
+                    data-tooltip={darkMode ? "Light mode" : "Dark mode"}
+                >
+                    {darkMode ? <Sun size={34} /> : <Moon size={34} />}
+                </button>
+            </nav>
+            <div className="auth-page">
+                <div className="auth-card">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+                        <div style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '56px',
+                            height: '56px',
+                            borderRadius: '16px',
+                            background: '#f0fdf4',
+                            color: '#059669'
+                        }}>
+                            <UtensilsCrossed size={28} />
+                        </div>
+                    </div>
+                    <h1 className="auth-title" style={{ textAlign: 'center' }}>Meal Balancer</h1>
+                    <p className="auth-subtitle" style={{ textAlign: 'center' }}>
+                        {mode === "signin"
+                            ? "Sign in to your account"
+                            : "Create a new account"}
+                    </p>
 
-                {mode === "signin" ? <SignInForm /> : <SignUpForm />}
+                    {mode === "signin" ? <SignInForm /> : <SignUpForm />}
 
-                <div className="auth-switch">
-                    {mode === "signin" ? (
-                        <p>
-                            Don't have an account?{" "}
-                            <button className="link-btn" onClick={() => setMode("signup")}>
-                                Sign up
-                            </button>
-                        </p>
-                    ) : (
-                        <p>
-                            Already have an account?{" "}
-                            <button className="link-btn" onClick={() => setMode("signin")}>
-                                Sign in
-                            </button>
-                        </p>
-                    )}
+                    <div className="auth-switch">
+                        {mode === "signin" ? (
+                            <p>
+                                Don't have an account?{" "}
+                                <button className="link-btn" onClick={() => setMode("signup")}>
+                                    Sign up
+                                </button>
+                            </p>
+                        ) : (
+                            <p>
+                                Already have an account?{" "}
+                                <button className="link-btn" onClick={() => setMode("signin")}>
+                                    Sign in
+                                </button>
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

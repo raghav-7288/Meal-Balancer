@@ -9,9 +9,9 @@
     <path d="m19 5-7 7"/>
   </g>
   <!-- Text: Meal Balancer -->
-  <text x="40" y="22" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="14.5" font-weight="800" fill="#f1f5f9" letter-spacing="-0.3">Meal Balancer</text>
+  <text x="40" y="22" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="17" font-weight="800" fill="#f1f5f9" letter-spacing="-0.3">Meal Balancer</text>
   <!-- Subtitle -->
-  <text x="40" y="35" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="9" font-weight="500" fill="#94a3b8">by Dt. Bhakti Shrivastava</text>
+  <text x="40" y="35" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#94a3b8">by Dt. Bhakti Shrivastava</text>
 </svg>
 
 

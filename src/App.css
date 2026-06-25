@@ -1647,7 +1647,7 @@ body.dark-mode .modal-input {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    min-height: calc(100vh - 77px);
     padding: 24px;
     background: #f4f7fb;
 }
@@ -2251,6 +2251,71 @@ body.dark-mode .auth-page {
     background: #0f1219;
 }
 
+body.dark-mode .auth-card {
+    background: #1a2332;
+    border-color: #334155;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .auth-title {
+    background: linear-gradient(135deg, #e2e8f0, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.dark-mode .auth-subtitle {
+    color: #94a3b8;
+}
+
+body.dark-mode .auth-field span {
+    color: #94a3b8;
+}
+
+body.dark-mode .auth-field input {
+    background: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+body.dark-mode .auth-field input:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15);
+}
+
+body.dark-mode .auth-field input::placeholder {
+    color: #64748b;
+}
+
+body.dark-mode .auth-btn {
+    background: #3b82f6;
+    color: #ffffff;
+}
+
+body.dark-mode .auth-btn:hover {
+    background: #2563eb;
+}
+
+body.dark-mode .auth-error {
+    background: #1c1917;
+    border-color: #7f1d1d;
+    color: #fca5a5;
+}
+
+body.dark-mode .auth-success {
+    background: #022c22;
+    border-color: #065f46;
+    color: #6ee7b7;
+}
+
+body.dark-mode .auth-switch {
+    color: #94a3b8;
+}
+
+body.dark-mode .link-btn {
+    color: #60a5fa;
+}
+
 body.dark-mode .profile-details {
     background: #1a2332;
     border-color: #334155;
@@ -2731,6 +2796,7 @@ body.dark-mode .profile-complete-btn.incomplete {
 }
 
 .health-tools-tab {
+    --tab-color: initial;
     flex: 1;
     display: inline-flex;
     align-items: center;
