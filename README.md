@@ -104,7 +104,6 @@ npm run preview   # preview the production build locally
 
 ### Deploy to Vercel
 
-The app is deployed on Vercel at [https://diet-specifix.vercel.app/](https://diet-specifix.vercel.app/).
 
 ```bash
 npm run build

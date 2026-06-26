@@ -146,7 +146,7 @@ function SignInForm() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="[REDACTED_EMAIL_ADDRESS_1]"
+                    placeholder="you@example.com"
                     required
                 />
             </label>
@@ -250,7 +250,7 @@ function SignUpForm() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="[REDACTED_EMAIL_ADDRESS_1]"
+                    placeholder="you@example.com"
                     required
                 />
             </label>
