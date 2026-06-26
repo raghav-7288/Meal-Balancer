@@ -43,7 +43,7 @@ describe("FoodSearchPage", () => {
     it("shows empty state when no query", () => {
         render(<FoodSearchPage />);
 
-        expect(screen.getByText("Start typing to search foods")).toBeInTheDocument();
+        expect(screen.getByText("Search the food database")).toBeInTheDocument();
     });
 
     it("renders filter chips", () => {

@@ -6,7 +6,7 @@ import OnboardingFlow from "./OnboardingFlow";
 
 function WelcomePage() {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { profile } = useAuth();
 
     const [showOnboarding, setShowOnboarding] = useState(() => {
         return localStorage.getItem("meal-balancer-onboarding-done") !== "true";
@@ -22,7 +22,7 @@ function WelcomePage() {
                 <div className="welcome-icon">
                     <UtensilsCrossed size={48} />
                 </div>
-                <h1>Welcome{user?.email ? `, ${user.email.split("@")[0]}` : ""}!</h1>
+                <h1>Welcome{profile?.username ? `, ${profile.username}` : profile?.full_name ? `, ${profile.full_name}` : ""}!</h1>
                 <p className="welcome-subtitle">
                     Your personal Indian diet planning dashboard
                 </p>

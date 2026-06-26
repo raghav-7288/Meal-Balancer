@@ -1,5 +1,5 @@
-import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, NavLink, Navigate } from "react-router-dom";
+import { lazy, Suspense, useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, NavLink, Navigate, useNavigate, useLocation } from "react-router-dom";
 import "./App.css";
 import {
     BarChart3,
@@ -8,11 +8,14 @@ import {
     Heart,
     Home,
     Loader2,
+    Menu,
     Moon,
     Sun,
     TrendingUp,
     User,
+    X,
 } from "lucide-react";
+import { Toaster } from "react-hot-toast";
 import AuthPage from "./components/AuthPage";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
 import { useAuth } from "./hooks/useAuth";
@@ -86,9 +89,40 @@ function App() {
 
 function AppShell() {
     const { darkMode, setDarkMode } = useProfile();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    // Close mobile menu on route change
+    useEffect(() => {
+        setMobileMenuOpen(false); // eslint-disable-line react-hooks/set-state-in-effect
+    }, [location.pathname]);
+
+    // Prevent body scroll when mobile menu is open
+    useEffect(() => {
+        if (mobileMenuOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => { document.body.style.overflow = ""; };
+    }, [mobileMenuOpen]);
+
+    // Redirect to home if onboarding hasn't been completed yet
+    useEffect(() => {
+        const onboardingDone = localStorage.getItem("meal-balancer-onboarding-done") === "true";
+        if (!onboardingDone && location.pathname !== "/") {
+            navigate("/", { replace: true });
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <div className="app-shell">
+            {/* Skip to content link for accessibility (#35) */}
+            <a href="#main-content" className="skip-to-content">
+                Skip to content
+            </a>
+
             <nav className="top-nav" role="navigation" aria-label="Main navigation">
                 <div className="nav-brand">
                     <img
@@ -97,7 +131,27 @@ function AppShell() {
                         className="nav-logo-img"
                     />
                 </div>
-                <div className="nav-links">
+
+                {/* Hamburger toggle for mobile (#29) */}
+                <button
+                    className="nav-hamburger"
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                    aria-expanded={mobileMenuOpen}
+                >
+                    {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+                </button>
+
+                {/* Mobile overlay */}
+                {mobileMenuOpen && (
+                    <div
+                        className="nav-mobile-overlay"
+                        onClick={() => setMobileMenuOpen(false)}
+                        aria-hidden="true"
+                    />
+                )}
+
+                <div className={`nav-links ${mobileMenuOpen ? "nav-links--open" : ""}`}>
                     <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
                         <Home size={16} /> <span>Home</span>
                     </NavLink>
@@ -126,22 +180,50 @@ function AppShell() {
                     aria-label="Toggle dark mode"
                     data-tooltip={darkMode ? "Light mode" : "Dark mode"}
                 >
-                    {darkMode ? <Sun size={34} /> : <Moon size={34} />}
+                    {darkMode ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
             </nav>
 
+            {/* Global toast container (#32) */}
+            <Toaster
+                position="top-center"
+                toastOptions={{
+                    duration: 3000,
+                    style: {
+                        borderRadius: "14px",
+                        padding: "12px 20px",
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                    },
+                    success: {
+                        style: { background: "#059669", color: "#fff" },
+                        iconTheme: { primary: "#fff", secondary: "#059669" },
+                    },
+                    error: {
+                        style: { background: "#dc2626", color: "#fff" },
+                        iconTheme: { primary: "#fff", secondary: "#dc2626" },
+                    },
+                }}
+            />
+
+            {/* aria-live region for dynamic score updates (#35) */}
+            <div id="score-announcer" className="sr-only" aria-live="polite" aria-atomic="true" />
+
             <ErrorBoundary>
                 <Suspense fallback={<PageLoader />}>
-                    <Routes>
-                        <Route path="/" element={<WelcomePage />} />
-                        <Route path="/health-tools" element={<HealthToolsPage />} />
-                        <Route path="/dashboard" element={<DashboardPage />} />
-                        <Route path="/weekly-planner" element={<WeeklyPlannerPage />} />
-                        <Route path="/progress" element={<ProgressPage />} />
-                        <Route path="/foods" element={<FoodSearchPage />} />
-                        <Route path="/profile" element={<ProfilePage />} />
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                    </Routes>
+                    <main id="main-content">
+                        <Routes>
+                            <Route path="/" element={<WelcomePage />} />
+                            <Route path="/health-tools" element={<HealthToolsPage />} />
+                            <Route path="/dashboard" element={<DashboardPage />} />
+                            <Route path="/weekly-planner" element={<WeeklyPlannerPage />} />
+                            <Route path="/progress" element={<ProgressPage />} />
+                            <Route path="/foods" element={<FoodSearchPage />} />
+                            <Route path="/profile" element={<ProfilePage />} />
+                            <Route path="*" element={<Navigate to="/" replace />} />
+                        </Routes>
+                    </main>
                 </Suspense>
             </ErrorBoundary>
 

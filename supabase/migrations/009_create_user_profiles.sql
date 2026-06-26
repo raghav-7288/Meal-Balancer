@@ -14,8 +14,25 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
     current_bmi NUMERIC,
     age INTEGER,
     contact_number TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    activity TEXT DEFAULT 'moderate',
+    goal TEXT DEFAULT 'maintenance',
+    diet_type TEXT DEFAULT 'vegetarian',
+    sex TEXT DEFAULT 'female',
+    bmi_target TEXT DEFAULT '22',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    -- CHECK constraints (values must match app UI option values)
+    CONSTRAINT chk_activity CHECK (activity IN ('sedentary', 'moderate', 'heavy')),
+    CONSTRAINT chk_goal CHECK (goal IN ('maintenance', 'weight loss', 'weight gain', 'metabolic improvement')),
+    CONSTRAINT chk_diet_type CHECK (diet_type IN ('vegetarian', 'eggetarian', 'non-vegetarian', 'Jain-compatible')),
+    CONSTRAINT chk_sex CHECK (sex IN ('male', 'female'))
 );
+
+COMMENT ON COLUMN public.user_profiles.activity IS 'Activity level: sedentary, moderate, heavy';
+COMMENT ON COLUMN public.user_profiles.goal IS 'Nutrition goal: maintenance, weight loss, weight gain, metabolic improvement';
+COMMENT ON COLUMN public.user_profiles.diet_type IS 'Diet type: vegetarian, eggetarian, non-vegetarian, Jain-compatible';
+COMMENT ON COLUMN public.user_profiles.sex IS 'Biological sex: male, female';
+COMMENT ON COLUMN public.user_profiles.bmi_target IS 'Target BMI value as text';
 
 -- 2. Enable Row Level Security
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;

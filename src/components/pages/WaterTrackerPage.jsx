@@ -1,6 +1,12 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Droplets, Plus, Minus, RotateCcw, Target } from "lucide-react";
 import { useLocalStorageState } from "../../hooks/useLocalStorage";
+import { useOptionalAuth } from "../../hooks/useAuth";
+import {
+    fetchDailyHealthData,
+    upsertDailyHealth,
+    dbRowsToWaterData,
+} from "../../services/dailyHealthService";
 
 const DEFAULT_TARGET = 8;
 
@@ -13,19 +19,87 @@ function WaterTrackerPage() {
     const [target, setTarget] = useLocalStorageState("meal-balancer-water-target", DEFAULT_TARGET);
     const [editingTarget, setEditingTarget] = useState(false);
     const [targetInput, setTargetInput] = useState(String(target));
+    const [syncStatus, setSyncStatus] = useState("idle");
+    const isMounted = useRef(true);
+    const syncTimeoutRef = useRef(null);
+
+    const { user, isAuthenticated } = useOptionalAuth();
+
+    const authRef = useRef({ isAuthenticated, userId: user?.id });
+    useEffect(() => {
+        authRef.current = { isAuthenticated, userId: user?.id };
+    }, [isAuthenticated, user?.id]);
+
+    useEffect(() => {
+        return () => { isMounted.current = false; };
+    }, []);
+
+    // Load water data from Supabase on login
+    useEffect(() => {
+        if (!isAuthenticated || !user?.id) return;
+
+        async function loadFromDb() {
+            try {
+                setSyncStatus("syncing");
+                const remoteRows = await fetchDailyHealthData(user.id);
+                const remoteData = dbRowsToWaterData(remoteRows);
+
+                if (isMounted.current) {
+                    // Merge: remote is source of truth, add local-only dates
+                    setWaterData((prev) => {
+                        const merged = { ...prev, ...remoteData };
+                        // Upload any local-only entries
+                        for (const [date, glasses] of Object.entries(prev)) {
+                            if (!(date in remoteData) && glasses > 0) {
+                                upsertDailyHealth(user.id, date, { water_glasses: glasses, water_target: target }).catch((err) =>
+                                    console.error("Failed to upload local water entry:", err)
+                                );
+                            }
+                        }
+                        return merged;
+                    });
+
+                    // Load target from the most recent remote entry (if available)
+                    if (remoteRows.length > 0 && remoteRows[0].water_target) {
+                        setTarget(remoteRows[0].water_target);
+                    }
+
+                    setSyncStatus("synced");
+                }
+            } catch (err) {
+                console.error("Failed to load water data from Supabase:", err);
+                if (isMounted.current) setSyncStatus("error");
+            }
+        }
+
+        loadFromDb();
+    }, [isAuthenticated, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const todayKey = getTodayKey();
     const glasses = waterData[todayKey] || 0;
 
-    const setGlasses = useCallback(
-        (count) => {
-            setWaterData((prev) => ({
-                ...prev,
-                [todayKey]: Math.max(0, count),
-            }));
-        },
-        [todayKey, setWaterData]
-    );
+    // Debounced sync to Supabase
+    function syncToDb(date, glassCount, dailyTarget) {
+        const { isAuthenticated: authed, userId } = authRef.current;
+        if (!authed || !userId) return;
+
+        if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+        syncTimeoutRef.current = setTimeout(() => {
+            upsertDailyHealth(userId, date, { water_glasses: glassCount, water_target: dailyTarget }).catch((err) => {
+                console.error("Failed to sync water intake:", err);
+                if (isMounted.current) setSyncStatus("error");
+            });
+        }, 500);
+    }
+
+    function setGlasses(count) {
+        const newCount = Math.max(0, count);
+        setWaterData((prev) => ({
+            ...prev,
+            [todayKey]: newCount,
+        }));
+        syncToDb(todayKey, newCount, target);
+    }
 
     const percentage = Math.min((glasses / target) * 100, 100);
     const isComplete = glasses >= target;
@@ -54,6 +128,8 @@ function WaterTrackerPage() {
         const val = parseInt(targetInput, 10);
         if (val >= 1 && val <= 20) {
             setTarget(val);
+            // Sync target change to Supabase
+            syncToDb(todayKey, glasses, val);
         }
         setEditingTarget(false);
     }
@@ -83,6 +159,11 @@ function WaterTrackerPage() {
                 <h2>Water Intake Tracker</h2>
                 <p className="water-tracker-subtitle">
                     Stay hydrated! Track your daily water intake.
+                    {syncStatus === "error" && (
+                        <span style={{ color: "var(--color-error, #ef4444)", fontSize: "12px", marginLeft: "8px" }}>
+                            ⚠ Sync failed
+                        </span>
+                    )}
                 </p>
             </div>
 

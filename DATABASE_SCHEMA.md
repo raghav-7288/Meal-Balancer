@@ -114,7 +114,18 @@ ETL/import staging table — wide-format nutrient data before unpivot.
 | `current_bmi` | `numeric` | YES | — |
 | `age` | `integer` | YES | — |
 | `contact_number` | `varchar` | YES | — |
+| `activity` | `text` | YES | `'moderate'` |
+| `goal` | `text` | YES | `'maintenance'` |
+| `diet_type` | `text` | YES | `'vegetarian'` |
+| `sex` | `text` | YES | `'female'` |
+| `bmi_target` | `text` | YES | `'22'` |
 | `created_at` | `timestamptz` | YES | `now()` |
+
+**CHECK constraints:**
+- `chk_activity`: `activity IN ('sedentary', 'moderate', 'heavy')`
+- `chk_goal`: `goal IN ('maintenance', 'weight loss', 'weight gain', 'metabolic improvement')`
+- `chk_diet_type`: `diet_type IN ('vegetarian', 'eggetarian', 'non-vegetarian', 'Jain-compatible')`
+- `chk_sex`: `sex IN ('male', 'female')`
 
 **RLS:** ✅ Enabled (user-scoped: `auth.uid() = user_id`)
 

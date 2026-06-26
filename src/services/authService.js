@@ -79,7 +79,7 @@ export async function getSession() {
 export async function fetchUserProfile(userId) {
     const { data, error } = await supabase
         .from("user_profiles")
-        .select("user_id, username, full_name, created_at, height_cm, weight_kg, current_bmi, age, contact_number")
+        .select("user_id, username, full_name, created_at, height_cm, weight_kg, current_bmi, age, contact_number, activity, goal, diet_type, sex, bmi_target")
         .eq("user_id", userId)
         .single();
 

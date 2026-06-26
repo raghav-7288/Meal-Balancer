@@ -95,7 +95,7 @@ function SignInForm() {
         try {
             await signIn(email, password);
         } catch (err) {
-            setError(err.message);
+            setError(err?.message || "Sign in failed. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -159,7 +159,7 @@ function SignUpForm() {
                 setSuccess(true);
             }
         } catch (err) {
-            setError(err.message);
+            setError(err?.message || "Sign up failed. Please try again.");
         } finally {
             setLoading(false);
         }
