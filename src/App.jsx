@@ -114,7 +114,7 @@ function AppShell() {
     useEffect(() => {
         if (hasCheckedOnboarding.current) return;
         hasCheckedOnboarding.current = true;
-        const onboardingDone = localStorage.getItem("meal-balancer-onboarding-done") === "true";
+        const onboardingDone = localStorage.getItem("diet-specifix-onboarding-done") === "true";
         if (!onboardingDone && location.pathname !== "/") {
             navigate("/", { replace: true });
         }
@@ -131,7 +131,7 @@ function AppShell() {
                 <div className="nav-brand">
                     <img
                         src={darkMode ? "/logo-dark.svg" : "/logo.svg"}
-                        alt="Meal Balancer by Dt. Bhakti Shrivastava"
+                        alt="Diet Specifix by Dt. Bhakti Shrivastava"
                         className="nav-logo-img"
                     />
                 </div>
@@ -232,7 +232,7 @@ function AppShell() {
             </ErrorBoundary>
 
             <footer className="app-footer">
-                <p>© {new Date().getFullYear()} Meal Balancer. All rights reserved.</p>
+                <p>© {new Date().getFullYear()} Diet Specifix. All rights reserved.</p>
                 <p className="app-footer-sub">Built with ❤️ for healthier living</p>
             </footer>
         </div>

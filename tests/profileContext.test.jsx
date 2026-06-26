@@ -76,7 +76,7 @@ describe("ProfileContext", () => {
     });
 
     it("should read profile from localStorage on mount", () => {
-        localStorage.setItem("meal-balancer-profile", JSON.stringify({
+        localStorage.setItem("diet-specifix-profile", JSON.stringify({
             activity: "heavy",
             goal: "weight_loss",
             dietType: "non-vegetarian",
@@ -111,7 +111,7 @@ describe("ProfileContext", () => {
             expect(screen.getByTestId("activity").textContent).toBe("heavy");
         });
 
-        const stored = JSON.parse(localStorage.getItem("meal-balancer-profile"));
+        const stored = JSON.parse(localStorage.getItem("diet-specifix-profile"));
         expect(stored.activity).toBe("heavy");
     });
 
@@ -129,11 +129,11 @@ describe("ProfileContext", () => {
         });
 
         expect(screen.getByTestId("dark-mode").textContent).toBe("true");
-        expect(localStorage.getItem("meal-balancer-dark-mode")).toBe("true");
+        expect(localStorage.getItem("diet-specifix-dark-mode")).toBe("true");
     });
 
     it("should read dark mode preference from localStorage", () => {
-        localStorage.setItem("meal-balancer-dark-mode", "true");
+        localStorage.setItem("diet-specifix-dark-mode", "true");
 
         render(
             <ProfileProvider>

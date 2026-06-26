@@ -67,7 +67,7 @@ export function useDashboardState() {
         }
     }, [searchParams, userPlans]);
 
-    const [nutrientLimits, setNutrientLimits] = useLocalStorageState("meal-balancer-nutrient-limits", {
+    const [nutrientLimits, setNutrientLimits] = useLocalStorageState("diet-specifix-nutrient-limits", {
         carbs: 300,
         protein: 60,
         fat: 65,

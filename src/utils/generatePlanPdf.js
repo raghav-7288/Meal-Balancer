@@ -104,7 +104,7 @@ const COLORS = {
 };
 
 /**
- * Draw the Meal Balancer logo on the PDF at the given position.
+ * Draw the Diet Specifix logo on the PDF at the given position.
  */
 function drawLogo(doc, x, y, small = false) {
     const radius = small ? 5.5 : 7;
@@ -135,12 +135,12 @@ function drawLogo(doc, x, y, small = false) {
     doc.setDrawColor(0);
     doc.setLineWidth(0.2);
 
-    // "Meal Balancer" text
+    // "Diet Specifix" text
     const textX = x + (radius * 2) + 4;
     doc.setFontSize(small ? 10 : 13);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...COLORS.dark);
-    doc.text("Meal Balancer", textX, y + (small ? 5 : 6));
+    doc.text("Diet Specifix", textX, y + (small ? 5 : 6));
 
     // "by Dt. Bhakti Shrivastava" subtitle
     doc.setFontSize(small ? 6.5 : 8);
@@ -194,7 +194,7 @@ function drawFooter(doc, pageNum, totalPages, pageWidth, pageHeight) {
     doc.text(`Page ${pageNum} of ${totalPages}`, pageWidth / 2, footerY, { align: "center" });
 
     // Branding on left
-    doc.text("Meal Balancer \u2014 Personalized Nutrition Plan", 14, footerY);
+    doc.text("Diet Specifix \u2014 Personalized Nutrition Plan", 14, footerY);
 
     doc.setTextColor(0);
 }

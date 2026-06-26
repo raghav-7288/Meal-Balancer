@@ -8,7 +8,7 @@ import {
     dbRowToEntry,
 } from "../services/mealHistoryService";
 
-const LOCAL_STORAGE_KEY = "meal-balancer-meal-history";
+const LOCAL_STORAGE_KEY = "diet-specifix-meal-history";
 
 function readLocal() {
     try {

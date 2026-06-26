@@ -9,7 +9,7 @@ function WelcomePage() {
     const { profile } = useAuth();
 
     const [showOnboarding, setShowOnboarding] = useState(() => {
-        return localStorage.getItem("meal-balancer-onboarding-done") !== "true";
+        return localStorage.getItem("diet-specifix-onboarding-done") !== "true";
     });
 
     if (showOnboarding) {

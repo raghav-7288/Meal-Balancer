@@ -40,7 +40,7 @@ function dbProfileToLocal(dbProfile) {
 export function ProfileProvider({ children }) {
     const [profile, setProfileInternal] = useState(() => {
         try {
-            const stored = localStorage.getItem("meal-balancer-profile");
+            const stored = localStorage.getItem("diet-specifix-profile");
             return stored ? JSON.parse(stored) : DEFAULT_PROFILE;
         } catch (err) {
             console.error("Failed to parse stored profile:", err);
@@ -49,7 +49,7 @@ export function ProfileProvider({ children }) {
     });
 
     const [darkMode, setDarkMode] = useState(() => {
-        return localStorage.getItem("meal-balancer-dark-mode") === "true";
+        return localStorage.getItem("diet-specifix-dark-mode") === "true";
     });
 
     const [profileSyncStatus, setProfileSyncStatus] = useState("idle"); // idle | syncing | synced | error
@@ -65,7 +65,7 @@ export function ProfileProvider({ children }) {
     // Persist to localStorage whenever profile changes
     useEffect(() => {
         try {
-            localStorage.setItem("meal-balancer-profile", JSON.stringify(profile));
+            localStorage.setItem("diet-specifix-profile", JSON.stringify(profile));
         } catch (err) {
             console.error("Failed to save profile:", err);
         }
@@ -73,7 +73,7 @@ export function ProfileProvider({ children }) {
 
     useEffect(() => {
         document.body.classList.toggle("dark-mode", darkMode);
-        localStorage.setItem("meal-balancer-dark-mode", String(darkMode));
+        localStorage.setItem("diet-specifix-dark-mode", String(darkMode));
     }, [darkMode]);
 
     // Load profile preferences from Supabase on login

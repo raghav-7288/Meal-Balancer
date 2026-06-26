@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "./useAuth";
 import { fetchUserPlans, upsertPlans, deletePlan } from "../services/planSyncService";
 
-const LOCAL_STORAGE_KEY = "meal-balancer-user-plans";
+const LOCAL_STORAGE_KEY = "diet-specifix-user-plans";
 
 /**
  * Read plans from localStorage.

@@ -1,7 +1,7 @@
 # Supabase Database Audit
 
 > **Generated**: June 25, 2026  
-> **Database**: Meal Balancer (Supabase)  
+> **Database**: Diet Specifix (Supabase)  
 > Run the diagnostic queries in `supabase/diagnostic-queries.sql` to regenerate this data.
 
 ---

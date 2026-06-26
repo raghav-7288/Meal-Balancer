@@ -5,12 +5,12 @@ import { LogIn, UserPlus, Loader2, UtensilsCrossed, Sun, Moon } from "lucide-rea
 function AuthPage() {
     const [mode, setMode] = useState("signin"); // "signin" | "signup"
     const [darkMode, setDarkMode] = useState(() => {
-        return localStorage.getItem("meal-balancer-dark-mode") === "true";
+        return localStorage.getItem("diet-specifix-dark-mode") === "true";
     });
 
     useEffect(() => {
         document.body.classList.toggle("dark-mode", darkMode);
-        localStorage.setItem("meal-balancer-dark-mode", String(darkMode));
+        localStorage.setItem("diet-specifix-dark-mode", String(darkMode));
     }, [darkMode]);
 
     return (
@@ -19,7 +19,7 @@ function AuthPage() {
                 <div className="nav-brand">
                     <img
                         src={darkMode ? "/logo-dark.svg" : "/logo.svg"}
-                        alt="Meal Balancer by Dt. Bhakti Shrivastava"
+                        alt="Diet Specifix by Dt. Bhakti Shrivastava"
                         className="nav-logo-img"
                     />
                 </div>
@@ -48,7 +48,7 @@ function AuthPage() {
                             <UtensilsCrossed size={28} />
                         </div>
                     </div>
-                    <h1 className="auth-title" style={{ textAlign: 'center' }}>Meal Balancer</h1>
+                    <h1 className="auth-title" style={{ textAlign: 'center' }}>Diet Specifix</h1>
                     <p className="auth-subtitle" style={{ textAlign: 'center' }}>
                         {mode === "signin"
                             ? "Sign in to your account"

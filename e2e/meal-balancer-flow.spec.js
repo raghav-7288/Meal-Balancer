@@ -1,5 +1,5 @@
 /**
- * Meal Balancer E2E Test: Full User Flow
+ * Diet Specifix E2E Test: Full User Flow
  *
  * Tests the complete user journey:
  * Login → Create Plan → Add Food → View Score → Export PDF → Logout
@@ -14,7 +14,7 @@ import { test, expect } from "@playwright/test";
 const TEST_EMAIL = process.env.E2E_TEST_EMAIL || "[REDACTED_EMAIL_ADDRESS_7]";
 const TEST_PASSWORD = process.env.E2E_TEST_PASSWORD || "testpass123";
 
-test.describe("Meal Balancer — Full User Flow", () => {
+test.describe("Diet Specifix — Full User Flow", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto("/");
     });
@@ -23,7 +23,7 @@ test.describe("Meal Balancer — Full User Flow", () => {
         // ─── STEP 1: Login ───────────────────────────────────────────────
         await test.step("Sign in with email and password", async () => {
             // Should see the auth page
-            await expect(page.locator("h1")).toContainText("Meal Balancer");
+            await expect(page.locator("h1")).toContainText("Diet Specifix");
             await expect(page.getByText("Sign in to your account")).toBeVisible();
 
             // Fill in credentials

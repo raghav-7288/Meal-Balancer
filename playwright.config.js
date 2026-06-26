@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Playwright E2E test configuration for Meal Balancer.
+ * Playwright E2E test configuration for Diet Specifix.
  *
  * Run with: npm run test:e2e
  * The dev server must be running (npm run dev) or use webServer config below.

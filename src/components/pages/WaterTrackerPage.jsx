@@ -15,8 +15,8 @@ function getTodayKey() {
 }
 
 function WaterTrackerPage() {
-    const [waterData, setWaterData] = useLocalStorageState("meal-balancer-water", {});
-    const [target, setTarget] = useLocalStorageState("meal-balancer-water-target", DEFAULT_TARGET);
+    const [waterData, setWaterData] = useLocalStorageState("diet-specifix-water", {});
+    const [target, setTarget] = useLocalStorageState("diet-specifix-water-target", DEFAULT_TARGET);
     const [editingTarget, setEditingTarget] = useState(false);
     const [targetInput, setTargetInput] = useState(String(target));
     const [syncStatus, setSyncStatus] = useState("idle");

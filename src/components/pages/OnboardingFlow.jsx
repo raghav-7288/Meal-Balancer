@@ -94,7 +94,7 @@ function OnboardingFlow({ onComplete }) {
 
     function handleFinish() {
         // Mark onboarding as complete
-        localStorage.setItem("meal-balancer-onboarding-done", "true");
+        localStorage.setItem("diet-specifix-onboarding-done", "true");
         if (onComplete) onComplete();
         navigate("/dashboard");
     }

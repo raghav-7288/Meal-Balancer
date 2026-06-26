@@ -1,4 +1,4 @@
-# Meal Balancer — Complete Supabase Database Schema
+# Diet Specifix — Complete Supabase Database Schema
 
 > Auto-generated from live Supabase introspection + codebase analysis (June 25, 2026)
 

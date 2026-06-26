@@ -1,8 +1,8 @@
-# 🍽️ Meal Balancer
+# 🍽️ Diet Specifix
 
 A React 19 single-page application for **Indian diet planning**. Build meals in grams, convert to exchange-style categories, score dietary patterns with transparent reasons, and export styled PDF reports — all backed by Supabase.
 
-🔗 **Live App:** [https://meal-balancer-three.vercel.app/](https://meal-balancer-three.vercel.app/)
+🔗 **Live App:** [https://diet-specifix.vercel.app/](https://diet-specifix.vercel.app/)
 
 ## ✨ Features
 
@@ -68,7 +68,7 @@ A React 19 single-page application for **Indian diet planning**. Build meals in 
 
 ```bash
 git clone <repo-url>
-cd meal-balancer
+cd diet-specifix
 npm install
 ```
 
@@ -104,7 +104,7 @@ npm run preview   # preview the production build locally
 
 ### Deploy to Vercel
 
-The app is deployed on Vercel at [https://meal-balancer-three.vercel.app/](https://meal-balancer-three.vercel.app/).
+The app is deployed on Vercel at [https://diet-specifix.vercel.app/](https://diet-specifix.vercel.app/).
 
 ```bash
 npm run build
