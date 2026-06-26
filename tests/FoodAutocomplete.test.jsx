@@ -12,6 +12,21 @@ vi.mock("../src/hooks/useDebounce", () => ({
     useDebounce: (value) => value,
 }));
 
+// Mock @tanstack/react-virtual — jsdom doesn't support scroll measurement
+vi.mock("@tanstack/react-virtual", () => ({
+    useVirtualizer: ({ count }) => ({
+        getTotalSize: () => count * 40,
+        getVirtualItems: () =>
+            Array.from({ length: count }, (_, i) => ({
+                index: i,
+                key: i,
+                start: i * 40,
+                size: 40,
+            })),
+        measureElement: () => {},
+    }),
+}));
+
 import FoodAutocomplete from "../src/components/dashboard/FoodAutocomplete";
 
 const mockFoodResults = [

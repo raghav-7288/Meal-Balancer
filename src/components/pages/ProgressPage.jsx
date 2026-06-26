@@ -22,6 +22,7 @@ import {
 import { useMealHistory } from "../../hooks/useMealHistory";
 import Section from "../ui/Section";
 import EmptyState from "../ui/EmptyState";
+import LazyChart from "../ui/LazyChart";
 
 /** Format YYYY-MM-DD to short display: "Jun 24" */
 function fmtDate(dateStr) {
@@ -270,37 +271,39 @@ function ProgressPage() {
 
             {/* Score Progress Chart */}
             <Section title="Score over time" icon={<TrendingUp size={16} />}>
-                <div style={{ width: "100%", height: 260 }}>
-                    <ResponsiveContainer>
-                        <AreaChart data={chartData}>
-                            <defs>
-                                <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
-                                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                            <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                            <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
-                            <Tooltip
-                                contentStyle={{
-                                    borderRadius: 10,
-                                    fontSize: 13,
-                                    border: "1px solid #e5e7eb",
-                                }}
-                            />
-                            <Area
-                                type="monotone"
-                                dataKey="score"
-                                stroke="#3b82f6"
-                                strokeWidth={2}
-                                fill="url(#scoreGrad)"
-                                dot={{ r: 4, fill: "#3b82f6" }}
-                                activeDot={{ r: 6 }}
-                            />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                </div>
+                <LazyChart height="260px">
+                    <div style={{ width: "100%", height: 260 }}>
+                        <ResponsiveContainer>
+                            <AreaChart data={chartData}>
+                                <defs>
+                                    <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
+                                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                                <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
+                                <Tooltip
+                                    contentStyle={{
+                                        borderRadius: 10,
+                                        fontSize: 13,
+                                        border: "1px solid #e5e7eb",
+                                    }}
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="score"
+                                    stroke="#3b82f6"
+                                    strokeWidth={2}
+                                    fill="url(#scoreGrad)"
+                                    dot={{ r: 4, fill: "#3b82f6" }}
+                                    activeDot={{ r: 6 }}
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                </LazyChart>
             </Section>
 
             {/* Monthly Averages */}

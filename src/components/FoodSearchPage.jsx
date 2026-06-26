@@ -5,6 +5,7 @@ import { escapeIlike } from "../services/foodSearchService";
 import { useDebounce } from "../hooks/useDebounce";
 import EmptyState from "./ui/EmptyState";
 import { SkeletonFoodResult } from "./ui/Skeleton";
+import VirtualizedList from "./ui/VirtualizedList";
 import "./FoodSearchPage.css";
 
 const FILTER_OPTIONS = ["All", "Foods", "Groups"];
@@ -357,40 +358,38 @@ function FoodSearchPage() {
                                     Sorted by <strong>{matchedNutrientName}</strong> (highest first)
                                 </div>
                             )}
-                            {filteredResults.slice(0, visibleCount).map((food, index) => (
-                                <div
-                                    key={`${food.food_id}-${index}`}
-                                    className={`food-result-card ${
-                                        selectedFood?.food_id === food.food_id ? "selected" : ""
-                                    } ${activeIndex === index ? "keyboard-active" : ""}`}
-                                    onClick={() => setSelectedFood(food)}
-                                >
-                                    <div className="food-result-name-row">
-                                        <span className="food-result-name">
-                                            <HighlightMatch text={food.food_name} query={debouncedQuery} />
-                                        </span>
-                                        {isNutrientSearch && food.value != null && (
-                                            <span className="food-result-nutrient-value">
-                                                {Number(food.value).toFixed(1)} <small>{food.unit || ""}</small>
+                            <VirtualizedList
+                                items={filteredResults}
+                                estimateSize={64}
+                                overscan={8}
+                                maxHeight="calc(100vh - 260px)"
+                                renderItem={(food, index) => (
+                                    <div
+                                        id={`food-result-${index}`}
+                                        className={`food-result-card ${
+                                            selectedFood?.food_id === food.food_id ? "selected" : ""
+                                        } ${activeIndex === index ? "keyboard-active" : ""}`}
+                                        onClick={() => setSelectedFood(food)}
+                                    >
+                                        <div className="food-result-name-row">
+                                            <span className="food-result-name">
+                                                <HighlightMatch text={food.food_name} query={debouncedQuery} />
                                             </span>
-                                        )}
+                                            {isNutrientSearch && food.value != null && (
+                                                <span className="food-result-nutrient-value">
+                                                    {Number(food.value).toFixed(1)} <small>{food.unit || ""}</small>
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="food-result-meta">
+                                            <span className="food-result-code">{food.food_code}</span>
+                                            <span className="food-result-group">
+                                                <HighlightMatch text={food.food_group || ""} query={debouncedQuery} />
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="food-result-meta">
-                                        <span className="food-result-code">{food.food_code}</span>
-                                        <span className="food-result-group">
-                                            <HighlightMatch text={food.food_group || ""} query={debouncedQuery} />
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
-                            {filteredResults.length > visibleCount && (
-                                <button
-                                    className="food-show-more-btn"
-                                    onClick={() => setVisibleCount((prev) => prev + 20)}
-                                >
-                                    Show more ({filteredResults.length - visibleCount} remaining)
-                                </button>
-                            )}
+                                )}
+                            />
                         </div>
                     )}
                 </div>

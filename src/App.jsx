@@ -18,6 +18,7 @@ import {
 import { Toaster } from "react-hot-toast";
 import AuthPage from "./components/AuthPage";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
+import RouteErrorBoundary from "./components/ui/RouteErrorBoundary";
 import { useAuth } from "./hooks/useAuth";
 import { ProfileProvider, useProfile } from "./context/ProfileContext";
 
@@ -217,13 +218,13 @@ function AppShell() {
                 <Suspense fallback={<PageLoader />}>
                     <main id="main-content">
                         <Routes>
-                            <Route path="/" element={<WelcomePage />} />
-                            <Route path="/health-tools" element={<HealthToolsPage />} />
-                            <Route path="/dashboard" element={<DashboardPage />} />
-                            <Route path="/weekly-planner" element={<WeeklyPlannerPage />} />
-                            <Route path="/progress" element={<ProgressPage />} />
-                            <Route path="/foods" element={<FoodSearchPage />} />
-                            <Route path="/profile" element={<ProfilePage />} />
+                            <Route path="/" element={<RouteErrorBoundary routeName="Home"><WelcomePage /></RouteErrorBoundary>} />
+                            <Route path="/health-tools" element={<RouteErrorBoundary routeName="Health Tools"><HealthToolsPage /></RouteErrorBoundary>} />
+                            <Route path="/dashboard" element={<RouteErrorBoundary routeName="Dashboard"><DashboardPage /></RouteErrorBoundary>} />
+                            <Route path="/weekly-planner" element={<RouteErrorBoundary routeName="Weekly Planner"><WeeklyPlannerPage /></RouteErrorBoundary>} />
+                            <Route path="/progress" element={<RouteErrorBoundary routeName="Progress"><ProgressPage /></RouteErrorBoundary>} />
+                            <Route path="/foods" element={<RouteErrorBoundary routeName="Food Search"><FoodSearchPage /></RouteErrorBoundary>} />
+                            <Route path="/profile" element={<RouteErrorBoundary routeName="Profile"><ProfilePage /></RouteErrorBoundary>} />
                             <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
                     </main>

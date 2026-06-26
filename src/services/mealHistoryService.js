@@ -1,4 +1,6 @@
 import { supabase } from "../lib/supabaseClient";
+import { validateResponse, MealHistoryArraySchema } from "../utils/schemas";
+import { withRetry } from "../utils/withRetry";
 
 // ─── Meal History Sync Service ──────────────────────────────────────────────
 // CRUD operations for meal_history table in Supabase.
@@ -9,14 +11,16 @@ import { supabase } from "../lib/supabaseClient";
  * @returns {Promise<Array>} array of meal history entries
  */
 export async function fetchMealHistory(userId) {
-    const { data, error } = await supabase
-        .from("meal_history")
-        .select("*")
-        .eq("user_id", userId)
-        .order("date", { ascending: false });
+    return withRetry(async () => {
+        const { data, error } = await supabase
+            .from("meal_history")
+            .select("*")
+            .eq("user_id", userId)
+            .order("date", { ascending: false });
 
-    if (error) throw new Error(`Failed to fetch meal history: ${error.message}`);
-    return data || [];
+        if (error) throw new Error(`Failed to fetch meal history: ${error.message}`);
+        return validateResponse(MealHistoryArraySchema, data || [], "fetchMealHistory");
+    }, { context: "fetchMealHistory" });
 }
 
 /**
@@ -26,31 +30,33 @@ export async function fetchMealHistory(userId) {
  * @returns {Promise<object>} the upserted row
  */
 export async function upsertMealHistoryEntry(userId, entry) {
-    const row = {
-        id: entry.id,
-        user_id: userId,
-        date: entry.date,
-        timestamp: entry.timestamp,
-        plan_name: entry.planName,
-        score: entry.score,
-        band: entry.band,
-        kcal: entry.kcal,
-        protein: entry.protein,
-        carbs: entry.carbs,
-        fat: entry.fat,
-        fibre: entry.fibre,
-        vegetables_g: entry.vegetablesG,
-        visible_fat: entry.visibleFat,
-    };
+    return withRetry(async () => {
+        const row = {
+            id: entry.id,
+            user_id: userId,
+            date: entry.date,
+            timestamp: entry.timestamp,
+            plan_name: entry.planName,
+            score: entry.score,
+            band: entry.band,
+            kcal: entry.kcal,
+            protein: entry.protein,
+            carbs: entry.carbs,
+            fat: entry.fat,
+            fibre: entry.fibre,
+            vegetables_g: entry.vegetablesG,
+            visible_fat: entry.visibleFat,
+        };
 
-    const { data, error } = await supabase
-        .from("meal_history")
-        .upsert(row, { onConflict: "user_id,date" })
-        .select()
-        .single();
+        const { data, error } = await supabase
+            .from("meal_history")
+            .upsert(row, { onConflict: "user_id,date" })
+            .select()
+            .single();
 
-    if (error) throw new Error(`Failed to save meal history entry: ${error.message}`);
-    return data;
+        if (error) throw new Error(`Failed to save meal history entry: ${error.message}`);
+        return data;
+    }, { context: "upsertMealHistoryEntry" });
 }
 
 /**
