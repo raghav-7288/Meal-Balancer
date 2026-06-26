@@ -12,8 +12,8 @@ ON food_items USING GIN (food_name gin_trgm_ops);
 -- Drop existing function (return type may differ)
 DROP FUNCTION IF EXISTS search_foods_all_fields(text);
 
--- Recreate search_foods_all_fields with a 20-row limit
-CREATE OR REPLACE FUNCTION search_foods_all_fields(search_text TEXT)
+-- Recreate search_foods_all_fields with pagination support
+CREATE OR REPLACE FUNCTION search_foods_all_fields(search_text TEXT, p_limit INTEGER DEFAULT 20, p_offset INTEGER DEFAULT 0)
 RETURNS TABLE (
     food_id INTEGER,
     food_code TEXT,
@@ -26,15 +26,15 @@ RETURNS TABLE (
 BEGIN
     RETURN QUERY
     SELECT DISTINCT ON (fi.food_id)
-        fi.food_id,
-        fi.food_code,
-        fi.food_name,
-        mg.group_name AS food_group,
-        nd.nutrient_name,
+        fi.food_id::INTEGER,
+        fi.food_code::TEXT,
+        fi.food_name::TEXT,
+        mg.group_name::TEXT AS food_group,
+        nd.nutrient_name::TEXT,
         fnv.value,
-        nd.unit
+        nd.unit::TEXT
     FROM food_items fi
-    LEFT JOIN major_groups mg ON mg.group_id = fi.major_group_id
+    LEFT JOIN major_groups mg ON mg.major_group_id = fi.major_group_id
     LEFT JOIN food_nutrient_values fnv ON fnv.food_id = fi.food_id
     LEFT JOIN nutrient_definitions nd ON nd.nutrient_id = fnv.nutrient_id
     WHERE
@@ -43,7 +43,8 @@ BEGIN
         OR mg.group_name ILIKE '%' || search_text || '%'
         OR nd.nutrient_name ILIKE '%' || search_text || '%'
     ORDER BY fi.food_id, fi.food_name
-    LIMIT 20;
+    LIMIT p_limit
+    OFFSET p_offset;
 END;
 $$ LANGUAGE plpgsql STABLE;
 

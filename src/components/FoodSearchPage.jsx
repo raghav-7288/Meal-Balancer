@@ -8,7 +8,7 @@ import { SkeletonFoodResult } from "./ui/Skeleton";
 import VirtualizedList from "./ui/VirtualizedList";
 import "./FoodSearchPage.css";
 
-const FILTER_OPTIONS = ["All", "Foods", "Groups"];
+const PAGE_SIZE = 20;
 
 
 function HighlightMatch({ text, query }) {
@@ -36,9 +36,10 @@ function FoodSearchPage() {
     const [selectedFood, setSelectedFood] = useState(null);
     const [nutrients, setNutrients] = useState([]);
     const [nutrientsLoading, setNutrientsLoading] = useState(false);
-    const [activeFilter, setActiveFilter] = useState("All");
     const [activeIndex, setActiveIndex] = useState(-1);
     const [searchError, setSearchError] = useState("");
+    const [hasMore, setHasMore] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
     const resultListRef = useRef(null);
     const inputRef = useRef(null);
 
@@ -58,6 +59,7 @@ function FoodSearchPage() {
                 setActiveIndex(-1);
                 setIsNutrientSearch(false);
                 setMatchedNutrientName("");
+                setHasMore(false);
             });
             return () => { cancelled = true; };
         }
@@ -76,7 +78,7 @@ function FoodSearchPage() {
                 if (nutrientError) {
                     console.error("Search error:", nutrientError);
                     if (!cancelled) {
-                        setSearchError("Could not connect to database. Check your network connection and try again.");
+                        setSearchError(nutrientError.message || "Search failed. Check your network connection and try again.");
                         setResults([]);
                         setIsNutrientSearch(false);
                         setMatchedNutrientName("");
@@ -96,7 +98,7 @@ function FoodSearchPage() {
                     if (nfError) {
                         console.error("Search error:", nfError);
                         if (!cancelled) {
-                            setSearchError("Could not connect to database. Check your network connection and try again.");
+                            setSearchError(nfError.message || "Nutrient search failed. Please try again.");
                             setResults([]);
                             setIsNutrientSearch(false);
                             setMatchedNutrientName("");
@@ -120,16 +122,17 @@ function FoodSearchPage() {
                     // No nutrient match — full text field search via RPC
                     const { data, error } = await supabase.rpc(
                         "search_foods_all_fields",
-                        { search_text: debouncedQuery }
+                        { search_text: debouncedQuery, p_limit: PAGE_SIZE, p_offset: 0 }
                     );
 
                     if (error) {
                         console.error("Search error:", error);
                         if (!cancelled) {
-                            setSearchError("Could not connect to database. Check your network connection and try again.");
+                            setSearchError(error.message || "Food search failed. Please try again.");
                             setResults([]);
                             setIsNutrientSearch(false);
                             setMatchedNutrientName("");
+                            setHasMore(false);
                             setLoading(false);
                         }
                         return;
@@ -139,6 +142,7 @@ function FoodSearchPage() {
                         setIsNutrientSearch(false);
                         setMatchedNutrientName("");
                         setResults(data || []);
+                        setHasMore((data || []).length >= PAGE_SIZE);
                         setActiveIndex(-1);
                     }
                 }
@@ -148,7 +152,7 @@ function FoodSearchPage() {
                     setResults([]);
                     setIsNutrientSearch(false);
                     setMatchedNutrientName("");
-                    setSearchError("Could not connect to database. Check your network connection and try again.");
+                    setSearchError("Network error. Check your connection and try again.");
                 }
             } finally {
                 if (!cancelled) setLoading(false);
@@ -196,21 +200,6 @@ function FoodSearchPage() {
         return () => { cancelled = true; };
     }, [selectedFood]);
 
-    // Filter results
-    const filteredResults = useMemo(() => {
-        if (activeFilter === "All") return results;
-        if (activeFilter === "Foods") return results;
-        if (activeFilter === "Groups") {
-            // Deduplicate by food_group
-            const seen = new Set();
-            return results.filter((r) => {
-                if (seen.has(r.food_group)) return false;
-                seen.add(r.food_group);
-                return true;
-            });
-        }
-        return results;
-    }, [results, activeFilter]);
 
     // Group nutrients by nutrient_group
     const groupedNutrients = useMemo(() => {
@@ -226,25 +215,48 @@ function FoodSearchPage() {
     // Keyboard navigation
     const handleKeyDown = useCallback(
         (e) => {
-            if (filteredResults.length === 0) return;
+            if (results.length === 0) return;
 
             if (e.key === "ArrowDown") {
                 e.preventDefault();
                 setActiveIndex((prev) =>
-                    prev < filteredResults.length - 1 ? prev + 1 : 0
+                    prev < results.length - 1 ? prev + 1 : 0
                 );
             } else if (e.key === "ArrowUp") {
                 e.preventDefault();
                 setActiveIndex((prev) =>
-                    prev > 0 ? prev - 1 : filteredResults.length - 1
+                    prev > 0 ? prev - 1 : results.length - 1
                 );
             } else if (e.key === "Enter" && activeIndex >= 0) {
                 e.preventDefault();
-                setSelectedFood(filteredResults[activeIndex]);
+                setSelectedFood(results[activeIndex]);
             }
         },
-        [filteredResults, activeIndex]
+        [results, activeIndex]
     );
+
+    // Load more results (pagination)
+    const loadMore = useCallback(async () => {
+        if (loadingMore || !hasMore) return;
+        setLoadingMore(true);
+        try {
+            const { data, error } = await supabase.rpc(
+                "search_foods_all_fields",
+                { search_text: debouncedQuery, p_limit: PAGE_SIZE, p_offset: results.length }
+            );
+            if (error) {
+                console.error("Load more error:", error);
+                return;
+            }
+            const newResults = data || [];
+            setResults((prev) => [...prev, ...newResults]);
+            setHasMore(newResults.length >= PAGE_SIZE);
+        } catch (err) {
+            console.error("Load more error:", err);
+        } finally {
+            setLoadingMore(false);
+        }
+    }, [loadingMore, hasMore, debouncedQuery, results.length]);
 
     // Scroll active item into view
     useEffect(() => {
@@ -270,7 +282,7 @@ function FoodSearchPage() {
                         onKeyDown={handleKeyDown}
                         autoFocus
                         role="combobox"
-                        aria-expanded={filteredResults.length > 0}
+                        aria-expanded={results.length > 0}
                         aria-controls="food-search-results"
                         aria-activedescendant={activeIndex >= 0 ? `food-result-${activeIndex}` : undefined}
                         aria-label="Search foods, nutrients, or food groups"
@@ -291,18 +303,6 @@ function FoodSearchPage() {
                     {loading && <Loader2 size={18} className="food-search-spinner" />}
                 </div>
 
-                {/* Filter chips */}
-                <div className="food-filter-chips">
-                    {FILTER_OPTIONS.map((filter) => (
-                        <button
-                            key={filter}
-                            className={`food-filter-chip ${activeFilter === filter ? "active" : ""}`}
-                            onClick={() => setActiveFilter(filter)}
-                        >
-                            {filter}
-                        </button>
-                    ))}
-                </div>
                 <div className="food-source-note">
                     <Info size={14} />
                     <span>Nutrient values are per 100g of food, based on IFCT 2017 data.</span>
@@ -327,7 +327,7 @@ function FoodSearchPage() {
                         </div>
                     )}
 
-                    {debouncedQuery.length >= 2 && !loading && filteredResults.length === 0 && !searchError && (
+                    {debouncedQuery.length >= 2 && !loading && results.length === 0 && !searchError && (
                         <EmptyState
                             icon={<Search size={36} strokeWidth={1.5} />}
                             title="No matching foods found"
@@ -350,7 +350,7 @@ function FoodSearchPage() {
                         </div>
                     )}
 
-                    {filteredResults.length > 0 && (
+                    {results.length > 0 && (
                         <div className="food-search-results-list" ref={resultListRef}>
                             {isNutrientSearch && (
                                 <div className="food-nutrient-search-badge">
@@ -358,10 +358,11 @@ function FoodSearchPage() {
                                 </div>
                             )}
                             <VirtualizedList
-                                items={filteredResults}
+                                items={results}
                                 estimateSize={64}
                                 overscan={8}
-                                maxHeight="calc(100vh - 260px)"
+                                maxHeight="100%"
+                                className="food-search-virtual-scroller"
                                 renderItem={(food, index) => (
                                     <div
                                         id={`food-result-${index}`}
@@ -389,6 +390,22 @@ function FoodSearchPage() {
                                     </div>
                                 )}
                             />
+                            {hasMore && !isNutrientSearch && (
+                                <button
+                                    className="food-show-more-btn"
+                                    onClick={loadMore}
+                                    disabled={loadingMore}
+                                >
+                                    {loadingMore ? (
+                                        <>
+                                            <Loader2 size={16} className="food-search-spinner" />
+                                            Loading...
+                                        </>
+                                    ) : (
+                                        `Show more results`
+                                    )}
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>

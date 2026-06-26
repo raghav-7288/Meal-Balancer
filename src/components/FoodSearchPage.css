@@ -158,14 +158,17 @@ body.dark-mode .food-source-note {
     width: 35%;
     min-width: 300px;
     border-right: 1px solid #e2e8f0;
-    overflow-y: auto;
+    overflow: hidden;
     background: #ffffff;
     padding: 1rem;
+    display: flex;
+    flex-direction: column;
 }
 
 .food-detail-panel {
     width: 65%;
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 1.5rem 2rem;
     background: #f8fafc;
 }
@@ -204,6 +207,17 @@ body.dark-mode .food-source-note {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.food-search-virtual-scroller {
+    flex: 1;
+    min-height: 0;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: auto;
 }
 
 .food-nutrient-search-badge {
@@ -689,7 +703,7 @@ body.dark-mode .food-nutrient-unit {
     .food-search-results-panel {
         width: 100%;
         min-width: unset;
-        max-height: 40vh;
+        max-height: 45vh;
         border-right: none;
         border-bottom: 1px solid #e2e8f0;
     }
@@ -718,9 +732,20 @@ body.dark-mode .food-nutrient-unit {
     font-weight: 500;
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s;
+    flex-shrink: 0;
 }
 
 .food-show-more-btn:hover {
     background: #eff6ff;
     border-color: #3b82f6;
 }
+
+.food-show-more-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+

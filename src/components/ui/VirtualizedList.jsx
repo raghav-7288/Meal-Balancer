@@ -37,6 +37,7 @@ function VirtualizedList({
             style={{
                 maxHeight,
                 overflow: "auto",
+                overscrollBehavior: "contain",
                 position: "relative",
             }}
         >

@@ -124,14 +124,12 @@ describe("FoodSearchPage", () => {
         expect(screen.getByText("Search the food database")).toBeInTheDocument();
     });
 
-    it("renders filter chips", async () => {
+    it("renders source note", async () => {
         await act(async () => {
             render(<FoodSearchPage />);
         });
 
-        expect(screen.getByText("All")).toBeInTheDocument();
-        expect(screen.getByText("Foods")).toBeInTheDocument();
-        expect(screen.getByText("Groups")).toBeInTheDocument();
+        expect(screen.getByText(/IFCT 2017 data/)).toBeInTheDocument();
     });
 
     it("shows detail panel empty state", async () => {
@@ -281,7 +279,7 @@ describe("FoodSearchPage", () => {
 
         await waitFor(() => {
             expect(
-                screen.getByText("Could not connect to database. Check your network connection and try again.")
+                screen.getByText("permission denied for table nutrient_definitions")
             ).toBeInTheDocument();
         });
     });
@@ -305,7 +303,7 @@ describe("FoodSearchPage", () => {
 
         await waitFor(() => {
             expect(
-                screen.getByText("Could not connect to database. Check your network connection and try again.")
+                screen.getByText("function not found")
             ).toBeInTheDocument();
         });
     });
