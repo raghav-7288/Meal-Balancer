@@ -120,22 +120,29 @@ export async function updateUserProfile(userId, fields) {
  * @param {string} userId - The auth user UUID.
  * @param {string} username
  * @param {string} fullName
+ * @param {string} [contactNumber] - Optional mobile number.
  * @returns {Promise<object>}
  */
-export async function createUserProfile(userId, username, fullName) {
+export async function createUserProfile(userId, username, fullName, contactNumber) {
     const existing = await fetchUserProfile(userId);
 
     if (existing) {
         return existing;
     }
 
+    const profileData = {
+        user_id: userId,
+        username,
+        full_name: fullName,
+    };
+
+    if (contactNumber) {
+        profileData.contact_number = contactNumber;
+    }
+
     const { data, error } = await supabase
         .from("user_profiles")
-        .insert({
-            user_id: userId,
-            username,
-            full_name: fullName,
-        })
+        .insert(profileData)
         .select()
         .single();
 

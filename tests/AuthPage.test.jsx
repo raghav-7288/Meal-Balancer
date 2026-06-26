@@ -61,10 +61,10 @@ describe("AuthPage", () => {
 
         render(<AuthPage />);
 
-        fireEvent.change(screen.getByPlaceholderText(/you@/i), {
+        fireEvent.change(screen.getByLabelText("Email"), {
             target: { value: "test@example.com" },
         });
-        fireEvent.change(screen.getByPlaceholderText("••••••••"), {
+        fireEvent.change(screen.getByLabelText("Password"), {
             target: { value: "password123" },
         });
 
@@ -80,10 +80,10 @@ describe("AuthPage", () => {
 
         render(<AuthPage />);
 
-        fireEvent.change(screen.getByPlaceholderText(/you@/i), {
+        fireEvent.change(screen.getByLabelText("Email"), {
             target: { value: "test@example.com" },
         });
-        fireEvent.change(screen.getByPlaceholderText("••••••••"), {
+        fireEvent.change(screen.getByLabelText("Password"), {
             target: { value: "wrongpass" },
         });
 
@@ -102,23 +102,23 @@ describe("AuthPage", () => {
         // Switch to sign up
         fireEvent.click(screen.getByText("Sign up"));
 
-        fireEvent.change(screen.getByPlaceholderText("johndoe"), {
+        fireEvent.change(screen.getByLabelText("Username"), {
             target: { value: "testuser" },
         });
-        fireEvent.change(screen.getByPlaceholderText("John Doe"), {
+        fireEvent.change(screen.getByLabelText("Full name"), {
             target: { value: "Test User" },
         });
-        fireEvent.change(screen.getByPlaceholderText(/you@/i), {
+        fireEvent.change(screen.getByLabelText("Email"), {
             target: { value: "new@example.com" },
         });
-        fireEvent.change(screen.getByPlaceholderText("Min 6 characters"), {
+        fireEvent.change(screen.getByLabelText("Password"), {
             target: { value: "securepass" },
         });
 
         fireEvent.click(screen.getByRole("button", { name: /sign up/i }));
 
         await waitFor(() => {
-            expect(mockSignUp).toHaveBeenCalledWith("new@example.com", "securepass", "testuser", "Test User");
+            expect(mockSignUp).toHaveBeenCalledWith("new@example.com", "securepass", "testuser", "Test User", "");
         });
     });
 
@@ -129,13 +129,13 @@ describe("AuthPage", () => {
         render(<AuthPage />);
         fireEvent.click(screen.getByText("Sign up"));
 
-        fireEvent.change(screen.getByPlaceholderText("johndoe"), {
+        fireEvent.change(screen.getByLabelText("Username"), {
             target: { value: "newuser" },
         });
-        fireEvent.change(screen.getByPlaceholderText(/you@/i), {
+        fireEvent.change(screen.getByLabelText("Email"), {
             target: { value: "confirm@example.com" },
         });
-        fireEvent.change(screen.getByPlaceholderText("Min 6 characters"), {
+        fireEvent.change(screen.getByLabelText("Password"), {
             target: { value: "pass123456" },
         });
 
@@ -153,13 +153,13 @@ describe("AuthPage", () => {
         render(<AuthPage />);
         fireEvent.click(screen.getByText("Sign up"));
 
-        fireEvent.change(screen.getByPlaceholderText("johndoe"), {
+        fireEvent.change(screen.getByLabelText("Username"), {
             target: { value: "existing" },
         });
-        fireEvent.change(screen.getByPlaceholderText(/you@/i), {
+        fireEvent.change(screen.getByLabelText("Email"), {
             target: { value: "taken@example.com" },
         });
-        fireEvent.change(screen.getByPlaceholderText("Min 6 characters"), {
+        fireEvent.change(screen.getByLabelText("Password"), {
             target: { value: "pass123456" },
         });
 
@@ -185,8 +185,8 @@ describe("AuthPage", () => {
     it("has required attributes on email and password fields", () => {
         render(<AuthPage />);
 
-        const emailInput = screen.getByPlaceholderText(/you@/i);
-        const passwordInput = screen.getByPlaceholderText("••••••••");
+        const emailInput = screen.getByLabelText("Email");
+        const passwordInput = screen.getByLabelText("Password");
 
         expect(emailInput).toHaveAttribute("type", "email");
         expect(emailInput).toBeRequired();

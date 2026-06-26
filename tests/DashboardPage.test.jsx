@@ -93,6 +93,9 @@ vi.mock("../src/components/dashboard/PlanGuidelines", () => ({
     default: () => <div data-testid="plan-guidelines">PlanGuidelines</div>,
 }));
 vi.mock("../src/components/dashboard/NutrientLimits.css", () => ({}));
+vi.mock("../src/components/VerificationStatus", () => ({
+    VerificationBanner: () => null,
+}));
 
 import DashboardPage from "../src/components/pages/DashboardPage";
 
@@ -194,5 +197,3 @@ describe("DashboardPage", () => {
         mockDashboardState.scoreTone = "good";
     });
 });
-
-

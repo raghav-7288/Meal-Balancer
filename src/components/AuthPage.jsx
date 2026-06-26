@@ -111,7 +111,7 @@ function SignInForm() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
+                    placeholder="[REDACTED_EMAIL_ADDRESS_1]"
                     required
                 />
             </label>
@@ -141,6 +141,7 @@ function SignUpForm() {
     const [password, setPassword] = useState("");
     const [username, setUsername] = useState("");
     const [fullName, setFullName] = useState("");
+    const [contactNumber, setContactNumber] = useState("");
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -152,7 +153,7 @@ function SignUpForm() {
         setLoading(true);
 
         try {
-            const data = await signUp(email, password, username, fullName);
+            const data = await signUp(email, password, username, fullName, contactNumber);
 
             // If email confirmation is required, user won't be auto-signed-in
             if (data.user && !data.session) {
@@ -171,6 +172,9 @@ function SignUpForm() {
                 <p>
                     ✓ Account created! Please check your email to confirm your account,
                     then sign in.
+                </p>
+                <p style={{ fontSize: '0.85rem', marginTop: '8px', color: '#6b7280' }}>
+                    You can verify your mobile number after signing in from your profile.
                 </p>
             </div>
         );
@@ -207,8 +211,18 @@ function SignUpForm() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
+                    placeholder="[REDACTED_EMAIL_ADDRESS_1]"
                     required
+                />
+            </label>
+
+            <label className="auth-field">
+                <span>Mobile number</span>
+                <input
+                    type="tel"
+                    value={contactNumber}
+                    onChange={(e) => setContactNumber(e.target.value)}
+                    placeholder="+91 9876543210"
                 />
             </label>
 
@@ -233,5 +247,3 @@ function SignUpForm() {
 }
 
 export default AuthPage;
-
-

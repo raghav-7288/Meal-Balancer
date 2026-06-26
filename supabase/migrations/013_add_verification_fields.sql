@@ -1,0 +1,5 @@
+-- ============================================================================
+-- Migration: (placeholder — no phone verification fields needed)
+-- Email verification is handled by Supabase auth.users.email_confirmed_at
+-- No additional schema changes required.
+-- ============================================================================

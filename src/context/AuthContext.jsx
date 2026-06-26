@@ -71,7 +71,7 @@ export function AuthProvider({ children }) {
         };
     }, []);
 
-    async function signUp(email, password, username, fullName) {
+    async function signUp(email, password, username, fullName, contactNumber) {
         const data = await authSignUp(email, password);
 
         if (data.user) {
@@ -81,7 +81,7 @@ export function AuthProvider({ children }) {
             window.history.replaceState(null, "", "/");
             setUser(data.user);
             setSession(data.session);
-            const newProfile = await createUserProfile(data.user.id, username, fullName);
+            const newProfile = await createUserProfile(data.user.id, username, fullName, contactNumber);
             setProfile(newProfile);
         }
 

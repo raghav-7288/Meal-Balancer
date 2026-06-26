@@ -1,0 +1,152 @@
+/* ============================================================
+   Verification Status Components Styles
+   ============================================================ */
+
+/* Banner shown at top of dashboard */
+.verification-banner {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    background: #fffbeb;
+    border: 1px solid #f59e0b;
+}
+
+.dark-mode .verification-banner {
+    background: #451a0340;
+    border-color: #d97706;
+}
+
+.verification-banner-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #92400e;
+}
+
+.dark-mode .verification-banner-item {
+    color: #fcd34d;
+}
+
+/* Badges */
+.verification-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    white-space: nowrap;
+}
+
+.verification-badge.verified {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.dark-mode .verification-badge.verified {
+    background: #064e3b;
+    color: #6ee7b7;
+}
+
+.verification-badge.unverified {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.dark-mode .verification-badge.unverified {
+    background: #451a0340;
+    color: #fcd34d;
+}
+
+/* Action area */
+.verification-action {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.verification-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.verification-btn:hover:not(:disabled) {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.verification-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.verification-btn.secondary {
+    border-color: transparent;
+    background: transparent;
+    color: #6b7280;
+    text-decoration: underline;
+}
+
+.dark-mode .verification-btn {
+    background: #374151;
+    border-color: #4b5563;
+    color: #e5e7eb;
+}
+
+.dark-mode .verification-btn:hover:not(:disabled) {
+    background: #4b5563;
+}
+
+.dark-mode .verification-btn.secondary {
+    color: #9ca3af;
+}
+
+.verification-sent {
+    font-size: 0.75rem;
+    color: #059669;
+    font-weight: 500;
+}
+
+.dark-mode .verification-sent {
+    color: #6ee7b7;
+}
+
+.verification-error {
+    font-size: 0.75rem;
+    color: #dc2626;
+    display: block;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.dark-mode .verification-error {
+    color: #fca5a5;
+}
+
+
+/* Profile row with verification badge */
+.profile-value-with-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+
+

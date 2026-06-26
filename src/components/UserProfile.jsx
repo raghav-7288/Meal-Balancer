@@ -1,5 +1,7 @@
 import { useAuth } from "../hooks/useAuth";
 import { LogOut, User } from "lucide-react";
+import { EmailVerificationAction } from "./VerificationStatus";
+import "../styles/verification.css";
 
 function UserProfile() {
     const { user, profile, signOut } = useAuth();
@@ -27,7 +29,10 @@ function UserProfile() {
                 </div>
                 <div className="profile-row">
                     <span className="profile-label">Email</span>
-                    <span>{user?.email || "—"}</span>
+                    <span className="profile-value-with-badge">
+                        {user?.email || "—"}
+                        <EmailVerificationAction />
+                    </span>
                 </div>
                 <div className="profile-row">
                     <span className="profile-label">Age</span>

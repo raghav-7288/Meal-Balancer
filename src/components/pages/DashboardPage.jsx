@@ -11,6 +11,7 @@ import ComparisonSection from "../dashboard/ComparisonSection";
 import DaySelector from "../dashboard/DaySelector";
 import CopyPlanModal from "../dashboard/CopyPlanModal";
 import PlanGuidelines from "../dashboard/PlanGuidelines";
+import { VerificationBanner } from "../VerificationStatus";
 
 function DashboardPage() {
     const {
@@ -71,6 +72,8 @@ function DashboardPage() {
 
     return (
         <div className="dashboard-page">
+
+            <VerificationBanner />
 
             {deleteToast && (
                 <div className="delete-toast-popup" role="alert" aria-live="assertive">
