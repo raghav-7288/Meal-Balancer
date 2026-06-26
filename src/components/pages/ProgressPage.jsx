@@ -43,7 +43,7 @@ function ProgressPage() {
 
     // Sort history by date (oldest first for charts)
     const sorted = useMemo(
-        () => [...history].sort((a, b) => a.date.localeCompare(b.date)),
+        () => [...history].sort((a, b) => (a.date || "").localeCompare(b.date || "")),
         [history],
     );
 
@@ -60,7 +60,7 @@ function ProgressPage() {
                 trendDelta: 0,
             };
 
-        const scores = sorted.map((e) => e.score);
+        const scores = sorted.map((e) => e.score ?? 0);
         const best = Math.max(...scores);
         const worst = Math.min(...scores);
         const avg = Math.round(scores.reduce((s, v) => s + v, 0) / scores.length);
@@ -93,9 +93,9 @@ function ProgressPage() {
             const firstHalf = sorted.slice(0, mid);
             const secondHalf = sorted.slice(mid);
             const avgFirst =
-                firstHalf.reduce((s, e) => s + e.score, 0) / firstHalf.length;
+                firstHalf.reduce((s, e) => s + (e.score ?? 0), 0) / firstHalf.length;
             const avgSecond =
-                secondHalf.reduce((s, e) => s + e.score, 0) / secondHalf.length;
+                secondHalf.reduce((s, e) => s + (e.score ?? 0), 0) / secondHalf.length;
             trendDelta = Math.round(avgSecond - avgFirst);
             if (trendDelta > 2) trend = "up";
             else if (trendDelta < -2) trend = "down";
@@ -110,8 +110,8 @@ function ProgressPage() {
         for (const e of sorted) {
             const ym = e.date.slice(0, 7);
             if (!months[ym]) months[ym] = { scores: [], kcals: [] };
-            months[ym].scores.push(e.score);
-            months[ym].kcals.push(e.kcal);
+            months[ym].scores.push(e.score ?? 0);
+            months[ym].kcals.push(e.kcal ?? 0);
         }
         return Object.entries(months)
             .sort(([a], [b]) => a.localeCompare(b))
@@ -131,8 +131,8 @@ function ProgressPage() {
     // ── Chart data ──
     const chartData = sorted.map((e) => ({
         date: fmtDate(e.date),
-        score: e.score,
-        kcal: e.kcal,
+        score: e.score ?? 0,
+        kcal: e.kcal ?? 0,
     }));
 
     const scoreColor = (score) => {
@@ -372,20 +372,20 @@ function ProgressPage() {
                             {[...sorted].reverse().map((entry) => (
                                 <tr key={entry.id}>
                                     <td>{fmtDate(entry.date)}</td>
-                                    <td>{entry.planName}</td>
+                                    <td>{entry.planName || "-"}</td>
                                     <td>
                                         <span
                                             className="progress-score-cell"
-                                            style={{ color: scoreColor(entry.score) }}
+                                            style={{ color: scoreColor(entry.score ?? 0) }}
                                         >
-                                            {entry.score}
+                                            {entry.score ?? 0}
                                         </span>
                                     </td>
-                                    <td>{entry.band}</td>
-                                    <td>{entry.kcal}</td>
-                                    <td>{entry.protein}g</td>
-                                    <td>{entry.fibre}g</td>
-                                    <td>{entry.vegetablesG}g</td>
+                                    <td>{entry.band || "-"}</td>
+                                    <td>{entry.kcal ?? 0}</td>
+                                    <td>{entry.protein ?? 0}g</td>
+                                    <td>{entry.fibre ?? 0}g</td>
+                                    <td>{entry.vegetablesG ?? 0}g</td>
                                     <td>
                                         <button
                                             className="icon-btn danger"

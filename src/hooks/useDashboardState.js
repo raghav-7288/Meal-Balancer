@@ -196,7 +196,7 @@ export function useDashboardState() {
     }, [summaries]);
 
     const visibleFatLimit =
-        APP_CONFIG.visibleFat?.[profile.sex]?.[profile.activity] ||
+        APP_CONFIG.visibleFat?.[profile?.sex]?.[profile?.activity] ||
         APP_CONFIG.visibleFat?.female?.moderate ||
         25;
 

@@ -33,18 +33,20 @@ export async function fetchDailyHealthData(userId, limit = 90) {
  * @returns {Promise<object|null>}
  */
 export async function fetchDailyHealthForDate(userId, date) {
-    const { data, error } = await supabase
-        .from("daily_health_tracking")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("date", date)
-        .single();
+    return withRetry(async () => {
+        const { data, error } = await supabase
+            .from("daily_health_tracking")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("date", date)
+            .single();
 
-    if (error) {
-        if (error.code === "PGRST116") return null; // No row found
-        throw new Error(`Failed to fetch daily health for date: ${error.message}`);
-    }
-    return validateResponse(DailyHealthRowSchema, data, "fetchDailyHealthForDate");
+        if (error) {
+            if (error.code === "PGRST116") return null; // No row found
+            throw new Error(`Failed to fetch daily health for date: ${error.message}`);
+        }
+        return validateResponse(DailyHealthRowSchema, data, "fetchDailyHealthForDate");
+    }, { context: "fetchDailyHealthForDate" });
 }
 
 /**
@@ -81,8 +83,11 @@ export async function upsertDailyHealth(userId, date, fields) {
  */
 export function dbRowsToWaterData(rows) {
     const waterData = {};
+    if (!rows) return waterData;
     for (const row of rows) {
-        waterData[row.date] = row.water_glasses;
+        if (row?.date != null) {
+            waterData[row.date] = row.water_glasses;
+        }
     }
     return waterData;
 }
@@ -94,8 +99,11 @@ export function dbRowsToWaterData(rows) {
  */
 export function dbRowsToStepData(rows) {
     const stepData = {};
+    if (!rows) return stepData;
     for (const row of rows) {
-        stepData[row.date] = row.steps;
+        if (row?.date != null) {
+            stepData[row.date] = row.steps;
+        }
     }
     return stepData;
 }

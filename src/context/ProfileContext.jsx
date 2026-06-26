@@ -59,7 +59,10 @@ export function ProfileProvider({ children }) {
     const { user, isAuthenticated, refreshProfile } = useAuth();
 
     useEffect(() => {
-        return () => { isMounted.current = false; };
+        return () => {
+            isMounted.current = false;
+            if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+        };
     }, []);
 
     // Persist to localStorage whenever profile changes

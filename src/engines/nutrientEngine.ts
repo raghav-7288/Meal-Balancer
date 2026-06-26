@@ -9,7 +9,7 @@ import type { LocalFood, MealItem, NutrientTotals } from "../data/config";
  * @returns Object with scaled nutrient values
  */
 export function calculateFoodNutrients(food: LocalFood, grams: number) {
-    const factor = grams / food.gramsPerExchange;
+    const factor = grams / (food.gramsPerExchange || 1);
 
     return {
         carbs: food.carbs * factor,
@@ -129,7 +129,8 @@ export function aggregateMeal(items: MealItem[]): NutrientTotals {
             // Legacy local food lookup
             const food = foodById(item.foodId);
             if (!food) continue;
-            const factor = item.grams / food.gramsPerExchange;
+            const gramsPerExch = food.gramsPerExchange || 1; // guard against 0/undefined
+            const factor = item.grams / gramsPerExch;
             const kcal = accumulateNutrients(totals, food, factor);
 
             totals.visibleFat += food.group === "fats" ? item.grams : 0;

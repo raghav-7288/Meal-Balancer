@@ -12,6 +12,7 @@ const PAGE_SIZE = 20;
 
 
 function HighlightMatch({ text, query }) {
+    if (!text) return null;
     if (!query || query.length < 2) return <>{text}</>;
     const splitRegex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
     const testRegex = new RegExp(`^${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");

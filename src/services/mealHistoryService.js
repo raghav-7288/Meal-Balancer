@@ -65,13 +65,15 @@ export async function upsertMealHistoryEntry(userId, entry) {
  * @param {string} entryId
  */
 export async function deleteMealHistoryEntry(userId, entryId) {
-    const { error } = await supabase
-        .from("meal_history")
-        .delete()
-        .eq("id", entryId)
-        .eq("user_id", userId);
+    return withRetry(async () => {
+        const { error } = await supabase
+            .from("meal_history")
+            .delete()
+            .eq("id", entryId)
+            .eq("user_id", userId);
 
-    if (error) throw new Error(`Failed to delete meal history entry: ${error.message}`);
+        if (error) throw new Error(`Failed to delete meal history entry: ${error.message}`);
+    }, { context: "deleteMealHistoryEntry" });
 }
 
 /**
@@ -79,12 +81,14 @@ export async function deleteMealHistoryEntry(userId, entryId) {
  * @param {string} userId
  */
 export async function clearMealHistory(userId) {
-    const { error } = await supabase
-        .from("meal_history")
-        .delete()
-        .eq("user_id", userId);
+    return withRetry(async () => {
+        const { error } = await supabase
+            .from("meal_history")
+            .delete()
+            .eq("user_id", userId);
 
-    if (error) throw new Error(`Failed to clear meal history: ${error.message}`);
+        if (error) throw new Error(`Failed to clear meal history: ${error.message}`);
+    }, { context: "clearMealHistory" });
 }
 
 /**

@@ -78,10 +78,16 @@ export function useSyncedPlans() {
     const [syncError, setSyncError] = useState(null);
     const isMounted = useRef(true);
     const syncInProgress = useRef(false);
+    const plansRef = useRef(plans);
 
     useEffect(() => {
         return () => { isMounted.current = false; };
     }, []);
+
+    // Keep plansRef in sync with latest state
+    useEffect(() => {
+        plansRef.current = plans;
+    }, [plans]);
 
     // Persist to localStorage whenever plans change
     useEffect(() => {
@@ -145,7 +151,7 @@ export function useSyncedPlans() {
      */
     function retrySync() {
         if (!isAuthenticated || !user?.id) return;
-        const currentPlans = readLocal();
+        const currentPlans = plansRef.current;
         setSyncStatus("syncing");
         setSyncError(null);
         syncToSupabase([], currentPlans, user.id, setSyncStatusRef, setSyncErrorRef, isMounted);

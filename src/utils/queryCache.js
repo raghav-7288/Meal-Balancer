@@ -93,8 +93,9 @@ export async function staleWhileRevalidate(key, fetcher, ttl = DEFAULT_TTL) {
                 cache.set(key, { data, timestamp: Date.now() });
                 inflight.delete(key);
                 return data;
-            }).catch(() => {
+            }).catch((err) => {
                 inflight.delete(key);
+                console.warn(`[queryCache] Background revalidation failed for key "${key}":`, err?.message || err);
             });
             inflight.set(key, bgPromise);
         }

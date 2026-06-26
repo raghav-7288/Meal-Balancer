@@ -122,7 +122,10 @@ function MealBuilder({
                                                     const foodGroup = food?.group || item.foodGroup || "-";
                                                     const isEditing = editingItemId === item.id;
                                                     const displayGrams = isEditing ? editValues.grams : item.grams;
-                                                    const exchange = food ? Number(displayGrams) / food.gramsPerExchange : (Number(displayGrams) / 100);
+                                                    const rawExchange = food
+                                                        ? Number(displayGrams) / (food.gramsPerExchange || 1)
+                                                        : (Number(displayGrams) / 100);
+                                                    const exchange = Number.isFinite(rawExchange) ? rawExchange : 0;
 
                                                     const startEditing = () => {
                                                         setEditingItemId(item.id);
