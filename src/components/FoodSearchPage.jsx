@@ -37,6 +37,7 @@ function FoodSearchPage() {
     const [activeFilter, setActiveFilter] = useState("All");
     const [activeIndex, setActiveIndex] = useState(-1);
     const [searchError, setSearchError] = useState("");
+    const [visibleCount, setVisibleCount] = useState(20);
     const resultListRef = useRef(null);
     const inputRef = useRef(null);
 
@@ -56,6 +57,7 @@ function FoodSearchPage() {
                 setActiveIndex(-1);
                 setIsNutrientSearch(false);
                 setMatchedNutrientName("");
+                setVisibleCount(20);
             });
             return () => { cancelled = true; };
         }
@@ -354,7 +356,7 @@ function FoodSearchPage() {
                                     Sorted by <strong>{matchedNutrientName}</strong> (highest first)
                                 </div>
                             )}
-                            {filteredResults.map((food, index) => (
+                            {filteredResults.slice(0, visibleCount).map((food, index) => (
                                 <div
                                     key={`${food.food_id}-${index}`}
                                     className={`food-result-card ${
@@ -380,6 +382,14 @@ function FoodSearchPage() {
                                     </div>
                                 </div>
                             ))}
+                            {filteredResults.length > visibleCount && (
+                                <button
+                                    className="food-show-more-btn"
+                                    onClick={() => setVisibleCount((prev) => prev + 20)}
+                                >
+                                    Show more ({filteredResults.length - visibleCount} remaining)
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>

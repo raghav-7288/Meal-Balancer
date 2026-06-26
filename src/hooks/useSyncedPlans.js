@@ -175,6 +175,10 @@ export function useSyncedPlans() {
 /**
  * Determine what changed between prev and next, and sync to Supabase.
  * Updates syncStatus/syncError via refs so mutation callers get feedback.
+ *
+ * Uses a reference-equality check (prevPlan === plan) to detect changes.
+ * Since the setPlans wrapper always creates new plan objects on mutation,
+ * reference inequality reliably indicates a changed plan without JSON.stringify.
  */
 async function syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncErrorRef, isMounted) {
     try {
@@ -186,11 +190,11 @@ async function syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncError
         const prevMap = new Map(prev.map((p) => [p.id, p]));
         const nextMap = new Map(next.map((p) => [p.id, p]));
 
-        // Find plans to upsert (new or modified)
+        // Find plans to upsert (new or modified via reference inequality)
         const toUpsert = [];
         for (const plan of next) {
             const prevPlan = prevMap.get(plan.id);
-            if (!prevPlan || JSON.stringify(prevPlan) !== JSON.stringify(plan)) {
+            if (!prevPlan || prevPlan !== plan) {
                 toUpsert.push(plan);
             }
         }
