@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 
 // Mock supabase client before importing component
 vi.mock("../src/lib/supabaseClient", () => ({
@@ -32,30 +32,38 @@ describe("FoodSearchPage", () => {
         vi.clearAllMocks();
     });
 
-    it("renders the search input", () => {
-        render(<FoodSearchPage />);
+    it("renders the search input", async () => {
+        await act(async () => {
+            render(<FoodSearchPage />);
+        });
 
         const input = screen.getByPlaceholderText("Search foods, nutrients, groups...");
         expect(input).toBeInTheDocument();
         expect(input).toHaveAttribute("role", "combobox");
     });
 
-    it("shows empty state when no query", () => {
-        render(<FoodSearchPage />);
+    it("shows empty state when no query", async () => {
+        await act(async () => {
+            render(<FoodSearchPage />);
+        });
 
         expect(screen.getByText("Search the food database")).toBeInTheDocument();
     });
 
-    it("renders filter chips", () => {
-        render(<FoodSearchPage />);
+    it("renders filter chips", async () => {
+        await act(async () => {
+            render(<FoodSearchPage />);
+        });
 
         expect(screen.getByText("All")).toBeInTheDocument();
         expect(screen.getByText("Foods")).toBeInTheDocument();
         expect(screen.getByText("Groups")).toBeInTheDocument();
     });
 
-    it("shows detail panel empty state", () => {
-        render(<FoodSearchPage />);
+    it("shows detail panel empty state", async () => {
+        await act(async () => {
+            render(<FoodSearchPage />);
+        });
 
         expect(screen.getByText("Select a food to view nutrient details")).toBeInTheDocument();
     });

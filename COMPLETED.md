@@ -49,6 +49,16 @@
 
 ---
 
+## 🧪 Testing & Quality
+
+| # | Issue | Fix Applied | Date |
+|---|-------|-------------|------|
+| 40 | **`generatePlanPdf.js` untested** — 716 lines of complex PDF generation | Extracted 4 pure functions (`capitalize`, `computeWeeklyAverages`, `buildMealTableRow`, `buildDailySummaryRows`). Added `tests/generatePlanPdf.test.js` with 19 unit tests covering all edge cases. | June 26, 2026 |
+| 53 | **FoodSearchPage tests `act()` warnings** | Wrapped all renders in `await act(async () => { ... })` — eliminated 10+ "not wrapped in act(...)" warnings. | June 26, 2026 |
+| 54 | **`generatePlanPdf.js:55` incorrect knife coordinate** | Fixed `circleY * scale` → `circleY`. The multiplication was wrong; the blade endpoint should be at the circle center Y, consistent with the offset pattern used elsewhere. | June 26, 2026 |
+
+---
+
 ## 🎨 UI / UX Improvements
 
 | # | Issue | Fix Applied | Date |
