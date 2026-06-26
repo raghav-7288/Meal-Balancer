@@ -135,12 +135,10 @@ export function useSyncedPlans() {
     // Refs for status setters accessible in syncToSupabase
     const setSyncStatusRef = useRef(setSyncStatus);
     const setSyncErrorRef = useRef(setSyncError);
-    const isMountedRef = useRef(isMounted);
     useEffect(() => {
         setSyncStatusRef.current = setSyncStatus;
         setSyncErrorRef.current = setSyncError;
-        isMountedRef.current = isMounted;
-    }, [setSyncStatus, setSyncError, isMounted]);
+    }, [setSyncStatus, setSyncError]);
 
     /**
      * Retry the last failed sync manually.
@@ -150,7 +148,7 @@ export function useSyncedPlans() {
         const currentPlans = readLocal();
         setSyncStatus("syncing");
         setSyncError(null);
-        syncToSupabase([], currentPlans, user.id, setSyncStatusRef, setSyncErrorRef, isMountedRef);
+        syncToSupabase([], currentPlans, user.id, setSyncStatusRef, setSyncErrorRef, isMounted);
     }
 
     /**
@@ -164,7 +162,7 @@ export function useSyncedPlans() {
 
             // Async Supabase sync with status tracking
             if (authed && userId) {
-                syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncErrorRef, isMountedRef);
+                syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncErrorRef, isMounted);
             }
 
             return next;
@@ -178,9 +176,9 @@ export function useSyncedPlans() {
  * Determine what changed between prev and next, and sync to Supabase.
  * Updates syncStatus/syncError via refs so mutation callers get feedback.
  */
-async function syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncErrorRef, isMountedRef) {
+async function syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncErrorRef, isMounted) {
     try {
-        if (isMountedRef.current?.current) {
+        if (isMounted.current) {
             setSyncStatusRef.current("syncing");
             setSyncErrorRef.current(null);
         }
@@ -218,12 +216,12 @@ async function syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncError
             await Promise.all(promises);
         }
 
-        if (isMountedRef.current?.current) {
+        if (isMounted.current) {
             setSyncStatusRef.current("synced");
         }
     } catch (err) {
         console.error("Background plan sync failed:", err);
-        if (isMountedRef.current?.current) {
+        if (isMounted.current) {
             setSyncStatusRef.current("error");
             setSyncErrorRef.current(err.message);
         }

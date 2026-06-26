@@ -43,6 +43,9 @@
 | 13 | **No TypeScript** — error-prone nested data | Migrated `config.ts`, `scoringEngine.ts`, `nutrientEngine.ts` with full type definitions (`NutrientTotals`, `ScoreResult`, `ScoringRule`, `MealItem`, `LocalFood`, `AppConfig`). Added `tsconfig.json`, TypeScript ESLint parser, and `typecheck` script. | June 26, 2026 |
 | 14 | **`useEffect` dependency warnings suppressed** — eslint-disable comments | Removed ALL `eslint-disable-line react-hooks/exhaustive-deps` comments. Fixed using: refs-in-effects pattern, `useRef` for mount-only checks, proper dependency arrays, and `useCallback`. Files fixed: `App.jsx`, `ProfileContext.jsx`, `useDashboardState.js`, `ProfilePage.jsx`, `useSyncedPlans.js`, `WaterTrackerPage.jsx`, `StepTrackerPage.jsx`, `WeeklyPlannerPage.jsx`, `FoodAutocomplete.jsx`. | June 26, 2026 |
 | 15 | **`food_nutrient_values_staging` table exposed** | (Previously addressed) | June 25, 2026 |
+| 50 | **`throw` inside `try` caught locally** — 4 instances in `FoodSearchPage.jsx` | Replaced `if (error) throw error` with direct `setSearchError(...)` + early return in all 4 locations. Eliminates unnecessary throw-then-catch pattern. | June 26, 2026 |
+| 51 | **`useSyncedPlans.js` confusing double-ref pattern** | Removed `isMountedRef = useRef(isMounted)` wrapper. Now passes `isMounted` ref directly to `syncToSupabase()` and accesses `.current` instead of `.current?.current`. | June 26, 2026 |
+| 52 | **`FoodSearchPage.jsx` duplicate `useDebounce` hook** | Removed local re-declaration (lines 10-17) and imported shared `useDebounce` from `hooks/useDebounce.js`. | June 26, 2026 |
 
 ---
 

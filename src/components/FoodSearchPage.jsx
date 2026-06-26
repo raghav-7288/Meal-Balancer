@@ -1,20 +1,13 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Search, ArrowRight, ChevronDown, ChevronUp, Info, Loader2 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
+import { useDebounce } from "../hooks/useDebounce";
 import EmptyState from "./ui/EmptyState";
 import { SkeletonFoodResult } from "./ui/Skeleton";
 import "./FoodSearchPage.css";
 
 const FILTER_OPTIONS = ["All", "Foods", "Groups"];
 
-function useDebounce(value, delay) {
-    const [debouncedValue, setDebouncedValue] = useState(value);
-    useEffect(() => {
-        const timer = setTimeout(() => setDebouncedValue(value), delay);
-        return () => clearTimeout(timer);
-    }, [value, delay]);
-    return debouncedValue;
-}
 
 function HighlightMatch({ text, query }) {
     if (!query || query.length < 2) return <>{text}</>;
@@ -78,7 +71,17 @@ function FoodSearchPage() {
                     .ilike("nutrient_name", `%${debouncedQuery}%`)
                     .limit(1);
 
-                if (nutrientError) throw nutrientError;
+                if (nutrientError) {
+                    console.error("Search error:", nutrientError);
+                    if (!cancelled) {
+                        setSearchError("Could not connect to database. Check your network connection and try again.");
+                        setResults([]);
+                        setIsNutrientSearch(false);
+                        setMatchedNutrientName("");
+                        setLoading(false);
+                    }
+                    return;
+                }
 
                 if (!cancelled && nutrientMatches && nutrientMatches.length > 0) {
                     // Nutrient match found — fetch foods ranked by this nutrient value desc
@@ -92,7 +95,17 @@ function FoodSearchPage() {
                         .order("value", { ascending: false })
                         .limit(20);
 
-                    if (nfError) throw nfError;
+                    if (nfError) {
+                        console.error("Search error:", nfError);
+                        if (!cancelled) {
+                            setSearchError("Could not connect to database. Check your network connection and try again.");
+                            setResults([]);
+                            setIsNutrientSearch(false);
+                            setMatchedNutrientName("");
+                            setLoading(false);
+                        }
+                        return;
+                    }
 
                     if (!cancelled) {
                         setIsNutrientSearch(true);
@@ -107,7 +120,17 @@ function FoodSearchPage() {
                         { search_text: debouncedQuery }
                     );
 
-                    if (error) throw error;
+                    if (error) {
+                        console.error("Search error:", error);
+                        if (!cancelled) {
+                            setSearchError("Could not connect to database. Check your network connection and try again.");
+                            setResults([]);
+                            setIsNutrientSearch(false);
+                            setMatchedNutrientName("");
+                            setLoading(false);
+                        }
+                        return;
+                    }
 
                     if (!cancelled) {
                         setIsNutrientSearch(false);
@@ -152,7 +175,11 @@ function FoodSearchPage() {
                     .from("food_search_view")
                     .select("*")
                     .eq("food_id", selectedFood.food_id);
-                if (error) throw error;
+                if (error) {
+                    console.error("Nutrient fetch error:", error);
+                    if (!cancelled) setNutrients([]);
+                    return;
+                }
                 if (!cancelled) setNutrients(data || []);
             } catch (err) {
                 console.error("Nutrient fetch error:", err);
