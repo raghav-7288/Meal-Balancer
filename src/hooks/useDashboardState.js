@@ -67,7 +67,7 @@ export function useDashboardState() {
         }
     }, [searchParams, userPlans]);
 
-    const [nutrientLimits, setNutrientLimits] = useLocalStorageState("meal-balancer-nutrient-limits", {
+    const [nutrientLimits, setNutrientLimits] = useLocalStorageState("diet-specifix-nutrient-limits", {
         carbs: 300,
         protein: 60,
         fat: 65,
@@ -146,47 +146,57 @@ export function useDashboardState() {
 
     const activePlan = plans.find((p) => p.id === activePlanId) || plans[0];
 
-    // ── Day-filtered summaries ──
-    const summaries = useMemo(() => {
-        return plans.map((plan) => {
-            const mealTotals = {};
-            const mealScores = {};
-            const meals = plan.meals || {};
+    // ── Helper to compute a single plan's summary for the current day ──
+    const computePlanSummary = (plan) => {
+        const mealTotals = {};
+        const mealScores = {};
+        const meals = plan.meals || {};
 
-            for (const mealName of MEALS) {
-                const allItems = meals[mealName] || [];
-                const dayItems = allItems.filter(i => i.day === viewDay || !i.day);
-                const totals = aggregateMeal(dayItems);
-                mealTotals[mealName] = totals;
-                mealScores[mealName] = scoreMeal({
-                    cerealEnergyPct: totals.cerealEnergyPct,
-                    vegetablesG: totals.vegetablesG,
-                    protein: totals.protein,
-                    fibre: totals.fibre,
-                    addedSugar: totals.addedSugar,
-                    visibleFat: totals.visibleFat,
-                });
-            }
-
-            const dayTotals = combineDay(mealTotals);
-            const dayScore = scoreDay({
-                cerealEnergyPct: dayTotals.cerealEnergyPct,
-                vegetablesG: dayTotals.vegetablesG,
-                protein: dayTotals.protein,
-                fibre: dayTotals.fibre,
-                addedSugar: dayTotals.addedSugar,
-                visibleFat: dayTotals.visibleFat,
+        for (const mealName of MEALS) {
+            const allItems = meals[mealName] || [];
+            const dayItems = allItems.filter(i => i.day === viewDay || !i.day);
+            const totals = aggregateMeal(dayItems);
+            mealTotals[mealName] = totals;
+            mealScores[mealName] = scoreMeal({
+                cerealEnergyPct: totals.cerealEnergyPct,
+                vegetablesG: totals.vegetablesG,
+                protein: totals.protein,
+                fibre: totals.fibre,
+                addedSugar: totals.addedSugar,
+                visibleFat: totals.visibleFat,
             });
+        }
 
-            return { plan, mealTotals, mealScores, dayTotals, dayScore };
+        const dayTotals = combineDay(mealTotals);
+        const dayScore = scoreDay({
+            cerealEnergyPct: dayTotals.cerealEnergyPct,
+            vegetablesG: dayTotals.vegetablesG,
+            protein: dayTotals.protein,
+            fibre: dayTotals.fibre,
+            addedSugar: dayTotals.addedSugar,
+            visibleFat: dayTotals.visibleFat,
         });
-    }, [plans, viewDay]);
 
-    const activeSummary = summaries.find((s) => s.plan.id === activePlanId) || summaries[0];
-    const bestSummary = [...summaries].sort((a, b) => b.dayScore.score - a.dayScore.score)[0];
+        return { plan, mealTotals, mealScores, dayTotals, dayScore };
+    };
+
+    // ── Active plan summary (computed eagerly) ──
+    const activeSummary = useMemo(() => {
+        if (!activePlan) return null;
+        return computePlanSummary(activePlan);
+    }, [activePlan, viewDay]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // ── All plan summaries (computed lazily for comparison section) ──
+    const summaries = useMemo(() => {
+        return plans.map(computePlanSummary);
+    }, [plans, viewDay]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const bestSummary = useMemo(() => {
+        return [...summaries].sort((a, b) => b.dayScore.score - a.dayScore.score)[0];
+    }, [summaries]);
 
     const visibleFatLimit =
-        APP_CONFIG.visibleFat?.[profile.sex]?.[profile.activity] ||
+        APP_CONFIG.visibleFat?.[profile?.sex]?.[profile?.activity] ||
         APP_CONFIG.visibleFat?.female?.moderate ||
         25;
 
@@ -390,13 +400,21 @@ export function useDashboardState() {
         }
     }, [dayScore, viewDay]);
 
-    // Keyboard shortcuts (#34)
-    useHotkeys({
-        "ctrl+s": () => { if (!isPresetActive) saveGuidelines(); },
+    // Keyboard shortcuts (#34) — memoized to avoid listener re-registration
+    const isPresetActiveRef = useRef(isPresetActive);
+    const copyModalRef2 = useRef(copyModal);
+    useEffect(() => {
+        isPresetActiveRef.current = isPresetActive;
+        copyModalRef2.current = copyModal;
+    }, [isPresetActive, copyModal]);
+
+    const shortcuts = useMemo(() => ({
+        "ctrl+s": () => { if (!isPresetActiveRef.current) saveGuidelines(); },
         "ctrl+n": () => saveNewPlan(),
         "ctrl+p": () => navigate("/weekly-planner"),
-        "escape": () => { if (copyModal) setCopyModal(null); },
-    });
+        "escape": () => { if (copyModalRef2.current) setCopyModal(null); },
+    }), []); // eslint-disable-line react-hooks/exhaustive-deps
+    useHotkeys(shortcuts);
 
     return {
         // Auth & profile

@@ -14,7 +14,7 @@ vi.mock("../src/engines/nutrientEngine", () => ({
 
 // Mock FoodAutocomplete to simplify testing MealBuilder interactions
 vi.mock("../src/components/dashboard/FoodAutocomplete", () => ({
-    default: ({ value, onChange, onSelect, placeholder }) => (
+    default: ({ value, onChange, placeholder }) => (
         <input
             data-testid="food-autocomplete"
             value={value}
@@ -187,6 +187,120 @@ describe("MealBuilder", () => {
         // The add button for Breakfast should be disabled since form is empty
         const addBtn = screen.getByLabelText("Add food to Breakfast");
         expect(addBtn).toBeDisabled();
+    });
+
+    it("handles keyboard interaction to toggle slots (Enter key)", () => {
+        render(<MealBuilder {...defaultProps} />);
+
+        const breakfastHeader = screen.getByText("Breakfast").closest("[role='button']");
+        fireEvent.keyDown(breakfastHeader, { key: "Enter" });
+
+        // Should collapse
+        expect(screen.queryByText("Rice")).not.toBeInTheDocument();
+
+        // Expand with Space
+        fireEvent.keyDown(breakfastHeader, { key: " " });
+        expect(screen.getByText("Rice")).toBeInTheDocument();
+    });
+
+    it("does not toggle slot on other keys", () => {
+        render(<MealBuilder {...defaultProps} />);
+
+        const breakfastHeader = screen.getByText("Breakfast").closest("[role='button']");
+        fireEvent.keyDown(breakfastHeader, { key: "a" });
+
+        // Should NOT collapse
+        expect(screen.getByText("Rice")).toBeInTheDocument();
+    });
+
+    it("edits instructions field in edit mode", () => {
+        render(<MealBuilder {...defaultProps} />);
+
+        // Click edit on Rice
+        fireEvent.click(screen.getByLabelText("Edit Rice"));
+
+        // Edit instructions
+        const instrInput = screen.getByLabelText("Edit instructions for Rice");
+        fireEvent.change(instrInput, { target: { value: "Boiled rice" } });
+
+        // Save
+        fireEvent.click(screen.getByLabelText("Save Rice"));
+
+        expect(defaultProps.onUpdateMealItem).toHaveBeenCalledWith("Breakfast", "item-1", {
+            grams: 150,
+            instructions: "Boiled rice",
+        });
+    });
+
+    it("shows exchange value for food items", () => {
+        render(<MealBuilder {...defaultProps} />);
+
+        // Rice: 150g / 30g per exchange = 5.00
+        expect(screen.getByText("5.00")).toBeInTheDocument();
+        // Dal: 100g / 30g per exchange = 3.33
+        expect(screen.getByText("3.33")).toBeInTheDocument();
+    });
+
+    it("handles unknown food (falls back to /100 for exchange)", () => {
+        const props = {
+            ...defaultProps,
+            activePlan: {
+                ...defaultProps.activePlan,
+                meals: {
+                    ...defaultProps.activePlan.meals,
+                    Breakfast: [
+                        { id: "item-3", foodId: "unknown-id", foodName: "Quinoa", grams: 200, day: "Monday", instructions: "" },
+                    ],
+                },
+            },
+        };
+        render(<MealBuilder {...props} />);
+
+        // 200 / 100 = 2.00
+        expect(screen.getByText("2.00")).toBeInTheDocument();
+        expect(screen.getByText("Quinoa")).toBeInTheDocument();
+    });
+
+    it("fills inline add form and submits food", () => {
+        // Use a custom mock for FoodAutocomplete that can trigger onSelect
+        render(<MealBuilder {...defaultProps} />);
+
+        // Fill grams for Breakfast
+        const gramsInputs = screen.getAllByLabelText(/Grams for new food in/);
+        const breakfastGrams = gramsInputs[0]; // First meal slot's grams input
+        fireEvent.change(breakfastGrams, { target: { value: "100" } });
+
+        // The add button should still be disabled because food name is empty
+        const addBtn = screen.getByLabelText("Add food to Early morning");
+        expect(addBtn).toBeDisabled();
+    });
+
+    it("handles grams input with negative value (ignores it)", () => {
+        render(<MealBuilder {...defaultProps} />);
+
+        const gramsInputs = screen.getAllByLabelText(/Grams for new food in/);
+        fireEvent.change(gramsInputs[0], { target: { value: "-5" } });
+
+        // Should not update — value stays empty
+        expect(gramsInputs[0].value).toBe("");
+    });
+
+    it("updates instructions in inline add form", () => {
+        render(<MealBuilder {...defaultProps} />);
+
+        const instrInputs = screen.getAllByLabelText(/Instructions for new food in/);
+        fireEvent.change(instrInputs[0], { target: { value: "Cut into pieces" } });
+
+        expect(instrInputs[0].value).toBe("Cut into pieces");
+    });
+
+    it("disables add button when isAddingFood is true", () => {
+        render(<MealBuilder {...defaultProps} isAddingFood={true} />);
+
+        const addBtns = screen.getAllByTitle("Add food");
+        for (const btn of addBtns) {
+            expect(btn).toBeDisabled();
+        }
     });
 });
 

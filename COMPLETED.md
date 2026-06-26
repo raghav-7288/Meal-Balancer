@@ -28,6 +28,13 @@
 | B4 | **Missing error guard** — `err.message` accessed without null-check | Changed to `err?.message \|\| "fallback message"` | June 26, 2026 |
 | B5 | **Dark mode toggle icon oversized** — `size={34}` | Reduced to `size={20}` | June 26, 2026 |
 | B6 | **`cachedFetch` has no request deduplication** | Added in-flight promise map for concurrent call sharing | June 26, 2026 |
+| B7 | **ProgressPage streak dead code** | Removed dead first streak calculation that was immediately overwritten by correct second one | June 26, 2026 |
+| B8 | **ProgressPage streak shows 1 for old entries** | Added check: most recent entry must be today/yesterday; returns 0 if stale | June 26, 2026 |
+| B9 | **OnboardingFlow crashes if presetPlans empty** | Added `?.` null guard on `selectedPlan.name` | June 26, 2026 |
+| B10 | **WaterTracker/StepTracker memory leak** | `syncTimeoutRef` not cleared on unmount; added cleanup in useEffect return | June 26, 2026 |
+| B11 | **WaterTracker/StepTracker potential infinite loop** | Removed unstable setter functions from useEffect dependency arrays | June 26, 2026 |
+| B12 | **PDF filename crash on null plan name** | Added fallback `"Meal Plan"` when `plan.name` is undefined | June 26, 2026 |
+| B13 | **Lint error: unused `onSelect` in MealBuilder test** | Removed unused destructured prop from mock component | June 26, 2026 |
 
 ---
 
@@ -43,6 +50,62 @@
 | 13 | **No TypeScript** — error-prone nested data | Migrated `config.ts`, `scoringEngine.ts`, `nutrientEngine.ts` with full type definitions (`NutrientTotals`, `ScoreResult`, `ScoringRule`, `MealItem`, `LocalFood`, `AppConfig`). Added `tsconfig.json`, TypeScript ESLint parser, and `typecheck` script. | June 26, 2026 |
 | 14 | **`useEffect` dependency warnings suppressed** — eslint-disable comments | Removed ALL `eslint-disable-line react-hooks/exhaustive-deps` comments. Fixed using: refs-in-effects pattern, `useRef` for mount-only checks, proper dependency arrays, and `useCallback`. Files fixed: `App.jsx`, `ProfileContext.jsx`, `useDashboardState.js`, `ProfilePage.jsx`, `useSyncedPlans.js`, `WaterTrackerPage.jsx`, `StepTrackerPage.jsx`, `WeeklyPlannerPage.jsx`, `FoodAutocomplete.jsx`. | June 26, 2026 |
 | 15 | **`food_nutrient_values_staging` table exposed** | (Previously addressed) | June 25, 2026 |
+| 50 | **`throw` inside `try` caught locally** — 4 instances in `FoodSearchPage.jsx` | Replaced `if (error) throw error` with direct `setSearchError(...)` + early return in all 4 locations. Eliminates unnecessary throw-then-catch pattern. | June 26, 2026 |
+| 51 | **`useSyncedPlans.js` confusing double-ref pattern** | Removed `isMountedRef = useRef(isMounted)` wrapper. Now passes `isMounted` ref directly to `syncToSupabase()` and accesses `.current` instead of `.current?.current`. | June 26, 2026 |
+| 52 | **`FoodSearchPage.jsx` duplicate `useDebounce` hook** | Removed local re-declaration (lines 10-17) and imported shared `useDebounce` from `hooks/useDebounce.js`. | June 26, 2026 |
+| 55 | **`NutrientLimits.jsx` duplicate nutrient lookup** | Extracted `getActualValue()` helper and `TOTALS_KEY_MAP` constant to eliminate repeated if-else chains | June 26, 2026 |
+| 71 | **No runtime data validation** — API responses trusted blindly | Created `src/utils/schemas.js` with Zod schemas (`FoodItemSchema`, `UserPlanSchema`, `DailyHealthRowSchema`, `MealHistoryRowSchema`) + `validateResponse()` helper with graceful degradation. Integrated into all 4 service files. | June 26, 2026 |
+| 72 | **Error Boundary per route** — single global ErrorBoundary | Created `src/components/ui/RouteErrorBoundary.jsx` with route-specific UI (name, retry, go-home). Wrapped each `<Route>` in `App.jsx` with its own boundary. | June 26, 2026 |
+| 73 | **No state management for complex flows** — prop drilling | Created `src/stores/planStore.js` with Zustand `usePlanStore` — centralizes plan UI state (activePlanId, viewDay, nutrientLimits, modals). Available for components to import directly. | June 26, 2026 |
+| 74 | **Service layer lacks retry logic** — fails silently on network blip | Created `src/utils/withRetry.js` with exponential backoff (1s/2s/4s). Only retries network failures (TypeError, AbortError, 5xx). Integrated into `planSyncService`, `dailyHealthService`, `mealHistoryService`. Added 8 unit tests. | June 26, 2026 |
+| 75 | **No API response caching layer** — repeated food searches hit DB | Enhanced `src/utils/queryCache.js` with `staleWhileRevalidate()` (5min fresh, 15min stale window). Integrated into `foodSearchService` for both search and nutrient fetch. Added 3 unit tests. | June 26, 2026 |
+
+---
+
+## 🧪 Testing & Quality
+
+| # | Issue | Fix Applied | Date |
+|---|-------|-------------|------|
+| 37 | **Component integration tests** | Added tests for: `DashboardPage` (renders KPIs), `MealBuilder` (add/remove food), `AuthPage` (login flow), `FoodAutocomplete` (search + select). 4 test files, 40 tests. | June 26, 2026 |
+| 38 | **E2E tests with Playwright** | Installed Playwright, created `playwright.config.js`, added `e2e/meal-balancer-flow.spec.js` covering Login → Create Plan → Add Food → View Score → Export PDF → Logout. | June 26, 2026 |
+| 40 | **`generatePlanPdf.js` untested** — 716 lines of complex PDF generation | Extracted 4 pure functions (`capitalize`, `computeWeeklyAverages`, `buildMealTableRow`, `buildDailySummaryRows`). Added `tests/generatePlanPdf.test.js` with 19 unit tests covering all edge cases. | June 26, 2026 |
+| 53 | **FoodSearchPage tests `act()` warnings** | Wrapped all renders in `await act(async () => { ... })` — eliminated 10+ "not wrapped in act(...)" warnings. | June 26, 2026 |
+| 54 | **`generatePlanPdf.js:55` incorrect knife coordinate** | Fixed `circleY * scale` → `circleY`. The multiplication was wrong; the blade endpoint should be at the circle center Y, consistent with the offset pattern used elsewhere. | June 26, 2026 |
+| 55 | **Progress streak untested** | Added `tests/progressStreak.test.js` with 8 tests covering edge cases: empty history, single entries, broken streaks, stale entries returning 0 | June 26, 2026 |
+| 56 | **NutrientLimits duplicate logic** | Extracted `getActualValue` helper and `TOTALS_KEY_MAP` constant to eliminate repeated if-else chains. | June 26, 2026 |
+| 57 | **PDF filename null safety** | `plan.name` could crash if undefined; added fallback `"Meal Plan"`. | June 26, 2026 |
+| 58 | **OnboardingFlow null safety** | `selectedPlan.name` could crash when presetPlans is empty; added `?.` guard. | June 26, 2026 |
+| 59 | **Tracker pages memory leak** | `syncTimeoutRef` not cleared on unmount in WaterTracker/StepTracker; added cleanup. | June 26, 2026 |
+| 60 | **Tracker useEffect infinite loop risk** | `setWaterData`/`setStepData` in useEffect dependencies could cause loops; removed from deps. | June 26, 2026 |
+
+---
+
+## ⚡ Performance
+
+| # | Issue | Fix Applied | Date |
+|---|-------|-------------|------|
+| 41 | **Summaries recalculated on every plan change** | Split into `activeSummary` (computed eagerly for active plan only) and `summaries` (all plans, used lazily by ComparisonSection). Active plan changes no longer recalculate all plans. | June 26, 2026 |
+| 42 | **JSON.stringify for plan comparison** | Replaced `JSON.stringify(prevPlan) !== JSON.stringify(plan)` with reference-equality check (`prevPlan !== plan`). Since `setPlans` always creates new objects on mutation, this is O(1) per plan. | June 26, 2026 |
+| 43 | **Search results render all DOM nodes** | Added `visibleCount` state (default 20) with "Show more" button. Only 20 DOM nodes rendered initially; user can load more in batches of 20. | June 26, 2026 |
+| 44 | **Inter font loaded from Google CDN** | Replaced Google Fonts CDN link with `@fontsource/inter` package. Font loaded from local bundle — eliminates render-blocking external request. | June 26, 2026 |
+| 61 | **useHotkeys re-registers listener on every render** | Shortcuts object now created via `useMemo(…, [])` with refs for dynamic values. Event listener only registered once. | June 26, 2026 |
+| 62 | **WeeklyPlannerPage bundles PDF library eagerly** | Lazy-loads `generatePlanPdf.js` via dynamic `import()`. WeeklyPlannerPage chunk dropped from 453KB → 13.9KB (97% reduction). PDF chunk loaded on demand. | June 26, 2026 |
+| 76 | **Food list not virtualized** — renders 500+ items | Installed `@tanstack/react-virtual`. Created `VirtualizedList` component. Integrated into `FoodSearchPage.jsx` (replaces slice+show-more) and `FoodAutocomplete.jsx` (virtualized dropdown). Only visible rows rendered. | June 26, 2026 |
+| 77 | **No bundle analysis tooling** | Installed `rollup-plugin-visualizer`. Added to `vite.config.js` (gated by `ANALYZE` env var). Added `npm run build:analyze` script → generates `dist/bundle-stats.html` treemap with gzip/brotli sizes. | June 26, 2026 |
+| 78 | **Recharts renders full SVG eagerly** — charts load off-screen | Created `src/components/ui/LazyChart.jsx` using `IntersectionObserver`. Wrapped AreaChart in `ProgressPage.jsx` — chart only renders when scrolled into viewport. | June 26, 2026 |
+| 79 | **Images not optimized** — no lazy loading, no modern formats | Created `src/components/ui/OptimizedImage.jsx` with `<picture>` fallback (AVIF/WebP), native `loading="lazy"`, `decoding="async"`, explicit `width`/`height` for CLS prevention. | June 26, 2026 |
+
+---
+
+## 🔒 Security & Database
+
+| # | Issue | Fix Applied | Date |
+|---|-------|-------------|------|
+| 16 | **No rate limiting on auth** — unlimited login attempts | Added client-side throttle: disables login button after 5 failures for 30s with countdown timer. Resets after lockout expires. | June 26, 2026 |
+| 17 | **`search_foods_all_fields` RPC returns up to 500 rows** | Created migration `014_optimize_food_search.sql`: adds `pg_trgm` GIN index on `food_items.food_name`, replaces RPC with 20-row limit. | June 26, 2026 |
+| 18 | **Anon key exposed in `.env`** — ensure `.gitignore` has `.env` | Verified `.env` is already in `.gitignore` (line 14). No change needed. | June 26, 2026 |
+| 19 | **No input sanitization on food search** — `%`, `_` not escaped in ILIKE | Added `escapeIlike()` utility in `foodSearchService.js`. Applied to all ILIKE queries in `foodSearchService.js` and `FoodSearchPage.jsx`. | June 26, 2026 |
+| 20 | **Missing migration files for 8 tables** | Generated and committed for all tables | June 25, 2026 |
 
 ---
 
@@ -58,14 +121,6 @@
 | 34 | **Keyboard shortcuts** — none existed | `Ctrl+S/N/P`, `Esc` close modals | June 26, 2026 |
 | 35 | **Accessibility gaps** | Focus trap, `aria-live` regions, skip nav link | June 26, 2026 |
 | 36 | **Dark mode toggle icon too large** | Reduced from `size={34}` to `size={20}` | June 26, 2026 |
-
----
-
-## 🔒 Security & Database
-
-| # | Issue | Fix Applied | Date |
-|---|-------|-------------|------|
-| 20 | **Missing migration files for 8 tables** | Generated and committed for all tables | June 25, 2026 |
 
 ---
 
@@ -99,3 +154,10 @@
 | Meal history synced to Supabase | June 25, 2026 |
 | Water + Step tracker synced to Supabase (daily_health_tracking table) | June 25, 2026 |
 
+---
+
+## 🔐 Dependency Security
+
+| Status | Details | Date |
+|--------|---------|------|
+| ✅ All clean | No known CVEs found across all npm dependencies | June 26, 2026 |

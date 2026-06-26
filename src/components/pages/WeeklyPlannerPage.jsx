@@ -16,7 +16,6 @@ import { useSyncedPlans } from "../../hooks/useSyncedPlans";
 import { usePresetPlans } from "../../hooks/usePresetPlans";
 import { useAuth } from "../../hooks/useAuth";
 import { useProfile } from "../../context/ProfileContext";
-import { downloadPlanAsPdf } from "../../utils/generatePlanPdf";
 import {
     BarChart,
     Bar,
@@ -116,7 +115,7 @@ function WeeklyPlannerPage() {
     }, [daySummaries]);
 
     // Download handler
-    function handleDownloadPdf() {
+    async function handleDownloadPdf() {
         if (!activePlan) return;
         // Build a combined summary for the plan using today's day
         const todayIdx = new Date().getDay();
@@ -133,6 +132,8 @@ function WeeklyPlannerPage() {
             contactNumber: dbProfile?.contact_number || "",
         };
 
+        // Lazy-load PDF module to keep initial bundle small
+        const { downloadPlanAsPdf } = await import("../../utils/generatePlanPdf");
         downloadPlanAsPdf(activePlan, summary, userInfo, profile, daySummaries);
     }
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { cachedFetch, invalidateCache, clearCache } from "../src/utils/queryCache";
+import { cachedFetch, staleWhileRevalidate, invalidateCache, clearCache } from "../src/utils/queryCache";
 
 describe("queryCache", () => {
     beforeEach(() => {
@@ -58,6 +58,39 @@ describe("queryCache", () => {
 
         expect(fetcher1).toHaveBeenCalledTimes(2);
         expect(fetcher2).toHaveBeenCalledTimes(2);
+    });
+
+    // ─── staleWhileRevalidate (#75) ──────────────────────────────────
+    describe("staleWhileRevalidate", () => {
+        it("fetches fresh data on first call (no cache)", async () => {
+            const fetcher = vi.fn().mockResolvedValue("fresh");
+            const result = await staleWhileRevalidate("swr-1", fetcher);
+            expect(result).toBe("fresh");
+            expect(fetcher).toHaveBeenCalledTimes(1);
+        });
+
+        it("returns cached data within TTL without re-fetching", async () => {
+            const fetcher = vi.fn().mockResolvedValue("data");
+            await staleWhileRevalidate("swr-2", fetcher, 60000);
+            const result = await staleWhileRevalidate("swr-2", fetcher, 60000);
+            expect(result).toBe("data");
+            expect(fetcher).toHaveBeenCalledTimes(1);
+        });
+
+        it("returns stale data and revalidates in background when TTL expired but within stale window", async () => {
+            const fetcher = vi.fn()
+                .mockResolvedValueOnce("stale")
+                .mockResolvedValueOnce("refreshed");
+
+            // First call — populates cache
+            await staleWhileRevalidate("swr-3", fetcher, 0); // TTL=0 means immediately stale
+            // Second call — should return stale data and fire background revalidation
+            const result = await staleWhileRevalidate("swr-3", fetcher, 0);
+            expect(result).toBe("stale"); // Returns stale immediately
+            // Background revalidation fires (give it a tick)
+            await new Promise((r) => setTimeout(r, 10));
+            expect(fetcher).toHaveBeenCalledTimes(2);
+        });
     });
 });
 

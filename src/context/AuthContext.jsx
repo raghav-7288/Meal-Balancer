@@ -76,7 +76,7 @@ export function AuthProvider({ children }) {
 
         if (data.user) {
             // Clear onboarding flag so new users always see the onboarding flow
-            localStorage.removeItem("meal-balancer-onboarding-done");
+            localStorage.removeItem("diet-specifix-onboarding-done");
             // Reset browser URL to "/" so BrowserRouter mounts at home (onboarding)
             window.history.replaceState(null, "", "/");
             setUser(data.user);

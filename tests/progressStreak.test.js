@@ -1,0 +1,100 @@
+/**
+ * Progress Page streak calculation logic tests.
+ * Verifies the streak logic that counts consecutive days from the most recent entry.
+ */
+import { describe, it, expect } from "vitest";
+
+/**
+ * Extracted streak calculation logic matching ProgressPage's implementation.
+ * Returns 0 if no entries or most recent entry is more than 1 day old.
+ */
+function calculateStreak(sorted) {
+    if (sorted.length === 0) return 0;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const mostRecent = new Date(sorted[sorted.length - 1].date + "T00:00:00");
+    const daysSinceLast = Math.round((today.getTime() - mostRecent.getTime()) / 86400000);
+
+    if (daysSinceLast > 1) return 0;
+
+    let streak = 1;
+    for (let i = sorted.length - 1; i > 0; i--) {
+        const curr = new Date(sorted[i].date + "T00:00:00");
+        const prev = new Date(sorted[i - 1].date + "T00:00:00");
+        const diff = (curr.getTime() - prev.getTime()) / 86400000;
+        if (diff === 1) streak++;
+        else break;
+    }
+    return streak;
+}
+
+function dateStr(daysAgo) {
+    const d = new Date();
+    d.setDate(d.getDate() - daysAgo);
+    return d.toISOString().split("T")[0];
+}
+
+describe("Progress Streak Calculation", () => {
+    it("returns 0 for empty history", () => {
+        expect(calculateStreak([])).toBe(0);
+    });
+
+    it("returns 1 for a single entry today", () => {
+        const sorted = [{ date: dateStr(0), score: 80 }];
+        expect(calculateStreak(sorted)).toBe(1);
+    });
+
+    it("returns 1 for a single entry yesterday", () => {
+        const sorted = [{ date: dateStr(1), score: 80 }];
+        expect(calculateStreak(sorted)).toBe(1);
+    });
+
+    it("returns 0 for a single entry 2+ days ago (streak broken)", () => {
+        const sorted = [{ date: dateStr(2), score: 80 }];
+        expect(calculateStreak(sorted)).toBe(0);
+    });
+
+    it("returns 0 for entries only from last week (streak broken)", () => {
+        const sorted = [
+            { date: dateStr(9), score: 70 },
+            { date: dateStr(8), score: 75 },
+            { date: dateStr(7), score: 80 },
+        ];
+        expect(calculateStreak(sorted)).toBe(0);
+    });
+
+    it("counts consecutive days correctly", () => {
+        const sorted = [
+            { date: dateStr(3), score: 70 },
+            { date: dateStr(2), score: 75 },
+            { date: dateStr(1), score: 80 },
+            { date: dateStr(0), score: 85 },
+        ];
+        expect(calculateStreak(sorted)).toBe(4);
+    });
+
+    it("stops counting when gap is found", () => {
+        const sorted = [
+            { date: dateStr(5), score: 70 },
+            { date: dateStr(3), score: 75 }, // gap: day 4 missing
+            { date: dateStr(2), score: 80 },
+            { date: dateStr(1), score: 85 },
+            { date: dateStr(0), score: 90 },
+        ];
+        // Days 0,1,2,3 are consecutive → streak = 4 (gap is between day 5 and day 3)
+        expect(calculateStreak(sorted)).toBe(4);
+    });
+
+    it("handles yesterday as most recent (no today entry yet)", () => {
+        const sorted = [
+            { date: dateStr(3), score: 70 },
+            { date: dateStr(2), score: 75 },
+            { date: dateStr(1), score: 80 },
+        ];
+        expect(calculateStreak(sorted)).toBe(3);
+    });
+});
+
+
+

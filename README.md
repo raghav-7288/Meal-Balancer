@@ -1,8 +1,8 @@
-# 🍽️ Meal Balancer
+# 🍽️ Diet Specifix
 
 A React 19 single-page application for **Indian diet planning**. Build meals in grams, convert to exchange-style categories, score dietary patterns with transparent reasons, and export styled PDF reports — all backed by Supabase.
 
-🔗 **Live App:** [https://meal-balancer-three.vercel.app/](https://meal-balancer-three.vercel.app/)
+🔗 **Live App:** [https://diet-specifix.vercel.app/](https://diet-specifix.vercel.app/)
 
 ## ✨ Features
 
@@ -43,7 +43,7 @@ A React 19 single-page application for **Indian diet planning**. Build meals in 
 | Layer | Technology | Version |
 |-------|-----------|---------|
 | Framework | React (JSX) | ^19.2.6 |
-| Type System | TypeScript (engines & config) | ^5.x |
+| Type System | TypeScript (engines & config) | ^6.0.3 |
 | Routing | React Router DOM | ^7.16.0 |
 | Build | Vite | ^8.0.12 |
 | Styling | CSS + Tailwind CSS | ^4.3.0 |
@@ -68,7 +68,7 @@ A React 19 single-page application for **Indian diet planning**. Build meals in 
 
 ```bash
 git clone <repo-url>
-cd meal-balancer
+cd diet-specifix
 npm install
 ```
 
@@ -104,7 +104,7 @@ npm run preview   # preview the production build locally
 
 ### Deploy to Vercel
 
-The app is deployed on Vercel at [https://meal-balancer-three.vercel.app/](https://meal-balancer-three.vercel.app/).
+The app is deployed on Vercel at [https://diet-specifix.vercel.app/](https://diet-specifix.vercel.app/).
 
 ```bash
 npm run build
@@ -147,7 +147,7 @@ SPA routing is handled by `vercel.json` rewrites. Set environment variables (`VI
 │   ├── migrations/          SQL migration files (001–012)
 │   ├── diagnostic-queries.sql
 │   └── SUPABASE_AUDIT.md
-├── tests/                   Unit & component tests (Vitest, 22 test files)
+├── tests/                   Unit & component tests (Vitest, 27 test files)
 ├── COMPLETED.md             Implemented changes log
 ├── CONTEXT.md               Auto-generated project context
 ├── DATABASE_SCHEMA.md       Full Supabase schema documentation
@@ -245,7 +245,7 @@ See [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) for full schema details including
 - **TypeScript** — Typed engines (`config.ts`, `scoringEngine.ts`, `nutrientEngine.ts`) with full interface definitions
 - **Prettier** — Auto-formats code on save/commit
 - **Husky + lint-staged** — Pre-commit hooks run format + lint on staged files
-- **@testing-library/react** — Component testing with jsdom environment (22 test files)
+- **@testing-library/react** — Component testing with jsdom environment (27 test files)
 - **react-hot-toast** — Global toast notification system
 - **Query Cache** — In-memory TTL cache with max-size eviction & request deduplication for Supabase API calls
 - **Error Boundary** — Catches React render errors with recovery option

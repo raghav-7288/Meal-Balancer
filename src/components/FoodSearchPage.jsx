@@ -1,22 +1,18 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Search, ArrowRight, ChevronDown, ChevronUp, Info, Loader2 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
+import { escapeIlike } from "../services/foodSearchService";
+import { useDebounce } from "../hooks/useDebounce";
 import EmptyState from "./ui/EmptyState";
 import { SkeletonFoodResult } from "./ui/Skeleton";
+import VirtualizedList from "./ui/VirtualizedList";
 import "./FoodSearchPage.css";
 
-const FILTER_OPTIONS = ["All", "Foods", "Groups"];
+const PAGE_SIZE = 20;
 
-function useDebounce(value, delay) {
-    const [debouncedValue, setDebouncedValue] = useState(value);
-    useEffect(() => {
-        const timer = setTimeout(() => setDebouncedValue(value), delay);
-        return () => clearTimeout(timer);
-    }, [value, delay]);
-    return debouncedValue;
-}
 
 function HighlightMatch({ text, query }) {
+    if (!text) return null;
     if (!query || query.length < 2) return <>{text}</>;
     const splitRegex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
     const testRegex = new RegExp(`^${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
@@ -41,9 +37,10 @@ function FoodSearchPage() {
     const [selectedFood, setSelectedFood] = useState(null);
     const [nutrients, setNutrients] = useState([]);
     const [nutrientsLoading, setNutrientsLoading] = useState(false);
-    const [activeFilter, setActiveFilter] = useState("All");
     const [activeIndex, setActiveIndex] = useState(-1);
     const [searchError, setSearchError] = useState("");
+    const [hasMore, setHasMore] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
     const resultListRef = useRef(null);
     const inputRef = useRef(null);
 
@@ -63,6 +60,7 @@ function FoodSearchPage() {
                 setActiveIndex(-1);
                 setIsNutrientSearch(false);
                 setMatchedNutrientName("");
+                setHasMore(false);
             });
             return () => { cancelled = true; };
         }
@@ -71,48 +69,81 @@ function FoodSearchPage() {
             setLoading(true);
             setSearchError("");
             try {
-                // First, check if the query matches a nutrient name
+                // First, check if the query matches a nutrient name via nutrient_definitions table
                 const { data: nutrientMatches, error: nutrientError } = await supabase
-                    .from("food_search_view")
+                    .from("nutrient_definitions")
                     .select("nutrient_name, nutrient_id, unit")
-                    .ilike("nutrient_name", `%${debouncedQuery}%`)
+                    .ilike("nutrient_name", `%${escapeIlike(debouncedQuery)}%`)
                     .limit(1);
 
-                if (nutrientError) throw nutrientError;
+                if (nutrientError) {
+                    console.error("Search error:", nutrientError);
+                    if (!cancelled) {
+                        setSearchError(nutrientError.message || "Search failed. Check your network connection and try again.");
+                        setResults([]);
+                        setIsNutrientSearch(false);
+                        setMatchedNutrientName("");
+                        setLoading(false);
+                    }
+                    return;
+                }
 
                 if (!cancelled && nutrientMatches && nutrientMatches.length > 0) {
-                    // Nutrient match found — fetch foods ranked by this nutrient value desc
+                    // Nutrient match found — fetch foods ranked by this nutrient via RPC
                     const matched = nutrientMatches[0];
-                    const { data: nutrientFoods, error: nfError } = await supabase
-                        .from("food_search_view")
-                        .select("food_id, food_code, food_name, food_group, nutrient_name, value, unit")
-                        .eq("nutrient_id", matched.nutrient_id)
-                        .not("value", "is", null)
-                        .gt("value", 0)
-                        .order("value", { ascending: false })
-                        .limit(20);
+                    const { data: nutrientFoods, error: nfError } = await supabase.rpc(
+                        "search_nutrient_foods",
+                        { nutrient_search: matched.nutrient_name }
+                    );
 
-                    if (nfError) throw nfError;
+                    if (nfError) {
+                        console.error("Search error:", nfError);
+                        if (!cancelled) {
+                            setSearchError(nfError.message || "Nutrient search failed. Please try again.");
+                            setResults([]);
+                            setIsNutrientSearch(false);
+                            setMatchedNutrientName("");
+                            setLoading(false);
+                        }
+                        return;
+                    }
 
                     if (!cancelled) {
                         setIsNutrientSearch(true);
                         setMatchedNutrientName(matched.nutrient_name);
-                        setResults(nutrientFoods || []);
+                        // Map RPC columns to match expected shape
+                        const mapped = (nutrientFoods || []).map((r) => ({
+                            ...r,
+                            value: r.nutrient_value,
+                        }));
+                        setResults(mapped);
                         setActiveIndex(-1);
                     }
                 } else {
                     // No nutrient match — full text field search via RPC
                     const { data, error } = await supabase.rpc(
                         "search_foods_all_fields",
-                        { search_text: debouncedQuery }
+                        { search_text: debouncedQuery, p_limit: PAGE_SIZE, p_offset: 0 }
                     );
 
-                    if (error) throw error;
+                    if (error) {
+                        console.error("Search error:", error);
+                        if (!cancelled) {
+                            setSearchError(error.message || "Food search failed. Please try again.");
+                            setResults([]);
+                            setIsNutrientSearch(false);
+                            setMatchedNutrientName("");
+                            setHasMore(false);
+                            setLoading(false);
+                        }
+                        return;
+                    }
 
                     if (!cancelled) {
                         setIsNutrientSearch(false);
                         setMatchedNutrientName("");
                         setResults(data || []);
+                        setHasMore((data || []).length >= PAGE_SIZE);
                         setActiveIndex(-1);
                     }
                 }
@@ -122,7 +153,7 @@ function FoodSearchPage() {
                     setResults([]);
                     setIsNutrientSearch(false);
                     setMatchedNutrientName("");
-                    setSearchError("Could not connect to database. Check your network connection and try again.");
+                    setSearchError("Network error. Check your connection and try again.");
                 }
             } finally {
                 if (!cancelled) setLoading(false);
@@ -148,11 +179,15 @@ function FoodSearchPage() {
         async function fetchNutrients() {
             setNutrientsLoading(true);
             try {
-                const { data, error } = await supabase
-                    .from("food_search_view")
-                    .select("*")
-                    .eq("food_id", selectedFood.food_id);
-                if (error) throw error;
+                const { data, error } = await supabase.rpc(
+                    "get_food_details",
+                    { p_food_id: selectedFood.food_id }
+                );
+                if (error) {
+                    console.error("Nutrient fetch error:", error);
+                    if (!cancelled) setNutrients([]);
+                    return;
+                }
                 if (!cancelled) setNutrients(data || []);
             } catch (err) {
                 console.error("Nutrient fetch error:", err);
@@ -166,21 +201,6 @@ function FoodSearchPage() {
         return () => { cancelled = true; };
     }, [selectedFood]);
 
-    // Filter results
-    const filteredResults = useMemo(() => {
-        if (activeFilter === "All") return results;
-        if (activeFilter === "Foods") return results;
-        if (activeFilter === "Groups") {
-            // Deduplicate by food_group
-            const seen = new Set();
-            return results.filter((r) => {
-                if (seen.has(r.food_group)) return false;
-                seen.add(r.food_group);
-                return true;
-            });
-        }
-        return results;
-    }, [results, activeFilter]);
 
     // Group nutrients by nutrient_group
     const groupedNutrients = useMemo(() => {
@@ -196,25 +216,48 @@ function FoodSearchPage() {
     // Keyboard navigation
     const handleKeyDown = useCallback(
         (e) => {
-            if (filteredResults.length === 0) return;
+            if (results.length === 0) return;
 
             if (e.key === "ArrowDown") {
                 e.preventDefault();
                 setActiveIndex((prev) =>
-                    prev < filteredResults.length - 1 ? prev + 1 : 0
+                    prev < results.length - 1 ? prev + 1 : 0
                 );
             } else if (e.key === "ArrowUp") {
                 e.preventDefault();
                 setActiveIndex((prev) =>
-                    prev > 0 ? prev - 1 : filteredResults.length - 1
+                    prev > 0 ? prev - 1 : results.length - 1
                 );
             } else if (e.key === "Enter" && activeIndex >= 0) {
                 e.preventDefault();
-                setSelectedFood(filteredResults[activeIndex]);
+                setSelectedFood(results[activeIndex]);
             }
         },
-        [filteredResults, activeIndex]
+        [results, activeIndex]
     );
+
+    // Load more results (pagination)
+    const loadMore = useCallback(async () => {
+        if (loadingMore || !hasMore) return;
+        setLoadingMore(true);
+        try {
+            const { data, error } = await supabase.rpc(
+                "search_foods_all_fields",
+                { search_text: debouncedQuery, p_limit: PAGE_SIZE, p_offset: results.length }
+            );
+            if (error) {
+                console.error("Load more error:", error);
+                return;
+            }
+            const newResults = data || [];
+            setResults((prev) => [...prev, ...newResults]);
+            setHasMore(newResults.length >= PAGE_SIZE);
+        } catch (err) {
+            console.error("Load more error:", err);
+        } finally {
+            setLoadingMore(false);
+        }
+    }, [loadingMore, hasMore, debouncedQuery, results.length]);
 
     // Scroll active item into view
     useEffect(() => {
@@ -240,7 +283,7 @@ function FoodSearchPage() {
                         onKeyDown={handleKeyDown}
                         autoFocus
                         role="combobox"
-                        aria-expanded={filteredResults.length > 0}
+                        aria-expanded={results.length > 0}
                         aria-controls="food-search-results"
                         aria-activedescendant={activeIndex >= 0 ? `food-result-${activeIndex}` : undefined}
                         aria-label="Search foods, nutrients, or food groups"
@@ -261,18 +304,6 @@ function FoodSearchPage() {
                     {loading && <Loader2 size={18} className="food-search-spinner" />}
                 </div>
 
-                {/* Filter chips */}
-                <div className="food-filter-chips">
-                    {FILTER_OPTIONS.map((filter) => (
-                        <button
-                            key={filter}
-                            className={`food-filter-chip ${activeFilter === filter ? "active" : ""}`}
-                            onClick={() => setActiveFilter(filter)}
-                        >
-                            {filter}
-                        </button>
-                    ))}
-                </div>
                 <div className="food-source-note">
                     <Info size={14} />
                     <span>Nutrient values are per 100g of food, based on IFCT 2017 data.</span>
@@ -297,7 +328,7 @@ function FoodSearchPage() {
                         </div>
                     )}
 
-                    {debouncedQuery.length >= 2 && !loading && filteredResults.length === 0 && !searchError && (
+                    {debouncedQuery.length >= 2 && !loading && results.length === 0 && !searchError && (
                         <EmptyState
                             icon={<Search size={36} strokeWidth={1.5} />}
                             title="No matching foods found"
@@ -320,39 +351,62 @@ function FoodSearchPage() {
                         </div>
                     )}
 
-                    {filteredResults.length > 0 && (
+                    {results.length > 0 && (
                         <div className="food-search-results-list" ref={resultListRef}>
                             {isNutrientSearch && (
                                 <div className="food-nutrient-search-badge">
                                     Sorted by <strong>{matchedNutrientName}</strong> (highest first)
                                 </div>
                             )}
-                            {filteredResults.map((food, index) => (
-                                <div
-                                    key={`${food.food_id}-${index}`}
-                                    className={`food-result-card ${
-                                        selectedFood?.food_id === food.food_id ? "selected" : ""
-                                    } ${activeIndex === index ? "keyboard-active" : ""}`}
-                                    onClick={() => setSelectedFood(food)}
-                                >
-                                    <div className="food-result-name-row">
-                                        <span className="food-result-name">
-                                            <HighlightMatch text={food.food_name} query={debouncedQuery} />
-                                        </span>
-                                        {isNutrientSearch && food.value != null && (
-                                            <span className="food-result-nutrient-value">
-                                                {Number(food.value).toFixed(1)} <small>{food.unit || ""}</small>
+                            <VirtualizedList
+                                items={results}
+                                estimateSize={64}
+                                overscan={8}
+                                maxHeight="100%"
+                                className="food-search-virtual-scroller"
+                                renderItem={(food, index) => (
+                                    <div
+                                        id={`food-result-${index}`}
+                                        className={`food-result-card ${
+                                            selectedFood?.food_id === food.food_id ? "selected" : ""
+                                        } ${activeIndex === index ? "keyboard-active" : ""}`}
+                                        onClick={() => setSelectedFood(food)}
+                                    >
+                                        <div className="food-result-name-row">
+                                            <span className="food-result-name">
+                                                <HighlightMatch text={food.food_name} query={debouncedQuery} />
                                             </span>
-                                        )}
+                                            {isNutrientSearch && food.value != null && (
+                                                <span className="food-result-nutrient-value">
+                                                    {Number(food.value).toFixed(1)} <small>{food.unit || ""}</small>
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="food-result-meta">
+                                            <span className="food-result-code">{food.food_code}</span>
+                                            <span className="food-result-group">
+                                                <HighlightMatch text={food.food_group || ""} query={debouncedQuery} />
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="food-result-meta">
-                                        <span className="food-result-code">{food.food_code}</span>
-                                        <span className="food-result-group">
-                                            <HighlightMatch text={food.food_group || ""} query={debouncedQuery} />
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
+                                )}
+                            />
+                            {hasMore && !isNutrientSearch && (
+                                <button
+                                    className="food-show-more-btn"
+                                    onClick={loadMore}
+                                    disabled={loadingMore}
+                                >
+                                    {loadingMore ? (
+                                        <>
+                                            <Loader2 size={16} className="food-search-spinner" />
+                                            Loading...
+                                        </>
+                                    ) : (
+                                        `Show more results`
+                                    )}
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>

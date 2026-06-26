@@ -3,6 +3,83 @@ import autoTable from "jspdf-autotable";
 import { foodById } from "../engines/nutrientEngine";
 import { MEALS, DAYS } from "../data/presetPlans";
 
+/* ─── Exported Pure Functions (testable layout logic) ─── */
+
+/**
+ * Compute weekly average macronutrients from daySummaries.
+ * @param {object} daySummaries - Per-day summaries keyed by day name
+ * @param {string[]} days - Array of day names to iterate
+ * @returns {{ daysWithFood: string[], avgKcal: number, avgProtein: number, avgCarbs: number, avgFat: number, avgFibre: number }}
+ */
+export function computeWeeklyAverages(daySummaries, days) {
+    const daysWithFood = days.filter((d) => {
+        const dt = daySummaries[d]?.dayTotals;
+        return dt && (dt.protein || 0) + (dt.carbs || 0) + (dt.fat || 0) > 0;
+    });
+    const numDays = daysWithFood.length || 1;
+    const avgKcal = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.kcal || 0), 0) / numDays);
+    const avgProtein = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.protein || 0), 0) / numDays);
+    const avgCarbs = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.carbs || 0), 0) / numDays);
+    const avgFat = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.fat || 0), 0) / numDays);
+    const avgFibre = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.fibre || 0), 0) / numDays);
+
+    return { daysWithFood, avgKcal, avgProtein, avgCarbs, avgFat, avgFibre };
+}
+
+/**
+ * Build a single table row for a meal item.
+ * @param {object} item - Meal item { foodId, foodName, grams, instructions, nutrients }
+ * @param {function} lookupFood - Function to look up food by ID (e.g., foodById)
+ * @param {object} [options] - { includeFibre: boolean }
+ * @returns {Array} Table row array: [name, qty, instructions, kcal, protein, carbs, fat, ...fibre?]
+ */
+export function buildMealTableRow(item, lookupFood, options = {}) {
+    const { includeFibre = false } = options;
+    const food = lookupFood(item.foodId);
+    const name = food?.name || item.foodName || item.foodId;
+    const grams = item.grams;
+    const instructions = item.instructions || "";
+    let kcal = 0, protein = "0", carbs = "0", fat = "0", fibre = "0";
+
+    if (item.nutrients) {
+        const factor = grams / 100;
+        kcal = Math.round((item.nutrients.kcal || 0) * factor);
+        protein = ((item.nutrients.protein || 0) * factor).toFixed(1);
+        carbs = ((item.nutrients.carbs || 0) * factor).toFixed(1);
+        fat = ((item.nutrients.fat || 0) * factor).toFixed(1);
+        fibre = ((item.nutrients.fibre || 0) * factor).toFixed(1);
+    } else if (food) {
+        const factor = grams / food.gramsPerExchange;
+        kcal = Math.round(food.kcal * factor);
+        protein = (food.protein * factor).toFixed(1);
+        carbs = (food.carbs * factor).toFixed(1);
+        fat = (food.fat * factor).toFixed(1);
+        fibre = (food.fibre * factor).toFixed(1);
+    }
+
+    if (includeFibre) {
+        return [name, `${grams}g`, instructions, kcal, protein, carbs, fat, fibre];
+    }
+    return [name, `${grams}g`, instructions, kcal, protein, carbs, fat];
+}
+
+/**
+ * Build the daily nutrition summary table body from dayTotals.
+ * @param {object} dayTotals - { kcal, protein, carbs, fat, fibre, visibleFat, vegetablesG }
+ * @returns {Array[]} 2D array of [label, value] rows
+ */
+export function buildDailySummaryRows(dayTotals) {
+    return [
+        ["Total Calories", `${Math.round(dayTotals.kcal)} kcal`],
+        ["Protein", `${dayTotals.protein.toFixed(1)} g`],
+        ["Carbohydrates", `${dayTotals.carbs.toFixed(1)} g`],
+        ["Fat", `${dayTotals.fat.toFixed(1)} g`],
+        ["Fibre", `${dayTotals.fibre.toFixed(1)} g`],
+        ["Visible Fat", `${dayTotals.visibleFat.toFixed(1)} g`],
+        ["Vegetables", `${dayTotals.vegetablesG.toFixed(1)} g`],
+    ];
+}
+
 /* ─── Color Palette ─── */
 const COLORS = {
     primary: [37, 99, 235],       // Blue-600
@@ -27,7 +104,7 @@ const COLORS = {
 };
 
 /**
- * Draw the Meal Balancer logo on the PDF at the given position.
+ * Draw the Diet Specifix logo on the PDF at the given position.
  */
 function drawLogo(doc, x, y, small = false) {
     const radius = small ? 5.5 : 7;
@@ -52,18 +129,18 @@ function drawLogo(doc, x, y, small = false) {
     // Knife
     doc.line(circleX + 2.5 * scale, circleY - 4 * scale, circleX + 2.5 * scale, circleY + 4 * scale);
     doc.line(circleX + 2.5 * scale, circleY - 4 * scale, circleX + 3.5 * scale, circleY - 2 * scale);
-    doc.line(circleX + 3.5 * scale, circleY - 2 * scale, circleX + 2.5 * scale, circleY * scale);
+    doc.line(circleX + 3.5 * scale, circleY - 2 * scale, circleX + 2.5 * scale, circleY);
 
     // Reset line color
     doc.setDrawColor(0);
     doc.setLineWidth(0.2);
 
-    // "Meal Balancer" text
+    // "Diet Specifix" text
     const textX = x + (radius * 2) + 4;
     doc.setFontSize(small ? 10 : 13);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...COLORS.dark);
-    doc.text("Meal Balancer", textX, y + (small ? 5 : 6));
+    doc.text("Diet Specifix", textX, y + (small ? 5 : 6));
 
     // "by Dt. Bhakti Shrivastava" subtitle
     doc.setFontSize(small ? 6.5 : 8);
@@ -117,7 +194,7 @@ function drawFooter(doc, pageNum, totalPages, pageWidth, pageHeight) {
     doc.text(`Page ${pageNum} of ${totalPages}`, pageWidth / 2, footerY, { align: "center" });
 
     // Branding on left
-    doc.text("Meal Balancer \u2014 Personalized Nutrition Plan", 14, footerY);
+    doc.text("Diet Specifix \u2014 Personalized Nutrition Plan", 14, footerY);
 
     doc.setTextColor(0);
 }
@@ -239,7 +316,12 @@ function drawInfoRow(doc, x, y, label, value) {
     doc.text(` ${value}`, x + labelWidth, y);
 }
 
-function capitalize(str) {
+/**
+ * Capitalize the first letter of a string.
+ * @param {string} str
+ * @returns {string}
+ */
+export function capitalize(str) {
     if (!str || str === "\u2014") return str;
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
@@ -327,16 +409,7 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
     // ─── 4. WEEKLY OVERVIEW STATS (only for weekly plans) ───
     if (daySummaries) {
         // Compute weekly averages
-        const daysWithFood = DAYS.filter((d) => {
-            const dt = daySummaries[d]?.dayTotals;
-            return dt && (dt.protein || 0) + (dt.carbs || 0) + (dt.fat || 0) > 0;
-        });
-        const numDays = daysWithFood.length || 1;
-        const avgKcal = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.kcal || 0), 0) / numDays);
-        const avgProtein = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.protein || 0), 0) / numDays);
-        const avgCarbs = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.carbs || 0), 0) / numDays);
-        const avgFat = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.fat || 0), 0) / numDays);
-        const avgFibre = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.fibre || 0), 0) / numDays);
+        const { daysWithFood, avgKcal, avgProtein, avgCarbs, avgFat, avgFibre } = computeWeeklyAverages(daySummaries, DAYS);
 
         // Check page space
         if (yPos > pageHeight - 55) {
@@ -448,29 +521,7 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
                 yPos += 6;
 
                 // Build table data
-                const tableBody = items.map((item) => {
-                    const food = foodById(item.foodId);
-                    const name = food?.name || item.foodName || item.foodId;
-                    const grams = item.grams;
-                    const instructions = item.instructions || "";
-                    let kcal = 0, protein = "0", carbs = "0", fat = "0";
-
-                    if (item.nutrients) {
-                        const factor = grams / 100;
-                        kcal = Math.round((item.nutrients.kcal || 0) * factor);
-                        protein = ((item.nutrients.protein || 0) * factor).toFixed(1);
-                        carbs = ((item.nutrients.carbs || 0) * factor).toFixed(1);
-                        fat = ((item.nutrients.fat || 0) * factor).toFixed(1);
-                    } else if (food) {
-                        const factor = grams / food.gramsPerExchange;
-                        kcal = Math.round(food.kcal * factor);
-                        protein = (food.protein * factor).toFixed(1);
-                        carbs = (food.carbs * factor).toFixed(1);
-                        fat = (food.fat * factor).toFixed(1);
-                    }
-
-                    return [name, `${grams}g`, instructions, kcal, protein, carbs, fat];
-                });
+                const tableBody = items.map((item) => buildMealTableRow(item, foodById, { includeFibre: false }));
 
                 autoTable(doc, {
                     startY: yPos,
@@ -555,31 +606,7 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
             doc.setTextColor(0);
             yPos += 4;
 
-            const tableBody = items.map((item) => {
-                const food = foodById(item.foodId);
-                const name = food?.name || item.foodName || item.foodId;
-                const grams = item.grams;
-                const instructions = item.instructions || "";
-                let kcal = 0, protein = "0", carbs = "0", fat = "0", fibre = "0";
-
-                if (item.nutrients) {
-                    const factor = grams / 100;
-                    kcal = Math.round((item.nutrients.kcal || 0) * factor);
-                    protein = ((item.nutrients.protein || 0) * factor).toFixed(1);
-                    carbs = ((item.nutrients.carbs || 0) * factor).toFixed(1);
-                    fat = ((item.nutrients.fat || 0) * factor).toFixed(1);
-                    fibre = ((item.nutrients.fibre || 0) * factor).toFixed(1);
-                } else if (food) {
-                    const factor = grams / food.gramsPerExchange;
-                    kcal = Math.round(food.kcal * factor);
-                    protein = (food.protein * factor).toFixed(1);
-                    carbs = (food.carbs * factor).toFixed(1);
-                    fat = (food.fat * factor).toFixed(1);
-                    fibre = (food.fibre * factor).toFixed(1);
-                }
-
-                return [name, `${grams}g`, instructions, kcal, protein, carbs, fat, fibre];
-            });
+            const tableBody = items.map((item) => buildMealTableRow(item, foodById, { includeFibre: true }));
 
             const mealTotals = summary?.mealTotals?.[mealName];
             if (mealTotals) {
@@ -665,15 +692,7 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
         autoTable(doc, {
             startY: yPos,
             head: [["Nutrient", "Daily Intake"]],
-            body: [
-                ["Total Calories", `${Math.round(dayTotals.kcal)} kcal`],
-                ["Protein", `${dayTotals.protein.toFixed(1)} g`],
-                ["Carbohydrates", `${dayTotals.carbs.toFixed(1)} g`],
-                ["Fat", `${dayTotals.fat.toFixed(1)} g`],
-                ["Fibre", `${dayTotals.fibre.toFixed(1)} g`],
-                ["Visible Fat", `${dayTotals.visibleFat.toFixed(1)} g`],
-                ["Vegetables", `${dayTotals.vegetablesG.toFixed(1)} g`],
-            ],
+            body: buildDailySummaryRows(dayTotals),
             theme: "grid",
             headStyles: {
                 fillColor: COLORS.summaryHeaderBg,
@@ -710,6 +729,6 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
     }
 
     // Save
-    const fileName = `${plan.name.replace(/[^a-zA-Z0-9 ]/g, "").trim()}.pdf`;
+    const fileName = `${(plan.name || "Meal Plan").replace(/[^a-zA-Z0-9 ]/g, "").trim()}.pdf`;
     doc.save(fileName);
 }

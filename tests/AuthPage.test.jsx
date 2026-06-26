@@ -26,7 +26,7 @@ describe("AuthPage", () => {
     it("renders sign in form by default", () => {
         render(<AuthPage />);
 
-        expect(screen.getByText("Meal Balancer")).toBeInTheDocument();
+        expect(screen.getByText("Diet Specifix")).toBeInTheDocument();
         expect(screen.getByText("Sign in to your account")).toBeInTheDocument();
         expect(screen.getByText("Email")).toBeInTheDocument();
         expect(screen.getByText("Password")).toBeInTheDocument();

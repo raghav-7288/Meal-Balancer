@@ -1,4 +1,16 @@
 import { supabase } from "../lib/supabaseClient";
+import { validateResponse, FoodItemArraySchema, FoodNutrientArraySchema } from "../utils/schemas";
+import { staleWhileRevalidate } from "../utils/queryCache";
+
+/**
+ * Escape special ILIKE wildcard characters (%, _) in user input.
+ * Prevents unexpected pattern matching while preserving normal search.
+ * @param {string} str - Raw user input.
+ * @returns {string} Escaped string safe for ILIKE patterns.
+ */
+export function escapeIlike(str) {
+    return str.replace(/[%_\\]/g, (ch) => `\\${ch}`);
+}
 
 /**
  * Search food items from Supabase using trigram similarity.
@@ -9,18 +21,23 @@ import { supabase } from "../lib/supabaseClient";
 export async function searchFoodItems(query, limit = 15) {
     if (!query || query.trim().length < 2) return [];
 
-    const { data, error } = await supabase
-        .from("food_items")
-        .select("food_id, food_code, food_name, major_group_id")
-        .ilike("food_name", `%${query.trim()}%`)
-        .limit(limit);
+    const safeQuery = escapeIlike(query.trim());
+    const cacheKey = `food-search:${safeQuery}:${limit}`;
 
-    if (error) {
-        console.error("Food search error:", error);
-        return [];
-    }
+    return staleWhileRevalidate(cacheKey, async () => {
+        const { data, error } = await supabase
+            .from("food_items")
+            .select("food_id, food_code, food_name, major_group_id")
+            .ilike("food_name", `%${safeQuery}%`)
+            .limit(limit);
 
-    return data || [];
+        if (error) {
+            console.error("Food search error:", error);
+            return [];
+        }
+
+        return validateResponse(FoodItemArraySchema, data || [], "searchFoodItems");
+    });
 }
 
 /**
@@ -30,50 +47,56 @@ export async function searchFoodItems(query, limit = 15) {
  * @returns {Promise<object>} Nutrient map: { nutrient_name: value, ... } and a flat object for the engine.
  */
 export async function fetchFoodNutrients(foodId) {
-    const { data, error } = await supabase
-        .from("food_nutrient_values")
-        .select(`
-            value,
-            nutrient_definitions (
-                nutrient_name,
-                nutrient_code,
-                unit
-            )
-        `)
-        .eq("food_id", foodId);
+    const cacheKey = `food-nutrients:${foodId}`;
 
-    if (error) {
-        console.error("Nutrient fetch error:", error);
-        return null;
-    }
+    return staleWhileRevalidate(cacheKey, async () => {
+        const { data, error } = await supabase
+            .from("food_nutrient_values")
+            .select(`
+                value,
+                nutrient_definitions (
+                    nutrient_name,
+                    nutrient_code,
+                    unit
+                )
+            `)
+            .eq("food_id", foodId);
 
-    if (!data || data.length === 0) return null;
-
-    // Build a raw map of all nutrients: { nutrient_name: { value, unit, code } }
-    const rawNutrients = {};
-    for (const row of data) {
-        const def = row.nutrient_definitions;
-        if (def) {
-            rawNutrients[def.nutrient_name.toLowerCase()] = {
-                value: Number(row.value),
-                unit: def.unit,
-                code: def.nutrient_code,
-            };
+        if (error) {
+            console.error("Nutrient fetch error:", error);
+            return null;
         }
-    }
 
-    // Map DB nutrient names to the app's internal nutrient keys (values are per 100g)
-    const nutrients = {
-        kcal: findNutrientValue(rawNutrients, ["energy", "energy (kcal)", "calories", "kcal"]),
-        carbs: findNutrientValue(rawNutrients, ["carbohydrate", "carbs", "total carbohydrate", "carbohydrate, total"]),
-        protein: findNutrientValue(rawNutrients, ["protein", "total protein"]),
-        fat: findNutrientValue(rawNutrients, ["fat", "total fat", "fat, total"]),
-        fibre: findNutrientValue(rawNutrients, ["fibre", "fiber", "dietary fibre", "dietary fiber", "total dietary fibre"]),
-        vitamins: findNutrientValue(rawNutrients, ["total vitamins", "vitamins"]),
-        minerals: findNutrientValue(rawNutrients, ["total minerals", "minerals", "mineral"]),
-    };
+        if (!data || data.length === 0) return null;
 
-    return { nutrients, rawNutrients };
+        const validated = validateResponse(FoodNutrientArraySchema, data, "fetchFoodNutrients");
+
+        // Build a raw map of all nutrients: { nutrient_name: { value, unit, code } }
+        const rawNutrients = {};
+        for (const row of validated) {
+            const def = row.nutrient_definitions;
+            if (def) {
+                rawNutrients[def.nutrient_name.toLowerCase()] = {
+                    value: Number(row.value),
+                    unit: def.unit,
+                    code: def.nutrient_code,
+                };
+            }
+        }
+
+        // Map DB nutrient names to the app's internal nutrient keys (values are per 100g)
+        const nutrients = {
+            kcal: findNutrientValue(rawNutrients, ["energy", "energy (kcal)", "calories", "kcal"]),
+            carbs: findNutrientValue(rawNutrients, ["carbohydrate", "carbs", "total carbohydrate", "carbohydrate, total"]),
+            protein: findNutrientValue(rawNutrients, ["protein", "total protein"]),
+            fat: findNutrientValue(rawNutrients, ["fat", "total fat", "fat, total"]),
+            fibre: findNutrientValue(rawNutrients, ["fibre", "fiber", "dietary fibre", "dietary fiber", "total dietary fibre"]),
+            vitamins: findNutrientValue(rawNutrients, ["total vitamins", "vitamins"]),
+            minerals: findNutrientValue(rawNutrients, ["total minerals", "minerals", "mineral"]),
+        };
+
+        return { nutrients, rawNutrients };
+    });
 }
 
 /**

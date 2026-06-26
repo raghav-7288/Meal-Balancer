@@ -1,5 +1,5 @@
 -- =============================================================================
--- Meal Balancer — Supabase Diagnostic Queries
+-- Diet Specifix — Supabase Diagnostic Queries
 -- =============================================================================
 -- Run these in the Supabase SQL Editor (Dashboard → SQL Editor) to audit
 -- the database state. Results can be compared against SUPABASE_AUDIT.md.

@@ -16,8 +16,8 @@ function getTodayKey() {
 }
 
 function StepTrackerPage() {
-    const [stepData, setStepData] = useLocalStorageState("meal-balancer-steps", {});
-    const [target, setTarget] = useLocalStorageState("meal-balancer-steps-target", DEFAULT_TARGET);
+    const [stepData, setStepData] = useLocalStorageState("diet-specifix-steps", {});
+    const [target, setTarget] = useLocalStorageState("diet-specifix-steps-target", DEFAULT_TARGET);
     const [editingTarget, setEditingTarget] = useState(false);
     const [targetInput, setTargetInput] = useState(String(target));
     const [customInput, setCustomInput] = useState("");
@@ -33,7 +33,10 @@ function StepTrackerPage() {
     }, [isAuthenticated, user?.id]);
 
     useEffect(() => {
-        return () => { isMounted.current = false; };
+        return () => {
+            isMounted.current = false;
+            if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+        };
     }, []);
 
     // Keep target in a ref so the load effect doesn't re-trigger on target change
@@ -80,7 +83,7 @@ function StepTrackerPage() {
         }
 
         loadFromDb();
-    }, [isAuthenticated, user?.id, setStepData, setTarget]);
+    }, [isAuthenticated, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const todayKey = getTodayKey();
     const steps = stepData[todayKey] || 0;

@@ -23,6 +23,14 @@ vi.mock("../src/lib/supabaseClient", () => ({
     },
 }));
 
+// Bypass cache in tests — always call fetcher directly
+vi.mock("../src/utils/queryCache", () => ({
+    staleWhileRevalidate: (_key, fetcher) => fetcher(),
+    cachedFetch: (_key, fetcher) => fetcher(),
+    invalidateCache: vi.fn(),
+    clearCache: vi.fn(),
+}));
+
 import { searchFoodItems, fetchFoodNutrients } from "../src/services/foodSearchService";
 
 describe("FoodSearchService", () => {

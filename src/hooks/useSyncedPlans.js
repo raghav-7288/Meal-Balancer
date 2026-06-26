@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "./useAuth";
 import { fetchUserPlans, upsertPlans, deletePlan } from "../services/planSyncService";
 
-const LOCAL_STORAGE_KEY = "meal-balancer-user-plans";
+const LOCAL_STORAGE_KEY = "diet-specifix-user-plans";
 
 /**
  * Read plans from localStorage.
@@ -78,10 +78,16 @@ export function useSyncedPlans() {
     const [syncError, setSyncError] = useState(null);
     const isMounted = useRef(true);
     const syncInProgress = useRef(false);
+    const plansRef = useRef(plans);
 
     useEffect(() => {
         return () => { isMounted.current = false; };
     }, []);
+
+    // Keep plansRef in sync with latest state
+    useEffect(() => {
+        plansRef.current = plans;
+    }, [plans]);
 
     // Persist to localStorage whenever plans change
     useEffect(() => {
@@ -135,22 +141,20 @@ export function useSyncedPlans() {
     // Refs for status setters accessible in syncToSupabase
     const setSyncStatusRef = useRef(setSyncStatus);
     const setSyncErrorRef = useRef(setSyncError);
-    const isMountedRef = useRef(isMounted);
     useEffect(() => {
         setSyncStatusRef.current = setSyncStatus;
         setSyncErrorRef.current = setSyncError;
-        isMountedRef.current = isMounted;
-    }, [setSyncStatus, setSyncError, isMounted]);
+    }, [setSyncStatus, setSyncError]);
 
     /**
      * Retry the last failed sync manually.
      */
     function retrySync() {
         if (!isAuthenticated || !user?.id) return;
-        const currentPlans = readLocal();
+        const currentPlans = plansRef.current;
         setSyncStatus("syncing");
         setSyncError(null);
-        syncToSupabase([], currentPlans, user.id, setSyncStatusRef, setSyncErrorRef, isMountedRef);
+        syncToSupabase([], currentPlans, user.id, setSyncStatusRef, setSyncErrorRef, isMounted);
     }
 
     /**
@@ -164,7 +168,7 @@ export function useSyncedPlans() {
 
             // Async Supabase sync with status tracking
             if (authed && userId) {
-                syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncErrorRef, isMountedRef);
+                syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncErrorRef, isMounted);
             }
 
             return next;
@@ -177,10 +181,14 @@ export function useSyncedPlans() {
 /**
  * Determine what changed between prev and next, and sync to Supabase.
  * Updates syncStatus/syncError via refs so mutation callers get feedback.
+ *
+ * Uses a reference-equality check (prevPlan === plan) to detect changes.
+ * Since the setPlans wrapper always creates new plan objects on mutation,
+ * reference inequality reliably indicates a changed plan without JSON.stringify.
  */
-async function syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncErrorRef, isMountedRef) {
+async function syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncErrorRef, isMounted) {
     try {
-        if (isMountedRef.current?.current) {
+        if (isMounted.current) {
             setSyncStatusRef.current("syncing");
             setSyncErrorRef.current(null);
         }
@@ -188,11 +196,11 @@ async function syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncError
         const prevMap = new Map(prev.map((p) => [p.id, p]));
         const nextMap = new Map(next.map((p) => [p.id, p]));
 
-        // Find plans to upsert (new or modified)
+        // Find plans to upsert (new or modified via reference inequality)
         const toUpsert = [];
         for (const plan of next) {
             const prevPlan = prevMap.get(plan.id);
-            if (!prevPlan || JSON.stringify(prevPlan) !== JSON.stringify(plan)) {
+            if (!prevPlan || prevPlan !== plan) {
                 toUpsert.push(plan);
             }
         }
@@ -218,12 +226,12 @@ async function syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncError
             await Promise.all(promises);
         }
 
-        if (isMountedRef.current?.current) {
+        if (isMounted.current) {
             setSyncStatusRef.current("synced");
         }
     } catch (err) {
         console.error("Background plan sync failed:", err);
-        if (isMountedRef.current?.current) {
+        if (isMounted.current) {
             setSyncStatusRef.current("error");
             setSyncErrorRef.current(err.message);
         }

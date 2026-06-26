@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useDebounce } from "../../hooks/useDebounce";
 import { searchFoodItems } from "../../services/foodSearchService";
 
@@ -15,6 +16,15 @@ function FoodAutocomplete({ value, onChange, onSelect, placeholder = "Type to se
     const debouncedQuery = useDebounce(inputValue, 300);
     const wrapperRef = useRef(null);
     const inputRef = useRef(null);
+    const dropdownRef = useRef(null);
+
+    // Virtualizer for dropdown (#76)
+    const virtualizer = useVirtualizer({
+        count: suggestions.length,
+        getScrollElement: () => dropdownRef.current,
+        estimateSize: () => 40,
+        overscan: 5,
+    });
     // Sync external value changes via effect (controlled component pattern)
     const prevValueRef = useRef(value);
     useEffect(() => {
@@ -106,20 +116,38 @@ function FoodAutocomplete({ value, onChange, onSelect, placeholder = "Type to se
             />
             {isLoading && <span className="food-autocomplete-loading">Searching...</span>}
             {isOpen && suggestions.length > 0 && (
-                <ul className="food-autocomplete-dropdown" role="listbox">
-                    {suggestions.map((item, index) => (
-                        <li
-                            key={item.food_id}
-                            role="option"
-                            aria-selected={index === highlightIndex}
-                            className={`food-autocomplete-item ${index === highlightIndex ? "highlighted" : ""}`}
-                            onClick={() => handleSelect(item)}
-                            onMouseEnter={() => setHighlightIndex(index)}
-                        >
-                            <span className="food-autocomplete-name">{item.food_name}</span>
-                            <span className="food-autocomplete-code">{item.food_code}</span>
-                        </li>
-                    ))}
+                <ul
+                    className="food-autocomplete-dropdown"
+                    role="listbox"
+                    ref={dropdownRef}
+                    style={{ maxHeight: 240, overflow: "auto" }}
+                >
+                    <div style={{ height: `${virtualizer.getTotalSize()}px`, position: "relative" }}>
+                        {virtualizer.getVirtualItems().map((virtualRow) => {
+                            const item = suggestions[virtualRow.index];
+                            const index = virtualRow.index;
+                            return (
+                                <li
+                                    key={item.food_id}
+                                    role="option"
+                                    aria-selected={index === highlightIndex}
+                                    className={`food-autocomplete-item ${index === highlightIndex ? "highlighted" : ""}`}
+                                    onClick={() => handleSelect(item)}
+                                    onMouseEnter={() => setHighlightIndex(index)}
+                                    style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        width: "100%",
+                                        transform: `translateY(${virtualRow.start}px)`,
+                                    }}
+                                >
+                                    <span className="food-autocomplete-name">{item.food_name}</span>
+                                    <span className="food-autocomplete-code">{item.food_code}</span>
+                                </li>
+                            );
+                        })}
+                    </div>
                 </ul>
             )}
         </div>

@@ -22,6 +22,7 @@ import {
 import { useMealHistory } from "../../hooks/useMealHistory";
 import Section from "../ui/Section";
 import EmptyState from "../ui/EmptyState";
+import LazyChart from "../ui/LazyChart";
 
 /** Format YYYY-MM-DD to short display: "Jun 24" */
 function fmtDate(dateStr) {
@@ -42,7 +43,7 @@ function ProgressPage() {
 
     // Sort history by date (oldest first for charts)
     const sorted = useMemo(
-        () => [...history].sort((a, b) => a.date.localeCompare(b.date)),
+        () => [...history].sort((a, b) => (a.date || "").localeCompare(b.date || "")),
         [history],
     );
 
@@ -59,37 +60,29 @@ function ProgressPage() {
                 trendDelta: 0,
             };
 
-        const scores = sorted.map((e) => e.score);
+        const scores = sorted.map((e) => e.score ?? 0);
         const best = Math.max(...scores);
         const worst = Math.min(...scores);
         const avg = Math.round(scores.reduce((s, v) => s + v, 0) / scores.length);
 
-        // Current streak — consecutive days ending today/yesterday
+        // Streak: count consecutive dates backwards from most recent entry
+        // Only count if the most recent entry is from today or yesterday
         let streak = 0;
-        const today = new Date();
-        for (let i = sorted.length - 1; i >= 0; i--) {
-            const entryDate = new Date(sorted[i].date + "T00:00:00");
-            const expectedDate = new Date(today);
-            expectedDate.setDate(today.getDate() - (sorted.length - 1 - i));
-            expectedDate.setHours(0, 0, 0, 0);
-            // Check if within 1 day tolerance
-            const diffDays = Math.round(
-                (today.getTime() - entryDate.getTime()) / (86400000),
-            );
-            if (diffDays === sorted.length - 1 - i || diffDays === sorted.length - i) {
-                streak++;
-            } else {
-                break;
+        if (sorted.length > 0) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const mostRecent = new Date(sorted[sorted.length - 1].date + "T00:00:00");
+            const daysSinceLast = Math.round((today.getTime() - mostRecent.getTime()) / 86400000);
+            if (daysSinceLast <= 1) {
+                streak = 1;
+                for (let i = sorted.length - 1; i > 0; i--) {
+                    const curr = new Date(sorted[i].date + "T00:00:00");
+                    const prev = new Date(sorted[i - 1].date + "T00:00:00");
+                    const diff = (curr.getTime() - prev.getTime()) / 86400000;
+                    if (diff === 1) streak++;
+                    else break;
+                }
             }
-        }
-        // Simpler streak: count consecutive dates backwards from most recent
-        streak = 1;
-        for (let i = sorted.length - 1; i > 0; i--) {
-            const curr = new Date(sorted[i].date + "T00:00:00");
-            const prev = new Date(sorted[i - 1].date + "T00:00:00");
-            const diff = (curr.getTime() - prev.getTime()) / 86400000;
-            if (diff === 1) streak++;
-            else break;
         }
 
         // Trend: compare last 7 entries avg vs previous 7
@@ -100,9 +93,9 @@ function ProgressPage() {
             const firstHalf = sorted.slice(0, mid);
             const secondHalf = sorted.slice(mid);
             const avgFirst =
-                firstHalf.reduce((s, e) => s + e.score, 0) / firstHalf.length;
+                firstHalf.reduce((s, e) => s + (e.score ?? 0), 0) / firstHalf.length;
             const avgSecond =
-                secondHalf.reduce((s, e) => s + e.score, 0) / secondHalf.length;
+                secondHalf.reduce((s, e) => s + (e.score ?? 0), 0) / secondHalf.length;
             trendDelta = Math.round(avgSecond - avgFirst);
             if (trendDelta > 2) trend = "up";
             else if (trendDelta < -2) trend = "down";
@@ -117,8 +110,8 @@ function ProgressPage() {
         for (const e of sorted) {
             const ym = e.date.slice(0, 7);
             if (!months[ym]) months[ym] = { scores: [], kcals: [] };
-            months[ym].scores.push(e.score);
-            months[ym].kcals.push(e.kcal);
+            months[ym].scores.push(e.score ?? 0);
+            months[ym].kcals.push(e.kcal ?? 0);
         }
         return Object.entries(months)
             .sort(([a], [b]) => a.localeCompare(b))
@@ -138,8 +131,8 @@ function ProgressPage() {
     // ── Chart data ──
     const chartData = sorted.map((e) => ({
         date: fmtDate(e.date),
-        score: e.score,
-        kcal: e.kcal,
+        score: e.score ?? 0,
+        kcal: e.kcal ?? 0,
     }));
 
     const scoreColor = (score) => {
@@ -278,37 +271,39 @@ function ProgressPage() {
 
             {/* Score Progress Chart */}
             <Section title="Score over time" icon={<TrendingUp size={16} />}>
-                <div style={{ width: "100%", height: 260 }}>
-                    <ResponsiveContainer>
-                        <AreaChart data={chartData}>
-                            <defs>
-                                <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
-                                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                            <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                            <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
-                            <Tooltip
-                                contentStyle={{
-                                    borderRadius: 10,
-                                    fontSize: 13,
-                                    border: "1px solid #e5e7eb",
-                                }}
-                            />
-                            <Area
-                                type="monotone"
-                                dataKey="score"
-                                stroke="#3b82f6"
-                                strokeWidth={2}
-                                fill="url(#scoreGrad)"
-                                dot={{ r: 4, fill: "#3b82f6" }}
-                                activeDot={{ r: 6 }}
-                            />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                </div>
+                <LazyChart height="260px">
+                    <div style={{ width: "100%", height: 260 }}>
+                        <ResponsiveContainer>
+                            <AreaChart data={chartData}>
+                                <defs>
+                                    <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
+                                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                                <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
+                                <Tooltip
+                                    contentStyle={{
+                                        borderRadius: 10,
+                                        fontSize: 13,
+                                        border: "1px solid #e5e7eb",
+                                    }}
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="score"
+                                    stroke="#3b82f6"
+                                    strokeWidth={2}
+                                    fill="url(#scoreGrad)"
+                                    dot={{ r: 4, fill: "#3b82f6" }}
+                                    activeDot={{ r: 6 }}
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                </LazyChart>
             </Section>
 
             {/* Monthly Averages */}
@@ -377,20 +372,20 @@ function ProgressPage() {
                             {[...sorted].reverse().map((entry) => (
                                 <tr key={entry.id}>
                                     <td>{fmtDate(entry.date)}</td>
-                                    <td>{entry.planName}</td>
+                                    <td>{entry.planName || "-"}</td>
                                     <td>
                                         <span
                                             className="progress-score-cell"
-                                            style={{ color: scoreColor(entry.score) }}
+                                            style={{ color: scoreColor(entry.score ?? 0) }}
                                         >
-                                            {entry.score}
+                                            {entry.score ?? 0}
                                         </span>
                                     </td>
-                                    <td>{entry.band}</td>
-                                    <td>{entry.kcal}</td>
-                                    <td>{entry.protein}g</td>
-                                    <td>{entry.fibre}g</td>
-                                    <td>{entry.vegetablesG}g</td>
+                                    <td>{entry.band || "-"}</td>
+                                    <td>{entry.kcal ?? 0}</td>
+                                    <td>{entry.protein ?? 0}g</td>
+                                    <td>{entry.fibre ?? 0}g</td>
+                                    <td>{entry.vegetablesG ?? 0}g</td>
                                     <td>
                                         <button
                                             className="icon-btn danger"
