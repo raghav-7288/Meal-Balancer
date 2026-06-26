@@ -80,22 +80,57 @@ function AuthPage() {
     );
 }
 
+const LOCKOUT_THRESHOLD = 5;
+const LOCKOUT_DURATION_MS = 30000; // 30 seconds
+
 function SignInForm() {
     const { signIn } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [failCount, setFailCount] = useState(0);
+    const [lockedUntil, setLockedUntil] = useState(null);
+    const [lockRemaining, setLockRemaining] = useState(0);
+
+    // Countdown timer for lockout
+    useEffect(() => {
+        if (!lockedUntil) return;
+        const tick = () => {
+            const remaining = lockedUntil - Date.now();
+            if (remaining <= 0) {
+                setLockedUntil(null);
+                setLockRemaining(0);
+                setFailCount(0);
+            } else {
+                setLockRemaining(Math.ceil(remaining / 1000));
+            }
+        };
+        tick();
+        const id = setInterval(tick, 1000);
+        return () => clearInterval(id);
+    }, [lockedUntil]);
+
+    const isLockedOut = lockRemaining > 0;
 
     async function handleSubmit(e) {
         e.preventDefault();
+        if (isLockedOut) return;
         setError(null);
         setLoading(true);
 
         try {
             await signIn(email, password);
+            setFailCount(0);
         } catch (err) {
-            setError(err?.message || "Sign in failed. Please try again.");
+            const newCount = failCount + 1;
+            setFailCount(newCount);
+            if (newCount >= LOCKOUT_THRESHOLD) {
+                setLockedUntil(Date.now() + LOCKOUT_DURATION_MS);
+                setError(`Too many failed attempts. Please wait 30 seconds before trying again.`);
+            } else {
+                setError(err?.message || "Sign in failed. Please try again.");
+            }
         } finally {
             setLoading(false);
         }
@@ -127,9 +162,13 @@ function SignInForm() {
                 />
             </label>
 
-            <button type="submit" className="auth-btn" disabled={loading}>
+            <button type="submit" className="auth-btn" disabled={loading || isLockedOut}>
                 {loading ? <Loader2 size={16} className="spin" /> : <LogIn size={16} />}
-                {loading ? "Signing in…" : "Sign in"}
+                {isLockedOut
+                    ? `Locked (${lockRemaining}s)`
+                    : loading
+                        ? "Signing in…"
+                        : "Sign in"}
             </button>
         </form>
     );

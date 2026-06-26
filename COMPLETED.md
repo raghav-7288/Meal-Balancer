@@ -87,6 +87,10 @@
 
 | # | Issue | Fix Applied | Date |
 |---|-------|-------------|------|
+| 16 | **No rate limiting on auth** — unlimited login attempts | Added client-side throttle: disables login button after 5 failures for 30s with countdown timer. Resets after lockout expires. | June 26, 2026 |
+| 17 | **`search_foods_all_fields` RPC returns up to 500 rows** | Created migration `014_optimize_food_search.sql`: adds `pg_trgm` GIN index on `food_items.food_name`, replaces RPC with 20-row limit. | June 26, 2026 |
+| 18 | **Anon key exposed in `.env`** — ensure `.gitignore` has `.env` | Verified `.env` is already in `.gitignore` (line 14). No change needed. | June 26, 2026 |
+| 19 | **No input sanitization on food search** — `%`, `_` not escaped in ILIKE | Added `escapeIlike()` utility in `foodSearchService.js`. Applied to all ILIKE queries in `foodSearchService.js` and `FoodSearchPage.jsx`. | June 26, 2026 |
 | 20 | **Missing migration files for 8 tables** | Generated and committed for all tables | June 25, 2026 |
 
 ---

@@ -1,6 +1,16 @@
 import { supabase } from "../lib/supabaseClient";
 
 /**
+ * Escape special ILIKE wildcard characters (%, _) in user input.
+ * Prevents unexpected pattern matching while preserving normal search.
+ * @param {string} str - Raw user input.
+ * @returns {string} Escaped string safe for ILIKE patterns.
+ */
+export function escapeIlike(str) {
+    return str.replace(/[%_\\]/g, (ch) => `\\${ch}`);
+}
+
+/**
  * Search food items from Supabase using trigram similarity.
  * @param {string} query - The search term typed by the user.
  * @param {number} limit - Max results to return (default 15).
@@ -9,10 +19,12 @@ import { supabase } from "../lib/supabaseClient";
 export async function searchFoodItems(query, limit = 15) {
     if (!query || query.trim().length < 2) return [];
 
+    const safeQuery = escapeIlike(query.trim());
+
     const { data, error } = await supabase
         .from("food_items")
         .select("food_id, food_code, food_name, major_group_id")
-        .ilike("food_name", `%${query.trim()}%`)
+        .ilike("food_name", `%${safeQuery}%`)
         .limit(limit);
 
     if (error) {

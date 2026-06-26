@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Search, ArrowRight, ChevronDown, ChevronUp, Info, Loader2 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
+import { escapeIlike } from "../services/foodSearchService";
 import { useDebounce } from "../hooks/useDebounce";
 import EmptyState from "./ui/EmptyState";
 import { SkeletonFoodResult } from "./ui/Skeleton";
@@ -70,7 +71,7 @@ function FoodSearchPage() {
                 const { data: nutrientMatches, error: nutrientError } = await supabase
                     .from("food_search_view")
                     .select("nutrient_name, nutrient_id, unit")
-                    .ilike("nutrient_name", `%${debouncedQuery}%`)
+                    .ilike("nutrient_name", `%${escapeIlike(debouncedQuery)}%`)
                     .limit(1);
 
                 if (nutrientError) {
