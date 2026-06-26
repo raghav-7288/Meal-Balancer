@@ -88,12 +88,22 @@ export function accumulateNutrients(
 
 /**
  * Aggregate nutrient totals for a single meal's items.
- * Supports both:
- *   - DB items with `nutrients` property (values per 100g)
- *   - Legacy local items looked up via foodById (using gramsPerExchange)
  *
- * @param items - Array of meal items with foodId, grams, and optional nutrients/foodGroup
- * @returns Aggregated totals including exchange info
+ * Supports two food item formats:
+ * - **DB items**: Have a `nutrients` property with values per 100g.
+ *   Scaled by `grams / 100`. The `foodGroup` field is used for exchange tracking.
+ * - **Legacy local items**: Looked up via {@link foodById} using `foodId`.
+ *   Scaled by `grams / gramsPerExchange`. The food's `group` field is used.
+ *
+ * In addition to macro/micro sums, tracks:
+ * - `vegetablesG` — total grams from "vegetables" group
+ * - `visibleFat` — total grams from "fats" group (added oils/ghee)
+ * - `cerealEnergy` — kcal contributed by "cereals" group
+ * - `cerealEnergyPct` — cereal kcal as % of total meal kcal
+ * - `exchangeTotals` — exchange count per food group (factor = grams / reference)
+ *
+ * @param items - Array of meal items, each with `foodId`, `grams`, and optionally `nutrients` / `foodGroup`
+ * @returns NutrientTotals object with all macros, micros, exchange info, and derived percentages
  */
 export function aggregateMeal(items: MealItem[]): NutrientTotals {
     const totals: NutrientTotals = {
@@ -136,8 +146,17 @@ export function aggregateMeal(items: MealItem[]): NutrientTotals {
 /**
  * Combine multiple meal totals into day-level totals.
  *
- * @param mealTotals - Object keyed by meal name, values from aggregateMeal()
- * @returns Day-level aggregated totals
+ * Sums all numeric nutrient fields across meals and merges `exchangeTotals`
+ * maps. Recomputes `cerealEnergyPct` as the day-wide ratio (not a simple
+ * sum of per-meal percentages).
+ *
+ * Typical usage: pass the output of {@link aggregateMeal} for each meal slot
+ * (e.g., "Breakfast", "Lunch", "Dinner") keyed by meal name.
+ *
+ * The resulting totals can be scored with {@link scoreDay} from scoringEngine.
+ *
+ * @param mealTotals - Object keyed by meal name (e.g., "Breakfast"), values are NutrientTotals from aggregateMeal()
+ * @returns Day-level NutrientTotals with all fields summed and `cerealEnergyPct` recomputed
  */
 export function combineDay(mealTotals: Record<string, NutrientTotals>): NutrientTotals {
     const day: NutrientTotals = {

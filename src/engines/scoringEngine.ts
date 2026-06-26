@@ -142,8 +142,19 @@ export function score(totals: Partial<NutrientTotals>, rules: ScoringRule[]): Sc
 /**
  * Score a single meal's nutrient balance.
  *
- * @param totals - Nutrient totals for the meal (from aggregateMeal)
- * @returns ScoreResult with score (0–100), band label, and improvement reasons
+ * Starts at 100 and applies the following penalty rules:
+ * - Cereal energy > 55% of meal kcal → −15 (too cereal-heavy)
+ * - Vegetables < 100g → −15 (insufficient vegetables)
+ * - Protein < 10g → −12 (low protein/pulse contribution)
+ * - Fibre < 5g → −10 (weak fibre support)
+ * - Added sugar > 5g → −10 (excess sugar)
+ * - Visible fat/oil > 7g → −10 (excess fat)
+ *
+ * Final score is clamped to [0, 100] and mapped to bands:
+ * Excellent (≥85) · Good (≥70) · Moderate (≥50) · Poor (<50)
+ *
+ * @param totals - Nutrient totals for the meal (output of {@link aggregateMeal})
+ * @returns ScoreResult with `score` (0–100), `band` label, and `reasons` array of triggered penalties
  */
 export function scoreMeal(totals: Partial<NutrientTotals>): ScoreResult {
     return score(totals, MEAL_RULES);
@@ -152,8 +163,19 @@ export function scoreMeal(totals: Partial<NutrientTotals>): ScoreResult {
 /**
  * Score an entire day's nutrient balance.
  *
- * @param dayTotals - Nutrient totals for the day (from combineDay)
- * @returns ScoreResult with score (0–100), band label, and improvement reasons
+ * Starts at 100 and applies the following penalty rules (higher thresholds than meal-level):
+ * - Cereal energy > 55% of day kcal → −15 (day pattern is cereal-forward)
+ * - Vegetables < 400g (APP_CONFIG.vegetableBenchmarkG) → −15 (below daily benchmark)
+ * - Protein < 30g (pulseBenchmarkG / 2) → −12 (low protein/pulse intake)
+ * - Fibre < 20g → −10 (daily fibre needs improvement)
+ * - Added sugar > 25g (APP_CONFIG.addedSugarLimitG) → −10 (exceeds WHO/ICMR limit)
+ * - Visible fat/oil > 25g → −10 (too high for the day)
+ *
+ * Final score is clamped to [0, 100] and mapped to bands:
+ * Excellent (≥85) · Good (≥70) · Moderate (≥50) · Poor (<50)
+ *
+ * @param dayTotals - Nutrient totals for the day (output of {@link combineDay})
+ * @returns ScoreResult with `score` (0–100), `band` label, and `reasons` array of triggered penalties
  */
 export function scoreDay(dayTotals: Partial<NutrientTotals>): ScoreResult {
     return score(dayTotals, DAY_RULES);

@@ -73,6 +73,8 @@
 
 | # | Issue | Fix Applied | Date |
 |---|-------|-------------|------|
+| 46 | **No JSDoc on engine functions** | Added comprehensive JSDoc with `@param`, `@returns`, scoring rule explanations, and `{@link}` cross-references to `scoreMeal`, `scoreDay`, `aggregateMeal`, `combineDay` | June 26, 2026 |
+| 47 | **CONTEXT.md is stale** | Updated folder structure, file map, testing section, and expanded Section 19 with full database schema (tables, view, RPCs, triggers, relationships) from DATABASE_SCHEMA.md | June 26, 2026 |
 | 49 | **Package version `"0.0.0"`** | Set to `"1.0.0"` with semantic versioning | June 26, 2026 |
 
 ---
