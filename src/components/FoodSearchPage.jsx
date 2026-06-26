@@ -39,7 +39,6 @@ function FoodSearchPage() {
     const [activeFilter, setActiveFilter] = useState("All");
     const [activeIndex, setActiveIndex] = useState(-1);
     const [searchError, setSearchError] = useState("");
-    const [visibleCount, setVisibleCount] = useState(20);
     const resultListRef = useRef(null);
     const inputRef = useRef(null);
 
@@ -59,7 +58,6 @@ function FoodSearchPage() {
                 setActiveIndex(-1);
                 setIsNutrientSearch(false);
                 setMatchedNutrientName("");
-                setVisibleCount(20);
             });
             return () => { cancelled = true; };
         }
@@ -68,9 +66,9 @@ function FoodSearchPage() {
             setLoading(true);
             setSearchError("");
             try {
-                // First, check if the query matches a nutrient name
+                // First, check if the query matches a nutrient name via nutrient_definitions table
                 const { data: nutrientMatches, error: nutrientError } = await supabase
-                    .from("food_search_view")
+                    .from("nutrient_definitions")
                     .select("nutrient_name, nutrient_id, unit")
                     .ilike("nutrient_name", `%${escapeIlike(debouncedQuery)}%`)
                     .limit(1);
@@ -88,16 +86,12 @@ function FoodSearchPage() {
                 }
 
                 if (!cancelled && nutrientMatches && nutrientMatches.length > 0) {
-                    // Nutrient match found — fetch foods ranked by this nutrient value desc
+                    // Nutrient match found — fetch foods ranked by this nutrient via RPC
                     const matched = nutrientMatches[0];
-                    const { data: nutrientFoods, error: nfError } = await supabase
-                        .from("food_search_view")
-                        .select("food_id, food_code, food_name, food_group, nutrient_name, value, unit")
-                        .eq("nutrient_id", matched.nutrient_id)
-                        .not("value", "is", null)
-                        .gt("value", 0)
-                        .order("value", { ascending: false })
-                        .limit(20);
+                    const { data: nutrientFoods, error: nfError } = await supabase.rpc(
+                        "search_nutrient_foods",
+                        { nutrient_search: matched.nutrient_name }
+                    );
 
                     if (nfError) {
                         console.error("Search error:", nfError);
@@ -114,7 +108,12 @@ function FoodSearchPage() {
                     if (!cancelled) {
                         setIsNutrientSearch(true);
                         setMatchedNutrientName(matched.nutrient_name);
-                        setResults(nutrientFoods || []);
+                        // Map RPC columns to match expected shape
+                        const mapped = (nutrientFoods || []).map((r) => ({
+                            ...r,
+                            value: r.nutrient_value,
+                        }));
+                        setResults(mapped);
                         setActiveIndex(-1);
                     }
                 } else {
@@ -175,10 +174,10 @@ function FoodSearchPage() {
         async function fetchNutrients() {
             setNutrientsLoading(true);
             try {
-                const { data, error } = await supabase
-                    .from("food_search_view")
-                    .select("*")
-                    .eq("food_id", selectedFood.food_id);
+                const { data, error } = await supabase.rpc(
+                    "get_food_details",
+                    { p_food_id: selectedFood.food_id }
+                );
                 if (error) {
                     console.error("Nutrient fetch error:", error);
                     if (!cancelled) setNutrients([]);
