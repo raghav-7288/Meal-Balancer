@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route, NavLink, Navigate, useNavigate, useLocation } from "react-router-dom";
 import "./App.css";
 import {
@@ -108,13 +108,16 @@ function AppShell() {
         return () => { document.body.style.overflow = ""; };
     }, [mobileMenuOpen]);
 
-    // Redirect to home if onboarding hasn't been completed yet
+    // Redirect to home if onboarding hasn't been completed yet (mount-only)
+    const hasCheckedOnboarding = useRef(false);
     useEffect(() => {
+        if (hasCheckedOnboarding.current) return;
+        hasCheckedOnboarding.current = true;
         const onboardingDone = localStorage.getItem("meal-balancer-onboarding-done") === "true";
         if (!onboardingDone && location.pathname !== "/") {
             navigate("/", { replace: true });
         }
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [location.pathname, navigate]);
 
     return (
         <div className="app-shell">

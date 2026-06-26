@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import {
     Activity,
@@ -90,9 +90,11 @@ function ProfilePage() {
     const [editSex, setEditSex] = useState("");
 
     // Sync from DB profile on load
+    const hasInitializedFromDb = useRef(false);
     useEffect(() => {
-        if (dbProfile) {
-            setHeight(dbProfile.height_cm ? String(dbProfile.height_cm) : ""); // eslint-disable-line react-hooks/set-state-in-effect
+        if (dbProfile && !hasInitializedFromDb.current) {
+            hasInitializedFromDb.current = true;
+            setHeight(dbProfile.height_cm ? String(dbProfile.height_cm) : "");
             setWeight(dbProfile.weight_kg ? String(dbProfile.weight_kg) : "");
             setAge(dbProfile.age ? String(dbProfile.age) : "");
             const parsed = parseContactNumber(dbProfile.contact_number);
@@ -100,7 +102,7 @@ function ProfilePage() {
             setContactNumber(parsed.local);
             setEditSex(dbProfile.sex || profile.sex || "female");
         }
-    }, [dbProfile]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [dbProfile, profile.sex]);
 
     // Derived values
     const heightM = height ? parseFloat(height) / 100 : 0;

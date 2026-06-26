@@ -1,4 +1,3 @@
-import useFocusTrap from "../../hooks/useFocusTrap";
 
 function CopyPlanModal({ copyModal, setCopyModal, copyPlanName, setCopyPlanName, confirmCopyPlan, copyModalRef }) {
     if (!copyModal) return null;

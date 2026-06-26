@@ -10,18 +10,21 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "format": "prettier --write \"src/**/*.{js,jsx,css}\"",
-    "format:check": "prettier --check \"src/**/*.{js,jsx,css}\"",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,css}\"",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "preview": "vite preview",
     "context": "node scripts/generate-context.js",
     "seed:preset-plans": "node scripts/seed-preset-plans.js",
     "prepare": "husky"
   },
   "lint-staged": {
-    "src/**/*.{js,jsx}": [
+    "src/**/*.{js,jsx,ts,tsx}": [
       "prettier --write",
       "eslint --fix"
     ],
@@ -44,9 +47,13 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.61.1",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/parser": "^8.62.0",
     "@vitejs/plugin-react": "^6.0.1",
     "dotenv": "^17.4.2",
     "eslint": "^10.3.0",
@@ -58,6 +65,8 @@
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.4",
     "prop-types": "^15.8.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.62.0",
     "vite": "^8.0.12",
     "vitest": "^4.1.8"
   }

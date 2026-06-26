@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { APP_CONFIG } from "../data/config";
@@ -39,15 +39,21 @@ export function useDashboardState() {
     const [activePlanId, setActivePlanId] = useState(() => presetPlans[0]?.id || "");
     const [viewDay, setViewDay] = useState(getTodayName);
 
+    // Ref to avoid re-triggering effect when userPlans changes
+    const userPlansRef = useRef(userPlans);
+    useEffect(() => {
+        userPlansRef.current = userPlans;
+    }, [userPlans]);
+
     // Update activePlanId when preset plans load from DB (IDs may change)
     useEffect(() => {
         if (presetPlans.length > 0) {
-            setActivePlanId((prev) => { // eslint-disable-line react-hooks/set-state-in-effect
-                const allIds = [...presetPlans, ...userPlans].map((p) => p.id);
+            setActivePlanId((prev) => {
+                const allIds = [...presetPlans, ...userPlansRef.current].map((p) => p.id);
                 return allIds.includes(prev) ? prev : presetPlans[0].id;
             });
         }
-    }, [presetPlans]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [presetPlans]);
 
     // Open specific plan from URL query param (e.g., ?plan=<id>)
     useEffect(() => {
@@ -117,10 +123,15 @@ export function useDashboardState() {
     }, [user?.id]);
 
     // Sync guidelines field only when active plan switches
+    // Use refs for plans to avoid re-running when plan content changes
+    const presetPlansRef = useRef(presetPlans);
     useEffect(() => {
-        const plan = [...presetPlans, ...userPlans].find((p) => p.id === activePlanId);
-        setGuidelines(plan?.guidelines || ""); // eslint-disable-line react-hooks/set-state-in-effect
-    }, [activePlanId]); // eslint-disable-line react-hooks/exhaustive-deps
+        presetPlansRef.current = presetPlans;
+    }, [presetPlans]);
+    useEffect(() => {
+        const plan = [...presetPlansRef.current, ...userPlansRef.current].find((p) => p.id === activePlanId);
+        setGuidelines(plan?.guidelines || "");
+    }, [activePlanId]);
 
     function saveGuidelines() {
         setUserPlans((prev) =>

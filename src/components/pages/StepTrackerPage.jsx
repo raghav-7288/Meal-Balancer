@@ -36,6 +36,12 @@ function StepTrackerPage() {
         return () => { isMounted.current = false; };
     }, []);
 
+    // Keep target in a ref so the load effect doesn't re-trigger on target change
+    const targetRef = useRef(target);
+    useEffect(() => {
+        targetRef.current = target;
+    }, [target]);
+
     // Load step data from Supabase on login
     useEffect(() => {
         if (!isAuthenticated || !user?.id) return;
@@ -52,7 +58,7 @@ function StepTrackerPage() {
                         // Upload local-only entries
                         for (const [date, steps] of Object.entries(prev)) {
                             if (!(date in remoteData) && steps > 0) {
-                                upsertDailyHealth(user.id, date, { steps, steps_target: target }).catch((err) =>
+                                upsertDailyHealth(user.id, date, { steps, steps_target: targetRef.current }).catch((err) =>
                                     console.error("Failed to upload local step entry:", err)
                                 );
                             }
@@ -74,7 +80,7 @@ function StepTrackerPage() {
         }
 
         loadFromDb();
-    }, [isAuthenticated, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [isAuthenticated, user?.id, setStepData, setTarget]);
 
     const todayKey = getTodayKey();
     const steps = stepData[todayKey] || 0;

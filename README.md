@@ -20,27 +20,37 @@ A React 19 single-page application for **Indian diet planning**. Build meals in 
 - **Plan Comparison** — Compare plans side-by-side + best recommendation
 - **Health Goals** — Personalised goals fetched from Supabase
 - **Auth** — Email/password sign-up & sign-in via Supabase
-- **Profile Management** — Body measurements, diet preferences & health goals
+- **Profile Management** — Body measurements, diet preferences & health goals (synced to Supabase)
 - **Onboarding Flow** — Guided first-time user setup
-- **Water Tracker** — Daily water intake logging with streaks
-- **Step Tracker** — Daily step count with goal progress
+- **Water Tracker** — Daily water intake logging with streaks (synced to Supabase)
+- **Step Tracker** — Daily step count with goal progress (synced to Supabase)
 - **Dark Mode** — System-aware + manual toggle (flash-free)
+- **Keyboard Shortcuts** — `Ctrl+S` save, `Ctrl+N` new plan, `Ctrl+P` export, `Esc` close modals
+- **Accessibility** — Focus traps, `aria-live` regions, skip navigation link
+- **Toast Notifications** — Global feedback via react-hot-toast
+- **Responsive Navigation** — Hamburger menu on mobile (< 768px)
+- **Loading Skeletons** — Shimmer placeholders during data fetches
+- **Empty States** — Illustrated empty states with CTA buttons
+- **Score Gauge** — Animated semicircle visualization
 - **Code Splitting** — Lazy-loaded pages with retry logic for stale deploys
 - **Error Boundary** — Graceful crash recovery
-- **Query Cache** — 5-min TTL in-memory cache with max-size eviction
+- **Query Cache** — 5-min TTL in-memory cache with max-size eviction & request deduplication
 - **Plan Sync** — Bi-directional sync between localStorage and Supabase
+- **TypeScript Engines** — Typed scoring & nutrient engines with full interface definitions
 
 ## 🛠️ Tech Stack
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
 | Framework | React (JSX) | ^19.2.6 |
+| Type System | TypeScript (engines & config) | ^5.x |
 | Routing | React Router DOM | ^7.16.0 |
 | Build | Vite | ^8.0.12 |
 | Styling | CSS + Tailwind CSS | ^4.3.0 |
 | Icons | lucide-react | ^1.17.0 |
 | Charts | Recharts | ^3.8.1 |
 | PDF | jsPDF + jspdf-autotable | ^4.2.1 / ^5.0.8 |
+| Toasts | react-hot-toast | ^2.x |
 | Backend | Supabase | ^2.106.2 |
 | Testing | Vitest + Testing Library | ^4.1.8 / ^16.3.2 |
 | Linting | ESLint + Prettier | ^10.3.0 / ^3.8.4 |
@@ -115,18 +125,18 @@ SPA routing is handled by `vercel.json` rewrites. Set environment variables (`VI
 ├── src/
 │   ├── assets/              Images & SVGs
 │   ├── components/
-│   │   ├── dashboard/       Dashboard sub-components (MealBuilder, PlanSidebar, etc.)
-│   │   ├── pages/           Page-level components (11 pages)
-│   │   ├── ui/              Reusable UI primitives (Section, Field, Kpi, StatCard, ErrorBoundary)
+│   │   ├── dashboard/       Dashboard sub-components (MealBuilder, PlanSidebar, DaySelector, etc.)
+│   │   ├── pages/           Page-level components (11 pages + profile subdir)
+│   │   ├── ui/              Reusable UI primitives (Section, Field, Kpi, StatCard, ErrorBoundary, Skeleton, ScoreGauge, EmptyState)
 │   │   ├── AuthPage.jsx     Login / Sign-up form
 │   │   ├── FoodSearchPage.* Food explorer (search + nutrient details)
 │   │   └── UserProfile.jsx  User profile display
 │   ├── context/             React context providers (Auth, Profile)
-│   ├── data/                Static config, food data & preset plans
-│   ├── engines/             Core logic (scoring, nutrients)
-│   ├── hooks/               Custom hooks (useAuth, useDebounce, useLocalStorage, useSyncedPlans, useMealHistory, usePresetPlans)
+│   ├── data/                Static config (config.ts), food data & preset plans
+│   ├── engines/             Core logic — TypeScript (scoringEngine.ts, nutrientEngine.ts)
+│   ├── hooks/               Custom hooks (useAuth, useDashboardState, useDebounce, useFocusTrap, useHotkeys, useLocalStorage, useSyncedPlans, useMealHistory, usePresetPlans)
 │   ├── lib/                 Third-party client setup (Supabase)
-│   ├── services/            API service layers (auth, database, foodSearch, planSync, presetPlan)
+│   ├── services/            API service layers (auth, dailyHealth, database, foodSearch, mealHistory, planSync, presetPlan)
 │   ├── styles/              Page-specific CSS modules
 │   ├── utils/               Helpers (PDF export, query cache)
 │   ├── App.jsx              Router shell + layout
@@ -134,14 +144,16 @@ SPA routing is handled by `vercel.json` rewrites. Set environment variables (`VI
 │   ├── index.css            Tailwind imports + base styles
 │   └── main.jsx             Entry point
 ├── supabase/
-│   ├── migrations/          SQL migration files (001–011)
+│   ├── migrations/          SQL migration files (001–012)
 │   ├── diagnostic-queries.sql
 │   └── SUPABASE_AUDIT.md
-├── tests/                   Unit & component tests (Vitest)
+├── tests/                   Unit & component tests (Vitest, 22 test files)
+├── COMPLETED.md             Implemented changes log
 ├── CONTEXT.md               Auto-generated project context
 ├── DATABASE_SCHEMA.md       Full Supabase schema documentation
 ├── SUGGESTIONS.md           Improvement suggestions & roadmap
 ├── package.json
+├── tsconfig.json
 └── vite.config.js
 ```
 
@@ -158,6 +170,7 @@ SPA routing is handled by `vercel.json` rewrites. Set environment variables (`VI
 | `npm test` | Run unit tests (Vitest) |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run test:coverage` | Run tests with coverage report |
+| `npm run typecheck` | TypeScript type-check (no emit) |
 | `npm run context` | Regenerate `CONTEXT.md` |
 | `npm run seed:preset-plans` | Seed preset plans to Supabase |
 
@@ -203,41 +216,55 @@ Scores start at **100** and deduct points for imbalances:
 |-------|---------|
 | `food_items` | 500+ food items with codes and group references |
 | `food_nutrient_values` | Nutrient values per food (38 nutrients) |
+| `food_nutrient_values_staging` | ETL import staging table (wide-format, not used at runtime) |
 | `major_groups` | Food group classifications |
 | `nutrient_groups` | Nutrient category groupings |
 | `nutrient_definitions` | Nutrient names, codes, and units |
-| `health_goals` | Available health goals for selection |
-| `user_profiles` | User body measurements & info (RLS enabled) |
+| `health_goals` | Available health goals for selection (RLS enabled) |
+| `user_profiles` | User body measurements & preferences (RLS enabled) |
 | `user_profile_health_goals` | User ↔ health goal junction (RLS enabled) |
 | `user_plans` | User meal plans synced from app (RLS enabled) |
-| `preset_plans` | Pre-saved template plans (read-only) |
+| `preset_plans` | Pre-saved template plans (read-only, RLS enabled) |
+| `meal_history` | Persisted meal history entries (RLS enabled) |
+| `daily_health_tracking` | Water & step tracker data (RLS enabled) |
 | `food_search_view` | Denormalized view for fast food search |
+
+### RPCs
+
+| Function | Description |
+|----------|-------------|
+| `search_foods(search_text)` | Multi-field ILIKE search, LIMIT 20 |
+| `get_food_details(p_food_id)` | All nutrients for a single food |
+| `search_nutrient_foods(nutrient_search)` | Foods ranked by nutrient value DESC, LIMIT 100 |
+| `search_foods_all_fields(search_text)` | Broad 7-way ILIKE search, LIMIT 500 |
 
 See [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) for full schema details including RLS policies, triggers, and RPCs.
 
 ## 🧰 Development Tooling
 
+- **TypeScript** — Typed engines (`config.ts`, `scoringEngine.ts`, `nutrientEngine.ts`) with full interface definitions
 - **Prettier** — Auto-formats code on save/commit
 - **Husky + lint-staged** — Pre-commit hooks run format + lint on staged files
-- **@testing-library/react** — Component testing with jsdom environment
-- **Query Cache** — In-memory TTL cache with max-size eviction for Supabase API calls
+- **@testing-library/react** — Component testing with jsdom environment (22 test files)
+- **react-hot-toast** — Global toast notification system
+- **Query Cache** — In-memory TTL cache with max-size eviction & request deduplication for Supabase API calls
 - **Error Boundary** — Catches React render errors with recovery option
 - **Code Splitting** — React.lazy with retry logic for stale deploys
 
 ## 🔮 Roadmap
 
-- [ ] Persist profile preferences (activity, goal, dietType) to Supabase
-- [ ] Persist meal history & water tracker to Supabase
-- [ ] Mobile-responsive navigation (hamburger menu / bottom tabs)
-- [ ] Loading skeletons & empty states
 - [ ] Food favorites / recently used
 - [ ] Nutrient RDA comparison (ICMR 2020 guidelines)
-- [ ] Toast system (shared context-based)
-- [ ] Refactor DashboardPage & ProfilePage (550+ lines → extracted components)
 - [ ] Google OAuth sign-in
 - [ ] CI/CD pipeline (GitHub Actions)
 - [ ] E2E tests (Playwright)
 - [ ] PWA / offline support
+- [ ] Drag-and-drop meal items
+- [ ] Meal templates (save & reuse)
+- [ ] Barcode scanner (Open Food Facts API)
+- [ ] Export/import plans (JSON + shareable links)
+
+See [SUGGESTIONS.md](./SUGGESTIONS.md) for full details and [COMPLETED.md](./COMPLETED.md) for finished work.
 
 ## 📄 License
 
