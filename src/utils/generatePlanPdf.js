@@ -729,6 +729,6 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
     }
 
     // Save
-    const fileName = `${plan.name.replace(/[^a-zA-Z0-9 ]/g, "").trim()}.pdf`;
+    const fileName = `${(plan.name || "Meal Plan").replace(/[^a-zA-Z0-9 ]/g, "").trim()}.pdf`;
     doc.save(fileName);
 }

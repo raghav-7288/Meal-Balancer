@@ -64,32 +64,24 @@ function ProgressPage() {
         const worst = Math.min(...scores);
         const avg = Math.round(scores.reduce((s, v) => s + v, 0) / scores.length);
 
-        // Current streak — consecutive days ending today/yesterday
+        // Streak: count consecutive dates backwards from most recent entry
+        // Only count if the most recent entry is from today or yesterday
         let streak = 0;
-        const today = new Date();
-        for (let i = sorted.length - 1; i >= 0; i--) {
-            const entryDate = new Date(sorted[i].date + "T00:00:00");
-            const expectedDate = new Date(today);
-            expectedDate.setDate(today.getDate() - (sorted.length - 1 - i));
-            expectedDate.setHours(0, 0, 0, 0);
-            // Check if within 1 day tolerance
-            const diffDays = Math.round(
-                (today.getTime() - entryDate.getTime()) / (86400000),
-            );
-            if (diffDays === sorted.length - 1 - i || diffDays === sorted.length - i) {
-                streak++;
-            } else {
-                break;
+        if (sorted.length > 0) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const mostRecent = new Date(sorted[sorted.length - 1].date + "T00:00:00");
+            const daysSinceLast = Math.round((today.getTime() - mostRecent.getTime()) / 86400000);
+            if (daysSinceLast <= 1) {
+                streak = 1;
+                for (let i = sorted.length - 1; i > 0; i--) {
+                    const curr = new Date(sorted[i].date + "T00:00:00");
+                    const prev = new Date(sorted[i - 1].date + "T00:00:00");
+                    const diff = (curr.getTime() - prev.getTime()) / 86400000;
+                    if (diff === 1) streak++;
+                    else break;
+                }
             }
-        }
-        // Simpler streak: count consecutive dates backwards from most recent
-        streak = 1;
-        for (let i = sorted.length - 1; i > 0; i--) {
-            const curr = new Date(sorted[i].date + "T00:00:00");
-            const prev = new Date(sorted[i - 1].date + "T00:00:00");
-            const diff = (curr.getTime() - prev.getTime()) / 86400000;
-            if (diff === 1) streak++;
-            else break;
         }
 
         // Trend: compare last 7 entries avg vs previous 7

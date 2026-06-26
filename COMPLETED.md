@@ -28,6 +28,13 @@
 | B4 | **Missing error guard** — `err.message` accessed without null-check | Changed to `err?.message \|\| "fallback message"` | June 26, 2026 |
 | B5 | **Dark mode toggle icon oversized** — `size={34}` | Reduced to `size={20}` | June 26, 2026 |
 | B6 | **`cachedFetch` has no request deduplication** | Added in-flight promise map for concurrent call sharing | June 26, 2026 |
+| B7 | **ProgressPage streak dead code** | Removed dead first streak calculation that was immediately overwritten by correct second one | June 26, 2026 |
+| B8 | **ProgressPage streak shows 1 for old entries** | Added check: most recent entry must be today/yesterday; returns 0 if stale | June 26, 2026 |
+| B9 | **OnboardingFlow crashes if presetPlans empty** | Added `?.` null guard on `selectedPlan.name` | June 26, 2026 |
+| B10 | **WaterTracker/StepTracker memory leak** | `syncTimeoutRef` not cleared on unmount; added cleanup in useEffect return | June 26, 2026 |
+| B11 | **WaterTracker/StepTracker potential infinite loop** | Removed unstable setter functions from useEffect dependency arrays | June 26, 2026 |
+| B12 | **PDF filename crash on null plan name** | Added fallback `"Meal Plan"` when `plan.name` is undefined | June 26, 2026 |
+| B13 | **Lint error: unused `onSelect` in MealBuilder test** | Removed unused destructured prop from mock component | June 26, 2026 |
 
 ---
 
@@ -46,6 +53,7 @@
 | 50 | **`throw` inside `try` caught locally** — 4 instances in `FoodSearchPage.jsx` | Replaced `if (error) throw error` with direct `setSearchError(...)` + early return in all 4 locations. Eliminates unnecessary throw-then-catch pattern. | June 26, 2026 |
 | 51 | **`useSyncedPlans.js` confusing double-ref pattern** | Removed `isMountedRef = useRef(isMounted)` wrapper. Now passes `isMounted` ref directly to `syncToSupabase()` and accesses `.current` instead of `.current?.current`. | June 26, 2026 |
 | 52 | **`FoodSearchPage.jsx` duplicate `useDebounce` hook** | Removed local re-declaration (lines 10-17) and imported shared `useDebounce` from `hooks/useDebounce.js`. | June 26, 2026 |
+| 55 | **`NutrientLimits.jsx` duplicate nutrient lookup** | Extracted `getActualValue()` helper and `TOTALS_KEY_MAP` constant to eliminate repeated if-else chains | June 26, 2026 |
 
 ---
 
@@ -56,6 +64,7 @@
 | 40 | **`generatePlanPdf.js` untested** — 716 lines of complex PDF generation | Extracted 4 pure functions (`capitalize`, `computeWeeklyAverages`, `buildMealTableRow`, `buildDailySummaryRows`). Added `tests/generatePlanPdf.test.js` with 19 unit tests covering all edge cases. | June 26, 2026 |
 | 53 | **FoodSearchPage tests `act()` warnings** | Wrapped all renders in `await act(async () => { ... })` — eliminated 10+ "not wrapped in act(...)" warnings. | June 26, 2026 |
 | 54 | **`generatePlanPdf.js:55` incorrect knife coordinate** | Fixed `circleY * scale` → `circleY`. The multiplication was wrong; the blade endpoint should be at the circle center Y, consistent with the offset pattern used elsewhere. | June 26, 2026 |
+| 55 | **Progress streak untested** | Added `tests/progressStreak.test.js` with 8 tests covering edge cases: empty history, single entries, broken streaks, stale entries returning 0 | June 26, 2026 |
 
 ---
 

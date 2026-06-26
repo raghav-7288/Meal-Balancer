@@ -10,6 +10,21 @@ const LIMIT_FIELDS = [
     { key: "fibre", label: "Fibre", unit: "g" },
 ];
 
+/** Map limit field keys to their corresponding dayTotals property */
+const TOTALS_KEY_MAP = {
+    carbs: "carbs",
+    protein: "protein",
+    fat: "fat",
+    sugar: "addedSugar",
+    salt: "salt",
+    fibre: "fibre",
+};
+
+function getActualValue(dayTotals, fieldKey) {
+    if (!dayTotals) return 0;
+    return dayTotals[TOTALS_KEY_MAP[fieldKey]] || 0;
+}
+
 /**
  * Compact inline nutrient limits strip that blends with hero-stats.
  */
@@ -23,13 +38,7 @@ function NutrientLimits({ limits, onChangeLimit, dayTotals }) {
             const limitVal = limits[field.key];
             if (!limitVal || limitVal <= 0) continue;
 
-            let actual = 0;
-            if (field.key === "carbs") actual = dayTotals.carbs || 0;
-            else if (field.key === "protein") actual = dayTotals.protein || 0;
-            else if (field.key === "fat") actual = dayTotals.fat || 0;
-            else if (field.key === "sugar") actual = dayTotals.addedSugar || 0;
-            else if (field.key === "salt") actual = dayTotals.salt || 0;
-            else if (field.key === "fibre") actual = dayTotals.fibre || 0;
+            const actual = getActualValue(dayTotals, field.key);
 
             if (actual > limitVal) {
                 warnings.push({
@@ -64,15 +73,7 @@ function NutrientLimits({ limits, onChangeLimit, dayTotals }) {
                 <div className="nutrient-limits-body">
                     <div className="nutrient-limits-grid">
                         {LIMIT_FIELDS.map((field) => {
-                            let actual = 0;
-                            if (dayTotals) {
-                                if (field.key === "carbs") actual = dayTotals.carbs || 0;
-                                else if (field.key === "protein") actual = dayTotals.protein || 0;
-                                else if (field.key === "fat") actual = dayTotals.fat || 0;
-                                else if (field.key === "sugar") actual = dayTotals.addedSugar || 0;
-                                else if (field.key === "salt") actual = dayTotals.salt || 0;
-                                else if (field.key === "fibre") actual = dayTotals.fibre || 0;
-                            }
+                            const actual = getActualValue(dayTotals, field.key);
                             const limitVal = limits[field.key] || 0;
                             const exceeded = limitVal > 0 && actual > limitVal;
 

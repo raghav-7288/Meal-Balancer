@@ -257,7 +257,7 @@ function OnboardingFlow({ onComplete }) {
                                 <Trophy size={28} />
                             </div>
                             <h2>Your Plan Score</h2>
-                            <p>Here's how <strong>"{selectedPlan.name}"</strong> scores based on your profile.</p>
+                            <p>Here's how <strong>"{selectedPlan?.name || "Selected Plan"}"</strong> scores based on your profile.</p>
                         </div>
 
                         {planScore && (

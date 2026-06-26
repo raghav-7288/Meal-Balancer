@@ -31,7 +31,10 @@ function WaterTrackerPage() {
     }, [isAuthenticated, user?.id]);
 
     useEffect(() => {
-        return () => { isMounted.current = false; };
+        return () => {
+            isMounted.current = false;
+            if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+        };
     }, []);
 
     // Keep target in a ref so the load effect doesn't re-trigger on target change
@@ -79,7 +82,7 @@ function WaterTrackerPage() {
         }
 
         loadFromDb();
-    }, [isAuthenticated, user?.id, setWaterData, setTarget]);
+    }, [isAuthenticated, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const todayKey = getTodayKey();
     const glasses = waterData[todayKey] || 0;

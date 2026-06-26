@@ -14,7 +14,7 @@ vi.mock("../src/engines/nutrientEngine", () => ({
 
 // Mock FoodAutocomplete to simplify testing MealBuilder interactions
 vi.mock("../src/components/dashboard/FoodAutocomplete", () => ({
-    default: ({ value, onChange, onSelect, placeholder }) => (
+    default: ({ value, onChange, placeholder }) => (
         <input
             data-testid="food-autocomplete"
             value={value}

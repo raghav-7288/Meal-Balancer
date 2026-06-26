@@ -33,7 +33,10 @@ function StepTrackerPage() {
     }, [isAuthenticated, user?.id]);
 
     useEffect(() => {
-        return () => { isMounted.current = false; };
+        return () => {
+            isMounted.current = false;
+            if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+        };
     }, []);
 
     // Keep target in a ref so the load effect doesn't re-trigger on target change
@@ -80,7 +83,7 @@ function StepTrackerPage() {
         }
 
         loadFromDb();
-    }, [isAuthenticated, user?.id, setStepData, setTarget]);
+    }, [isAuthenticated, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const todayKey = getTodayKey();
     const steps = stepData[todayKey] || 0;
