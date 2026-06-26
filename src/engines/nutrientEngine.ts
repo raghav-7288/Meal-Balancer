@@ -1,6 +1,14 @@
 import { FOODS } from "../data/foods";
+import type { LocalFood, MealItem, NutrientTotals } from "../data/config";
 
-export function calculateFoodNutrients(food, grams) {
+/**
+ * Calculate scaled nutrient values for a food item at a given gram amount.
+ *
+ * @param food - The food item definition (from FOODS array)
+ * @param grams - How many grams are being consumed
+ * @returns Object with scaled nutrient values
+ */
+export function calculateFoodNutrients(food: LocalFood, grams: number) {
     const factor = grams / food.gramsPerExchange;
 
     return {
@@ -14,7 +22,13 @@ export function calculateFoodNutrients(food, grams) {
     };
 }
 
-export function calculateMealTotals(items) {
+/**
+ * Sum pre-calculated nutrient values for an array of food items.
+ *
+ * @param items - Array of objects with nutrient properties
+ * @returns Aggregated nutrient totals
+ */
+export function calculateMealTotals(items: Array<{ carbs: number; protein: number; fat: number; fibre: number; vitamins: number; minerals: number; kcal: number }>) {
     return items.reduce(
         (acc, item) => {
             acc.carbs += item.carbs;
@@ -40,11 +54,36 @@ export function calculateMealTotals(items) {
 
 /**
  * Look up a food by its ID from the local FOODS array.
- * @param {string} id
- * @returns {object|undefined}
+ *
+ * @param id - Food item identifier
+ * @returns The matching food object, or undefined if not found
  */
-export function foodById(id) {
-    return FOODS.find((f) => f.id === id);
+export function foodById(id: string): LocalFood | undefined {
+    return (FOODS as LocalFood[]).find((f) => f.id === id);
+}
+
+/**
+ * Shared helper to accumulate nutrient values into totals.
+ * Eliminates duplication between DB-item and legacy-item branches.
+ *
+ * @param totals - The running totals object to mutate
+ * @param nutrients - Source nutrient values (per unit)
+ * @param factor - Multiplier (grams / 100 for DB items, grams / gramsPerExchange for legacy)
+ */
+export function accumulateNutrients(
+    totals: NutrientTotals,
+    nutrients: { kcal?: number; carbs?: number; protein?: number; fat?: number; fibre?: number; vitamins?: number; minerals?: number },
+    factor: number
+): number {
+    const kcal = (nutrients.kcal || 0) * factor;
+    totals.kcal += kcal;
+    totals.carbs += (nutrients.carbs || 0) * factor;
+    totals.protein += (nutrients.protein || 0) * factor;
+    totals.fat += (nutrients.fat || 0) * factor;
+    totals.fibre += (nutrients.fibre || 0) * factor;
+    totals.vitamins += (nutrients.vitamins || 0) * factor;
+    totals.minerals += (nutrients.minerals || 0) * factor;
+    return kcal;
 }
 
 /**
@@ -53,31 +92,22 @@ export function foodById(id) {
  *   - DB items with `nutrients` property (values per 100g)
  *   - Legacy local items looked up via foodById (using gramsPerExchange)
  *
- * @param {Array<{foodId: string, grams: number, nutrients?: object, foodGroup?: string}>} items
- * @returns {object} Aggregated totals including exchange info.
+ * @param items - Array of meal items with foodId, grams, and optional nutrients/foodGroup
+ * @returns Aggregated totals including exchange info
  */
-export function aggregateMeal(items) {
-    const totals = {
+export function aggregateMeal(items: MealItem[]): NutrientTotals {
+    const totals: NutrientTotals = {
         kcal: 0, carbs: 0, protein: 0, fat: 0, fibre: 0,
         vitamins: 0, minerals: 0, addedSugar: 0, visibleFat: 0,
-        vegetablesG: 0, cerealEnergy: 0, exchangeTotals: {},
+        vegetablesG: 0, cerealEnergy: 0, cerealEnergyPct: 0, exchangeTotals: {},
     };
 
     for (const item of items) {
-        // If the item has nutrients stored from DB (per 100g values)
         if (item.nutrients) {
+            // DB items: nutrients are per 100g
             const factor = item.grams / 100;
-            const kcal = (item.nutrients.kcal || 0) * factor;
+            const kcal = accumulateNutrients(totals, item.nutrients, factor);
 
-            totals.kcal += kcal;
-            totals.carbs += (item.nutrients.carbs || 0) * factor;
-            totals.protein += (item.nutrients.protein || 0) * factor;
-            totals.fat += (item.nutrients.fat || 0) * factor;
-            totals.fibre += (item.nutrients.fibre || 0) * factor;
-            totals.vitamins += (item.nutrients.vitamins || 0) * factor;
-            totals.minerals += (item.nutrients.minerals || 0) * factor;
-
-            // Use foodGroup stored on item for group-based calculations
             const group = item.foodGroup || "";
             totals.visibleFat += group === "fats" ? item.grams : 0;
             totals.vegetablesG += group === "vegetables" ? item.grams : 0;
@@ -86,19 +116,12 @@ export function aggregateMeal(items) {
                 totals.exchangeTotals[group] = (totals.exchangeTotals[group] || 0) + factor;
             }
         } else {
-            // Fallback: legacy local food lookup
+            // Legacy local food lookup
             const food = foodById(item.foodId);
             if (!food) continue;
             const factor = item.grams / food.gramsPerExchange;
-            const kcal = food.kcal * factor;
+            const kcal = accumulateNutrients(totals, food, factor);
 
-            totals.kcal += kcal;
-            totals.carbs += food.carbs * factor;
-            totals.protein += food.protein * factor;
-            totals.fat += food.fat * factor;
-            totals.fibre += food.fibre * factor;
-            totals.vitamins += food.vitamins * factor;
-            totals.minerals += food.minerals * factor;
             totals.visibleFat += food.group === "fats" ? item.grams : 0;
             totals.vegetablesG += food.group === "vegetables" ? item.grams : 0;
             totals.cerealEnergy += food.group === "cereals" ? kcal : 0;
@@ -112,14 +135,15 @@ export function aggregateMeal(items) {
 
 /**
  * Combine multiple meal totals into day-level totals.
- * @param {object} mealTotals - keyed by meal name, values from aggregateMeal().
- * @returns {object} Day-level aggregated totals.
+ *
+ * @param mealTotals - Object keyed by meal name, values from aggregateMeal()
+ * @returns Day-level aggregated totals
  */
-export function combineDay(mealTotals) {
-    const day = {
+export function combineDay(mealTotals: Record<string, NutrientTotals>): NutrientTotals {
+    const day: NutrientTotals = {
         kcal: 0, carbs: 0, protein: 0, fat: 0, fibre: 0,
         vitamins: 0, minerals: 0, addedSugar: 0, visibleFat: 0,
-        vegetablesG: 0, cerealEnergy: 0, exchangeTotals: {},
+        vegetablesG: 0, cerealEnergy: 0, cerealEnergyPct: 0, exchangeTotals: {},
     };
 
     for (const meal of Object.values(mealTotals)) {
@@ -143,3 +167,4 @@ export function combineDay(mealTotals) {
     day.cerealEnergyPct = day.kcal > 0 ? (day.cerealEnergy / day.kcal) * 100 : 0;
     return day;
 }
+

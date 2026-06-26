@@ -34,6 +34,12 @@ function WaterTrackerPage() {
         return () => { isMounted.current = false; };
     }, []);
 
+    // Keep target in a ref so the load effect doesn't re-trigger on target change
+    const targetRef = useRef(target);
+    useEffect(() => {
+        targetRef.current = target;
+    }, [target]);
+
     // Load water data from Supabase on login
     useEffect(() => {
         if (!isAuthenticated || !user?.id) return;
@@ -51,7 +57,7 @@ function WaterTrackerPage() {
                         // Upload any local-only entries
                         for (const [date, glasses] of Object.entries(prev)) {
                             if (!(date in remoteData) && glasses > 0) {
-                                upsertDailyHealth(user.id, date, { water_glasses: glasses, water_target: target }).catch((err) =>
+                                upsertDailyHealth(user.id, date, { water_glasses: glasses, water_target: targetRef.current }).catch((err) =>
                                     console.error("Failed to upload local water entry:", err)
                                 );
                             }
@@ -73,7 +79,7 @@ function WaterTrackerPage() {
         }
 
         loadFromDb();
-    }, [isAuthenticated, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [isAuthenticated, user?.id, setWaterData, setTarget]);
 
     const todayKey = getTodayKey();
     const glasses = waterData[todayKey] || 0;

@@ -136,11 +136,11 @@ export function useSyncedPlans() {
     const setSyncStatusRef = useRef(setSyncStatus);
     const setSyncErrorRef = useRef(setSyncError);
     const isMountedRef = useRef(isMounted);
-    useEffect(() => { // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => {
         setSyncStatusRef.current = setSyncStatus;
         setSyncErrorRef.current = setSyncError;
         isMountedRef.current = isMounted;
-    });
+    }, [setSyncStatus, setSyncError, isMounted]);
 
     /**
      * Retry the last failed sync manually.

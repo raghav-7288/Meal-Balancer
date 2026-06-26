@@ -119,6 +119,7 @@ export function ProfileProvider({ children }) {
 
     // Save profile to Supabase (debounced) — uses upsert to handle missing rows
     const lastSavedProfile = useRef(null);
+    const saveToDbRef = useRef(null);
 
     function saveToDb(newProfile) {
         if (!isAuthenticated || !user?.id) return;
@@ -158,11 +159,14 @@ export function ProfileProvider({ children }) {
     }
 
     // Retry a failed sync with current profile state
+    useEffect(() => {
+        saveToDbRef.current = saveToDb;
+    });
     const retrySync = useCallback(() => {
         if (profileSyncStatus !== "error") return;
         lastSavedProfile.current = null; // force re-save
-        saveToDb(profile);
-    }, [profileSyncStatus, profile, isAuthenticated, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+        saveToDbRef.current?.(profile);
+    }, [profileSyncStatus, profile]);
 
     // Wrapper that also triggers DB save (debounced)
     function setProfile(updater) {

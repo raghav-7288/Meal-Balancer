@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
     Calendar,
@@ -38,15 +38,21 @@ function WeeklyPlannerPage() {
         userPlans[0]?.id || presetPlans[0]?.id || ""
     );
 
+    // Ref to avoid re-triggering effect when userPlans changes
+    const userPlansRef = useRef(userPlans);
+    useEffect(() => {
+        userPlansRef.current = userPlans;
+    }, [userPlans]);
+
     // Update activePlanId when preset plans load from DB
     useEffect(() => {
         if (presetPlans.length > 0) {
-            setActivePlanId((prev) => { // eslint-disable-line react-hooks/set-state-in-effect
-                const allIds = [...presetPlans, ...userPlans].map((p) => p.id);
-                return allIds.includes(prev) ? prev : (userPlans[0]?.id || presetPlans[0].id);
+            setActivePlanId((prev) => {
+                const allIds = [...presetPlans, ...userPlansRef.current].map((p) => p.id);
+                return allIds.includes(prev) ? prev : (userPlansRef.current[0]?.id || presetPlans[0].id);
             });
         }
-    }, [presetPlans]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [presetPlans]);
 
     const activePlan = allPlans.find((p) => p.id === activePlanId) || allPlans[0];
     const isPresetPlan = presetPlans.some((p) => p.id === activePlanId);
