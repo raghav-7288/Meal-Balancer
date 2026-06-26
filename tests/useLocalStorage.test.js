@@ -110,5 +110,24 @@ describe("useLocalStorageState", () => {
         expect(result1.current[0]).toBe("A-updated");
         expect(result2.current[0]).toBe("B");
     });
+
+    it("should handle localStorage.setItem failure gracefully", () => {
+        const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+        const originalSetItem = Storage.prototype.setItem;
+        Storage.prototype.setItem = vi.fn(() => { throw new Error("QuotaExceededError"); });
+
+        const { result } = renderHook(() => useLocalStorageState("quota-key", "initial"));
+
+        // State should still update even if persistence fails
+        act(() => {
+            result.current[1]("new-value");
+        });
+
+        expect(result.current[0]).toBe("new-value");
+        expect(spy).toHaveBeenCalledWith("Failed to save to localStorage:", expect.any(Error));
+
+        Storage.prototype.setItem = originalSetItem;
+        spy.mockRestore();
+    });
 });
 

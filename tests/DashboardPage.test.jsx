@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 
 // Mock react-router-dom
 vi.mock("react-router-dom", () => ({
@@ -186,6 +186,55 @@ describe("DashboardPage", () => {
         // All values should render as 0
         const zeros = screen.getAllByText("0");
         expect(zeros.length).toBeGreaterThanOrEqual(4);
+
+        // Restore
+        mockDashboardState.activeSummary = {
+            dayTotals: { kcal: 1850, vegetablesG: 245, visibleFat: 18 },
+            dayScore: { score: 72, band: "Good balance" },
+            mealScores: {},
+        };
+        mockDashboardState.dayScore = 72;
+        mockDashboardState.scoreTone = "good";
+    });
+
+    it("calls undoAction when Undo button is clicked", () => {
+        const undoFn = vi.fn();
+        mockDashboardState.deleteToast = {
+            planName: "Deleted Plan",
+            undoAction: undoFn,
+        };
+
+        render(<DashboardPage />);
+
+        fireEvent.click(screen.getByText("Undo"));
+        expect(undoFn).toHaveBeenCalledTimes(1);
+
+        mockDashboardState.deleteToast = null;
+    });
+
+    it("calls setDeleteToast(null) when close button is clicked", () => {
+        mockDashboardState.deleteToast = {
+            planName: "To Close",
+            undoAction: vi.fn(),
+        };
+
+        render(<DashboardPage />);
+
+        fireEvent.click(screen.getByText("✕"));
+        expect(mockDashboardState.setDeleteToast).toHaveBeenCalledWith(null);
+
+        mockDashboardState.deleteToast = null;
+    });
+
+    it("handles null activeSummary gracefully", () => {
+        mockDashboardState.activeSummary = null;
+        mockDashboardState.dayScore = 0;
+        mockDashboardState.scoreTone = "bad";
+
+        render(<DashboardPage />);
+
+        // Should render 0 for all KPI values
+        expect(screen.getByText("Monday score")).toBeInTheDocument();
 
         // Restore
         mockDashboardState.activeSummary = {
