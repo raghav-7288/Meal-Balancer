@@ -159,7 +159,7 @@ function SignInForm() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="[REDACTED_EMAIL_ADDRESS_1]"
+                    placeholder="Enter your email"
                     required
                     aria-label="Email address"
                     autoComplete="email"
@@ -278,7 +278,7 @@ function SignUpForm() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="[REDACTED_EMAIL_ADDRESS_1]"
+                    placeholder="Enter your email"
                     required
                     aria-label="Email address"
                     autoComplete="email"
@@ -286,7 +286,7 @@ function SignUpForm() {
             </label>
 
             <label className="auth-field">
-                <span>Mobile number</span>
+                <span>Password</span>
                 <input
                     type="tel"
                     value={contactNumber}
