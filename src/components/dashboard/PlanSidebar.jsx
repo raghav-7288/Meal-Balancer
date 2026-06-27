@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Activity, Copy, Database, Leaf, Plus, Sparkles, Trash2 } from "lucide-react";
 import Section from "../ui/Section";
 import MacroChart from "./MacroChart";
@@ -22,20 +22,26 @@ function PlanSidebar({
     userGoalNames,
     dayTotals,
 }) {
+    const [showCreateModal, setShowCreateModal] = useState(false);
+
+    const handleCreatePlan = () => {
+        onCreatePlan();
+        setShowCreateModal(false);
+    };
+
     return (
         <aside className="sidebar" role="complementary" aria-label="Plan controls sidebar">
             <Section title="Plan controls" icon={<Sparkles size={16} />}>
-                <input
-                    type="text"
-                    placeholder={`My Plan ${userPlans.length + 1}`}
-                    value={newPlanName}
-                    onChange={(e) => setNewPlanName(e.target.value)}
-                    className="plan-name-input"
-                    aria-label="New plan name"
-                />
                 <div className="button-row">
-                    <button type="button" onClick={onCreatePlan} aria-label="Create new plan">
-                        <Plus size={14} aria-hidden="true" /> Create
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setNewPlanName(`My Plan ${userPlans.length + 1}`);
+                            setShowCreateModal(true);
+                        }}
+                        aria-label="Create new plan"
+                    >
+                        <Plus size={14} aria-hidden="true" /> Create New
                     </button>
                     <button
                         type="button"
@@ -47,6 +53,43 @@ function PlanSidebar({
                         Reset meals
                     </button>
                 </div>
+
+                {showCreateModal && (
+                    <div
+                        className="modal-overlay"
+                        onClick={() => setShowCreateModal(false)}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Create new plan"
+                    >
+                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            <h3>Create new plan:</h3>
+                            <input
+                                type="text"
+                                className="modal-input"
+                                value={newPlanName}
+                                onChange={(e) => setNewPlanName(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && handleCreatePlan()}
+                                autoFocus
+                                placeholder="Enter plan name"
+                            />
+                            <div className="modal-actions">
+                                <button onClick={handleCreatePlan} disabled={!newPlanName.trim()}>
+                                    Create
+                                </button>
+                                <button
+                                    className="secondary"
+                                    onClick={() => {
+                                        setShowCreateModal(false);
+                                        setNewPlanName("");
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <div className="plan-toggle" role="tablist" aria-label="Plan type selector">
                     <button
