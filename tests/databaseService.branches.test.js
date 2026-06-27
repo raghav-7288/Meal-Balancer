@@ -40,7 +40,7 @@ vi.mock("../src/utils/queryCache", () => ({
     cachedFetch: vi.fn((key, fetcher) => fetcher()),
 }));
 
-import { saveUserHealthGoals, getUserHealthGoals } from "../src/services/databaseService";
+import { saveUserHealthGoals } from "../src/services/databaseService";
 
 describe("databaseService - saveUserHealthGoals", () => {
     beforeEach(() => {

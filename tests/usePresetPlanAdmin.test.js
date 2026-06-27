@@ -15,7 +15,7 @@ vi.mock("react-hot-toast", () => ({
     default: { success: vi.fn(), error: vi.fn() },
 }));
 
-import { fetchAllPresetPlans, upsertPresetPlan, deletePresetPlan } from "../src/services/presetPlanService";
+import { fetchAllPresetPlans, upsertPresetPlan } from "../src/services/presetPlanService";
 import toast from "react-hot-toast";
 import { usePresetPlanAdmin } from "../src/hooks/usePresetPlanAdmin";
 

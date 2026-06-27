@@ -161,3 +161,32 @@
 | Status | Details | Date |
 |--------|---------|------|
 | ✅ All clean | No known CVEs found across all npm dependencies | June 26, 2026 |
+
+---
+
+## 🔍 Codebase Audit (June 27, 2026)
+
+| # | Issue | Fix Applied | Date |
+|---|-------|-------------|------|
+| A1 | **ESLint errors (7)** — unused imports, stale disable directives | Removed unused `DAYS` import from `usePresetPlanAdmin.js`, unused `screen` from `VirtualizedList.test.jsx`, stale `eslint-disable-line` from `FoodAutocomplete.jsx`, 5 stale `eslint-disable-next-line` from `authContext.test.jsx` | June 27, 2026 |
+| A2 | **ESLint config missing coverage ignore** | Added `coverage` to `globalIgnores` in `eslint.config.js` | June 27, 2026 |
+| A3 | **react-hooks/globals false positives in tests** | Added `'react-hooks/globals': 'off'` rule for `tests/**/*.{js,jsx}` (Spy pattern is valid for testing) | June 27, 2026 |
+| A4 | **useSyncedPlans low branch coverage (52%)** | Added `useSyncedPlans.branches.test.js` with 9 tests covering: deletions, modifications, sync errors, retrySync no-op, localStorage failures, no-auth setPlans | June 27, 2026 |
+| A5 | **useMealHistory low branch coverage (66%)** | Added `useMealHistory.branches.test.js` with 12 tests covering: default fields, sync error recovery, background upload failures, no-auth paths, localStorage errors, date merge dedup | June 27, 2026 |
+| A6 | **queryCache stale-while-revalidate untested** | Added `queryCache.staleRevalidate.test.js` with 10 tests covering: fresh/stale/expired paths, background revalidation failure, inflight dedup, concurrent requests, eviction of expired entries | June 27, 2026 |
+| A7 | **withRetry non-retryable fallthrough untested (line 41)** | Added 4 tests: generic app errors, empty message, null message, custom context logging | June 27, 2026 |
+| A8 | **dailyHealthService branch gaps at 86-104** | Added `dailyHealthService.branches.test.js` with 12 tests covering: null/undefined rows input, null dates, null row elements, zero values, large counts | June 27, 2026 |
+| A9 | **README inconsistencies** — wrong Node version (20→22), stale test count (27→45), E2E listed as roadmap but already done | Fixed Node version, test file count, removed E2E from roadmap, added missing scripts to table | June 27, 2026 |
+
+### Coverage Before → After
+
+| Area | Statements | Branches |
+|------|-----------|----------|
+| **Overall** | 89.88% → 91.76% | 78.69% → 82.11% |
+| **useSyncedPlans** | 83.33% → 99.07% | 52.17% → 82.6% |
+| **useMealHistory** | 86.07% → 100% | 66.07% → 89.28% |
+| **queryCache** | 91.83% → 100% | 76.92% → 96.15% |
+| **withRetry** | 96% → 100% | 93.1% → 100% |
+| **dailyHealthService** | 93.75% → 100% | 78.94% → 100% |
+| **Services (all)** | 98.65% → 99.55% | 97.18% → 100% |
+

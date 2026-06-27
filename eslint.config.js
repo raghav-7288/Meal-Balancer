@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'coverage']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [
@@ -38,9 +38,22 @@ export default defineConfig([
     },
   },
   {
+    files: ['vite.config.js'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
+  {
     files: ['playwright.config.js', 'e2e/**/*.js'],
     languageOptions: {
       globals: globals.node,
+    },
+  },
+  {
+    files: ['tests/**/*.{js,jsx}'],
+    rules: {
+      'no-unused-vars': ['error', { varsIgnorePattern: '^_', argsIgnorePattern: '^_' }],
+      'react-hooks/globals': 'off',
     },
   },
 ])

@@ -37,7 +37,7 @@ function FoodAutocomplete({ value, onChange, onSelect, placeholder = "Type to se
     // Fetch suggestions when debounced query changes
     useEffect(() => {
         if (debouncedQuery.length < 2) {
-            setSuggestions([]); // eslint-disable-line react-hooks/set-state-in-effect
+            setSuggestions([]);
             setIsOpen(false);
             return;
         }

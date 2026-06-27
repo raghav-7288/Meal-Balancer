@@ -103,6 +103,50 @@ describe("withRetry", () => {
         expect(result).toBe("recovered");
         expect(fn).toHaveBeenCalledTimes(2);
     });
+
+    it("should not retry generic application errors (non-retryable fallthrough)", async () => {
+        // This error doesn't start with "Failed to" and is not a network/5xx error
+        // It hits the `return false` fallthrough in isRetryable()
+        const appError = new Error("Validation error: invalid email format");
+        const fn = vi.fn().mockRejectedValue(appError);
+
+        await expect(withRetry(fn)).rejects.toThrow("Validation error: invalid email format");
+        expect(fn).toHaveBeenCalledTimes(1);
+    });
+
+    it("should not retry errors with empty message", async () => {
+        const emptyError = new Error("");
+        const fn = vi.fn().mockRejectedValue(emptyError);
+
+        await expect(withRetry(fn)).rejects.toThrow("");
+        expect(fn).toHaveBeenCalledTimes(1);
+    });
+
+    it("should not retry errors with no message property", async () => {
+        const noMsgError = { name: "CustomError" };
+        const fn = vi.fn().mockRejectedValue(noMsgError);
+
+        await expect(withRetry(fn)).rejects.toEqual(noMsgError);
+        expect(fn).toHaveBeenCalledTimes(1);
+    });
+
+    it("should respect custom context in log messages", async () => {
+        const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+        const networkError = new TypeError("fetch failed");
+        const fn = vi.fn()
+            .mockRejectedValueOnce(networkError)
+            .mockResolvedValueOnce("ok");
+
+        const promise = withRetry(fn, { baseDelay: 10, context: "fetchPlans" });
+        await vi.advanceTimersByTimeAsync(15);
+        await promise;
+
+        expect(warnSpy).toHaveBeenCalledWith(
+            expect.stringContaining("fetchPlans"),
+            expect.any(String)
+        );
+        warnSpy.mockRestore();
+    });
 });
 
 

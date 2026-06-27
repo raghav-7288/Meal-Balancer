@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { MEALS, DAYS } from "../data/presetPlans";
+import { MEALS } from "../data/presetPlans";
 import { fetchAllPresetPlans, upsertPresetPlan, deletePresetPlan } from "../services/presetPlanService";
 import toast from "react-hot-toast";
 
