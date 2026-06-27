@@ -64,6 +64,27 @@ function PageLoader() {
     );
 }
 
+const CURRENT_YEAR = new Date().getFullYear();
+
+const TOAST_OPTIONS = {
+    duration: 3000,
+    style: {
+        borderRadius: "14px",
+        padding: "12px 20px",
+        fontSize: "14px",
+        fontWeight: 600,
+        boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+    },
+    success: {
+        style: { background: "#059669", color: "#fff" },
+        iconTheme: { primary: "#fff", secondary: "#059669" },
+    },
+    error: {
+        style: { background: "#dc2626", color: "#fff" },
+        iconTheme: { primary: "#fff", secondary: "#dc2626" },
+    },
+};
+
 function App() {
     const { isAuthenticated, loading: authLoading } = useAuth();
 
@@ -192,24 +213,7 @@ function AppShell() {
             {/* Global toast container (#32) */}
             <Toaster
                 position="bottom-center"
-                toastOptions={{
-                    duration: 3000,
-                    style: {
-                        borderRadius: "14px",
-                        padding: "12px 20px",
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-                    },
-                    success: {
-                        style: { background: "#059669", color: "#fff" },
-                        iconTheme: { primary: "#fff", secondary: "#059669" },
-                    },
-                    error: {
-                        style: { background: "#dc2626", color: "#fff" },
-                        iconTheme: { primary: "#fff", secondary: "#dc2626" },
-                    },
-                }}
+                toastOptions={TOAST_OPTIONS}
             />
 
             {/* aria-live region for dynamic score updates (#35) */}
@@ -234,7 +238,7 @@ function AppShell() {
             </ErrorBoundary>
 
             <footer className="app-footer">
-                <p>© {new Date().getFullYear()} Diet Specifix. All rights reserved.</p>
+                <p>© {CURRENT_YEAR} Diet Specifix. All rights reserved.</p>
                 <p className="app-footer-sub">Built with ❤️ for healthier living</p>
             </footer>
         </div>

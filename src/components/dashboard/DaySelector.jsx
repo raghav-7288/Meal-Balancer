@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { DAYS } from "../../data/presetPlans";
 import { Link } from "react-router-dom";
 import { Calendar, Cloud, CloudOff, Loader, Settings } from "lucide-react";
@@ -59,5 +60,5 @@ function DaySelector({
     );
 }
 
-export default DaySelector;
+export default memo(DaySelector);
 

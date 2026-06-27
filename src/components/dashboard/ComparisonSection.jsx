@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { Sparkles } from "lucide-react";
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip,
@@ -27,10 +28,10 @@ function buildComparisonData(summaries) {
 }
 
 function ComparisonSection({ summaries, bestSummary }) {
-    const chartData = buildComparisonData(summaries);
-    const planNames = summaries.map((s) =>
+    const chartData = useMemo(() => buildComparisonData(summaries), [summaries]);
+    const planNames = useMemo(() => summaries.map((s) =>
         s.plan.name.length > 14 ? s.plan.name.slice(0, 14) + "…" : s.plan.name
-    );
+    ), [summaries]);
 
     return (
         <>
@@ -117,5 +118,5 @@ function ComparisonSection({ summaries, bestSummary }) {
     );
 }
 
-export default ComparisonSection;
+export default memo(ComparisonSection);
 

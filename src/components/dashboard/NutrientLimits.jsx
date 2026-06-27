@@ -1,5 +1,5 @@
+import { memo, useMemo, useState } from "react";
 import { AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
 
 const LIMIT_FIELDS = [
     { key: "carbs", label: "Carbs", unit: "g" },
@@ -32,24 +32,27 @@ function NutrientLimits({ limits, onChangeLimit, dayTotals }) {
     const [expanded, setExpanded] = useState(false);
 
     // Check which limits are exceeded
-    const warnings = [];
-    if (dayTotals) {
-        for (const field of LIMIT_FIELDS) {
-            const limitVal = limits[field.key];
-            if (!limitVal || limitVal <= 0) continue;
+    const warnings = useMemo(() => {
+        const result = [];
+        if (dayTotals) {
+            for (const field of LIMIT_FIELDS) {
+                const limitVal = limits[field.key];
+                if (!limitVal || limitVal <= 0) continue;
 
-            const actual = getActualValue(dayTotals, field.key);
+                const actual = getActualValue(dayTotals, field.key);
 
-            if (actual > limitVal) {
-                warnings.push({
-                    label: field.label,
-                    actual: Math.round(actual * 10) / 10,
-                    limit: limitVal,
-                    unit: field.unit,
-                });
+                if (actual > limitVal) {
+                    result.push({
+                        label: field.label,
+                        actual: Math.round(actual * 10) / 10,
+                        limit: limitVal,
+                        unit: field.unit,
+                    });
+                }
             }
         }
-    }
+        return result;
+    }, [limits, dayTotals]);
 
     return (
         <div className="nutrient-limits-strip">
@@ -130,5 +133,5 @@ function NutrientLimits({ limits, onChangeLimit, dayTotals }) {
     );
 }
 
-export default NutrientLimits;
+export default memo(NutrientLimits);
 

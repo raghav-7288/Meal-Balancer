@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef, memo } from "react";
 import { Search, ArrowRight, ChevronDown, ChevronUp, Info, Loader2 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { escapeIlike } from "../services/foodSearchService";
@@ -11,7 +11,7 @@ import "./FoodSearchPage.css";
 const PAGE_SIZE = 20;
 
 
-function HighlightMatch({ text, query }) {
+const HighlightMatch = memo(function HighlightMatch({ text, query }) {
     if (!text) return null;
     if (!query || query.length < 2) return <>{text}</>;
     const splitRegex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
@@ -28,7 +28,7 @@ function HighlightMatch({ text, query }) {
             )}
         </>
     );
-}
+});
 
 function FoodSearchPage() {
     const [query, setQuery] = useState("");
@@ -457,7 +457,7 @@ function FoodSearchPage() {
     );
 }
 
-function NutrientGroupTable({ groupName, items }) {
+const NutrientGroupTable = memo(function NutrientGroupTable({ groupName, items }) {
     const [collapsed, setCollapsed] = useState(false);
 
     return (
@@ -493,7 +493,7 @@ function NutrientGroupTable({ groupName, items }) {
             )}
         </div>
     );
-}
+});
 
 export default FoodSearchPage;
 

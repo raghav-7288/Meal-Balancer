@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { memo, useState, useEffect, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useDebounce } from "../../hooks/useDebounce";
 import { searchFoodItems } from "../../services/foodSearchService";
@@ -160,6 +160,6 @@ function FoodAutocomplete({ value, onChange, onSelect, placeholder = "Type to se
     );
 }
 
-export default FoodAutocomplete;
+export default memo(FoodAutocomplete);
 
 

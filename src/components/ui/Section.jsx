@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 function Section({ title, icon, headerRight, children }) {
     return (
         <section className="section">
@@ -13,5 +15,5 @@ function Section({ title, icon, headerRight, children }) {
     );
 }
 
-export default Section;
+export default memo(Section);
 

@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { BarChart3, Leaf } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { foodById } from "../../engines/nutrientEngine";
@@ -13,14 +14,28 @@ const NUTRIENT_COLORS = {
 };
 
 function NutrientSummary({ activeSummary, activePlan, viewDay }) {
-    const nutrients = [
-        { name: "Carbs", value: Number(activeSummary?.dayTotals?.carbs || 0) },
-        { name: "Protein", value: Number(activeSummary?.dayTotals?.protein || 0) },
-        { name: "Fats", value: Number(activeSummary?.dayTotals?.fat || 0) },
-        { name: "Fibre", value: Number(activeSummary?.dayTotals?.fibre || 0) },
-        { name: "Vitamins", value: Number(activeSummary?.dayTotals?.vitamins || 0) },
-        { name: "Minerals", value: Number(activeSummary?.dayTotals?.minerals || 0) },
-    ].map((n) => ({ ...n, value: Math.round(n.value * 10) / 10 }));
+    const nutrients = useMemo(() =>
+        [
+            { name: "Carbs", value: Number(activeSummary?.dayTotals?.carbs || 0) },
+            { name: "Protein", value: Number(activeSummary?.dayTotals?.protein || 0) },
+            { name: "Fats", value: Number(activeSummary?.dayTotals?.fat || 0) },
+            { name: "Fibre", value: Number(activeSummary?.dayTotals?.fibre || 0) },
+            { name: "Vitamins", value: Number(activeSummary?.dayTotals?.vitamins || 0) },
+            { name: "Minerals", value: Number(activeSummary?.dayTotals?.minerals || 0) },
+        ].map((n) => ({ ...n, value: Math.round(n.value * 10) / 10 })),
+        [activeSummary?.dayTotals]
+    );
+
+    const exchangeItems = useMemo(() => {
+        const allItems = Object.values(activePlan?.meals || {})
+            .flat()
+            .filter((i) => i.day === viewDay || !i.day);
+        return allItems.map((item) => {
+            const food = foodById(item.foodId);
+            const exchange = food ? item.grams / food.gramsPerExchange : 0;
+            return { item, food, exchange };
+        });
+    }, [activePlan?.meals, viewDay]);
 
     const hasData = nutrients.some((n) => n.value > 0);
 
@@ -70,26 +85,18 @@ function NutrientSummary({ activeSummary, activePlan, viewDay }) {
                     <table aria-label="Exchange conversion for all meals">
                         <thead><tr><th>Food</th><th>g</th><th>Group</th><th>Exchange</th></tr></thead>
                         <tbody>
-                            {(() => {
-                                const allItems = Object.values(activePlan?.meals || {})
-                                    .flat()
-                                    .filter((i) => i.day === viewDay || !i.day);
-                                if (!allItems.length) {
-                                    return <tr><td colSpan={4} className="empty-cell">Add foods to see exchange conversion.</td></tr>;
-                                }
-                                return allItems.map((item) => {
-                                    const food = foodById(item.foodId);
-                                    const exchange = food ? item.grams / food.gramsPerExchange : 0;
-                                    return (
-                                        <tr key={item.id}>
-                                            <td>{food?.name || item.foodName || "-"}</td>
-                                            <td>{item.grams}</td>
-                                            <td>{food?.group || item.foodGroup || "-"}</td>
-                                            <td>{exchange.toFixed(2)}</td>
-                                        </tr>
-                                    );
-                                });
-                            })()}
+                            {exchangeItems.length === 0 ? (
+                                <tr><td colSpan={4} className="empty-cell">Add foods to see exchange conversion.</td></tr>
+                            ) : (
+                                exchangeItems.map(({ item, food, exchange }) => (
+                                    <tr key={item.id}>
+                                        <td>{food?.name || item.foodName || "-"}</td>
+                                        <td>{item.grams}</td>
+                                        <td>{food?.group || item.foodGroup || "-"}</td>
+                                        <td>{exchange.toFixed(2)}</td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -98,5 +105,5 @@ function NutrientSummary({ activeSummary, activePlan, viewDay }) {
     );
 }
 
-export default NutrientSummary;
+export default memo(NutrientSummary);
 

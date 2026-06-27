@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Plus, Pencil, Check, Trash2, ChevronDown } from "lucide-react";
 import { MEALS } from "../../data/presetPlans";
 import { foodById } from "../../engines/nutrientEngine";
@@ -274,4 +274,4 @@ function MealBuilder({
     );
 }
 
-export default MealBuilder;
+export default memo(MealBuilder);

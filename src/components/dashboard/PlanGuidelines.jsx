@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 function PlanGuidelines({ guidelines, setGuidelines, saveGuidelines, isPresetActive }) {
     return (
         <div className="plan-guidelines-section">
@@ -27,5 +29,5 @@ function PlanGuidelines({ guidelines, setGuidelines, saveGuidelines, isPresetAct
     );
 }
 
-export default PlanGuidelines;
+export default memo(PlanGuidelines);
 

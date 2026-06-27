@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 function Kpi({ label, value, hint, tone = "neutral" }) {
     return (
         <div className={`kpi ${tone}`}>
@@ -8,5 +10,5 @@ function Kpi({ label, value, hint, tone = "neutral" }) {
     );
 }
 
-export default Kpi;
+export default memo(Kpi);
 

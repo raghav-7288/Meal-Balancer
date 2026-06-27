@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 
 /**
@@ -24,5 +25,5 @@ function EmptyState({ icon, title, description, actionLabel, actionTo, onAction 
     );
 }
 
-export default EmptyState;
+export default memo(EmptyState);
 

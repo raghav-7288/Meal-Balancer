@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Activity, Copy, Database, Leaf, Plus, Sparkles, Trash2 } from "lucide-react";
 import Section from "../ui/Section";
 import MacroChart from "./MacroChart";
@@ -172,5 +173,5 @@ function PlanSidebar({
     );
 }
 
-export default PlanSidebar;
+export default memo(PlanSidebar);
 

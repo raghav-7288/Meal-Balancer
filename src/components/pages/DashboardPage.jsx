@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useDashboardState } from "../../hooks/useDashboardState";
 import Kpi from "../ui/Kpi";
 
@@ -64,6 +65,10 @@ function DashboardPage() {
         userGoalNames,
         logToday,
     } = useDashboardState();
+
+    const handleChangeLimit = useCallback((key, value) => {
+        setNutrientLimits((prev) => ({ ...prev, [key]: value }));
+    }, [setNutrientLimits]);
 
     // Show skeleton loading state until plans are available (#30)
     if (presetLoading && plans.length === 0) {
@@ -136,7 +141,7 @@ function DashboardPage() {
 
                     <NutrientLimits
                         limits={nutrientLimits}
-                        onChangeLimit={(key, value) => setNutrientLimits((prev) => ({ ...prev, [key]: value }))}
+                        onChangeLimit={handleChangeLimit}
                         dayTotals={activeSummary?.dayTotals}
                     />
 

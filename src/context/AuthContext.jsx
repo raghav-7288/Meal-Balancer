@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useMemo, useCallback } from "react";
 import {
     getSession,
     fetchUserProfile,
@@ -82,7 +82,7 @@ export function AuthProvider({ children }) {
         };
     }, []);
 
-    async function signUp(email, password, username, fullName, contactNumber) {
+    const signUp = useCallback(async (email, password, username, fullName, contactNumber) => {
         const data = await authSignUp(email, password);
 
         if (data.user) {
@@ -103,9 +103,9 @@ export function AuthProvider({ children }) {
         }
 
         return data;
-    }
+    }, []);
 
-    async function signIn(email, password) {
+    const signIn = useCallback(async (email, password) => {
         const data = await authSignIn(email, password);
 
         if (data.user) {
@@ -121,30 +121,34 @@ export function AuthProvider({ children }) {
         }
 
         return data;
-    }
+    }, []);
 
-    async function signOut() {
+    const signOut = useCallback(async () => {
         await authSignOut();
         setUser(null);
         setSession(null);
         setProfile(null);
-    }
+    }, []);
 
-    async function updateProfile(fields) {
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
+    const updateProfile = useCallback(async (fields) => {
         if (!user?.id) throw new Error("No authenticated user");
         const updated = await authUpdateProfile(user.id, fields);
         setProfile(updated);
         return updated;
-    }
+    }, [user?.id]);
 
-    async function refreshProfile() {
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
+    const refreshProfile = useCallback(async () => {
         if (!user?.id) return;
         const userProfile = await fetchUserProfile(user.id);
         setProfile(userProfile);
         return userProfile;
-    }
+    }, [user?.id]);
 
-    const value = {
+    const isAuthenticated = !!user;
+
+    const value = useMemo(() => ({
         user,
         profile,
         session,
@@ -154,8 +158,8 @@ export function AuthProvider({ children }) {
         signOut,
         updateProfile,
         refreshProfile,
-        isAuthenticated: !!user,
-    };
+        isAuthenticated,
+    }), [user, profile, session, loading, signUp, signIn, signOut, updateProfile, refreshProfile, isAuthenticated]);
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

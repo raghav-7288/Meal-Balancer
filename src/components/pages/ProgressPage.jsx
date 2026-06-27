@@ -37,6 +37,13 @@ function fmtMonth(ym) {
     return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
 
+function scoreColor(score) {
+    if (score >= 85) return "#059669";
+    if (score >= 70) return "#0d9488";
+    if (score >= 50) return "#d97706";
+    return "#dc2626";
+}
+
 function ProgressPage() {
     const { history, removeEntry, clearHistory } = useMealHistory();
     const [confirmClear, setConfirmClear] = useState(false);
@@ -129,18 +136,11 @@ function ProgressPage() {
     }, [sorted]);
 
     // ── Chart data ──
-    const chartData = sorted.map((e) => ({
+    const chartData = useMemo(() => sorted.map((e) => ({
         date: fmtDate(e.date),
         score: e.score ?? 0,
         kcal: e.kcal ?? 0,
-    }));
-
-    const scoreColor = (score) => {
-        if (score >= 85) return "#059669";
-        if (score >= 70) return "#0d9488";
-        if (score >= 50) return "#d97706";
-        return "#dc2626";
-    };
+    })), [sorted]);
 
     const TrendIcon =
         stats.trend === "up"

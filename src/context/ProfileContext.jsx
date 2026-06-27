@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../lib/supabaseClient";
 
@@ -179,7 +179,7 @@ export function ProfileProvider({ children }) {
     }, [profileSyncStatus, profile]);
 
     // Wrapper that also triggers DB save (debounced)
-    function setProfile(updater) {
+    const setProfile = useCallback((updater) => {
         setProfileInternal((prev) => {
             const next = typeof updater === "function" ? updater(prev) : updater;
 
@@ -191,16 +191,16 @@ export function ProfileProvider({ children }) {
 
             return next;
         });
-    }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const value = {
+    const value = useMemo(() => ({
         profile,
         setProfile,
         darkMode,
         setDarkMode,
         profileSyncStatus,
         retrySync,
-    };
+    }), [profile, setProfile, darkMode, setDarkMode, profileSyncStatus, retrySync]);
 
     return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
 }
