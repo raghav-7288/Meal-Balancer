@@ -1,43 +1,43 @@
 /* ─── Nutrient Limits Strip ─── */
 .nutrient-limits-strip {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 16px;
-    margin-bottom: 20px;
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-xl);
+    margin-bottom: var(--ds-space-5);
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    box-shadow: var(--ds-shadow-xs);
 }
 
 .nutrient-limits-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 18px;
+    padding: var(--ds-space-3) var(--ds-space-5);
     cursor: pointer;
     user-select: none;
-    transition: background 0.15s;
+    transition: background var(--ds-transition-fast);
 }
 
 .nutrient-limits-header:hover {
-    background: #f8fafc;
+    background: var(--ds-surface-alt);
 }
 
 .nutrient-limits-title {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    font-weight: 700;
+    gap: var(--ds-space-2);
+    font-size: var(--ds-text-base);
+    font-weight: var(--ds-font-bold);
     color: #334155;
 }
 
 .nutrient-limits-toggle {
     background: none;
     border: none;
-    color: #64748b;
+    color: var(--ds-text-tertiary);
     cursor: pointer;
-    padding: 4px;
-    border-radius: 6px;
+    padding: var(--ds-space-1);
+    border-radius: var(--ds-radius-xs);
     display: flex;
     align-items: center;
 }
@@ -47,63 +47,63 @@
 }
 
 .nutrient-limits-badge {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 10px;
+    font-size: var(--ds-badge-font-size);
+    font-weight: var(--ds-badge-font-weight);
+    padding: 2px var(--ds-space-2);
+    border-radius: var(--ds-radius-md);
 }
 
 .nutrient-limits-badge.warn {
-    background: #fef2f2;
-    color: #dc2626;
-    border: 1px solid #fecaca;
+    background: var(--ds-danger-bg);
+    color: var(--ds-danger);
+    border: 1px solid var(--ds-danger-border);
 }
 
 .nutrient-limits-badge.ok {
-    background: #ecfdf5;
-    color: #059669;
-    border: 1px solid #a7f3d0;
+    background: var(--ds-success-bg);
+    color: var(--ds-success);
+    border: 1px solid var(--ds-success-border);
 }
 
 /* Body (expanded) */
 .nutrient-limits-body {
-    padding: 0 18px 16px;
-    border-top: 1px solid #f1f5f9;
+    padding: 0 var(--ds-space-5) var(--ds-space-4);
+    border-top: 1px solid var(--ds-border-light);
 }
 
 .nutrient-limits-grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    gap: 10px;
-    margin-top: 12px;
+    gap: var(--ds-space-3);
+    margin-top: var(--ds-space-3);
 }
 
 .nutrient-limit-item {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    padding: 10px 12px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    transition: border-color 0.2s, background 0.2s;
+    padding: var(--ds-space-3) var(--ds-space-3);
+    background: var(--ds-surface-alt);
+    border: 1px solid var(--ds-border-input);
+    border-radius: var(--ds-radius-md);
+    transition: border-color var(--ds-transition-base), background var(--ds-transition-base);
 }
 
 .nutrient-limit-item.exceeded {
-    background: #fef2f2;
-    border-color: #fecaca;
+    background: var(--ds-danger-bg);
+    border-color: var(--ds-danger-border);
 }
 
 .nutrient-limit-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 4px;
+    gap: var(--ds-space-1);
 }
 
 .nutrient-limit-label {
-    font-size: 11px;
-    font-weight: 700;
+    font-size: var(--ds-text-xs);
+    font-weight: var(--ds-font-bold);
     color: #475569;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -111,19 +111,19 @@
 
 .nutrient-limit-actual {
     font-size: 10px;
-    font-weight: 600;
-    border-radius: 6px;
+    font-weight: var(--ds-font-semibold);
+    border-radius: var(--ds-radius-xs);
     padding: 1px 5px;
 }
 
 .nutrient-limit-actual.ok {
-    color: #059669;
-    background: #ecfdf5;
+    color: var(--ds-success);
+    background: var(--ds-success-bg);
 }
 
 .nutrient-limit-actual.over {
-    color: #dc2626;
-    background: #fef2f2;
+    color: var(--ds-danger);
+    background: var(--ds-danger-bg);
 }
 
 .nutrient-limit-input-wrap {
@@ -135,13 +135,13 @@
 .nutrient-limit-input {
     width: 100%;
     height: 28px;
-    border: 1px solid #dbe2ea;
-    border-radius: 8px;
-    padding: 4px 8px;
-    font-size: 13px;
-    font-weight: 600;
+    border: 1px solid var(--ds-border-input);
+    border-radius: var(--ds-radius-sm);
+    padding: 4px var(--ds-space-2);
+    font-size: var(--ds-text-base);
+    font-weight: var(--ds-font-semibold);
     text-align: center;
-    background: white;
+    background: var(--ds-surface);
     outline: none;
     box-sizing: border-box;
     -webkit-appearance: none;
@@ -149,20 +149,20 @@
 }
 
 .nutrient-limit-input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+    border-color: var(--ds-focus-border);
+    box-shadow: var(--ds-focus-ring);
 }
 
 .nutrient-limit-unit {
-    font-size: 11px;
-    color: #94a3b8;
-    font-weight: 600;
+    font-size: var(--ds-text-xs);
+    color: var(--ds-text-faint);
+    font-weight: var(--ds-font-semibold);
 }
 
 /* Progress bar */
 .nutrient-limit-bar {
     height: 4px;
-    background: #e2e8f0;
+    background: var(--ds-border-input);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -170,7 +170,7 @@
 .nutrient-limit-bar-fill {
     height: 100%;
     border-radius: 4px;
-    transition: width 0.3s ease;
+    transition: width var(--ds-transition-slow);
 }
 
 .nutrient-limit-bar-fill.ok {
@@ -186,19 +186,19 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px solid #f1f5f9;
+    margin-top: var(--ds-space-3);
+    padding-top: var(--ds-space-3);
+    border-top: 1px solid var(--ds-border-light);
 }
 
 .nutrient-warn-pill {
-    font-size: 11px;
-    font-weight: 600;
-    color: #dc2626;
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    padding: 4px 10px;
-    border-radius: 20px;
+    font-size: var(--ds-badge-font-size);
+    font-weight: var(--ds-font-semibold);
+    color: var(--ds-danger);
+    background: var(--ds-danger-bg);
+    border: 1px solid var(--ds-danger-border);
+    padding: var(--ds-badge-padding-y) var(--ds-badge-padding-x);
+    border-radius: var(--ds-badge-radius);
 }
 
 /* Dark mode */

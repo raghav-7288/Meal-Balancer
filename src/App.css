@@ -746,8 +746,8 @@ body.dark-mode .sync-badge--idle {
 .builder-row input:focus,
 .builder-row select:focus,
 .meal-card input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--ds-focus-border);
+    box-shadow: var(--ds-focus-ring);
 }
 
 .tag-grid {
@@ -976,18 +976,12 @@ button.secondary {
 
 .plan-name-input {
     width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 13px;
-    background: #f8fafc;
-    margin-bottom: 8px;
 }
 
 .plan-name-input:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    border-color: var(--ds-focus-border);
+    box-shadow: var(--ds-focus-ring);
 }
 
 .preset-guidelines-textarea {
@@ -1005,8 +999,8 @@ button.secondary {
 
 .preset-guidelines-textarea:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    border-color: var(--ds-focus-border);
+    box-shadow: var(--ds-focus-ring);
 }
 
 .new-plan-row button {
@@ -1021,8 +1015,8 @@ button.secondary {
 
 .error-text {
     margin: 0;
-    color: #dc2626;
-    font-size: 13px;
+    color: var(--ds-danger);
+    font-size: var(--ds-text-base);
 }
 
 .goals-tags {
@@ -1034,12 +1028,12 @@ button.secondary {
 .goal-tag {
     display: inline-block;
     padding: 6px 12px;
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #065f46;
+    background: var(--ds-success-bg);
+    border: 1px solid var(--ds-success-border);
+    border-radius: var(--ds-radius-full);
+    font-size: var(--ds-text-sm);
+    font-weight: var(--ds-font-semibold);
+    color: var(--ds-success-text);
     text-transform: capitalize;
 }
 
@@ -1131,12 +1125,12 @@ button.secondary {
 }
 
 .score-pill {
-    border-radius: 999px;
-    background: white;
-    border: 1px solid #e5e7eb;
-    padding: 8px 12px;
-    font-size: 12px;
-    font-weight: 700;
+    border-radius: var(--ds-radius-full);
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    padding: var(--ds-space-2) var(--ds-space-3);
+    font-size: var(--ds-text-sm);
+    font-weight: var(--ds-font-bold);
     white-space: nowrap;
 }
 
@@ -1225,9 +1219,9 @@ th:last-child {
 }
 
 .inline-add-row input:focus {
-    border-color: #3b82f6;
+    border-color: var(--ds-focus-border);
     outline: none;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+    box-shadow: var(--ds-focus-ring);
 }
 
 .inline-add-row .food-autocomplete input {
@@ -1278,24 +1272,24 @@ body.dark-mode .add-inline-btn:hover:not(:disabled) {
 }
 
 .reason-box {
-    margin-top: 14px;
-    background: #fff7ed;
-    border: 1px solid #fed7aa;
-    border-radius: 14px;
-    padding: 14px 16px;
+    margin-top: var(--ds-space-4);
+    background: var(--ds-warning-bg);
+    border: 1px solid var(--ds-warning-border);
+    border-radius: var(--ds-alert-radius);
+    padding: var(--ds-space-4) var(--ds-space-4);
     position: relative;
     z-index: 0;
 }
 
 .reason-box strong {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: var(--ds-space-2);
 }
 
 .reason-box ul {
     margin: 0;
     padding-left: 18px;
-    color: #7c2d12;
+    color: var(--ds-warning-text);
 }
 
 .two-col {
@@ -1310,10 +1304,10 @@ body.dark-mode .add-inline-btn:hover:not(:disabled) {
 }
 
 .nutrient-row {
-    background: #f8fafc;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    padding: 12px 14px;
+    background: var(--ds-surface-alt);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-lg);
+    padding: var(--ds-space-3) var(--ds-space-4);
 }
 
 .nutrient-top {
@@ -1324,15 +1318,15 @@ body.dark-mode .add-inline-btn:hover:not(:disabled) {
 
 .bar {
     height: 8px;
-    background: #e5e7eb;
-    border-radius: 999px;
+    background: var(--ds-border);
+    border-radius: var(--ds-radius-full);
     overflow: hidden;
 }
 
 .bar-fill {
     height: 100%;
-    background: #0f172a;
-    border-radius: 999px;
+    background: var(--ds-primary);
+    border-radius: var(--ds-radius-full);
     min-width: 2px;
 }
 
@@ -1422,15 +1416,15 @@ body.dark-mode .add-inline-btn:hover:not(:disabled) {
 }
 
 .compare-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    padding: 14px 16px;
-    background: #f8fafc;
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-lg);
+    padding: var(--ds-space-4) var(--ds-space-4);
+    background: var(--ds-surface-alt);
 }
 
 .compare-card.best {
-    background: #ecfdf5;
-    border-color: #a7f3d0;
+    background: var(--ds-success-bg);
+    border-color: var(--ds-success-border);
 }
 
 .compare-head {
@@ -1599,8 +1593,8 @@ body.dark-mode .add-inline-btn:hover:not(:disabled) {
 
 .modal-input:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    border-color: var(--ds-focus-border);
+    box-shadow: var(--ds-focus-ring);
 }
 
 .modal-actions {
@@ -1701,13 +1695,6 @@ body.dark-mode .modal-input {
     animation: spin 0.7s linear infinite;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.spin {
-    animation: spin 0.7s linear infinite;
-}
 
 .auth-page {
     display: flex;
@@ -1719,13 +1706,13 @@ body.dark-mode .modal-input {
 }
 
 .auth-card {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 20px;
-    padding: 40px;
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-card-radius);
+    padding: var(--ds-space-10);
     width: 100%;
     max-width: 420px;
-    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.06);
+    box-shadow: var(--ds-shadow-lg);
 }
 
 .auth-title {
@@ -1773,8 +1760,8 @@ body.dark-mode .modal-input {
 }
 
 .auth-field input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--ds-focus-border);
+    box-shadow: var(--ds-focus-ring);
 }
 
 .auth-btn {
@@ -1868,11 +1855,11 @@ body.dark-mode .modal-input {
 
 .profile-details {
     display: grid;
-    gap: 8px;
-    background: #f8fafc;
-    border: 1px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 12px;
+    gap: var(--ds-space-2);
+    background: var(--ds-surface-alt);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-xl);
+    padding: var(--ds-space-3);
 }
 
 .profile-row {
@@ -1993,28 +1980,19 @@ body.dark-mode .modal-input {
 }
 
 .error-boundary button {
-    padding: 0.5rem 1.5rem;
+    padding: 10px 20px;
     background: #3b82f6;
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--ds-radius-md);
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .error-boundary button:hover {
     background: #2563eb;
 }
 
-/* Spin animation */
-.spin {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
 
 /* Nav links as anchor tags (react-router NavLink) */
 a.nav-link {
@@ -2479,14 +2457,14 @@ body.dark-mode .plan-action-btns .download-btn {
 }
 
 .bmi-calculator-card {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 24px;
-    padding: 48px;
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-3xl);
+    padding: var(--ds-space-12);
     max-width: 580px;
     width: 100%;
     text-align: center;
-    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.05);
+    box-shadow: var(--ds-shadow-lg);
 }
 
 .bmi-calc-header {
@@ -2583,16 +2561,16 @@ body.dark-mode .plan-action-btns .download-btn {
 .bmi-input-group input {
     width: 100%;
     padding: 12px 14px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--ds-border-input);
     border-radius: 12px;
     font-size: 16px;
-    transition: border-color 0.15s;
+    transition: border-color var(--ds-transition-fast);
 }
 
 .bmi-input-group input:focus {
     outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    border-color: var(--ds-focus-border);
+    box-shadow: var(--ds-focus-ring);
 }
 
 .bmi-result-section {
@@ -2656,24 +2634,24 @@ body.dark-mode .plan-action-btns .download-btn {
 .bmi-info-box {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
-    padding: 14px;
+    gap: var(--ds-space-3);
+    padding: var(--ds-space-4);
     background: #f0fdf4;
     border: 1px solid #bbf7d0;
-    border-radius: 12px;
+    border-radius: var(--ds-btn-radius);
     text-align: left;
 }
 
 .bmi-info-box svg {
     flex-shrink: 0;
-    color: #059669;
+    color: var(--ds-success);
     margin-top: 2px;
 }
 
 .bmi-info-box p {
     margin: 0;
-    font-size: 13px;
-    color: #374151;
+    font-size: var(--ds-text-base);
+    color: var(--ds-text-secondary);
 }
 
 .bmi-continue-btn {
@@ -2683,7 +2661,7 @@ body.dark-mode .plan-action-btns .download-btn {
     padding: 14px 28px;
     font-size: 16px;
     font-weight: 700;
-    border-radius: 16px;
+    border-radius: var(--ds-radius-lg);
     background: #0f172a;
     color: white;
     border: none;
@@ -2763,7 +2741,7 @@ body.dark-mode .plan-action-btns .download-btn {
     padding: 14px 28px;
     font-size: 15px;
     font-weight: 700;
-    border-radius: 16px;
+    border-radius: var(--ds-radius-lg);
     border: none;
     cursor: pointer;
     transition: transform 0.1s ease, background 0.2s;
@@ -2870,10 +2848,10 @@ body.dark-mode .profile-complete-btn.incomplete {
 .health-tools-tabs {
     display: flex;
     gap: 6px;
-    background: #f1f5f9;
+    background: var(--ds-surface-hover);
     padding: 5px;
-    border-radius: 16px;
-    margin-bottom: 28px;
+    border-radius: var(--ds-radius-xl);
+    margin-bottom: var(--ds-space-8);
 }
 
 .health-tools-tab {
@@ -2882,27 +2860,27 @@ body.dark-mode .profile-complete-btn.incomplete {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 12px 16px;
-    border-radius: 12px;
+    gap: var(--ds-space-2);
+    padding: var(--ds-space-3) var(--ds-space-4);
+    border-radius: var(--ds-radius-md);
     border: none;
     background: transparent;
-    color: #64748b;
-    font-size: 14px;
-    font-weight: 600;
+    color: var(--ds-text-tertiary);
+    font-size: var(--ds-text-md);
+    font-weight: var(--ds-font-semibold);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--ds-transition-base);
 }
 
 .health-tools-tab:hover {
     background: rgba(255, 255, 255, 0.6);
-    color: #0f172a;
+    color: var(--ds-text);
 }
 
 .health-tools-tab.active {
-    background: #ffffff;
-    color: var(--tab-color, #0f172a);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background: var(--ds-surface);
+    color: var(--tab-color, var(--ds-text));
+    box-shadow: var(--ds-shadow-sm);
 }
 
 .health-tools-content {
@@ -2925,31 +2903,43 @@ body.dark-mode .profile-complete-btn.incomplete {
     width: 100%;
 }
 
-/* ─── Water Tracker ─── */
-.water-tracker-tool {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 24px;
+/* ─── Shared Tool Card Base ─── */
+.water-tracker-tool,
+.calorie-calc-tool,
+.step-tracker-tool {
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-3xl);
     padding: 40px;
+    box-shadow: var(--ds-shadow-lg);
+}
+
+.water-tracker-tool,
+.step-tracker-tool {
     text-align: center;
-    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.05);
 }
 
 .water-tracker-header {
     margin-bottom: 28px;
 }
 
-.water-tracker-icon-wrap {
+/* ─── Shared Tool Icon Wrap ─── */
+.water-tracker-icon-wrap,
+.calorie-calc-icon-wrap,
+.step-tracker-icon-wrap {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 72px;
     height: 72px;
     border-radius: 18px;
-    background: #ecfeff;
-    color: #06b6d4;
     margin-bottom: 16px;
     animation: float 3s ease-in-out infinite;
+}
+
+.water-tracker-icon-wrap {
+    background: #ecfeff;
+    color: #06b6d4;
 }
 
 .water-tracker-header h2 {
@@ -3166,7 +3156,7 @@ body.dark-mode .profile-complete-btn.incomplete {
 .water-target-edit input {
     width: 60px;
     padding: 6px 10px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--ds-border-input);
     border-radius: 8px;
     font-size: 14px;
     text-align: center;
@@ -3191,42 +3181,27 @@ body.dark-mode .profile-complete-btn.incomplete {
     text-decoration: underline;
 }
 
-.water-complete-banner {
+.water-complete-banner,
+.step-complete-banner {
     padding: 14px 20px;
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-    border-radius: 14px;
-    color: #065f46;
+    background: var(--ds-success-bg);
+    border: 1px solid var(--ds-success-border);
+    border-radius: var(--ds-radius-lg);
+    color: var(--ds-success-text);
     font-size: 15px;
     font-weight: 600;
     animation: health-tool-fade-in 0.3s ease;
 }
 
 /* ─── Calorie Calculator ─── */
-.calorie-calc-tool {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 24px;
-    padding: 40px;
-    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.05);
-}
-
 .calorie-calc-header {
     text-align: center;
     margin-bottom: 32px;
 }
 
 .calorie-calc-icon-wrap {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 72px;
-    height: 72px;
-    border-radius: 18px;
     background: #fff7ed;
     color: #f97316;
-    margin-bottom: 16px;
-    animation: float 3s ease-in-out infinite;
 }
 
 .calorie-calc-header h2 {
@@ -3267,18 +3242,18 @@ body.dark-mode .profile-complete-btn.incomplete {
 .calorie-input-group select {
     width: 100%;
     padding: 12px 14px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--ds-border-input);
     border-radius: 12px;
     font-size: 15px;
     background: #fff;
-    transition: border-color 0.15s;
+    transition: border-color var(--ds-transition-fast);
 }
 
 .calorie-input-group input:focus,
 .calorie-input-group select:focus {
     outline: none;
-    border-color: #f97316;
-    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+    border-color: var(--ds-focus-border);
+    box-shadow: var(--ds-focus-ring);
 }
 
 .calorie-selector-group {
@@ -3540,30 +3515,13 @@ body.dark-mode .profile-complete-btn.incomplete {
 }
 
 /* ─── Step Tracker ─── */
-.step-tracker-tool {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 24px;
-    padding: 40px;
-    text-align: center;
-    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.05);
-}
-
 .step-tracker-header {
     margin-bottom: 28px;
 }
 
 .step-tracker-icon-wrap {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 72px;
-    height: 72px;
-    border-radius: 18px;
     background: #ecfdf5;
     color: #10b981;
-    margin-bottom: 16px;
-    animation: float 3s ease-in-out infinite;
 }
 
 .step-tracker-header h2 {
@@ -3711,17 +3669,17 @@ body.dark-mode .profile-complete-btn.incomplete {
 .step-custom-input input {
     width: 140px;
     padding: 10px 14px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--ds-border-input);
     border-radius: 12px;
     font-size: 15px;
     text-align: center;
-    transition: border-color 0.15s;
+    transition: border-color var(--ds-transition-fast);
 }
 
 .step-custom-input input:focus {
     outline: none;
-    border-color: #10b981;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    border-color: var(--ds-focus-border);
+    box-shadow: var(--ds-focus-ring);
 }
 
 .step-add-btn {
@@ -3828,7 +3786,7 @@ body.dark-mode .profile-complete-btn.incomplete {
 .step-target-edit input {
     width: 80px;
     padding: 6px 10px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--ds-border-input);
     border-radius: 8px;
     font-size: 14px;
     text-align: center;
@@ -3923,17 +3881,6 @@ body.dark-mode .profile-complete-btn.incomplete {
     color: #6b7280;
 }
 
-.step-complete-banner {
-    padding: 14px 20px;
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-    border-radius: 14px;
-    color: #065f46;
-    font-size: 15px;
-    font-weight: 600;
-    animation: health-tool-fade-in 0.3s ease;
-}
-
 /* ─── Dark Mode: Health Tools ─── */
 body.dark-mode .health-tools-tabs {
     background: #0f172a;
@@ -3954,12 +3901,22 @@ body.dark-mode .health-tools-tab.active {
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Dark: Water tracker */
-body.dark-mode .water-tracker-tool {
-    background: #1e293b;
-    border-color: #334155;
+/* Dark: Tool cards (shared) */
+body.dark-mode .water-tracker-tool,
+body.dark-mode .calorie-calc-tool,
+body.dark-mode .step-tracker-tool {
+    background: var(--ds-surface);
+    border-color: var(--ds-border);
 }
 
+body.dark-mode .water-complete-banner,
+body.dark-mode .step-complete-banner {
+    background: var(--ds-success-bg);
+    border-color: var(--ds-success-border);
+    color: var(--ds-success-text);
+}
+
+/* Dark: Water tracker */
 body.dark-mode .water-tracker-icon-wrap {
     background: #164e63;
     color: #22d3ee;
@@ -4039,12 +3996,6 @@ body.dark-mode .water-target-edit input {
     background: #0f172a;
     border-color: #475569;
     color: #f1f5f9;
-}
-
-body.dark-mode .water-complete-banner {
-    background: #064e3b;
-    border-color: #065f46;
-    color: #6ee7b7;
 }
 
 /* Dark: Step tracker */
@@ -4344,13 +4295,12 @@ body.dark-mode .calorie-info-box p {
 }
 
 .onboarding-card {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 24px;
-    padding: 40px;
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-3xl);
+    padding: var(--ds-space-10);
     max-width: 640px;
     width: 100%;
-    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.05);
 }
 
 /* Progress bar */
@@ -4483,27 +4433,27 @@ body.dark-mode .calorie-info-box p {
 .onboarding-chip {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    background: #f8fafc;
+    gap: var(--ds-space-2);
+    padding: var(--ds-space-3) var(--ds-space-4);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-lg);
+    background: var(--ds-surface-alt);
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    color: #374151;
-    transition: all 0.15s ease;
+    font-size: var(--ds-text-md);
+    font-weight: var(--ds-font-semibold);
+    color: var(--ds-text-secondary);
+    transition: all var(--ds-transition-fast);
     text-align: left;
 }
 
 .onboarding-chip:hover {
-    border-color: #0f172a;
-    background: #f1f5f9;
+    border-color: var(--ds-primary);
+    background: var(--ds-surface-hover);
 }
 
 .onboarding-chip.active {
-    border-color: #0f172a;
-    background: #0f172a;
+    border-color: var(--ds-primary);
+    background: var(--ds-primary);
     color: #ffffff;
 }
 
@@ -4997,21 +4947,21 @@ body.dark-mode .onboarding-back-btn:hover {
 
 .weekly-plan-select:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--ds-focus-border);
+    box-shadow: var(--ds-focus-ring);
 }
 
 .weekly-unassigned-notice {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
+    gap: var(--ds-space-2);
+    padding: var(--ds-space-3) var(--ds-space-4);
     background: #fef3c7;
     border: 1px solid #fcd34d;
-    border-radius: 12px;
-    font-size: 13px;
+    border-radius: var(--ds-btn-radius);
+    font-size: var(--ds-text-base);
     color: #92400e;
-    margin-bottom: 16px;
+    margin-bottom: var(--ds-space-4);
 }
 
 .weekly-summary-bar {
@@ -5129,10 +5079,10 @@ body.dark-mode .onboarding-back-btn:hover {
 }
 
 .weekly-meal-slot {
-    background: #f8fafc;
-    border: 1px solid #f1f5f9;
-    border-radius: 12px;
-    padding: 8px 10px;
+    background: var(--ds-surface-alt);
+    border: 1px solid var(--ds-border-light);
+    border-radius: var(--ds-radius-md);
+    padding: var(--ds-space-2) var(--ds-space-3);
 }
 
 .weekly-meal-label {
@@ -5238,16 +5188,16 @@ body.dark-mode .onboarding-back-btn:hover {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    padding: 6px 8px;
-    font-size: 11px;
-    font-weight: 600;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    background: #f8fafc;
+    gap: var(--ds-space-1);
+    padding: 6px var(--ds-space-2);
+    font-size: var(--ds-text-xs);
+    font-weight: var(--ds-font-semibold);
+    border-radius: var(--ds-radius-sm);
+    border: 1px solid var(--ds-border);
+    background: var(--ds-surface-alt);
     color: #475569;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all var(--ds-transition-fast);
 }
 
 .weekly-action-btn:hover {
@@ -5255,9 +5205,9 @@ body.dark-mode .onboarding-back-btn:hover {
 }
 
 .weekly-action-btn.danger:hover {
-    background: #fee2e2;
-    color: #dc2626;
-    border-color: #fecaca;
+    background: var(--ds-danger-bg);
+    color: var(--ds-danger);
+    border-color: var(--ds-danger-border);
 }
 
 .weekly-day-summary {
@@ -5475,8 +5425,8 @@ body.dark-mode .onboarding-back-btn:hover {
 
 .plan-guidelines-input:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--ds-focus-border);
+    box-shadow: var(--ds-focus-ring);
     background: #fff;
 }
 
@@ -6122,22 +6072,22 @@ body.dark-mode .progress-empty-state h2 {
 /* Footer */
 .app-footer {
     text-align: center;
-    padding: 28px 16px;
-    margin-top: 48px;
-    border-top: 1px solid #f1f5f9;
+    padding: var(--ds-space-8) var(--ds-space-4);
+    margin-top: var(--ds-space-12);
+    border-top: 1px solid var(--ds-border-light);
     background: transparent;
 }
 
 .app-footer p {
     margin: 0;
-    font-size: 13px;
-    font-weight: 500;
-    color: #94a3b8;
+    font-size: var(--ds-text-base);
+    font-weight: var(--ds-font-medium);
+    color: var(--ds-text-faint);
 }
 
 .app-footer-sub {
-    margin-top: 4px !important;
-    font-size: 12px !important;
+    margin-top: var(--ds-space-1) !important;
+    font-size: var(--ds-text-sm) !important;
     color: #cbd5e1 !important;
 }
 

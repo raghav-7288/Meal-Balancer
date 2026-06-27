@@ -1,0 +1,214 @@
+/* ═══════════════════════════════════════════════════════
+   DESIGN TOKENS — Single source of truth for the UI.
+   All repeated visual values are defined here as CSS
+   custom properties so every screen shares one language.
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* ─── Color: Backgrounds ─── */
+  --ds-bg:             #f4f7fb;
+  --ds-surface:        #ffffff;
+  --ds-surface-alt:    #f8fafc;
+  --ds-surface-hover:  #f1f5f9;
+
+  /* ─── Color: Text ─── */
+  --ds-text:           #0f172a;
+  --ds-text-secondary: #374151;
+  --ds-text-tertiary:  #64748b;
+  --ds-text-muted:     #6b7280;
+  --ds-text-faint:     #94a3b8;
+  --ds-text-disabled:  #9ca3af;
+
+  /* ─── Color: Borders ─── */
+  --ds-border:         #e5e7eb;
+  --ds-border-input:   #e2e8f0;
+  --ds-border-light:   #f1f5f9;
+
+  /* ─── Color: Brand / Interactive ─── */
+  --ds-primary:        #0f172a;
+  --ds-primary-hover:  #1e293b;
+  --ds-accent:         #3b82f6;
+  --ds-accent-hover:   #2563eb;
+
+  /* ─── Color: Semantic (light mode) ─── */
+  --ds-success:        #059669;
+  --ds-success-bg:     #ecfdf5;
+  --ds-success-border: #a7f3d0;
+  --ds-success-text:   #065f46;
+
+  --ds-warning:        #d97706;
+  --ds-warning-bg:     #fff7ed;
+  --ds-warning-border: #fed7aa;
+  --ds-warning-text:   #7c2d12;
+
+  --ds-danger:         #dc2626;
+  --ds-danger-bg:      #fef2f2;
+  --ds-danger-border:  #fecaca;
+  --ds-danger-text:    #b91c1c;
+
+  --ds-info-bg:        #f0f9ff;
+  --ds-info-border:    #bfdbfe;
+  --ds-info-text:      #1e40af;
+
+  /* ─── Typography ─── */
+  --ds-font: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --ds-text-xs:  11px;
+  --ds-text-sm:  12px;
+  --ds-text-base: 13px;
+  --ds-text-md:  14px;
+  --ds-text-lg:  15px;
+  --ds-text-xl:  16px;
+  --ds-text-2xl: 18px;
+  --ds-text-3xl: 20px;
+  --ds-text-4xl: 24px;
+  --ds-text-5xl: 28px;
+
+  /* ─── Font Weights ─── */
+  --ds-font-normal:    400;
+  --ds-font-medium:    500;
+  --ds-font-semibold:  600;
+  --ds-font-bold:      700;
+  --ds-font-extrabold: 800;
+
+  /* ─── Border Radius ─── */
+  --ds-radius-xs:   6px;   /* tooltips                            */
+  --ds-radius-sm:   8px;   /* small tags, weekly action btns       */
+  --ds-radius-md:  12px;   /* inputs, buttons, nav links, dropdowns */
+  --ds-radius-lg:  14px;   /* inner cards, chips, alerts            */
+  --ds-radius-xl:  16px;   /* cards, containers, tables             */
+  --ds-radius-2xl: 20px;   /* sections, KPIs, modals                */
+  --ds-radius-3xl: 24px;   /* page-level hero cards                 */
+  --ds-radius-full: 999px; /* pills, avatars, progress bars         */
+
+  /* ─── Shadows ─── */
+  --ds-shadow-xs:  0 1px 3px rgba(15, 23, 42, 0.04);
+  --ds-shadow-sm:  0 2px 8px rgba(15, 23, 42, 0.05);
+  --ds-shadow-md:  0 4px 16px rgba(15, 23, 42, 0.04);
+  --ds-shadow-lg:  0 8px 32px rgba(15, 23, 42, 0.05);
+  --ds-shadow-xl:  0 12px 40px rgba(15, 23, 42, 0.1);
+  --ds-shadow-2xl: 0 20px 60px rgba(0, 0, 0, 0.2);
+
+  /* ─── Focus Ring (one value, used everywhere) ─── */
+  --ds-focus-ring:   0 0 0 3px rgba(59, 130, 246, 0.12);
+  --ds-focus-border: #3b82f6;
+
+  /* ─── Transitions ─── */
+  --ds-transition-fast: 0.15s ease;
+  --ds-transition-base: 0.2s ease;
+  --ds-transition-slow: 0.3s ease;
+
+  /* ─── Component: Inputs ─── */
+  --ds-input-height:      42px;
+  --ds-input-bg:          var(--ds-surface);
+  --ds-input-border:      var(--ds-border-input);
+  --ds-input-radius:      var(--ds-radius-md);
+  --ds-input-font-size:   var(--ds-text-md);
+  --ds-input-padding-x:   12px;
+  --ds-input-padding-y:   10px;
+
+  /* ─── Component: Buttons ─── */
+  --ds-btn-radius:        var(--ds-radius-md);
+  --ds-btn-font-size:     var(--ds-text-md);
+  --ds-btn-font-weight:   var(--ds-font-semibold);
+  --ds-btn-padding-x:     14px;
+  --ds-btn-padding-y:     10px;
+
+  /* ─── Component: Cards ─── */
+  --ds-card-bg:           var(--ds-surface);
+  --ds-card-border:       var(--ds-border);
+  --ds-card-radius:       var(--ds-radius-2xl);
+  --ds-card-shadow:       var(--ds-shadow-md);
+  --ds-card-padding:      20px;
+
+  /* ─── Component: Badges / Pills ─── */
+  --ds-badge-radius:      var(--ds-radius-full);
+  --ds-badge-font-size:   var(--ds-text-xs);
+  --ds-badge-font-weight: var(--ds-font-bold);
+  --ds-badge-padding-x:   10px;
+  --ds-badge-padding-y:   4px;
+
+  /* ─── Component: Alerts / Banners ─── */
+  --ds-alert-radius:      var(--ds-radius-lg);
+  --ds-alert-padding:     14px 16px;
+  --ds-alert-font-size:   var(--ds-text-md);
+
+  /* ─── Component: Tables ─── */
+  --ds-table-radius:      var(--ds-radius-xl);
+  --ds-table-header-bg:   var(--ds-surface-alt);
+  --ds-table-border:      var(--ds-border-light);
+  --ds-table-cell-padding: 12px 16px;
+
+  /* ─── Component: Modals ─── */
+  --ds-modal-radius:      var(--ds-radius-2xl);
+  --ds-modal-shadow:      var(--ds-shadow-2xl);
+  --ds-modal-padding:     32px;
+
+  /* ─── Component: Tooltips ─── */
+  --ds-tooltip-bg:        #1e293b;
+  --ds-tooltip-color:     #f8fafc;
+  --ds-tooltip-radius:    var(--ds-radius-xs);
+  --ds-tooltip-font-size: var(--ds-text-sm);
+
+  /* ─── Component: Section Title ─── */
+  --ds-section-title-size:   var(--ds-text-2xl);
+  --ds-section-title-weight: var(--ds-font-bold);
+
+  /* ─── Spacing Scale ─── */
+  --ds-space-1:  4px;
+  --ds-space-2:  8px;
+  --ds-space-3:  12px;
+  --ds-space-4:  16px;
+  --ds-space-5:  20px;
+  --ds-space-6:  24px;
+  --ds-space-8:  32px;
+  --ds-space-10: 40px;
+  --ds-space-12: 48px;
+}
+
+/* ─── Dark-mode overrides ─── */
+body.dark-mode {
+  --ds-bg:             #0f1219;
+  --ds-surface:        #1e293b;
+  --ds-surface-alt:    #1a2332;
+  --ds-surface-hover:  #334155;
+
+  --ds-text:           #e2e8f0;
+  --ds-text-secondary: #cbd5e1;
+  --ds-text-tertiary:  #94a3b8;
+  --ds-text-muted:     #94a3b8;
+  --ds-text-faint:     #64748b;
+
+  --ds-border:         #334155;
+  --ds-border-input:   #475569;
+  --ds-border-light:   #334155;
+
+  --ds-accent:         #60a5fa;
+  --ds-accent-hover:   #3b82f6;
+
+  --ds-success-bg:     #064e3b;
+  --ds-success-border: #065f46;
+  --ds-success-text:   #6ee7b7;
+
+  --ds-warning-bg:     #2d1b00;
+  --ds-warning-border: #78350f;
+  --ds-warning-text:   #fbbf24;
+
+  --ds-danger-bg:      #450a0a;
+  --ds-danger-border:  #7f1d1d;
+  --ds-danger-text:    #fca5a5;
+
+  --ds-info-bg:        #1e3a5f;
+  --ds-info-border:    #1d4ed8;
+  --ds-info-text:      #93c5fd;
+
+  --ds-shadow-sm:  0 2px 8px rgba(0, 0, 0, 0.2);
+  --ds-shadow-md:  0 4px 16px rgba(0, 0, 0, 0.2);
+  --ds-shadow-lg:  0 10px 35px rgba(0, 0, 0, 0.2);
+  --ds-shadow-xl:  0 12px 40px rgba(0, 0, 0, 0.3);
+  --ds-shadow-2xl: 0 20px 60px rgba(0, 0, 0, 0.4);
+
+  --ds-focus-ring:   0 0 0 3px rgba(96, 165, 250, 0.15);
+  --ds-focus-border: #60a5fa;
+}
+
