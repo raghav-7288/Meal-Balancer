@@ -1066,6 +1066,11 @@ button.secondary {
     background: #f8fafc;
     border-radius: 22px;
     padding: 16px;
+    position: relative;
+}
+
+.meal-card:has(.food-autocomplete-dropdown) {
+    z-index: 10;
 }
 
 .meal-head {
@@ -1118,8 +1123,6 @@ button.secondary {
     background: white;
     border: 1px solid #e5e7eb;
     max-width: 100%;
-    position: relative;
-    z-index: 1;
 }
 
 table {
@@ -1450,7 +1453,7 @@ body.dark-mode .add-inline-btn:hover:not(:disabled) {
 
 .delete-toast-popup {
     position: fixed;
-    bottom: 32px;
+    bottom: 80px;
     left: 50%;
     transform: translateX(-50%);
     background: #1e293b;

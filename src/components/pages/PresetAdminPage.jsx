@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Plus, Save, Trash2, Eye, EyeOff, Loader2, ChevronDown, Pencil, Check, Settings } from "lucide-react";
 import { MEALS, DAYS } from "../../data/presetPlans";
 import { foodById } from "../../engines/nutrientEngine";
 import { usePresetPlanAdmin } from "../../hooks/usePresetPlanAdmin";
+import { getMajorGroups } from "../../services/databaseService";
 import Section from "../ui/Section";
 import FoodAutocomplete from "../dashboard/FoodAutocomplete";
 import "../dashboard/FoodAutocomplete.css";
@@ -17,6 +18,9 @@ function PresetAdminPage() {
         setActivePlanId,
         activePlan,
         saving,
+        isDirty,
+        deleteToast,
+        setDeleteToast,
         viewDay,
         setViewDay,
         createPlan,
@@ -34,11 +38,23 @@ function PresetAdminPage() {
     const [collapsedSlots, setCollapsedSlots] = useState({});
     const [editingItemId, setEditingItemId] = useState(null);
     const [editValues, setEditValues] = useState({ grams: "", instructions: "" });
+    const [majorGroups, setMajorGroups] = useState([]);
     const [slotForms, setSlotForms] = useState(() => {
         const init = {};
         for (const m of MEALS) init[m] = { foodId: "", foodName: "", foodGroupId: null, grams: "", instructions: "" };
         return init;
     });
+
+    // Fetch major groups for resolving group IDs to names
+    useEffect(() => {
+        getMajorGroups().then(setMajorGroups).catch(() => {});
+    }, []);
+
+    const groupNameById = (groupId) => {
+        if (!groupId) return "";
+        const group = majorGroups.find((g) => g.major_group_id === groupId);
+        return group?.group_name || "";
+    };
 
     const toggleSlot = (meal) => {
         setCollapsedSlots((prev) => ({ ...prev, [meal]: !prev[meal] }));
@@ -55,7 +71,8 @@ function PresetAdminPage() {
     const handleAddFood = (meal) => {
         const f = slotForms[meal];
         if (!f.foodName || !f.foodId || !f.grams || Number(f.grams) <= 0) return;
-        addFood(meal, f.foodId, f.foodName, f.grams, f.instructions, f.foodGroupId);
+        const foodGroup = groupNameById(f.foodGroupId);
+        addFood(meal, f.foodId, f.foodName, f.grams, f.instructions, f.foodGroupId, foodGroup);
         resetSlotForm(meal);
     };
 
@@ -102,6 +119,17 @@ function PresetAdminPage() {
 
     return (
         <div className="dashboard-page">
+
+            {deleteToast && (
+                <div className="delete-toast-popup" role="alert" aria-live="assertive">
+                    <span>Plan &ldquo;{deleteToast.planName}&rdquo; deleted</span>
+                    <div className="delete-toast-actions">
+                        <button className="undo-btn" onClick={deleteToast.undoAction}>Undo</button>
+                        <button className="close-btn" onClick={() => setDeleteToast(null)}>✕</button>
+                    </div>
+                </div>
+            )}
+
             {/* Create plan modal — same pattern as CopyPlanModal */}
             {showCreateModal && (
                 <div className="modal-overlay" onClick={() => setShowCreateModal(false)} role="dialog" aria-modal="true" aria-label="Create preset plan">
@@ -143,16 +171,23 @@ function PresetAdminPage() {
                     <Link to="/dashboard" className="planner-nav-link">
                         <ArrowLeft size={14} /> Dashboard
                     </Link>
-                    {activePlan && (
-                        <button
-                            className="log-today-btn"
-                            onClick={handleSavePlan}
-                            disabled={saving}
-                        >
-                            {saving ? <Loader2 size={14} className="spin" /> : <Save size={14} />}
-                            Save Plan
-                        </button>
-                    )}
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        {activePlan && (
+                            <span style={{ fontSize: "12px", color: saving ? "#f59e0b" : isDirty ? "#ef4444" : "#10b981", fontWeight: 500 }}>
+                                {saving ? "Saving…" : isDirty ? "Unsaved changes" : "All changes saved"}
+                            </span>
+                        )}
+                        {activePlan && (
+                            <button
+                                className="log-today-btn"
+                                onClick={handleSavePlan}
+                                disabled={saving}
+                            >
+                                {saving ? <Loader2 size={14} className="spin" /> : <Save size={14} />}
+                                Save Plan
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -301,7 +336,7 @@ function PresetAdminPage() {
                                                                     const isEditing = editingItemId === item.id;
                                                                     const displayGrams = isEditing ? editValues.grams : item.grams;
                                                                     const food = foodById(item.foodId);
-                                                                    const foodGroup = food?.group || item.foodGroup || "-";
+                                                                    const foodGroup = food?.group || item.foodGroup || groupNameById(item.foodGroupId) || "-";
                                                                     const rawExchange = food
                                                                         ? Number(displayGrams) / (food.gramsPerExchange || 1)
                                                                         : (Number(displayGrams) / 100);
