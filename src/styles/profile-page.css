@@ -286,14 +286,14 @@ body.dark-mode .pro-toast {
 .pro-card {
     background: #ffffff;
     border: 1px solid #e5e7eb;
-    border-radius: 20px;
+    border-radius: 18px;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
     transition: box-shadow 0.2s ease;
 }
 
 .pro-card:hover {
-    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.07);
+    box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
 }
 
 .pro-card-header {

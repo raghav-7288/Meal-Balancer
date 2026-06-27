@@ -238,7 +238,7 @@ body.dark-mode .food-source-note {
     padding: 0.875rem 1rem;
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.15s ease;
 }
@@ -252,7 +252,7 @@ body.dark-mode .food-source-note {
 .food-result-card.selected {
     border-color: #3b82f6;
     background: #eff6ff;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.12);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
 }
 
 .food-result-card.keyboard-active {
@@ -725,11 +725,11 @@ body.dark-mode .food-nutrient-unit {
     padding: 12px;
     margin-top: 4px;
     border: 1px dashed #cbd5e1;
-    border-radius: 8px;
+    border-radius: 12px;
     background: #f8fafc;
     color: #3b82f6;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s;
     flex-shrink: 0;
@@ -737,7 +737,7 @@ body.dark-mode .food-nutrient-unit {
 
 .food-show-more-btn:hover {
     background: #eff6ff;
-    border-color: #3b82f6;
+    border-color: #93c5fd;
 }
 
 .food-show-more-btn:disabled {
