@@ -12,7 +12,7 @@ const NUTRIENT_COLORS = {
     Minerals: "#06b6d4",
 };
 
-function NutrientSummary({ activeSummary, activePlan }) {
+function NutrientSummary({ activeSummary, activePlan, viewDay }) {
     const nutrients = [
         { name: "Carbs", value: Number(activeSummary?.dayTotals?.carbs || 0) },
         { name: "Protein", value: Number(activeSummary?.dayTotals?.protein || 0) },
@@ -71,7 +71,9 @@ function NutrientSummary({ activeSummary, activePlan }) {
                         <thead><tr><th>Food</th><th>g</th><th>Group</th><th>Exchange</th></tr></thead>
                         <tbody>
                             {(() => {
-                                const allItems = Object.values(activePlan?.meals || {}).flat();
+                                const allItems = Object.values(activePlan?.meals || {})
+                                    .flat()
+                                    .filter((i) => i.day === viewDay || !i.day);
                                 if (!allItems.length) {
                                     return <tr><td colSpan={4} className="empty-cell">Add foods to see exchange conversion.</td></tr>;
                                 }

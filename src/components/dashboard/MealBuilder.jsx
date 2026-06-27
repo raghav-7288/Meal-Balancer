@@ -112,7 +112,7 @@ function MealBuilder({
                                         <table>
                                             <thead>
                                                 <tr>
-                                                    <th>Food</th><th>g</th><th>Group</th><th>Exchange</th><th>Instructions</th>{!isPresetActive && <th>Actions</th>}
+                                                    <th>Menu/Instructions</th><th>Food</th><th>g</th><th>Group</th><th>Exchange</th>{!isPresetActive && <th>Actions</th>}
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -142,6 +142,19 @@ function MealBuilder({
 
                                                     return (
                                                         <tr key={item.id}>
+                                                            <td className="instructions-cell">
+                                                                {isEditing ? (
+                                                                    <input
+                                                                        type="text"
+                                                                        value={editValues.instructions}
+                                                                        onChange={(e) => setEditValues((v) => ({ ...v, instructions: e.target.value }))}
+                                                                        aria-label={`Edit instructions for ${foodName}`}
+                                                                        placeholder="Menu/Instructions"
+                                                                    />
+                                                                ) : (
+                                                                    item.instructions || "-"
+                                                                )}
+                                                            </td>
                                                             <td>{foodName}</td>
                                                             <td>
                                                                 {isEditing ? (
@@ -159,19 +172,6 @@ function MealBuilder({
                                                             </td>
                                                             <td>{foodGroup}</td>
                                                             <td>{exchange.toFixed(2)}</td>
-                                                            <td className="instructions-cell">
-                                                                {isEditing ? (
-                                                                    <input
-                                                                        type="text"
-                                                                        value={editValues.instructions}
-                                                                        onChange={(e) => setEditValues((v) => ({ ...v, instructions: e.target.value }))}
-                                                                        aria-label={`Edit instructions for ${foodName}`}
-                                                                        placeholder="Instructions…"
-                                                                    />
-                                                                ) : (
-                                                                    item.instructions || "-"
-                                                                )}
-                                                            </td>
                                                             {!isPresetActive && (
                                                                 <td>
                                                                     <div className="icon-row">
@@ -201,6 +201,15 @@ function MealBuilder({
                                                 {/* Inline add-food row for this slot */}
                                                 {!isPresetActive && (
                                                     <tr className="inline-add-row">
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                value={form.instructions}
+                                                                placeholder="Menu/Instructions"
+                                                                onChange={(e) => updateSlotForm(meal, { instructions: e.target.value })}
+                                                                aria-label={`Instructions for new food in ${meal}`}
+                                                            />
+                                                        </td>
                                                         <td>
                                                             <FoodAutocomplete
                                                                 value={form.foodName}
@@ -233,16 +242,7 @@ function MealBuilder({
                                                                 aria-label={`Grams for new food in ${meal}`}
                                                             />
                                                         </td>
-                                                        <td colSpan={2}>
-                                                            <input
-                                                                type="text"
-                                                                value={form.instructions}
-                                                                placeholder="Instructions…"
-                                                                onChange={(e) => updateSlotForm(meal, { instructions: e.target.value })}
-                                                                aria-label={`Instructions for new food in ${meal}`}
-                                                            />
-                                                        </td>
-                                                        <td></td>
+                                                        <td colSpan={2}></td>
                                                         <td>
                                                             <button
                                                                 className="icon-btn add-inline-btn"

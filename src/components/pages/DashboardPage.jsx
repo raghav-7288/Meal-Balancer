@@ -134,6 +134,12 @@ function DashboardPage() {
                         <Kpi label="Visible fat" value={Math.round(activeSummary?.dayTotals?.visibleFat || 0)} hint="g/day" />
                     </div>
 
+                    <NutrientLimits
+                        limits={nutrientLimits}
+                        onChangeLimit={(key, value) => setNutrientLimits((prev) => ({ ...prev, [key]: value }))}
+                        dayTotals={activeSummary?.dayTotals}
+                    />
+
                     <MealBuilder
                         activePlan={activePlan}
                         activeSummary={activeSummary}
@@ -152,15 +158,11 @@ function DashboardPage() {
                         isPresetActive={isPresetActive}
                     />
 
-                    <NutrientLimits
-                        limits={nutrientLimits}
-                        onChangeLimit={(key, value) => setNutrientLimits((prev) => ({ ...prev, [key]: value }))}
-                        dayTotals={activeSummary?.dayTotals}
-                    />
 
                     <NutrientSummary
                         activeSummary={activeSummary}
                         activePlan={activePlan}
+                        viewDay={viewDay}
                     />
 
                     <ComparisonSection summaries={summaries} bestSummary={bestSummary} />
