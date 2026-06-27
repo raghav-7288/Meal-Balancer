@@ -121,6 +121,7 @@
 | 34 | **Keyboard shortcuts** — none existed | `Ctrl+S/N/P`, `Esc` close modals | June 26, 2026 |
 | 35 | **Accessibility gaps** | Focus trap, `aria-live` regions, skip nav link | June 26, 2026 |
 | 36 | **Dark mode toggle icon too large** | Reduced from `size={34}` to `size={20}` | June 26, 2026 |
+| A10 | **Final interaction polish pass** — no micro-interactions | Added `src/styles/interaction-polish.css` (380+ lines) — premium interaction layer with: hover animations (card lifts, nav spring), click feedback (active scale), button press states, page fade-in transitions, modal spring entrance, table row highlights, input focus glow, empty state fade-in, toast slide animations, staggered KPI entrance, error shake animation, success pop animation, score pill transitions, nutrient bar smoothing, toggle switch spring, focus-visible ring for keyboard nav. All animations respect `prefers-reduced-motion`. Enhanced toast styling with backdrop blur. | June 27, 2026 |
 
 ---
 

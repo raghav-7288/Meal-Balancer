@@ -69,12 +69,13 @@ const CURRENT_YEAR = new Date().getFullYear();
 const TOAST_OPTIONS = {
     duration: 3000,
     style: {
-        borderRadius: "12px",
-        padding: "12px 20px",
+        borderRadius: "14px",
+        padding: "14px 22px",
         fontSize: "14px",
         fontWeight: 600,
-        boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+        boxShadow: "0 10px 32px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06)",
         maxWidth: "400px",
+        backdropFilter: "blur(8px)",
     },
     success: {
         style: { background: "#059669", color: "#fff" },

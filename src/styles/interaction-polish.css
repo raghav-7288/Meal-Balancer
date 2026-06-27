@@ -1,0 +1,596 @@
+/* ═══════════════════════════════════════════════════════
+   INTERACTION POLISH — Premium micro-interactions layer.
+   Adds subtle hover, active, focus, and transition
+   enhancements for a refined, responsive feel.
+   Import AFTER component-base.css.
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── Global: Reduced motion preference ─── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── Page Transition: Fade-in on mount ─── */
+#main-content > * {
+  animation: page-fade-in 0.25s ease-out;
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Buttons: Universal press feedback ─── */
+button:not(:disabled):active,
+.ds-btn:not(:disabled):active,
+.nav-link:active,
+.day-chip:active,
+.welcome-cta:active,
+.auth-btn:active {
+  transform: scale(0.97);
+  transition-duration: 0.05s;
+}
+
+/* Primary buttons: lift on hover */
+button:not(.secondary):not(.nav-link):not(.day-chip):not(.icon-btn):not(.link-btn):not(.toggle-btn):not(.nav-theme-toggle):not(.nav-hamburger):not(:disabled):hover {
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+}
+
+/* ─── Nav Links: Smooth transitions ─── */
+.nav-link {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.nav-link:hover {
+  transform: translateY(-1px);
+}
+
+.nav-link:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.nav-link.active {
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+}
+
+/* ─── Cards: Subtle hover lift ─── */
+.kpi,
+.stat-card,
+.meal-card,
+.section {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.2s ease;
+}
+
+.kpi:hover,
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.meal-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+}
+
+body.dark-mode .meal-card:hover {
+  border-color: #475569;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .kpi:hover,
+body.dark-mode .stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+/* ─── Table Rows: Hover highlight ─── */
+table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+body.dark-mode table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* ─── Plan Rows: Interaction feedback ─── */
+.plan-row {
+  transition: all 0.15s ease;
+}
+
+.plan-row:hover:not(.active) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateX(2px);
+}
+
+body.dark-mode .plan-row:hover:not(.active) {
+  background: #1e293b !important;
+  border-color: #475569 !important;
+}
+
+/* ─── Day Chips: Snappy interaction ─── */
+.day-chip {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.day-chip:hover {
+  transform: translateY(-1px);
+}
+
+.day-chip.active {
+  transform: scale(1.02);
+}
+
+.day-chip:active {
+  transform: scale(0.95);
+}
+
+/* ─── Inputs: Enhanced focus glow ─── */
+.field input:focus,
+.field select:focus,
+.builder-row input:focus,
+.builder-row select:focus,
+.auth-field input:focus,
+.modal-input:focus,
+.plan-name-input:focus,
+.ds-input:focus,
+.ds-select:focus {
+  transform: scale(1.005);
+  transition: border-color 0.15s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+/* ─── Modals: Improved entrance ─── */
+@keyframes modal-fade-in-polished {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(6px);
+  }
+}
+
+@keyframes modal-scale-in-polished {
+  from {
+    opacity: 0;
+    transform: scale(0.93) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-overlay,
+.ds-modal-overlay {
+  animation: modal-fade-in-polished 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-content,
+.ds-modal {
+  animation: modal-scale-in-polished 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ─── Toast: Smooth entrance ─── */
+.toast-popup {
+  animation: toast-slide-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-16px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+.delete-toast-popup {
+  animation: toast-slide-up 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes toast-slide-up {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* ─── Skeleton Shimmer: Refined timing ─── */
+.skeleton-shimmer,
+.ds-skeleton {
+  animation-duration: 1.8s;
+  animation-timing-function: ease-in-out;
+}
+
+/* ─── Score Pills: Color pulse on change ─── */
+.score-pill {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Nutrient Bars: Smooth fill animation ─── */
+.bar-fill,
+.ds-progress-fill {
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Icon Buttons: Press feedback ─── */
+.icon-btn {
+  transition: all 0.15s ease;
+}
+
+.icon-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.icon-btn:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.icon-btn.danger:hover:not(:disabled) {
+  background: #fee2e2;
+  border-color: #f87171;
+}
+
+body.dark-mode .icon-btn.danger:hover:not(:disabled) {
+  background: #7f1d1d !important;
+}
+
+/* ─── Welcome CTA: Premium hover ─── */
+.welcome-cta {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s ease;
+}
+
+.welcome-cta:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.15);
+}
+
+.welcome-cta:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: none;
+}
+
+/* ─── Highlight Items: Stagger entrance ─── */
+.welcome-highlight-item {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.welcome-highlight-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+/* ─── Empty States: Refined presentation ─── */
+.empty-state,
+.ds-empty-state {
+  animation: empty-state-in 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes empty-state-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.empty-state-cta,
+.ds-empty-state .ds-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.empty-state-cta:hover,
+.ds-empty-state .ds-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+}
+
+/* ─── Auth Card: Premium entrance ─── */
+.auth-card {
+  animation: auth-card-in 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes auth-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.auth-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+}
+
+.auth-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ─── Sync Badge: Smooth state change ─── */
+.sync-badge {
+  transition: all 0.3s ease;
+}
+
+/* ─── Food Search: Results entrance ─── */
+.food-result-card,
+.food-autocomplete-dropdown li {
+  transition: background-color 0.12s ease, transform 0.12s ease;
+}
+
+.food-autocomplete-dropdown li:hover,
+.food-result-card:hover {
+  transform: translateX(2px);
+}
+
+/* ─── Profile Page Cards ─── */
+.pro-stat-card,
+.pro-card {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s ease;
+}
+
+.pro-stat-card:hover,
+.pro-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+}
+
+body.dark-mode .pro-stat-card:hover,
+body.dark-mode .pro-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* ─── Health Tools Tab: Smooth switch ─── */
+.health-tools-tab {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.health-tools-tab:active {
+  transform: scale(0.96);
+}
+
+.health-tools-content {
+  animation: health-tab-enter 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes health-tab-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Toggle Switch: Smooth knob ─── */
+.toggle-switch {
+  transition: background 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-switch::after {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ─── Planner Nav Link: Interaction ─── */
+.planner-nav-link {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.planner-nav-link:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* ─── Water/Step Quick Buttons: Bounce press ─── */
+.water-ctrl-btn:active:not(:disabled),
+.step-quick-btn:active,
+.step-add-btn:active:not(:disabled) {
+  transform: scale(0.94);
+  transition-duration: 0.05s;
+}
+
+/* ─── Calorie Option Buttons: Selection feel ─── */
+.calorie-option-btn {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.calorie-option-btn:active {
+  transform: scale(0.96);
+}
+
+.calorie-option-btn.active {
+  transform: scale(1.02);
+}
+
+/* ─── Comparison Grid Cards ─── */
+.compare-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.compare-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+/* ─── Error States: Attention pulse ─── */
+.auth-error,
+.test-error,
+.error-text {
+  animation: error-shake 0.3s ease;
+}
+
+@keyframes error-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-3px); }
+  40% { transform: translateX(3px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+}
+
+/* ─── Success States: Quick pulse ─── */
+.auth-success,
+.test-success,
+.water-complete-banner,
+.step-complete-banner {
+  animation: success-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes success-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ─── KPI Grid: Staggered entrance ─── */
+.kpi-grid .kpi:nth-child(1) { animation-delay: 0ms; }
+.kpi-grid .kpi:nth-child(2) { animation-delay: 50ms; }
+.kpi-grid .kpi:nth-child(3) { animation-delay: 100ms; }
+.kpi-grid .kpi:nth-child(4) { animation-delay: 150ms; }
+
+.kpi-grid .kpi {
+  animation: kpi-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+@keyframes kpi-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Footer: Subtle presence ─── */
+.app-footer {
+  transition: opacity 0.3s ease;
+}
+
+.app-footer:hover {
+  opacity: 0.9;
+}
+
+/* ─── Link Button: Underline slide ─── */
+.link-btn {
+  position: relative;
+  transition: color 0.15s ease;
+}
+
+.link-btn:hover {
+  color: var(--ds-accent);
+}
+
+body.dark-mode .link-btn:hover {
+  color: #93c5fd !important;
+}
+
+/* ─── Glass/Water Icons: Fill animation ─── */
+.water-glass-icon {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.water-glass-icon:active {
+  transform: scale(0.9);
+}
+
+/* ─── Meal Collapse Arrow: Spring animation ─── */
+.meal-collapse-arrow {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ─── Macro Chart: Ring animation ─── */
+.macro-chart-ring-area {
+  animation: ring-scale-in 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes ring-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ─── Copy/Download/Delete Action Buttons ─── */
+.plan-action-btns .download-btn,
+.plan-action-btns .delete-btn,
+.plan-row-wrapper .copy-btn {
+  transition: all 0.15s ease;
+}
+
+.plan-action-btns .download-btn:active,
+.plan-action-btns .delete-btn:active,
+.plan-row-wrapper .copy-btn:active {
+  transform: scale(0.9);
+}
+
+/* ─── Focus visible ring (keyboard-only) ─── */
+:focus-visible {
+  outline: 2px solid var(--ds-focus-border);
+  outline-offset: 2px;
+  border-radius: var(--ds-radius-sm);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--ds-focus-border);
+  outline-offset: 2px;
+}
+
+/* Remove outline on mouse interaction */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+

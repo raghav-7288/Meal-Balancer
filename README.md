@@ -32,6 +32,7 @@ A React 19 single-page application for **Indian diet planning**. Build meals in 
 - **Loading Skeletons** — Shimmer placeholders during data fetches
 - **Empty States** — Illustrated empty states with CTA buttons
 - **Score Gauge** — Animated semicircle visualization
+- **Interaction Polish** — Premium micro-interactions (hover lifts, press feedback, page transitions, modal springs, staggered entrances) respecting `prefers-reduced-motion`
 - **Code Splitting** — Lazy-loaded pages with retry logic for stale deploys
 - **Error Boundary** — Graceful crash recovery
 - **Query Cache** — 5-min TTL in-memory cache with max-size eviction & request deduplication
@@ -136,8 +137,8 @@ SPA routing is handled by `vercel.json` rewrites. Set environment variables (`VI
 │   ├── hooks/               Custom hooks (useAuth, useDashboardState, useDebounce, useFocusTrap, useHotkeys, useLocalStorage, useSyncedPlans, useMealHistory, usePresetPlans)
 │   ├── lib/                 Third-party client setup (Supabase)
 │   ├── services/            API service layers (auth, dailyHealth, database, foodSearch, mealHistory, planSync, presetPlan)
-│   ├── styles/              Page-specific CSS modules
-│   ├── utils/               Helpers (PDF export, query cache)
+│   ├── styles/              Design tokens, component base & interaction polish CSS
+│   ├── utils/               Helpers (PDF export, query cache, retry, schemas)
 │   ├── App.jsx              Router shell + layout
 │   ├── App.css              Global styles
 │   ├── index.css            Tailwind imports + base styles
