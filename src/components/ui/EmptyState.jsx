@@ -7,8 +7,8 @@ import { Link } from "react-router-dom";
  */
 function EmptyState({ icon, title, description, actionLabel, actionTo, onAction }) {
     return (
-        <div className="empty-state" role="status">
-            {icon && <div className="empty-state-icon">{icon}</div>}
+        <div className="empty-state" role="status" aria-label={title}>
+            {icon && <div className="empty-state-icon" aria-hidden="true">{icon}</div>}
             <h2 className="empty-state-title">{title}</h2>
             {description && <p className="empty-state-desc">{description}</p>}
             {actionLabel && actionTo && (
@@ -17,7 +17,7 @@ function EmptyState({ icon, title, description, actionLabel, actionTo, onAction 
                 </Link>
             )}
             {actionLabel && onAction && !actionTo && (
-                <button className="empty-state-cta" onClick={onAction}>
+                <button type="button" className="empty-state-cta" onClick={onAction}>
                     {actionLabel}
                 </button>
             )}

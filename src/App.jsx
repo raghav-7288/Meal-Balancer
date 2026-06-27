@@ -58,7 +58,7 @@ const PresetAdminPage = lazyWithRetry(() => import("./components/pages/PresetAdm
 function PageLoader() {
     return (
         <div className="auth-loading-screen" role="status" aria-label="Loading page">
-            <Loader2 size={32} className="spin" style={{ color: '#3b82f6' }} />
+            <Loader2 size={32} className="spin" style={{ color: '#3b82f6' }} aria-hidden="true" />
             <p style={{ fontSize: '14px', fontWeight: 500, color: '#64748b' }}>Loading…</p>
         </div>
     );
@@ -161,6 +161,7 @@ function AppShell() {
 
                 {/* Hamburger toggle for mobile (#29) */}
                 <button
+                    type="button"
                     className="nav-hamburger"
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                     aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
@@ -180,34 +181,35 @@ function AppShell() {
 
                 <div className={`nav-links ${mobileMenuOpen ? "nav-links--open" : ""}`}>
                     <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <Home size={16} /> <span>Home</span>
+                        <Home size={16} aria-hidden="true" /> <span>Home</span>
                     </NavLink>
                     <NavLink to="/health-tools" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <Heart size={16} /> <span>Health Tools</span>
+                        <Heart size={16} aria-hidden="true" /> <span>Health Tools</span>
                     </NavLink>
                     <NavLink to="/dashboard" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <BarChart3 size={16} /> <span>Dashboard</span>
+                        <BarChart3 size={16} aria-hidden="true" /> <span>Dashboard</span>
                     </NavLink>
                     <NavLink to="/weekly-planner" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <Calendar size={16} /> <span>Planner</span>
+                        <Calendar size={16} aria-hidden="true" /> <span>Planner</span>
                     </NavLink>
                     <NavLink to="/progress" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <TrendingUp size={16} /> <span>Progress</span>
+                        <TrendingUp size={16} aria-hidden="true" /> <span>Progress</span>
                     </NavLink>
                     <NavLink to="/foods" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <Database size={16} /> <span>Foods</span>
+                        <Database size={16} aria-hidden="true" /> <span>Foods</span>
                     </NavLink>
                     <NavLink to="/profile" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <User size={16} /> <span>Profile</span>
+                        <User size={16} aria-hidden="true" /> <span>Profile</span>
                     </NavLink>
                 </div>
                 <button
+                    type="button"
                     className="nav-theme-toggle"
                     onClick={() => setDarkMode(!darkMode)}
-                    aria-label="Toggle dark mode"
+                    aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
                     data-tooltip={darkMode ? "Light mode" : "Dark mode"}
                 >
-                    {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+                    {darkMode ? <Sun size={20} aria-hidden="true" /> : <Moon size={20} aria-hidden="true" />}
                 </button>
             </nav>
 
@@ -238,7 +240,7 @@ function AppShell() {
                 </Suspense>
             </ErrorBoundary>
 
-            <footer className="app-footer">
+            <footer className="app-footer" role="contentinfo">
                 <p>© {CURRENT_YEAR} Diet Specifix. All rights reserved.</p>
                 <p className="app-footer-sub">Built with ❤️ for healthier living</p>
             </footer>

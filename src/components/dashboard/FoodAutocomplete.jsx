@@ -107,6 +107,8 @@ function FoodAutocomplete({ value, onChange, onSelect, placeholder = "Type to se
         }
     }
 
+    const listboxId = `food-autocomplete-listbox-${Math.random().toString(36).slice(2, 8)}`;
+
     return (
         <div className="food-autocomplete" ref={wrapperRef} style={{ position: "relative" }}>
             <input
@@ -119,14 +121,21 @@ function FoodAutocomplete({ value, onChange, onSelect, placeholder = "Type to se
                 placeholder={placeholder}
                 aria-label="Search food item"
                 autoComplete="off"
+                role="combobox"
+                aria-expanded={isOpen}
+                aria-controls={listboxId}
+                aria-activedescendant={highlightIndex >= 0 && isOpen ? `food-option-${highlightIndex}` : undefined}
+                aria-autocomplete="list"
             />
-            {isLoading && <span className="food-autocomplete-loading">Searching...</span>}
+            {isLoading && <span className="food-autocomplete-loading" role="status" aria-live="polite">Searching…</span>}
             {isOpen && suggestions.length > 0 && (
                 <ul
                     className="food-autocomplete-dropdown"
                     role="listbox"
+                    id={listboxId}
                     ref={dropdownRef}
                     style={{ maxHeight: 240, overflow: "auto" }}
+                    aria-label="Food search results"
                 >
                     <div style={{ height: `${virtualizer.getTotalSize()}px`, position: "relative" }}>
                         {virtualizer.getVirtualItems().map((virtualRow) => {
@@ -135,6 +144,7 @@ function FoodAutocomplete({ value, onChange, onSelect, placeholder = "Type to se
                             return (
                                 <li
                                     key={item.food_id}
+                                    id={`food-option-${index}`}
                                     role="option"
                                     aria-selected={index === highlightIndex}
                                     className={`food-autocomplete-item ${index === highlightIndex ? "highlighted" : ""}`}

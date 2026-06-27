@@ -215,32 +215,32 @@ function ProfilePage() {
                 <div className="pro-profile-header-bg" />
                 <div className="pro-profile-header-content">
                     <div className="pro-avatar-section">
-                        <div className="pro-avatar"><User size={28} /></div>
+                        <div className="pro-avatar" aria-hidden="true"><User size={28} /></div>
                         <div className="pro-avatar-info">
                             <h1>{dbProfile?.full_name || dbProfile?.username || "User"}</h1>
-                            <p className="pro-avatar-email"><Mail size={13} />{user?.email}</p>
+                            <p className="pro-avatar-email"><Mail size={13} aria-hidden="true" />{user?.email}</p>
                             <div className="pro-avatar-meta">
-                                <span className="pro-meta-chip"><Calendar size={12} /> Joined {memberSince}</span>
-                                <span className="pro-meta-chip"><Shield size={12} /> Active</span>
+                                <span className="pro-meta-chip"><Calendar size={12} aria-hidden="true" /> Joined {memberSince}</span>
+                                <span className="pro-meta-chip"><Shield size={12} aria-hidden="true" /> Active</span>
                             </div>
                         </div>
                     </div>
-                    <button className="pro-signout-btn" onClick={signOut}><LogOut size={15} /> Sign Out</button>
+                    <button type="button" className="pro-signout-btn" onClick={signOut}><LogOut size={15} aria-hidden="true" /> Sign Out</button>
                 </div>
             </div>
 
             {/* ─── Stats Row ─── */}
-            <div className="pro-stats-row">
+            <div className="pro-stats-row" role="group" aria-label="Body statistics">
                 <div className="pro-stat-card">
-                    <div className="pro-stat-icon" style={{ background: "#ede9fe", color: "#7c3aed" }}><Ruler size={18} /></div>
+                    <div className="pro-stat-icon" style={{ background: "#ede9fe", color: "#7c3aed" }} aria-hidden="true"><Ruler size={18} /></div>
                     <div className="pro-stat-info"><span className="pro-stat-value">{height || "—"}</span><span className="pro-stat-label">Height (cm)</span></div>
                 </div>
                 <div className="pro-stat-card">
-                    <div className="pro-stat-icon" style={{ background: "#fce7f3", color: "#db2777" }}><Scale size={18} /></div>
+                    <div className="pro-stat-icon" style={{ background: "#fce7f3", color: "#db2777" }} aria-hidden="true"><Scale size={18} /></div>
                     <div className="pro-stat-info"><span className="pro-stat-value">{weight || "—"}</span><span className="pro-stat-label">Weight (kg)</span></div>
                 </div>
                 <div className="pro-stat-card">
-                    <div className="pro-stat-icon" style={{ background: "#d1fae5", color: "#059669" }}><Target size={18} /></div>
+                    <div className="pro-stat-icon" style={{ background: "#d1fae5", color: "#059669" }} aria-hidden="true"><Target size={18} /></div>
                     <div className="pro-stat-info">
                         <span className="pro-stat-value">
                             {currentBmi || "—"}
@@ -255,7 +255,7 @@ function ProfilePage() {
                     </div>
                 </div>
                 <div className="pro-stat-card">
-                    <div className="pro-stat-icon" style={{ background: "#fff7ed", color: "#ea580c" }}><Activity size={18} /></div>
+                    <div className="pro-stat-icon" style={{ background: "#fff7ed", color: "#ea580c" }} aria-hidden="true"><Activity size={18} /></div>
                     <div className="pro-stat-info"><span className="pro-stat-value">{age || "—"}</span><span className="pro-stat-label">Age (years)</span></div>
                 </div>
             </div>
@@ -263,10 +263,17 @@ function ProfilePage() {
             {/* ─── Completion Progress ─── */}
             <div className="pro-completion-bar-card">
                 <div className="pro-completion-header">
-                    <div className="pro-completion-title"><Sparkles size={16} /><span>Profile Completion</span></div>
-                    <span className="pro-completion-percent">{completionPercent}%</span>
+                    <div className="pro-completion-title"><Sparkles size={16} aria-hidden="true" /><span>Profile Completion</span></div>
+                    <span className="pro-completion-percent" aria-hidden="true">{completionPercent}%</span>
                 </div>
-                <div className="pro-progress-track">
+                <div
+                    className="pro-progress-track"
+                    role="progressbar"
+                    aria-valuenow={completionPercent}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`Profile completion: ${completionPercent}%`}
+                >
                     <div className="pro-progress-fill" style={{ width: `${completionPercent}%` }} />
                 </div>
                 <p className="pro-completion-hint">

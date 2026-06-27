@@ -269,10 +269,11 @@ function FoodSearchPage() {
 
     return (
         <div className="food-search-page">
+            <h1 className="sr-only">Food Database Search</h1>
             {/* Sticky search bar */}
             <div className="food-search-bar-container">
                 <div className="food-search-bar">
-                    <Search size={20} className="food-search-icon" />
+                    <Search size={20} className="food-search-icon" aria-hidden="true" />
                     <input
                         ref={inputRef}
                         type="text"
@@ -290,6 +291,7 @@ function FoodSearchPage() {
                     />
                     {query && (
                         <button
+                            type="button"
                             className="food-search-clear"
                             onClick={() => {
                                 setQuery("");
@@ -298,14 +300,14 @@ function FoodSearchPage() {
                             }}
                             aria-label="Clear search"
                         >
-                            <ArrowRight size={18} />
+                            <ArrowRight size={18} aria-hidden="true" />
                         </button>
                     )}
-                    {loading && <Loader2 size={18} className="food-search-spinner" />}
+                    {loading && <Loader2 size={18} className="food-search-spinner" aria-hidden="true" />}
                 </div>
 
                 <div className="food-source-note">
-                    <Info size={14} />
+                    <Info size={14} aria-hidden="true" />
                     <span>Nutrient values are per 100g of food, based on IFCT 2017 data.</span>
                 </div>
             </div>
@@ -338,7 +340,7 @@ function FoodSearchPage() {
 
                     {/* Loading skeletons (#30) */}
                     {loading && (
-                        <div className="food-search-results-list" aria-label="Loading search results" role="status">
+                        <div className="food-search-results-list" aria-label="Loading search results" role="status" aria-live="polite">
                             {Array.from({ length: 6 }).map((_, i) => (
                                 <SkeletonFoodResult key={i} />
                             ))}
@@ -346,7 +348,7 @@ function FoodSearchPage() {
                     )}
 
                     {searchError && (
-                        <div className="food-search-empty-state" style={{ color: "#ef4444" }}>
+                        <div className="food-search-empty-state" style={{ color: "#ef4444" }} role="alert">
                             <p>{searchError}</p>
                         </div>
                     )}
@@ -371,6 +373,10 @@ function FoodSearchPage() {
                                             selectedFood?.food_id === food.food_id ? "selected" : ""
                                         } ${activeIndex === index ? "keyboard-active" : ""}`}
                                         onClick={() => setSelectedFood(food)}
+                                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedFood(food); } }}
+                                        role="option"
+                                        aria-selected={selectedFood?.food_id === food.food_id}
+                                        tabIndex={0}
                                     >
                                         <div className="food-result-name-row">
                                             <span className="food-result-name">
@@ -393,9 +399,11 @@ function FoodSearchPage() {
                             />
                             {hasMore && !isNutrientSearch && (
                                 <button
+                                    type="button"
                                     className="food-show-more-btn"
                                     onClick={loadMore}
                                     disabled={loadingMore}
+                                    aria-busy={loadingMore}
                                 >
                                     {loadingMore ? (
                                         <>
@@ -420,9 +428,9 @@ function FoodSearchPage() {
                     )}
 
                     {selectedFood && nutrientsLoading && (
-                        <div className="food-search-empty-state">
-                            <Loader2 size={32} className="food-search-spinner" />
-                            <p>Loading nutrient details...</p>
+                        <div className="food-search-empty-state" role="status" aria-live="polite">
+                            <Loader2 size={32} className="food-search-spinner" aria-hidden="true" />
+                            <p>Loading nutrient details…</p>
                         </div>
                     )}
 
@@ -463,19 +471,26 @@ const NutrientGroupTable = memo(function NutrientGroupTable({ groupName, items }
     return (
         <div className="food-nutrient-group">
             <button
+                type="button"
                 className="food-nutrient-group-header"
                 onClick={() => setCollapsed(!collapsed)}
+                aria-expanded={!collapsed}
+                aria-controls={`nutrient-group-${groupName.replace(/\s+/g, "-").toLowerCase()}`}
             >
                 <h3>{groupName}</h3>
-                {collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+                {collapsed ? <ChevronDown size={16} aria-hidden="true" /> : <ChevronUp size={16} aria-hidden="true" />}
             </button>
             {!collapsed && (
-                <table className="food-nutrient-table">
+                <table
+                    className="food-nutrient-table"
+                    id={`nutrient-group-${groupName.replace(/\s+/g, "-").toLowerCase()}`}
+                    aria-label={`${groupName} nutrients`}
+                >
                     <thead>
                         <tr>
-                            <th>Nutrient</th>
-                            <th className="food-nutrient-value-col">Value</th>
-                            <th className="food-nutrient-unit-col">Unit</th>
+                            <th scope="col">Nutrient</th>
+                            <th scope="col" className="food-nutrient-value-col">Value</th>
+                            <th scope="col" className="food-nutrient-unit-col">Unit</th>
                         </tr>
                     </thead>
                     <tbody>

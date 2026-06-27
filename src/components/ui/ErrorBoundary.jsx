@@ -18,11 +18,12 @@ class ErrorBoundary extends Component {
     render() {
         if (this.state.hasError) {
             return (
-                <div className="error-boundary">
-                    <AlertTriangle size={48} />
+                <div className="error-boundary" role="alert">
+                    <AlertTriangle size={48} aria-hidden="true" />
                     <h2>Something went wrong</h2>
                     <p>{this.state.error?.message || "An unexpected error occurred."}</p>
                     <button
+                        type="button"
                         onClick={() => this.setState({ hasError: false, error: null })}
                     >
                         Try again

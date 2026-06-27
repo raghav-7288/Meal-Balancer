@@ -83,7 +83,7 @@ function NutrientSummary({ activeSummary, activePlan, viewDay }) {
             <Section title="Exchange conversion table" icon={<Leaf size={16} />}>
                 <div className="table-wrap">
                     <table aria-label="Exchange conversion for all meals">
-                        <thead><tr><th>Food</th><th>g</th><th>Group</th><th>Exchange</th></tr></thead>
+                        <thead><tr><th scope="col">Food</th><th scope="col">g</th><th scope="col">Group</th><th scope="col">Exchange</th></tr></thead>
                         <tbody>
                             {exchangeItems.length === 0 ? (
                                 <tr><td colSpan={4} className="empty-cell">Add foods to see exchange conversion.</td></tr>

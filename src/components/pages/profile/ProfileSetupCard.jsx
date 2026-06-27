@@ -46,37 +46,38 @@ function ProfileSetupCard({ profile, setProfile, profileSyncStatus, retrySync })
     return (
         <div className="pro-card">
             <div className="pro-card-header">
-                <div className="pro-card-icon" style={{ background: "#ede9fe", color: "#7c3aed" }}>
+                <div className="pro-card-icon" style={{ background: "#ede9fe", color: "#7c3aed" }} aria-hidden="true">
                     <Activity size={16} />
                 </div>
                 <h2>Profile Setup</h2>
                 {/* Sync status indicator */}
-                <div className="pro-sync-status" style={{ marginLeft: "auto" }}>
+                <div className="pro-sync-status" style={{ marginLeft: "auto" }} role="status" aria-live="polite">
                     {profileSyncStatus === "syncing" && (
-                        <span className="pro-sync-badge pro-sync-syncing" title="Syncing preferences…">
-                            <Loader size={13} className="pro-spin" /> Saving…
+                        <span className="pro-sync-badge pro-sync-syncing" aria-label="Syncing preferences">
+                            <Loader size={13} className="pro-spin" aria-hidden="true" /> Saving…
                         </span>
                     )}
                     {profileSyncStatus === "synced" && (
-                        <span className="pro-sync-badge pro-sync-synced" title="Preferences saved to cloud">
-                            <Cloud size={13} /> Synced
+                        <span className="pro-sync-badge pro-sync-synced" aria-label="Preferences saved to cloud">
+                            <Cloud size={13} aria-hidden="true" /> Synced
                         </span>
                     )}
                     {profileSyncStatus === "error" && (
                         <button
+                            type="button"
                             className="pro-sync-badge pro-sync-error"
-                            title="Sync failed — click to retry"
+                            aria-label="Sync failed, click to retry"
                             onClick={retrySync}
                         >
-                            <CloudOff size={13} /> Failed — <RefreshCw size={11} /> Retry
+                            <CloudOff size={13} aria-hidden="true" /> Failed — <RefreshCw size={11} aria-hidden="true" /> Retry
                         </button>
                     )}
                 </div>
             </div>
             <div className="pro-card-body">
-                <div className="pro-field-group">
-                    <label className="pro-field-label">Activity Level</label>
-                    <div className="pro-radio-group">
+                <fieldset className="pro-field-group">
+                    <legend className="pro-field-label">Activity Level</legend>
+                    <div className="pro-radio-group" role="radiogroup" aria-label="Activity level">
                         {ACTIVITY_OPTIONS.map((opt) => (
                             <label
                                 key={opt.value}
@@ -96,11 +97,11 @@ function ProfileSetupCard({ profile, setProfile, profileSyncStatus, retrySync })
                             </label>
                         ))}
                     </div>
-                </div>
+                </fieldset>
 
-                <div className="pro-field-group">
-                    <label className="pro-field-label">Weight Goal</label>
-                    <div className="pro-option-grid">
+                <fieldset className="pro-field-group">
+                    <legend className="pro-field-label">Weight Goal</legend>
+                    <div className="pro-option-grid" role="radiogroup" aria-label="Weight goal">
                         {GOAL_OPTIONS.map((opt) => (
                             <label
                                 key={opt.value}
@@ -120,11 +121,11 @@ function ProfileSetupCard({ profile, setProfile, profileSyncStatus, retrySync })
                             </label>
                         ))}
                     </div>
-                </div>
+                </fieldset>
 
-                <div className="pro-field-group">
-                    <label className="pro-field-label">Diet Preference</label>
-                    <div className="pro-option-grid">
+                <fieldset className="pro-field-group">
+                    <legend className="pro-field-label">Diet Preference</legend>
+                    <div className="pro-option-grid" role="radiogroup" aria-label="Diet preference">
                         {DIET_OPTIONS.map((opt) => (
                             <label
                                 key={opt.value}
@@ -144,11 +145,12 @@ function ProfileSetupCard({ profile, setProfile, profileSyncStatus, retrySync })
                             </label>
                         ))}
                     </div>
-                </div>
+                </fieldset>
 
                 <div className="pro-field-group">
-                    <label className="pro-field-label">BMI Target</label>
+                    <label className="pro-field-label" htmlFor="bmi-target-input">BMI Target</label>
                     <input
+                        id="bmi-target-input"
                         className="pro-input"
                         type="number"
                         step="0.1"
@@ -162,6 +164,7 @@ function ProfileSetupCard({ profile, setProfile, profileSyncStatus, retrySync })
                             setProfile({ ...profile, bmiTarget: clampOnBlur(e.target.value, 10, 50) })
                         }
                         onKeyDown={(e) => { if (e.key === "-" || e.key === "e") e.preventDefault(); }}
+                        aria-label="BMI target value"
                     />
                 </div>
             </div>

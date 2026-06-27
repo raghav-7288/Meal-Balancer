@@ -149,12 +149,13 @@ function WaterTrackerPage() {
         glassIcons.push(
             <button
                 key={i}
+                type="button"
                 className={`water-glass-icon ${i < glasses ? "filled" : ""}`}
                 onClick={() => setGlasses(i < glasses ? i : i + 1)}
-                aria-label={`Glass ${i + 1}`}
-                title={i < glasses ? `Remove glass ${i + 1}` : `Add glass ${i + 1}`}
+                aria-label={i < glasses ? `Remove glass ${i + 1} (filled)` : `Add glass ${i + 1} (empty)`}
+                aria-pressed={i < glasses}
             >
-                <Droplets size={24} />
+                <Droplets size={24} aria-hidden="true" />
             </button>
         );
     }
@@ -162,14 +163,14 @@ function WaterTrackerPage() {
     return (
         <div className="water-tracker-tool">
             <div className="water-tracker-header">
-                <div className="water-tracker-icon-wrap">
+                <div className="water-tracker-icon-wrap" aria-hidden="true">
                     <Droplets size={32} />
                 </div>
                 <h2>Water Intake Tracker</h2>
                 <p className="water-tracker-subtitle">
                     Stay hydrated! Track your daily water intake.
                     {syncStatus === "error" && (
-                        <span style={{ color: "var(--color-error, #ef4444)", fontSize: "12px", marginLeft: "8px" }}>
+                        <span style={{ color: "var(--color-error, #ef4444)", fontSize: "12px", marginLeft: "8px" }} role="alert">
                             ⚠ Sync failed
                         </span>
                     )}
@@ -177,9 +178,9 @@ function WaterTrackerPage() {
             </div>
 
             {/* Progress ring */}
-            <div className="water-progress-section">
+            <div className="water-progress-section" aria-live="polite">
                 <div className={`water-progress-ring ${isComplete ? "complete" : ""}`}>
-                    <svg viewBox="0 0 120 120" className="water-ring-svg">
+                    <svg viewBox="0 0 120 120" className="water-ring-svg" role="img" aria-label={`Water intake: ${glasses} of ${target} glasses, ${Math.round(percentage)}% complete`}>
                         <circle
                             cx="60"
                             cy="60"
@@ -203,7 +204,7 @@ function WaterTrackerPage() {
                             transform="rotate(-90 60 60)"
                         />
                     </svg>
-                    <div className="water-ring-content">
+                    <div className="water-ring-content" aria-hidden="true">
                         <span className="water-ring-count">{glasses}</span>
                         <span className="water-ring-label">of {target}</span>
                     </div>
@@ -228,28 +229,31 @@ function WaterTrackerPage() {
             {/* Controls */}
             <div className="water-controls">
                 <button
+                    type="button"
                     className="water-ctrl-btn minus"
                     onClick={() => setGlasses(glasses - 1)}
                     disabled={glasses <= 0}
                     aria-label="Remove a glass"
                 >
-                    <Minus size={20} />
+                    <Minus size={20} aria-hidden="true" />
                 </button>
                 <button
+                    type="button"
                     className="water-ctrl-btn add"
                     onClick={() => setGlasses(glasses + 1)}
-                    aria-label="Add a glass"
+                    aria-label="Add a glass of water"
                 >
-                    <Plus size={20} />
+                    <Plus size={20} aria-hidden="true" />
                     <span>Add Glass</span>
                 </button>
                 <button
+                    type="button"
                     className="water-ctrl-btn reset"
                     onClick={() => setGlasses(0)}
                     disabled={glasses <= 0}
-                    aria-label="Reset"
+                    aria-label="Reset water intake to zero"
                 >
-                    <RotateCcw size={20} />
+                    <RotateCcw size={20} aria-hidden="true" />
                 </button>
             </div>
 
@@ -258,7 +262,7 @@ function WaterTrackerPage() {
 
             {/* Target setting */}
             <div className="water-target-section">
-                <Target size={16} />
+                <Target size={16} aria-hidden="true" />
                 {editingTarget ? (
                     <div className="water-target-edit">
                         <input
@@ -269,14 +273,15 @@ function WaterTrackerPage() {
                             onChange={(e) => setTargetInput(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && handleSaveTarget()}
                             autoFocus
+                            aria-label="Daily water target in glasses"
                         />
-                        <button onClick={handleSaveTarget}>Save</button>
-                        <button className="secondary" onClick={() => setEditingTarget(false)}>Cancel</button>
+                        <button type="button" onClick={handleSaveTarget}>Save</button>
+                        <button type="button" className="secondary" onClick={() => setEditingTarget(false)}>Cancel</button>
                     </div>
                 ) : (
                     <span>
                         Daily target: <strong>{target} glasses</strong> ({target * 250} ml)
-                        <button className="water-edit-target-btn" onClick={() => { setTargetInput(String(target)); setEditingTarget(true); }}>
+                        <button type="button" className="water-edit-target-btn" onClick={() => { setTargetInput(String(target)); setEditingTarget(true); }}>
                             Edit
                         </button>
                     </span>
@@ -284,7 +289,7 @@ function WaterTrackerPage() {
             </div>
 
             {isComplete && (
-                <div className="water-complete-banner">
+                <div className="water-complete-banner" role="status" aria-live="polite">
                     🎉 Great job! You've reached your daily water intake goal!
                 </div>
             )}

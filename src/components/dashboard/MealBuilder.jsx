@@ -112,7 +112,7 @@ function MealBuilder({
                                         <table>
                                             <thead>
                                                 <tr>
-                                                    <th>Menu/Instructions</th><th>Food</th><th>g</th><th>Group</th><th>Exchange</th>{!isPresetActive && <th>Actions</th>}
+                                                    <th scope="col">Menu/Instructions</th><th scope="col">Food</th><th scope="col">g</th><th scope="col">Group</th><th scope="col">Exchange</th>{!isPresetActive && <th scope="col">Actions</th>}
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -175,6 +175,7 @@ function MealBuilder({
                                                                 <td>
                                                                     <div className="icon-row">
                                                                         <button
+                                                                            type="button"
                                                                             className="icon-btn"
                                                                             onClick={isEditing ? saveEditing : startEditing}
                                                                             aria-label={isEditing ? `Save ${foodName}` : `Edit ${foodName}`}
@@ -182,6 +183,7 @@ function MealBuilder({
                                                                             {isEditing ? <Check size={14} /> : <Pencil size={14} />}
                                                                         </button>
                                                                         <button
+                                                                            type="button"
                                                                             className="icon-btn danger"
                                                                             onClick={() => onRemoveMealItem(meal, item.id)}
                                                                             aria-label={`Remove ${foodName}`}
@@ -244,6 +246,7 @@ function MealBuilder({
                                                         <td colSpan={2}></td>
                                                         <td>
                                                             <button
+                                                                type="button"
                                                                 className="icon-btn add-inline-btn"
                                                                 onClick={() => handleAdd(meal)}
                                                                 disabled={isAddingFood || !form.foodName || !form.grams || Number(form.grams) <= 0}

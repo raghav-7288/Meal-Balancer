@@ -166,8 +166,8 @@ function SignInForm() {
                 />
             </label>
 
-            <button type="submit" className="auth-btn" disabled={loading || isLockedOut}>
-                {loading ? <Loader2 size={16} className="spin" /> : <LogIn size={16} />}
+            <button type="submit" className="auth-btn" disabled={loading || isLockedOut} aria-busy={loading}>
+                {loading ? <Loader2 size={16} className="spin" aria-hidden="true" /> : <LogIn size={16} aria-hidden="true" />}
                 {isLockedOut
                     ? `Locked (${lockRemaining}s)`
                     : loading
@@ -211,7 +211,7 @@ function SignUpForm() {
 
     if (success) {
         return (
-            <div className="auth-success">
+            <div className="auth-success" role="status" aria-live="polite">
                 <p>
                     ✓ Account created! Please check your email to confirm your account,
                     then sign in.
@@ -287,8 +287,8 @@ function SignUpForm() {
                 />
             </label>
 
-            <button type="submit" className="auth-btn" disabled={loading}>
-                {loading ? <Loader2 size={16} className="spin" /> : <UserPlus size={16} />}
+            <button type="submit" className="auth-btn" disabled={loading} aria-busy={loading}>
+                {loading ? <Loader2 size={16} className="spin" aria-hidden="true" /> : <UserPlus size={16} aria-hidden="true" />}
                 {loading ? "Creating account…" : "Sign up"}
             </button>
         </form>

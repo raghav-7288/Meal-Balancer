@@ -84,8 +84,8 @@ function DashboardPage() {
                 <div className="delete-toast-popup" role="alert" aria-live="assertive">
                     <span>Plan &ldquo;{deleteToast.planName}&rdquo; deleted</span>
                     <div className="delete-toast-actions">
-                        <button className="undo-btn" onClick={deleteToast.undoAction}>Undo</button>
-                        <button className="close-btn" onClick={() => setDeleteToast(null)}>✕</button>
+                        <button type="button" className="undo-btn" onClick={deleteToast.undoAction}>Undo</button>
+                        <button type="button" className="close-btn" onClick={() => setDeleteToast(null)} aria-label="Dismiss notification">✕</button>
                     </div>
                 </div>
             )}
@@ -130,7 +130,7 @@ function DashboardPage() {
                     dayTotals={activeSummary?.dayTotals}
                 />
 
-                <main className="content">
+                <div className="content" role="region" aria-label="Meal plan details">
                     {/* KPI row (#33) */}
                     <div className="kpi-grid kpi-grid--flex">
                         <Kpi label={`${viewDay} score`} value={dayScore} tone={scoreTone} hint={activeSummary?.dayScore?.band || "No band"} />
@@ -171,7 +171,7 @@ function DashboardPage() {
                     />
 
                     <ComparisonSection summaries={summaries} bestSummary={bestSummary} />
-                </main>
+                </div>
             </div>
         </div>
     );

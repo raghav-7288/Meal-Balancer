@@ -19,7 +19,7 @@ function WelcomePage() {
     return (
         <div className="welcome-page">
             <div className="welcome-card">
-                <div className="welcome-icon">
+                <div className="welcome-icon" aria-hidden="true">
                     <UtensilsCrossed size={48} />
                 </div>
                 <h1>Welcome{profile?.username ? `, ${profile.username}` : profile?.full_name ? `, ${profile.full_name}` : ""}!</h1>
@@ -33,29 +33,29 @@ function WelcomePage() {
                 </p>
                 <div className="welcome-highlights">
                     <div className="welcome-highlight-item">
-                        <Activity size={20} />
+                        <Activity size={20} aria-hidden="true" />
                         <div>
                             <strong>Personalized Scoring</strong>
                             <p>Get scores based on your activity level, goals, and conditions</p>
                         </div>
                     </div>
                     <div className="welcome-highlight-item">
-                        <BarChart3 size={20} />
+                        <BarChart3 size={20} aria-hidden="true" />
                         <div>
                             <strong>Nutrient Tracking</strong>
                             <p>Monitor carbs, protein, fats, fibre, vitamins & minerals</p>
                         </div>
                     </div>
                     <div className="welcome-highlight-item">
-                        <Sparkles size={20} />
+                        <Sparkles size={20} aria-hidden="true" />
                         <div>
                             <strong>Smart Recommendations</strong>
                             <p>Compare plans and get actionable improvement tips</p>
                         </div>
                     </div>
                 </div>
-                <button className="welcome-cta" onClick={() => navigate("/dashboard")}>
-                    Go to Dashboard <ArrowRight size={16} />
+                <button type="button" className="welcome-cta" onClick={() => navigate("/dashboard")}>
+                    Go to Dashboard <ArrowRight size={16} aria-hidden="true" />
                 </button>
             </div>
         </div>

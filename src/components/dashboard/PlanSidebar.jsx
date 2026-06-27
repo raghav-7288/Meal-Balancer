@@ -34,10 +34,11 @@ function PlanSidebar({
                     aria-label="New plan name"
                 />
                 <div className="button-row">
-                    <button onClick={onCreatePlan} aria-label="Create new plan">
-                        <Plus size={14} /> Create
+                    <button type="button" onClick={onCreatePlan} aria-label="Create new plan">
+                        <Plus size={14} aria-hidden="true" /> Create
                     </button>
                     <button
+                        type="button"
                         className="secondary"
                         onClick={onResetPlan}
                         disabled={presetPlans.some(p => p.id === activePlanId)}
@@ -49,18 +50,22 @@ function PlanSidebar({
 
                 <div className="plan-toggle" role="tablist" aria-label="Plan type selector">
                     <button
+                        type="button"
                         className={`toggle-btn ${planView === "preset" ? "active" : ""}`}
                         onClick={() => setPlanView("preset")}
                         role="tab"
                         aria-selected={planView === "preset"}
+                        tabIndex={planView === "preset" ? 0 : -1}
                     >
                         ⭐ Pre-saved
                     </button>
                     <button
+                        type="button"
                         className={`toggle-btn ${planView === "user" ? "active" : ""}`}
                         onClick={() => setPlanView("user")}
                         role="tab"
                         aria-selected={planView === "user"}
+                        tabIndex={planView === "user" ? 0 : -1}
                     >
                         👤 My Plans
                     </button>
@@ -78,20 +83,23 @@ function PlanSidebar({
                                 return (
                                     <div key={plan.id} className={`plan-row-wrapper ${active ? "active" : ""}`} role="listitem">
                                         <button
+                                            type="button"
                                             className={`plan-row ${active ? "active" : ""}`}
                                             onClick={() => setActivePlanId(plan.id)}
                                             aria-label={`Select plan: ${plan.name}, score ${summary?.dayScore?.score ?? 0}`}
+                                            aria-current={active ? "true" : undefined}
                                         >
                                             <span>{plan.name}</span>
                                             <strong>{summary?.dayScore?.score ?? 0}</strong>
                                         </button>
                                         <button
+                                            type="button"
                                             className="copy-btn"
                                             title="Copy as my plan"
                                             onClick={() => onDuplicatePreset(plan)}
                                             aria-label={`Copy ${plan.name} as your plan`}
                                         >
-                                            <Copy size={12} />
+                                            <Copy size={12} aria-hidden="true" />
                                         </button>
                                     </div>
                                 );
@@ -117,21 +125,24 @@ function PlanSidebar({
                                 return (
                                     <div key={plan.id} className={`plan-row-wrapper ${active ? "active" : ""}`} role="listitem">
                                         <button
+                                            type="button"
                                             className={`plan-row ${active ? "active" : ""}`}
                                             onClick={() => setActivePlanId(plan.id)}
                                             aria-label={`Select plan: ${plan.name}, score ${summary?.dayScore?.score ?? 0}`}
+                                            aria-current={active ? "true" : undefined}
                                         >
                                             <span>{plan.name}</span>
                                             <strong>{summary?.dayScore?.score ?? 0}</strong>
                                         </button>
                                         <div className="plan-action-btns">
                                             <button
+                                                type="button"
                                                 className="delete-btn tooltip-btn"
                                                 data-tooltip="Delete Plan"
                                                 onClick={() => onDeletePlan(plan.id)}
                                                 aria-label={`Delete plan: ${plan.name}`}
                                             >
-                                                <Trash2 size={18} />
+                                                <Trash2 size={18} aria-hidden="true" />
                                             </button>
                                         </div>
                                     </div>
