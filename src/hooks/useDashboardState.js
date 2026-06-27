@@ -59,7 +59,7 @@ export function useDashboardState() {
     useEffect(() => {
         const planId = searchParams.get("plan");
         if (planId) {
-            const isUserPlan = userPlans.some(p => p.id === planId);
+            const isUserPlan = userPlans.some((p) => p.id === planId);
             if (isUserPlan) {
                 setActivePlanId(planId); // eslint-disable-line react-hooks/set-state-in-effect
                 setPlanView("user");
@@ -67,14 +67,17 @@ export function useDashboardState() {
         }
     }, [searchParams, userPlans]);
 
-    const [nutrientLimits, setNutrientLimits] = useLocalStorageState("diet-specifix-nutrient-limits", {
-        carbs: 300,
-        protein: 60,
-        fat: 65,
-        sugar: APP_CONFIG.addedSugarLimitG,
-        salt: APP_CONFIG.saltLimitG,
-        fibre: 30,
-    });
+    const [nutrientLimits, setNutrientLimits] = useLocalStorageState(
+        "diet-specifix-nutrient-limits",
+        {
+            carbs: 300,
+            protein: 60,
+            fat: 65,
+            sugar: APP_CONFIG.addedSugarLimitG,
+            salt: APP_CONFIG.saltLimitG,
+            fibre: 30,
+        }
+    );
     const [isAddingFood, setIsAddingFood] = useState(false);
     const [majorGroups, setMajorGroups] = useState([]);
     const [deleteToast, setDeleteToast] = useState(null);
@@ -129,12 +132,16 @@ export function useDashboardState() {
         presetPlansRef.current = presetPlans;
     }, [presetPlans]);
     useEffect(() => {
-        const plan = [...presetPlansRef.current, ...userPlansRef.current].find((p) => p.id === activePlanId);
+        const plan = [...presetPlansRef.current, ...userPlansRef.current].find(
+            (p) => p.id === activePlanId
+        );
         setGuidelines(plan?.guidelines || "");
     }, [activePlanId]);
 
     const guidelinesRef = useRef(guidelines);
-    useEffect(() => { guidelinesRef.current = guidelines; }, [guidelines]);
+    useEffect(() => {
+        guidelinesRef.current = guidelines;
+    }, [guidelines]);
 
     const saveGuidelines = useCallback(() => {
         setUserPlans((prev) =>
@@ -157,7 +164,7 @@ export function useDashboardState() {
 
         for (const mealName of MEALS) {
             const allItems = meals[mealName] || [];
-            const dayItems = allItems.filter(i => i.day === viewDay || !i.day);
+            const dayItems = allItems.filter((i) => i.day === viewDay || !i.day);
             const totals = aggregateMeal(dayItems);
             mealTotals[mealName] = totals;
             mealScores[mealName] = scoreMeal({
@@ -203,108 +210,134 @@ export function useDashboardState() {
         APP_CONFIG.visibleFat?.female?.moderate ||
         25;
 
-    const isPresetActive = presetPlans.some(p => p.id === activePlanId);
+    const isPresetActive = presetPlans.some((p) => p.id === activePlanId);
 
-    const updateMealItem = useCallback((mealName, itemId, updates) => {
-        setUserPlans((prev) =>
-            prev.map((plan) =>
-                plan.id === activePlanId
-                    ? {
-                        ...plan,
-                        meals: {
-                            ...(plan.meals || {}),
-                            [mealName]: (plan.meals?.[mealName] || []).map((item) =>
-                                item.id === itemId ? { ...item, ...updates } : item
-                            ),
-                        },
-                    }
-                    : plan
-            )
-        );
-    }, [activePlanId, setUserPlans]);
+    const updateMealItem = useCallback(
+        (mealName, itemId, updates) => {
+            setUserPlans((prev) =>
+                prev.map((plan) =>
+                    plan.id === activePlanId
+                        ? {
+                              ...plan,
+                              meals: {
+                                  ...(plan.meals || {}),
+                                  [mealName]: (plan.meals?.[mealName] || []).map((item) =>
+                                      item.id === itemId ? { ...item, ...updates } : item
+                                  ),
+                              },
+                          }
+                        : plan
+                )
+            );
+        },
+        [activePlanId, setUserPlans]
+    );
 
-    const removeMealItem = useCallback((mealName, itemId) => {
-        setUserPlans((prev) =>
-            prev.map((plan) =>
-                plan.id === activePlanId
-                    ? {
-                        ...plan,
-                        meals: {
-                            ...(plan.meals || {}),
-                            [mealName]: (plan.meals?.[mealName] || []).filter((item) => item.id !== itemId),
-                        },
-                    }
-                    : plan
-            )
-        );
-    }, [activePlanId, setUserPlans]);
+    const removeMealItem = useCallback(
+        (mealName, itemId) => {
+            setUserPlans((prev) =>
+                prev.map((plan) =>
+                    plan.id === activePlanId
+                        ? {
+                              ...plan,
+                              meals: {
+                                  ...(plan.meals || {}),
+                                  [mealName]: (plan.meals?.[mealName] || []).filter(
+                                      (item) => item.id !== itemId
+                                  ),
+                              },
+                          }
+                        : plan
+                )
+            );
+        },
+        [activePlanId, setUserPlans]
+    );
 
     // Keep refs for addFood closure to avoid re-creating callback on every plan/day change
     const viewDayRef = useRef(viewDay);
     const activePlanIdRef = useRef(activePlanId);
     const majorGroupsRef = useRef(majorGroups);
-    useEffect(() => { viewDayRef.current = viewDay; }, [viewDay]);
+    useEffect(() => {
+        viewDayRef.current = viewDay;
+    }, [viewDay]);
     // eslint-disable-next-line react-hooks/immutability
-    useEffect(() => { activePlanIdRef.current = activePlanId; }, [activePlanId]);
-    useEffect(() => { majorGroupsRef.current = majorGroups; }, [majorGroups]);
+    useEffect(() => {
+        activePlanIdRef.current = activePlanId;
+    }, [activePlanId]);
+    useEffect(() => {
+        majorGroupsRef.current = majorGroups;
+    }, [majorGroups]);
 
-    const addFood = useCallback(async (selectedMeal, selectedFoodId, selectedFoodName, gramsVal, instructionsVal, selectedFoodGroupId) => {
-        if (!selectedMeal || !selectedFoodId || !gramsVal) return;
-        setIsAddingFood(true);
+    const addFood = useCallback(
+        async (
+            selectedMeal,
+            selectedFoodId,
+            selectedFoodName,
+            gramsVal,
+            instructionsVal,
+            selectedFoodGroupId
+        ) => {
+            if (!selectedMeal || !selectedFoodId || !gramsVal) return;
+            setIsAddingFood(true);
 
-        try {
-            const food = foodById(selectedFoodId);
-            const foodName = food?.name || selectedFoodName || "Unknown food";
+            try {
+                const food = foodById(selectedFoodId);
+                const foodName = food?.name || selectedFoodName || "Unknown food";
 
-            let nutrients = null;
-            let foodGroup = "";
+                let nutrients = null;
+                let foodGroup = "";
 
-            if (!food) {
-                const result = await fetchFoodNutrients(selectedFoodId);
-                if (result) {
-                    nutrients = result.nutrients;
+                if (!food) {
+                    const result = await fetchFoodNutrients(selectedFoodId);
+                    if (result) {
+                        nutrients = result.nutrients;
+                    }
+                    if (selectedFoodGroupId && majorGroupsRef.current.length > 0) {
+                        const group = majorGroupsRef.current.find(
+                            (g) => g.major_group_id === selectedFoodGroupId
+                        );
+                        foodGroup = group?.group_name?.toLowerCase() || "";
+                    }
                 }
-                if (selectedFoodGroupId && majorGroupsRef.current.length > 0) {
-                    const group = majorGroupsRef.current.find(g => g.major_group_id === selectedFoodGroupId);
-                    foodGroup = group?.group_name?.toLowerCase() || "";
-                }
+
+                const mealItem = {
+                    id: crypto.randomUUID(),
+                    foodId: selectedFoodId,
+                    foodName: selectedFoodName || foodName,
+                    grams: Number(gramsVal),
+                    day: viewDayRef.current,
+                    instructions: instructionsVal || "",
+                    ...(nutrients && { nutrients }),
+                    ...(foodGroup && { foodGroup }),
+                };
+
+                setUserPlans((prev) =>
+                    prev.map((plan) =>
+                        plan.id === activePlanIdRef.current
+                            ? {
+                                  ...plan,
+                                  meals: {
+                                      ...(plan.meals || {}),
+                                      [selectedMeal]: [
+                                          ...(plan.meals?.[selectedMeal] || []),
+                                          mealItem,
+                                      ],
+                                  },
+                              }
+                            : plan
+                    )
+                );
+                toast.success(`"${foodName}" added to ${selectedMeal} (${viewDayRef.current})`);
+            } catch (err) {
+                console.error("Error adding food:", err);
+                toast.error("Failed to add food. Please try again.");
+            } finally {
+                setIsAddingFood(false);
             }
-
-            const mealItem = {
-                id: crypto.randomUUID(),
-                foodId: selectedFoodId,
-                foodName: selectedFoodName || foodName,
-                grams: Number(gramsVal),
-                day: viewDayRef.current,
-                instructions: instructionsVal || "",
-                ...(nutrients && { nutrients }),
-                ...(foodGroup && { foodGroup }),
-            };
-
-            setUserPlans((prev) =>
-                prev.map((plan) =>
-                    plan.id === activePlanIdRef.current
-                        ? {
-                            ...plan,
-                            meals: {
-                                ...(plan.meals || {}),
-                                [selectedMeal]: [
-                                    ...(plan.meals?.[selectedMeal] || []),
-                                    mealItem,
-                                ],
-                            },
-                        }
-                        : plan
-                )
-            );
-            toast.success(`"${foodName}" added to ${selectedMeal} (${viewDayRef.current})`);
-        } catch (err) {
-            console.error("Error adding food:", err);
-            toast.error("Failed to add food. Please try again.");
-        } finally {
-            setIsAddingFood(false);
-        }
-    }, [setUserPlans]);
+        },
+        [setUserPlans]
+    );
 
     const saveNewPlan = useCallback(() => {
         const name = newPlanName.trim() || `My Plan ${userPlansRef.current.length + 1}`;
@@ -356,7 +389,10 @@ export function useDashboardState() {
         const copyMeals = copyModal.meals || {};
         const newMeals = {};
         for (const slot of MEALS) {
-            newMeals[slot] = (copyMeals[slot] || []).map(i => ({ ...i, id: crypto.randomUUID() }));
+            newMeals[slot] = (copyMeals[slot] || []).map((i) => ({
+                ...i,
+                id: crypto.randomUUID(),
+            }));
         }
         const newPlan = createPlan(name, newMeals, copyModal.guidelines || "");
         setUserPlans((prev) => [...prev, newPlan]);
@@ -374,9 +410,7 @@ export function useDashboardState() {
         }
         setUserPlans((prev) =>
             prev.map((plan) =>
-                plan.id === activePlanIdRef.current
-                    ? { ...plan, meals: emptyMeals }
-                    : plan
+                plan.id === activePlanIdRef.current ? { ...plan, meals: emptyMeals } : plan
             )
         );
     }, [setUserPlans]);
@@ -420,12 +454,19 @@ export function useDashboardState() {
         copyModalRef2.current = copyModal;
     }, [isPresetActive, copyModal]);
 
-    const shortcuts = useMemo(() => ({
-        "ctrl+s": () => { if (!isPresetActiveRef.current) saveGuidelines(); },
-        "ctrl+n": () => saveNewPlan(),
-        "ctrl+p": () => navigate("/weekly-planner"),
-        "escape": () => { if (copyModalRef2.current) setCopyModal(null); },
-    }), []); // eslint-disable-line react-hooks/exhaustive-deps
+    const shortcuts = useMemo(
+        () => ({
+            "ctrl+s": () => {
+                if (!isPresetActiveRef.current) saveGuidelines();
+            },
+            "ctrl+n": () => saveNewPlan(),
+            "ctrl+p": () => navigate("/weekly-planner"),
+            escape: () => {
+                if (copyModalRef2.current) setCopyModal(null);
+            },
+        }),
+        []
+    ); // eslint-disable-line react-hooks/exhaustive-deps
     useHotkeys(shortcuts);
 
     return {
@@ -491,4 +532,3 @@ export function useDashboardState() {
         logToday,
     };
 }
-

@@ -93,7 +93,12 @@ export function AuthProvider({ children }) {
             setUser(data.user);
             setSession(data.session);
             try {
-                const newProfile = await createUserProfile(data.user.id, username, fullName, contactNumber);
+                const newProfile = await createUserProfile(
+                    data.user.id,
+                    username,
+                    fullName,
+                    contactNumber
+                );
                 setProfile(newProfile);
             } catch (profileErr) {
                 // Auth succeeded but profile creation failed — user is still authenticated
@@ -131,12 +136,15 @@ export function AuthProvider({ children }) {
     }, []);
 
     // eslint-disable-next-line react-hooks/preserve-manual-memoization
-    const updateProfile = useCallback(async (fields) => {
-        if (!user?.id) throw new Error("No authenticated user");
-        const updated = await authUpdateProfile(user.id, fields);
-        setProfile(updated);
-        return updated;
-    }, [user?.id]);
+    const updateProfile = useCallback(
+        async (fields) => {
+            if (!user?.id) throw new Error("No authenticated user");
+            const updated = await authUpdateProfile(user.id, fields);
+            setProfile(updated);
+            return updated;
+        },
+        [user?.id]
+    );
 
     // eslint-disable-next-line react-hooks/preserve-manual-memoization
     const refreshProfile = useCallback(async () => {
@@ -148,19 +156,32 @@ export function AuthProvider({ children }) {
 
     const isAuthenticated = !!user;
 
-    const value = useMemo(() => ({
-        user,
-        profile,
-        session,
-        loading,
-        signUp,
-        signIn,
-        signOut,
-        updateProfile,
-        refreshProfile,
-        isAuthenticated,
-    }), [user, profile, session, loading, signUp, signIn, signOut, updateProfile, refreshProfile, isAuthenticated]);
+    const value = useMemo(
+        () => ({
+            user,
+            profile,
+            session,
+            loading,
+            signUp,
+            signIn,
+            signOut,
+            updateProfile,
+            refreshProfile,
+            isAuthenticated,
+        }),
+        [
+            user,
+            profile,
+            session,
+            loading,
+            signUp,
+            signIn,
+            signOut,
+            updateProfile,
+            refreshProfile,
+            isAuthenticated,
+        ]
+    );
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-
