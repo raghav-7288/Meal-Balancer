@@ -32,7 +32,7 @@ export async function searchFoodItems(query, limit = 15) {
             .limit(limit);
 
         if (error) {
-            console.error("Food search error:", error);
+            if (import.meta.env.DEV) console.error("Food search error:", error);
             return [];
         }
 
@@ -52,18 +52,20 @@ export async function fetchFoodNutrients(foodId) {
     return staleWhileRevalidate(cacheKey, async () => {
         const { data, error } = await supabase
             .from("food_nutrient_values")
-            .select(`
+            .select(
+                `
                 value,
                 nutrient_definitions (
                     nutrient_name,
                     nutrient_code,
                     unit
                 )
-            `)
+            `
+            )
             .eq("food_id", foodId);
 
         if (error) {
-            console.error("Nutrient fetch error:", error);
+            if (import.meta.env.DEV) console.error("Nutrient fetch error:", error);
             return null;
         }
 
@@ -87,10 +89,21 @@ export async function fetchFoodNutrients(foodId) {
         // Map DB nutrient names to the app's internal nutrient keys (values are per 100g)
         const nutrients = {
             kcal: findNutrientValue(rawNutrients, ["energy", "energy (kcal)", "calories", "kcal"]),
-            carbs: findNutrientValue(rawNutrients, ["carbohydrate", "carbs", "total carbohydrate", "carbohydrate, total"]),
+            carbs: findNutrientValue(rawNutrients, [
+                "carbohydrate",
+                "carbs",
+                "total carbohydrate",
+                "carbohydrate, total",
+            ]),
             protein: findNutrientValue(rawNutrients, ["protein", "total protein"]),
             fat: findNutrientValue(rawNutrients, ["fat", "total fat", "fat, total"]),
-            fibre: findNutrientValue(rawNutrients, ["fibre", "fiber", "dietary fibre", "dietary fiber", "total dietary fibre"]),
+            fibre: findNutrientValue(rawNutrients, [
+                "fibre",
+                "fiber",
+                "dietary fibre",
+                "dietary fiber",
+                "total dietary fibre",
+            ]),
             vitamins: findNutrientValue(rawNutrients, ["total vitamins", "vitamins"]),
             minerals: findNutrientValue(rawNutrients, ["total minerals", "minerals", "mineral"]),
         };
@@ -110,4 +123,3 @@ function findNutrientValue(rawNutrients, possibleNames) {
     }
     return 0;
 }
-

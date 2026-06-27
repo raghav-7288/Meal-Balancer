@@ -1,5 +1,13 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { BrowserRouter, Routes, Route, NavLink, Navigate, useNavigate, useLocation } from "react-router-dom";
+import {
+    BrowserRouter,
+    Routes,
+    Route,
+    NavLink,
+    Navigate,
+    useNavigate,
+    useLocation,
+} from "react-router-dom";
 import "./App.css";
 import {
     BarChart3,
@@ -53,15 +61,39 @@ const WeeklyPlannerPage = lazyWithRetry(() => import("./components/pages/WeeklyP
 const ProgressPage = lazyWithRetry(() => import("./components/pages/ProgressPage"));
 const ProfilePage = lazyWithRetry(() => import("./components/pages/ProfilePage"));
 const FoodSearchPage = lazyWithRetry(() => import("./components/FoodSearchPage"));
+const PresetAdminPage = lazyWithRetry(() => import("./components/pages/PresetAdminPage"));
 
 function PageLoader() {
     return (
         <div className="auth-loading-screen" role="status" aria-label="Loading page">
-            <Loader2 size={32} className="spin" style={{ color: '#3b82f6' }} />
-            <p style={{ fontSize: '14px', fontWeight: 500, color: '#64748b' }}>Loading…</p>
+            <Loader2 size={32} className="spin" style={{ color: "#3b82f6" }} aria-hidden="true" />
+            <p style={{ fontSize: "14px", fontWeight: 500, color: "#64748b" }}>Loading…</p>
         </div>
     );
 }
+
+const CURRENT_YEAR = new Date().getFullYear();
+
+const TOAST_OPTIONS = {
+    duration: 3000,
+    style: {
+        borderRadius: "14px",
+        padding: "14px 22px",
+        fontSize: "14px",
+        fontWeight: 600,
+        boxShadow: "0 10px 32px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06)",
+        maxWidth: "400px",
+        backdropFilter: "blur(8px)",
+    },
+    success: {
+        style: { background: "#059669", color: "#fff" },
+        iconTheme: { primary: "#fff", secondary: "#059669" },
+    },
+    error: {
+        style: { background: "#dc2626", color: "#fff" },
+        iconTheme: { primary: "#fff", secondary: "#dc2626" },
+    },
+};
 
 function App() {
     const { isAuthenticated, loading: authLoading } = useAuth();
@@ -106,7 +138,9 @@ function AppShell() {
         } else {
             document.body.style.overflow = "";
         }
-        return () => { document.body.style.overflow = ""; };
+        return () => {
+            document.body.style.overflow = "";
+        };
     }, [mobileMenuOpen]);
 
     // Redirect to home if onboarding hasn't been completed yet (mount-only)
@@ -138,6 +172,7 @@ function AppShell() {
 
                 {/* Hamburger toggle for mobile (#29) */}
                 <button
+                    type="button"
                     className="nav-hamburger"
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                     aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
@@ -156,60 +191,67 @@ function AppShell() {
                 )}
 
                 <div className={`nav-links ${mobileMenuOpen ? "nav-links--open" : ""}`}>
-                    <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <Home size={16} /> <span>Home</span>
+                    <NavLink
+                        to="/"
+                        end
+                        className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+                    >
+                        <Home size={16} aria-hidden="true" /> <span>Home</span>
                     </NavLink>
-                    <NavLink to="/health-tools" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <Heart size={16} /> <span>Health Tools</span>
+                    <NavLink
+                        to="/health-tools"
+                        className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+                    >
+                        <Heart size={16} aria-hidden="true" /> <span>Health Tools</span>
                     </NavLink>
-                    <NavLink to="/dashboard" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <BarChart3 size={16} /> <span>Dashboard</span>
+                    <NavLink
+                        to="/dashboard"
+                        className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+                    >
+                        <BarChart3 size={16} aria-hidden="true" /> <span>Dashboard</span>
                     </NavLink>
-                    <NavLink to="/weekly-planner" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <Calendar size={16} /> <span>Planner</span>
+                    <NavLink
+                        to="/weekly-planner"
+                        className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+                    >
+                        <Calendar size={16} aria-hidden="true" /> <span>Planner</span>
                     </NavLink>
-                    <NavLink to="/progress" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <TrendingUp size={16} /> <span>Progress</span>
+                    <NavLink
+                        to="/progress"
+                        className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+                    >
+                        <TrendingUp size={16} aria-hidden="true" /> <span>Progress</span>
                     </NavLink>
-                    <NavLink to="/foods" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <Database size={16} /> <span>Foods</span>
+                    <NavLink
+                        to="/foods"
+                        className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+                    >
+                        <Database size={16} aria-hidden="true" /> <span>Foods</span>
                     </NavLink>
-                    <NavLink to="/profile" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
-                        <User size={16} /> <span>Profile</span>
+                    <NavLink
+                        to="/profile"
+                        className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+                    >
+                        <User size={16} aria-hidden="true" /> <span>Profile</span>
                     </NavLink>
                 </div>
                 <button
+                    type="button"
                     className="nav-theme-toggle"
                     onClick={() => setDarkMode(!darkMode)}
-                    aria-label="Toggle dark mode"
+                    aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
                     data-tooltip={darkMode ? "Light mode" : "Dark mode"}
                 >
-                    {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+                    {darkMode ? (
+                        <Sun size={20} aria-hidden="true" />
+                    ) : (
+                        <Moon size={20} aria-hidden="true" />
+                    )}
                 </button>
             </nav>
 
             {/* Global toast container (#32) */}
-            <Toaster
-                position="top-center"
-                toastOptions={{
-                    duration: 3000,
-                    style: {
-                        borderRadius: "14px",
-                        padding: "12px 20px",
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-                    },
-                    success: {
-                        style: { background: "#059669", color: "#fff" },
-                        iconTheme: { primary: "#fff", secondary: "#059669" },
-                    },
-                    error: {
-                        style: { background: "#dc2626", color: "#fff" },
-                        iconTheme: { primary: "#fff", secondary: "#dc2626" },
-                    },
-                }}
-            />
+            <Toaster position="bottom-center" toastOptions={TOAST_OPTIONS} />
 
             {/* aria-live region for dynamic score updates (#35) */}
             <div id="score-announcer" className="sr-only" aria-live="polite" aria-atomic="true" />
@@ -218,21 +260,78 @@ function AppShell() {
                 <Suspense fallback={<PageLoader />}>
                     <main id="main-content">
                         <Routes>
-                            <Route path="/" element={<RouteErrorBoundary routeName="Home"><WelcomePage /></RouteErrorBoundary>} />
-                            <Route path="/health-tools" element={<RouteErrorBoundary routeName="Health Tools"><HealthToolsPage /></RouteErrorBoundary>} />
-                            <Route path="/dashboard" element={<RouteErrorBoundary routeName="Dashboard"><DashboardPage /></RouteErrorBoundary>} />
-                            <Route path="/weekly-planner" element={<RouteErrorBoundary routeName="Weekly Planner"><WeeklyPlannerPage /></RouteErrorBoundary>} />
-                            <Route path="/progress" element={<RouteErrorBoundary routeName="Progress"><ProgressPage /></RouteErrorBoundary>} />
-                            <Route path="/foods" element={<RouteErrorBoundary routeName="Food Search"><FoodSearchPage /></RouteErrorBoundary>} />
-                            <Route path="/profile" element={<RouteErrorBoundary routeName="Profile"><ProfilePage /></RouteErrorBoundary>} />
+                            <Route
+                                path="/"
+                                element={
+                                    <RouteErrorBoundary routeName="Home">
+                                        <WelcomePage />
+                                    </RouteErrorBoundary>
+                                }
+                            />
+                            <Route
+                                path="/health-tools"
+                                element={
+                                    <RouteErrorBoundary routeName="Health Tools">
+                                        <HealthToolsPage />
+                                    </RouteErrorBoundary>
+                                }
+                            />
+                            <Route
+                                path="/dashboard"
+                                element={
+                                    <RouteErrorBoundary routeName="Dashboard">
+                                        <DashboardPage />
+                                    </RouteErrorBoundary>
+                                }
+                            />
+                            <Route
+                                path="/weekly-planner"
+                                element={
+                                    <RouteErrorBoundary routeName="Weekly Planner">
+                                        <WeeklyPlannerPage />
+                                    </RouteErrorBoundary>
+                                }
+                            />
+                            <Route
+                                path="/progress"
+                                element={
+                                    <RouteErrorBoundary routeName="Progress">
+                                        <ProgressPage />
+                                    </RouteErrorBoundary>
+                                }
+                            />
+                            <Route
+                                path="/foods"
+                                element={
+                                    <RouteErrorBoundary routeName="Food Search">
+                                        <FoodSearchPage />
+                                    </RouteErrorBoundary>
+                                }
+                            />
+                            <Route
+                                path="/preset-admin"
+                                element={
+                                    <RouteErrorBoundary routeName="Preset Admin">
+                                        <PresetAdminPage />
+                                    </RouteErrorBoundary>
+                                }
+                            />
+                            <Route
+                                path="/profile"
+                                element={
+                                    <RouteErrorBoundary routeName="Profile">
+                                        <ProfilePage />
+                                    </RouteErrorBoundary>
+                                }
+                            />
                             <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
                     </main>
                 </Suspense>
             </ErrorBoundary>
 
-            <footer className="app-footer">
-                <p>© {new Date().getFullYear()} Diet Specifix. All rights reserved.</p>
+            <footer className="app-footer" role="contentinfo">
+                <p>© {CURRENT_YEAR} Diet Specifix. All rights reserved.</p>
                 <p className="app-footer-sub">Built with ❤️ for healthier living</p>
             </footer>
         </div>

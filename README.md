@@ -32,6 +32,7 @@ A React 19 single-page application for **Indian diet planning**. Build meals in 
 - **Loading Skeletons** — Shimmer placeholders during data fetches
 - **Empty States** — Illustrated empty states with CTA buttons
 - **Score Gauge** — Animated semicircle visualization
+- **Interaction Polish** — Premium micro-interactions (hover lifts, press feedback, page transitions, modal springs, staggered entrances) respecting `prefers-reduced-motion`
 - **Code Splitting** — Lazy-loaded pages with retry logic for stale deploys
 - **Error Boundary** — Graceful crash recovery
 - **Query Cache** — 5-min TTL in-memory cache with max-size eviction & request deduplication
@@ -55,13 +56,13 @@ A React 19 single-page application for **Indian diet planning**. Build meals in 
 | Testing | Vitest + Testing Library | ^4.1.8 / ^16.3.2 |
 | Linting | ESLint + Prettier | ^10.3.0 / ^3.8.4 |
 | Git Hooks | Husky + lint-staged | ^9.1.7 / ^16.4.0 |
-| Node | — | 20.x |
+| Node | — | 22.x |
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 20.x
+- Node.js 22.x
 - npm 10+
 
 ### Installation
@@ -136,8 +137,8 @@ SPA routing is handled by `vercel.json` rewrites. Set environment variables (`VI
 │   ├── hooks/               Custom hooks (useAuth, useDashboardState, useDebounce, useFocusTrap, useHotkeys, useLocalStorage, useSyncedPlans, useMealHistory, usePresetPlans)
 │   ├── lib/                 Third-party client setup (Supabase)
 │   ├── services/            API service layers (auth, dailyHealth, database, foodSearch, mealHistory, planSync, presetPlan)
-│   ├── styles/              Page-specific CSS modules
-│   ├── utils/               Helpers (PDF export, query cache)
+│   ├── styles/              Design tokens, component base & interaction polish CSS
+│   ├── utils/               Helpers (PDF export, query cache, retry, schemas)
 │   ├── App.jsx              Router shell + layout
 │   ├── App.css              Global styles
 │   ├── index.css            Tailwind imports + base styles
@@ -146,7 +147,7 @@ SPA routing is handled by `vercel.json` rewrites. Set environment variables (`VI
 │   ├── migrations/          SQL migration files (001–012)
 │   ├── diagnostic-queries.sql
 │   └── SUPABASE_AUDIT.md
-├── tests/                   Unit & component tests (Vitest, 27 test files)
+├── tests/                   Unit & component tests (Vitest, 49 test files, 617 tests)
 ├── COMPLETED.md             Implemented changes log
 ├── CONTEXT.md               Auto-generated project context
 ├── DATABASE_SCHEMA.md       Full Supabase schema documentation
@@ -162,6 +163,7 @@ SPA routing is handled by `vercel.json` rewrites. Set environment variables (`VI
 |---------|-------------|
 | `npm run dev` | Start Vite dev server with HMR |
 | `npm run build` | Production build (output: `dist/`) |
+| `npm run build:analyze` | Bundle analysis (opens treemap in browser) |
 | `npm run preview` | Preview production build locally |
 | `npm run lint` | Run ESLint |
 | `npm run format` | Auto-format all source files (Prettier) |
@@ -169,6 +171,7 @@ SPA routing is handled by `vercel.json` rewrites. Set environment variables (`VI
 | `npm test` | Run unit tests (Vitest) |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run test:coverage` | Run tests with coverage report |
+| `npm run test:e2e` | Run Playwright E2E tests |
 | `npm run typecheck` | TypeScript type-check (no emit) |
 | `npm run context` | Regenerate `CONTEXT.md` |
 | `npm run seed:preset-plans` | Seed preset plans to Supabase |
@@ -244,7 +247,8 @@ See [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) for full schema details including
 - **TypeScript** — Typed engines (`config.ts`, `scoringEngine.ts`, `nutrientEngine.ts`) with full interface definitions
 - **Prettier** — Auto-formats code on save/commit
 - **Husky + lint-staged** — Pre-commit hooks run format + lint on staged files
-- **@testing-library/react** — Component testing with jsdom environment (27 test files)
+- **@testing-library/react** — Component testing with jsdom environment (49 test files, 617 tests)
+- **Playwright** — E2E tests with auto-started dev server
 - **react-hot-toast** — Global toast notification system
 - **Query Cache** — In-memory TTL cache with max-size eviction & request deduplication for Supabase API calls
 - **Error Boundary** — Catches React render errors with recovery option
@@ -256,12 +260,12 @@ See [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) for full schema details including
 - [ ] Nutrient RDA comparison (ICMR 2020 guidelines)
 - [ ] Google OAuth sign-in
 - [ ] CI/CD pipeline (GitHub Actions)
-- [ ] E2E tests (Playwright)
 - [ ] PWA / offline support
+- [ ] Food portion presets (Indian-specific)
+- [ ] Grocery list generation
 - [ ] Drag-and-drop meal items
 - [ ] Meal templates (save & reuse)
 - [ ] Barcode scanner (Open Food Facts API)
-- [ ] Export/import plans (JSON + shareable links)
 
 See [SUGGESTIONS.md](./SUGGESTIONS.md) for full details and [COMPLETED.md](./COMPLETED.md) for finished work.
 

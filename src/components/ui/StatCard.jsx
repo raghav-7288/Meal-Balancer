@@ -25,4 +25,3 @@ function EditableStatCard({ label, value, unit, onChange }) {
 }
 
 export { StatCard, EditableStatCard };
-

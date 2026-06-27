@@ -14,54 +14,17 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useProfile } from "../../context/ProfileContext";
-import { getHealthGoals, getUserHealthGoals, saveUserHealthGoals } from "../../services/databaseService";
+import {
+    getHealthGoals,
+    getUserHealthGoals,
+    saveUserHealthGoals,
+} from "../../services/databaseService";
 import { APP_CONFIG } from "../../data/config";
+import { parseContactNumber } from "../../data/countryCodes";
 import ProfileSetupCard from "./profile/ProfileSetupCard";
 import HealthGoalsCard from "./profile/HealthGoalsCard";
 import BodyMeasurementsCard from "./profile/BodyMeasurementsCard";
 import FatBenchmarkCard from "./profile/FatBenchmarkCard";
-
-const COUNTRY_CODES = [
-    { code: "+91", country: "IN", label: "🇮🇳 +91" },
-    { code: "+1", country: "US", label: "🇺🇸 +1" },
-    { code: "+44", country: "GB", label: "🇬🇧 +44" },
-    { code: "+61", country: "AU", label: "🇦🇺 +61" },
-    { code: "+86", country: "CN", label: "🇨🇳 +86" },
-    { code: "+81", country: "JP", label: "🇯🇵 +81" },
-    { code: "+49", country: "DE", label: "🇩🇪 +49" },
-    { code: "+33", country: "FR", label: "🇫🇷 +33" },
-    { code: "+971", country: "AE", label: "🇦🇪 +971" },
-    { code: "+65", country: "SG", label: "🇸🇬 +65" },
-    { code: "+966", country: "SA", label: "🇸🇦 +966" },
-    { code: "+82", country: "KR", label: "🇰🇷 +82" },
-    { code: "+55", country: "BR", label: "🇧🇷 +55" },
-    { code: "+7", country: "RU", label: "🇷🇺 +7" },
-    { code: "+27", country: "ZA", label: "🇿🇦 +27" },
-    { code: "+234", country: "NG", label: "🇳🇬 +234" },
-    { code: "+62", country: "ID", label: "🇮🇩 +62" },
-    { code: "+60", country: "MY", label: "🇲🇾 +60" },
-    { code: "+64", country: "NZ", label: "🇳🇿 +64" },
-    { code: "+39", country: "IT", label: "🇮🇹 +39" },
-    { code: "+34", country: "ES", label: "🇪🇸 +34" },
-    { code: "+52", country: "MX", label: "🇲🇽 +52" },
-    { code: "+977", country: "NP", label: "🇳🇵 +977" },
-    { code: "+94", country: "LK", label: "🇱🇰 +94" },
-    { code: "+880", country: "BD", label: "🇧🇩 +880" },
-    { code: "+92", country: "PK", label: "🇵🇰 +92" },
-];
-
-/** Extract country code and local number from a stored contact string like "+91 9876543210" */
-function parseContactNumber(stored) {
-    if (!stored) return { code: "+91", local: "" };
-    const trimmed = stored.trim();
-    const sorted = [...COUNTRY_CODES].sort((a, b) => b.code.length - a.code.length);
-    for (const cc of sorted) {
-        if (trimmed.startsWith(cc.code)) {
-            return { code: cc.code, local: trimmed.slice(cc.code.length).trim() };
-        }
-    }
-    return { code: "+91", local: trimmed };
-}
 
 function getBmiCategory(bmi) {
     if (bmi < 18.5) return { label: "Underweight", color: "#3b82f6", bg: "#dbeafe" };
@@ -111,8 +74,13 @@ function ProfilePage() {
         heightM > 0 && weightKg > 0 ? (weightKg / (heightM * heightM)).toFixed(1) : null;
 
     const savedCompletedFields = [
-        profile.activity, profile.goal, profile.dietType, profile.sex,
-        dbProfile?.height_cm, dbProfile?.weight_kg, dbProfile?.age,
+        profile.activity,
+        profile.goal,
+        profile.dietType,
+        profile.sex,
+        dbProfile?.height_cm,
+        dbProfile?.weight_kg,
+        dbProfile?.age,
     ].filter(Boolean).length;
     const totalFields = 7;
     const completionPercent = Math.round((savedCompletedFields / totalFields) * 100);
@@ -120,14 +88,19 @@ function ProfilePage() {
 
     const visibleFatLimit =
         APP_CONFIG.visibleFat?.[profile.sex]?.[profile.activity] ||
-        APP_CONFIG.visibleFat?.female?.moderate || 25;
+        APP_CONFIG.visibleFat?.female?.moderate ||
+        25;
 
     const memberSince = dbProfile?.created_at
-        ? new Date(dbProfile.created_at).toLocaleDateString("en-IN", { month: "short", year: "numeric" })
+        ? new Date(dbProfile.created_at).toLocaleDateString("en-IN", {
+              month: "short",
+              year: "numeric",
+          })
         : "—";
 
     // ── Health goals loading ──
     useEffect(() => {
+        let cancelled = false;
         async function loadGoals() {
             try {
                 setGoalsLoading(true);
@@ -136,15 +109,22 @@ function ProfilePage() {
                     getHealthGoals(),
                     user?.id ? getUserHealthGoals(user.id) : Promise.resolve([]),
                 ]);
-                setHealthGoals(goals);
-                setSelectedGoalIds(userGoals.map((ug) => ug.health_goal_id));
+                if (!cancelled) {
+                    setHealthGoals(goals || []);
+                    setSelectedGoalIds((userGoals || []).map((ug) => ug.health_goal_id));
+                }
             } catch (err) {
-                setGoalsError(err.message);
+                if (!cancelled) {
+                    setGoalsError(err?.message || "Failed to load health goals");
+                }
             } finally {
-                setGoalsLoading(false);
+                if (!cancelled) setGoalsLoading(false);
             }
         }
         loadGoals();
+        return () => {
+            cancelled = true;
+        };
     }, [user?.id]);
 
     function toggleGoal(goalId) {
@@ -209,58 +189,119 @@ function ProfilePage() {
                 <div className="pro-profile-header-bg" />
                 <div className="pro-profile-header-content">
                     <div className="pro-avatar-section">
-                        <div className="pro-avatar"><User size={28} /></div>
+                        <div className="pro-avatar" aria-hidden="true">
+                            <User size={28} />
+                        </div>
                         <div className="pro-avatar-info">
                             <h1>{dbProfile?.full_name || dbProfile?.username || "User"}</h1>
-                            <p className="pro-avatar-email"><Mail size={13} />{user?.email}</p>
+                            <p className="pro-avatar-email">
+                                <Mail size={13} aria-hidden="true" />
+                                {user?.email}
+                            </p>
                             <div className="pro-avatar-meta">
-                                <span className="pro-meta-chip"><Calendar size={12} /> Joined {memberSince}</span>
-                                <span className="pro-meta-chip"><Shield size={12} /> Active</span>
+                                <span className="pro-meta-chip">
+                                    <Calendar size={12} aria-hidden="true" /> Joined {memberSince}
+                                </span>
+                                <span className="pro-meta-chip">
+                                    <Shield size={12} aria-hidden="true" /> Active
+                                </span>
                             </div>
                         </div>
                     </div>
-                    <button className="pro-signout-btn" onClick={signOut}><LogOut size={15} /> Sign Out</button>
+                    <button type="button" className="pro-signout-btn" onClick={signOut}>
+                        <LogOut size={15} aria-hidden="true" /> Sign Out
+                    </button>
                 </div>
             </div>
 
             {/* ─── Stats Row ─── */}
-            <div className="pro-stats-row">
+            <div className="pro-stats-row" role="group" aria-label="Body statistics">
                 <div className="pro-stat-card">
-                    <div className="pro-stat-icon" style={{ background: "#ede9fe", color: "#7c3aed" }}><Ruler size={18} /></div>
-                    <div className="pro-stat-info"><span className="pro-stat-value">{height || "—"}</span><span className="pro-stat-label">Height (cm)</span></div>
+                    <div
+                        className="pro-stat-icon"
+                        style={{ background: "#ede9fe", color: "#7c3aed" }}
+                        aria-hidden="true"
+                    >
+                        <Ruler size={18} />
+                    </div>
+                    <div className="pro-stat-info">
+                        <span className="pro-stat-value">{height || "—"}</span>
+                        <span className="pro-stat-label">Height (cm)</span>
+                    </div>
                 </div>
                 <div className="pro-stat-card">
-                    <div className="pro-stat-icon" style={{ background: "#fce7f3", color: "#db2777" }}><Scale size={18} /></div>
-                    <div className="pro-stat-info"><span className="pro-stat-value">{weight || "—"}</span><span className="pro-stat-label">Weight (kg)</span></div>
+                    <div
+                        className="pro-stat-icon"
+                        style={{ background: "#fce7f3", color: "#db2777" }}
+                        aria-hidden="true"
+                    >
+                        <Scale size={18} />
+                    </div>
+                    <div className="pro-stat-info">
+                        <span className="pro-stat-value">{weight || "—"}</span>
+                        <span className="pro-stat-label">Weight (kg)</span>
+                    </div>
                 </div>
                 <div className="pro-stat-card">
-                    <div className="pro-stat-icon" style={{ background: "#d1fae5", color: "#059669" }}><Target size={18} /></div>
+                    <div
+                        className="pro-stat-icon"
+                        style={{ background: "#d1fae5", color: "#059669" }}
+                        aria-hidden="true"
+                    >
+                        <Target size={18} />
+                    </div>
                     <div className="pro-stat-info">
                         <span className="pro-stat-value">
                             {currentBmi || "—"}
                             {currentBmi && (
-                                <small className="pro-bmi-badge" style={{
-                                    background: getBmiCategory(parseFloat(currentBmi)).bg,
-                                    color: getBmiCategory(parseFloat(currentBmi)).color,
-                                }}>{getBmiCategory(parseFloat(currentBmi)).label}</small>
+                                <small
+                                    className="pro-bmi-badge"
+                                    style={{
+                                        background: getBmiCategory(parseFloat(currentBmi)).bg,
+                                        color: getBmiCategory(parseFloat(currentBmi)).color,
+                                    }}
+                                >
+                                    {getBmiCategory(parseFloat(currentBmi)).label}
+                                </small>
                             )}
                         </span>
                         <span className="pro-stat-label">BMI</span>
                     </div>
                 </div>
                 <div className="pro-stat-card">
-                    <div className="pro-stat-icon" style={{ background: "#fff7ed", color: "#ea580c" }}><Activity size={18} /></div>
-                    <div className="pro-stat-info"><span className="pro-stat-value">{age || "—"}</span><span className="pro-stat-label">Age (years)</span></div>
+                    <div
+                        className="pro-stat-icon"
+                        style={{ background: "#fff7ed", color: "#ea580c" }}
+                        aria-hidden="true"
+                    >
+                        <Activity size={18} />
+                    </div>
+                    <div className="pro-stat-info">
+                        <span className="pro-stat-value">{age || "—"}</span>
+                        <span className="pro-stat-label">Age (years)</span>
+                    </div>
                 </div>
             </div>
 
             {/* ─── Completion Progress ─── */}
             <div className="pro-completion-bar-card">
                 <div className="pro-completion-header">
-                    <div className="pro-completion-title"><Sparkles size={16} /><span>Profile Completion</span></div>
-                    <span className="pro-completion-percent">{completionPercent}%</span>
+                    <div className="pro-completion-title">
+                        <Sparkles size={16} aria-hidden="true" />
+                        <span>Profile Completion</span>
+                    </div>
+                    <span className="pro-completion-percent" aria-hidden="true">
+                        {completionPercent}%
+                    </span>
                 </div>
-                <div className="pro-progress-track">
+                <div
+                    className="pro-progress-track"
+                    role="progressbar"
+                    aria-valuenow={completionPercent}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`Profile completion: ${completionPercent}%`}
+                >
                     <div className="pro-progress-fill" style={{ width: `${completionPercent}%` }} />
                 </div>
                 <p className="pro-completion-hint">
@@ -309,10 +350,7 @@ function ProfilePage() {
                         onSaveDetails={handleSaveDetails}
                         onCancelEdit={handleCancelEdit}
                     />
-                    <FatBenchmarkCard
-                        visibleFatLimit={visibleFatLimit}
-                        profile={profile}
-                    />
+                    <FatBenchmarkCard visibleFatLimit={visibleFatLimit} profile={profile} />
                 </div>
             </div>
         </div>

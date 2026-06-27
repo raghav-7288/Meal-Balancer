@@ -17,6 +17,13 @@ const DEFAULT_BASE_DELAY = 1000; // 1 second
 function isRetryable(error) {
     const message = error?.message?.toLowerCase() || "";
 
+    // AbortError or TypeError from fetch API (e.g., "Failed to fetch" network error)
+    // Must check BEFORE the message prefix — native TypeError "Failed to fetch" starts with
+    // "failed to " but IS a retryable network failure.
+    if (error?.name === "TypeError" || error?.name === "AbortError") {
+        return true;
+    }
+
     // Service-layer errors always start with "Failed to ..." — these wrap Supabase
     // error objects and should NOT be retried (the DB responded with an error).
     if (message.startsWith("failed to ")) {
@@ -24,17 +31,21 @@ function isRetryable(error) {
     }
 
     // Network errors (fetch itself failed)
-    if (message.includes("fetch failed") || message.includes("networkerror") || message.includes("network request failed")) {
+    if (
+        message.includes("fetch failed") ||
+        message.includes("networkerror") ||
+        message.includes("network request failed")
+    ) {
         return true;
     }
 
     // HTTP 5xx server errors
-    if (message.includes("500") || message.includes("502") || message.includes("503") || message.includes("504")) {
-        return true;
-    }
-
-    // AbortError or TypeError from fetch API
-    if (error?.name === "TypeError" || error?.name === "AbortError") {
+    if (
+        message.includes("500") ||
+        message.includes("502") ||
+        message.includes("503") ||
+        message.includes("504")
+    ) {
         return true;
     }
 
@@ -71,10 +82,12 @@ export async function withRetry(fn, options = {}) {
             }
 
             const delay = baseDelay * Math.pow(2, attempt); // 1s, 2s, 4s
-            console.warn(
-                `[Retry] ${context || "operation"} failed (attempt ${attempt + 1}/${maxRetries}), retrying in ${delay}ms...`,
-                error.message,
-            );
+            if (import.meta.env.DEV) {
+                console.warn(
+                    `[Retry] ${context || "operation"} failed (attempt ${attempt + 1}/${maxRetries}), retrying in ${delay}ms...`,
+                    error.message
+                );
+            }
 
             await new Promise((resolve) => setTimeout(resolve, delay));
         }
@@ -82,5 +95,3 @@ export async function withRetry(fn, options = {}) {
 
     throw lastError;
 }
-
-

@@ -13,16 +13,20 @@ function useHotkeys(shortcuts, enabled = true) {
 
             // Don't fire shortcuts when user is typing in an input/textarea/select
             const tag = e.target.tagName;
-            const isEditable = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.target.isContentEditable;
+            const isEditable =
+                tag === "INPUT" ||
+                tag === "TEXTAREA" ||
+                tag === "SELECT" ||
+                e.target.isContentEditable;
 
             for (const [combo, fn] of Object.entries(shortcuts)) {
                 const parts = combo.toLowerCase().split("+");
                 const needsCtrl = parts.includes("ctrl") || parts.includes("meta");
                 const needsShift = parts.includes("shift");
                 const needsAlt = parts.includes("alt");
-                const key = parts.filter(p => !["ctrl", "meta", "shift", "alt"].includes(p))[0];
+                const key = parts.filter((p) => !["ctrl", "meta", "shift", "alt"].includes(p))[0];
 
-                const ctrlMatch = needsCtrl ? (e.ctrlKey || e.metaKey) : true;
+                const ctrlMatch = needsCtrl ? e.ctrlKey || e.metaKey : true;
                 const shiftMatch = needsShift ? e.shiftKey : true;
                 const altMatch = needsAlt ? e.altKey : true;
                 const keyMatch = e.key.toLowerCase() === key || e.code.toLowerCase() === key;
@@ -53,4 +57,3 @@ function useHotkeys(shortcuts, enabled = true) {
 }
 
 export default useHotkeys;
-

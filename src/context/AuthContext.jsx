@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useMemo, useCallback } from "react";
 import {
     getSession,
     fetchUserProfile,
@@ -22,6 +22,7 @@ export function AuthProvider({ children }) {
     // Restore session on mount
     useEffect(() => {
         let timeout;
+        let initComplete = false;
 
         async function init() {
             try {
@@ -30,12 +31,18 @@ export function AuthProvider({ children }) {
 
                 if (currentSession?.user) {
                     setUser(currentSession.user);
-                    const userProfile = await fetchUserProfile(currentSession.user.id);
-                    setProfile(userProfile);
+                    try {
+                        const userProfile = await fetchUserProfile(currentSession.user.id);
+                        setProfile(userProfile);
+                    } catch (profileErr) {
+                        // Auth succeeded but profile fetch failed — user can still use the app
+                        console.error("Profile fetch error during init:", profileErr);
+                    }
                 }
             } catch (err) {
                 console.error("Auth init error:", err);
             } finally {
+                initComplete = true;
                 clearTimeout(timeout);
                 setLoading(false);
             }
@@ -49,6 +56,10 @@ export function AuthProvider({ children }) {
         init();
 
         const subscription = onAuthStateChange(async (event, newSession) => {
+            // Skip auth state changes while init() is still running to avoid
+            // duplicate profile fetches and race conditions
+            if (!initComplete) return;
+
             setSession(newSession);
 
             if (newSession?.user) {
@@ -71,7 +82,7 @@ export function AuthProvider({ children }) {
         };
     }, []);
 
-    async function signUp(email, password, username, fullName, contactNumber) {
+    const signUp = useCallback(async (email, password, username, fullName, contactNumber) => {
         const data = await authSignUp(email, password);
 
         if (data.user) {
@@ -81,48 +92,63 @@ export function AuthProvider({ children }) {
             window.history.replaceState(null, "", "/");
             setUser(data.user);
             setSession(data.session);
-            const newProfile = await createUserProfile(data.user.id, username, fullName, contactNumber);
-            setProfile(newProfile);
+            try {
+                const newProfile = await createUserProfile(data.user.id, username, fullName, contactNumber);
+                setProfile(newProfile);
+            } catch (profileErr) {
+                // Auth succeeded but profile creation failed — user is still authenticated
+                // Profile will be retried on next login or page load
+                console.error("Profile creation failed:", profileErr);
+            }
         }
 
         return data;
-    }
+    }, []);
 
-    async function signIn(email, password) {
+    const signIn = useCallback(async (email, password) => {
         const data = await authSignIn(email, password);
 
         if (data.user) {
             setUser(data.user);
             setSession(data.session);
-            const userProfile = await fetchUserProfile(data.user.id);
-            setProfile(userProfile);
+            try {
+                const userProfile = await fetchUserProfile(data.user.id);
+                setProfile(userProfile);
+            } catch (profileErr) {
+                // Auth succeeded but profile fetch failed — user can still use the app
+                console.error("Profile fetch failed during sign in:", profileErr);
+            }
         }
 
         return data;
-    }
+    }, []);
 
-    async function signOut() {
+    const signOut = useCallback(async () => {
         await authSignOut();
         setUser(null);
         setSession(null);
         setProfile(null);
-    }
+    }, []);
 
-    async function updateProfile(fields) {
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
+    const updateProfile = useCallback(async (fields) => {
         if (!user?.id) throw new Error("No authenticated user");
         const updated = await authUpdateProfile(user.id, fields);
         setProfile(updated);
         return updated;
-    }
+    }, [user?.id]);
 
-    async function refreshProfile() {
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
+    const refreshProfile = useCallback(async () => {
         if (!user?.id) return;
         const userProfile = await fetchUserProfile(user.id);
         setProfile(userProfile);
         return userProfile;
-    }
+    }, [user?.id]);
 
-    const value = {
+    const isAuthenticated = !!user;
+
+    const value = useMemo(() => ({
         user,
         profile,
         session,
@@ -132,8 +158,8 @@ export function AuthProvider({ children }) {
         signOut,
         updateProfile,
         refreshProfile,
-        isAuthenticated: !!user,
-    };
+        isAuthenticated,
+    }), [user, profile, session, loading, signUp, signIn, signOut, updateProfile, refreshProfile, isAuthenticated]);
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

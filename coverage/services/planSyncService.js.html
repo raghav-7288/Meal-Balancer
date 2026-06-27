@@ -161,7 +161,18 @@
 <a name='L96'></a><a href='#L96'>96</a>
 <a name='L97'></a><a href='#L97'>97</a>
 <a name='L98'></a><a href='#L98'>98</a>
-<a name='L99'></a><a href='#L99'>99</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -176,6 +187,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -194,7 +206,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -211,6 +226,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -224,6 +241,7 @@
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -248,14 +266,18 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -273,16 +295,19 @@ import { withRetry } from "../utils/withRetry";
  * @returns {Promise&lt;Array&gt;} array of plan objects
  */
 export async function fetchUserPlans(userId) {
-    return withRetry(async () =&gt; {
-        const { data, error } = await supabase
-            .from("user_plans")
-            .select("id, user_id, name, meals, guidelines, created_at, updated_at")
-            .eq("user_id", userId)
-            .order("created_at", { ascending: true });
+    return withRetry(
+        async () =&gt; {
+            const { data, error } = await supabase
+                .from("user_plans")
+                .select("id, user_id, name, meals, guidelines, created_at, updated_at")
+                .eq("user_id", userId)
+                .order("created_at", { ascending: true });
 &nbsp;
-        if (error) throw new Error(`Failed to fetch user plans: ${error.message}`);
-        return validateResponse(UserPlanArraySchema, data || [], "fetchUserPlans");
-    }, { context: "fetchUserPlans" });
+            if (error) throw new Error(`Failed to fetch user plans: ${error.message}`);
+            return validateResponse(UserPlanArraySchema, data || [], "fetchUserPlans");
+        },
+        { context: "fetchUserPlans" }
+    );
 }
 &nbsp;
 /**
@@ -292,24 +317,27 @@ export async function fetchUserPlans(userId) {
  * @returns {Promise&lt;object&gt;} the upserted plan row
  */
 export async function upsertPlan(userId, plan) {
-    return withRetry(async () =&gt; {
-        const row = {
-            id: plan.id,
-            user_id: userId,
-            name: plan.name,
-            meals: plan.meals,
-            guidelines: plan.guidelines || "",
-        };
+    return withRetry(
+        async () =&gt; {
+            const row = {
+                id: plan.id,
+                user_id: userId,
+                name: plan.name,
+                meals: plan.meals,
+                guidelines: plan.guidelines || "",
+            };
 &nbsp;
-        const { data, error } = await supabase
-            .from("user_plans")
-            .upsert(row, { onConflict: "id" })
-            .select()
-            .single();
+            const { data, error } = await supabase
+                .from("user_plans")
+                .upsert(row, { onConflict: "id" })
+                .select()
+                .single();
 &nbsp;
-        if (error) throw new Error(`Failed to save plan: ${error.message}`);
-        return data;
-    }, { context: "upsertPlan" });
+            if (error) throw new Error(`Failed to save plan: ${error.message}`);
+            return data;
+        },
+        { context: "upsertPlan" }
+    );
 }
 &nbsp;
 /**
@@ -321,23 +349,26 @@ export async function upsertPlan(userId, plan) {
 export async function upsertPlans(userId, plans) {
     if (!plans.length) return [];
 &nbsp;
-    return withRetry(async () =&gt; {
-        const rows = plans.map((plan) =&gt; ({
-            id: plan.id,
-            user_id: userId,
-            name: plan.name,
-            meals: plan.meals,
-            guidelines: plan.guidelines || "",
-        }));
+    return withRetry(
+        async () =&gt; {
+            const rows = plans.map((plan) =&gt; ({
+                id: plan.id,
+                user_id: userId,
+                name: plan.name,
+                meals: plan.meals,
+                guidelines: plan.guidelines || "",
+            }));
 &nbsp;
-        const { data, error } = await supabase
-            .from("user_plans")
-            .upsert(rows, { onConflict: "id" })
-            .select();
+            const { data, error } = await supabase
+                .from("user_plans")
+                .upsert(rows, { onConflict: "id" })
+                .select();
 &nbsp;
-        if (error) throw new Error(`Failed to batch save plans: ${error.message}`);
-        return data || [];
-    }, { context: "upsertPlans" });
+            if (error) throw new Error(`Failed to batch save plans: ${error.message}`);
+            return data || [];
+        },
+        { context: "upsertPlans" }
+    );
 }
 &nbsp;
 /**
@@ -346,17 +377,19 @@ export async function upsertPlans(userId, plans) {
  * @param {string} planId
  */
 export async function deletePlan(userId, planId) {
-    return withRetry(async () =&gt; {
-        const { error } = await supabase
-            .from("user_plans")
-            .delete()
-            .eq("id", planId)
-            .eq("user_id", userId);
+    return withRetry(
+        async () =&gt; {
+            const { error } = await supabase
+                .from("user_plans")
+                .delete()
+                .eq("id", planId)
+                .eq("user_id", userId);
 &nbsp;
-        if (error) throw new Error(`Failed to delete plan: ${error.message}`);
-    }, { context: "deletePlan" });
+            if (error) throw new Error(`Failed to delete plan: ${error.message}`);
+        },
+        { context: "deletePlan" }
+    );
 }
-&nbsp;
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -364,7 +397,7 @@ export async function deletePlan(userId, planId) {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-26T13:10:15.271Z
+                at 2026-06-27T17:32:58.664Z
             </div>
         <script src="../prettify.js"></script>
         <script>

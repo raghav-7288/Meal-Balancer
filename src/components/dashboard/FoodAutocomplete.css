@@ -12,8 +12,8 @@
     right: 8px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 0.75rem;
-    color: #6b7280;
+    font-size: var(--ds-text-sm);
+    color: var(--ds-text-muted);
     pointer-events: none;
 }
 
@@ -24,33 +24,35 @@
     right: 0;
     max-height: 260px;
     overflow-y: auto;
-    background: #ffffff;
-    border: 2px solid #3b82f6;
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border-input);
+    border-radius: var(--ds-radius-md);
+    box-shadow: var(--ds-shadow-xl);
     z-index: 9999;
     list-style: none;
     margin: 0;
-    padding: 4px 0;
+    padding: var(--ds-space-1);
 }
 
 .food-autocomplete-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 14px;
+    padding: var(--ds-space-3) var(--ds-space-3);
     cursor: pointer;
-    transition: background 0.12s ease, color 0.12s ease;
-    font-size: 0.875rem;
-    color: #1f2937;
-    border-left: 3px solid transparent;
+    transition:
+        background var(--ds-transition-fast),
+        color var(--ds-transition-fast);
+    font-size: var(--ds-text-md);
+    color: var(--ds-text);
+    border-radius: var(--ds-radius-sm);
+    border-left: none;
 }
 
 .food-autocomplete-item:hover,
 .food-autocomplete-item.highlighted {
     background: #eff6ff;
-    border-left-color: #3b82f6;
-    color: #1e40af;
+    color: var(--ds-info-text);
 }
 
 .food-autocomplete-name {
@@ -58,13 +60,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-weight: 500;
+    font-weight: var(--ds-font-medium);
 }
 
 .food-autocomplete-code {
-    margin-left: 12px;
+    margin-left: var(--ds-space-3);
     font-size: 0.72rem;
-    color: #6b7280;
+    color: var(--ds-text-muted);
     flex-shrink: 0;
     background: #f3f4f6;
     padding: 2px 6px;
@@ -73,9 +75,11 @@
 
 /* Dark mode support */
 body.dark-mode .food-autocomplete-dropdown {
-    background: #1e293b;
-    border-color: #60a5fa;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+    background: var(--ds-surface);
+    border-color: var(--ds-border);
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.3),
+        0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 body.dark-mode .food-autocomplete-item {
@@ -85,16 +89,14 @@ body.dark-mode .food-autocomplete-item {
 body.dark-mode .food-autocomplete-item:hover,
 body.dark-mode .food-autocomplete-item.highlighted {
     background: #334155;
-    border-left-color: #60a5fa;
     color: #93c5fd;
 }
 
 body.dark-mode .food-autocomplete-code {
     background: #334155;
-    color: #94a3b8;
+    color: var(--ds-text-faint);
 }
 
 body.dark-mode .food-autocomplete-loading {
-    color: #94a3b8;
+    color: var(--ds-text-faint);
 }
-

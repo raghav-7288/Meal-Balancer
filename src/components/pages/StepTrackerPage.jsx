@@ -61,7 +61,10 @@ function StepTrackerPage() {
                         // Upload local-only entries
                         for (const [date, steps] of Object.entries(prev)) {
                             if (!(date in remoteData) && steps > 0) {
-                                upsertDailyHealth(user.id, date, { steps, steps_target: targetRef.current }).catch((err) =>
+                                upsertDailyHealth(user.id, date, {
+                                    steps,
+                                    steps_target: targetRef.current,
+                                }).catch((err) =>
                                     console.error("Failed to upload local step entry:", err)
                                 );
                             }
@@ -95,10 +98,12 @@ function StepTrackerPage() {
 
         if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
         syncTimeoutRef.current = setTimeout(() => {
-            upsertDailyHealth(userId, date, { steps: stepCount, steps_target: dailyTarget }).catch((err) => {
-                console.error("Failed to sync steps:", err);
-                if (isMounted.current) setSyncStatus("error");
-            });
+            upsertDailyHealth(userId, date, { steps: stepCount, steps_target: dailyTarget }).catch(
+                (err) => {
+                    console.error("Failed to sync steps:", err);
+                    if (isMounted.current) setSyncStatus("error");
+                }
+            );
         }, 500);
     }
 
@@ -184,7 +189,13 @@ function StepTrackerPage() {
                 <p className="step-tracker-subtitle">
                     Keep moving! Track your daily steps and stay active.
                     {syncStatus === "error" && (
-                        <span style={{ color: "var(--color-error, #ef4444)", fontSize: "12px", marginLeft: "8px" }}>
+                        <span
+                            style={{
+                                color: "var(--color-error, #ef4444)",
+                                fontSize: "12px",
+                                marginLeft: "8px",
+                            }}
+                        >
                             ⚠ Sync failed
                         </span>
                     )}
@@ -289,12 +300,11 @@ function StepTrackerPage() {
             {/* Progress bar */}
             <div className="step-progress-bar-section">
                 <div className="step-progress-bar-track">
-                    <div
-                        className="step-progress-bar-fill"
-                        style={{ width: `${percentage}%` }}
-                    />
+                    <div className="step-progress-bar-fill" style={{ width: `${percentage}%` }} />
                 </div>
-                <span className="step-progress-bar-text">{Math.round(percentage)}% of daily goal</span>
+                <span className="step-progress-bar-text">
+                    {Math.round(percentage)}% of daily goal
+                </span>
             </div>
 
             {/* Target setting */}
@@ -313,12 +323,20 @@ function StepTrackerPage() {
                             autoFocus
                         />
                         <button onClick={handleSaveTarget}>Save</button>
-                        <button className="secondary" onClick={() => setEditingTarget(false)}>Cancel</button>
+                        <button className="secondary" onClick={() => setEditingTarget(false)}>
+                            Cancel
+                        </button>
                     </div>
                 ) : (
                     <span>
                         Daily target: <strong>{target.toLocaleString()} steps</strong>
-                        <button className="step-edit-target-btn" onClick={() => { setTargetInput(String(target)); setEditingTarget(true); }}>
+                        <button
+                            className="step-edit-target-btn"
+                            onClick={() => {
+                                setTargetInput(String(target));
+                                setEditingTarget(true);
+                            }}
+                        >
                             Edit
                         </button>
                     </span>
@@ -341,7 +359,10 @@ function StepTrackerPage() {
                         const dayLabel = d.toLocaleDateString("en", { weekday: "short" });
                         const isToday = key === todayKey;
                         return (
-                            <div key={key} className={`step-weekly-bar-col ${isToday ? "today" : ""}`}>
+                            <div
+                                key={key}
+                                className={`step-weekly-bar-col ${isToday ? "today" : ""}`}
+                            >
                                 <div className="step-weekly-bar-track">
                                     <div
                                         className={`step-weekly-bar-fill ${daySteps >= target ? "met" : ""}`}

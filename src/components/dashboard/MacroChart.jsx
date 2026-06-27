@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 const COLORS = ["#6366f1", "#10b981", "#ef4444", "#f59e0b"];
@@ -76,5 +77,4 @@ function MacroChart({ dayTotals }) {
     );
 }
 
-export default MacroChart;
-
+export default memo(MacroChart);

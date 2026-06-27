@@ -13,17 +13,20 @@ import { withRetry } from "../utils/withRetry";
  * @returns {Promise<Array>} array of daily health entries
  */
 export async function fetchDailyHealthData(userId, limit = 90) {
-    return withRetry(async () => {
-        const { data, error } = await supabase
-            .from("daily_health_tracking")
-            .select("*")
-            .eq("user_id", userId)
-            .order("date", { ascending: false })
-            .limit(limit);
+    return withRetry(
+        async () => {
+            const { data, error } = await supabase
+                .from("daily_health_tracking")
+                .select("*")
+                .eq("user_id", userId)
+                .order("date", { ascending: false })
+                .limit(limit);
 
-        if (error) throw new Error(`Failed to fetch daily health data: ${error.message}`);
-        return validateResponse(DailyHealthArraySchema, data || [], "fetchDailyHealthData");
-    }, { context: "fetchDailyHealthData" });
+            if (error) throw new Error(`Failed to fetch daily health data: ${error.message}`);
+            return validateResponse(DailyHealthArraySchema, data || [], "fetchDailyHealthData");
+        },
+        { context: "fetchDailyHealthData" }
+    );
 }
 
 /**
@@ -33,20 +36,23 @@ export async function fetchDailyHealthData(userId, limit = 90) {
  * @returns {Promise<object|null>}
  */
 export async function fetchDailyHealthForDate(userId, date) {
-    return withRetry(async () => {
-        const { data, error } = await supabase
-            .from("daily_health_tracking")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("date", date)
-            .single();
+    return withRetry(
+        async () => {
+            const { data, error } = await supabase
+                .from("daily_health_tracking")
+                .select("*")
+                .eq("user_id", userId)
+                .eq("date", date)
+                .single();
 
-        if (error) {
-            if (error.code === "PGRST116") return null; // No row found
-            throw new Error(`Failed to fetch daily health for date: ${error.message}`);
-        }
-        return validateResponse(DailyHealthRowSchema, data, "fetchDailyHealthForDate");
-    }, { context: "fetchDailyHealthForDate" });
+            if (error) {
+                if (error.code === "PGRST116") return null; // No row found
+                throw new Error(`Failed to fetch daily health for date: ${error.message}`);
+            }
+            return validateResponse(DailyHealthRowSchema, data, "fetchDailyHealthForDate");
+        },
+        { context: "fetchDailyHealthForDate" }
+    );
 }
 
 /**
@@ -58,22 +64,25 @@ export async function fetchDailyHealthForDate(userId, date) {
  * @returns {Promise<object>} the upserted row
  */
 export async function upsertDailyHealth(userId, date, fields) {
-    return withRetry(async () => {
-        const row = {
-            user_id: userId,
-            date,
-            ...fields,
-        };
+    return withRetry(
+        async () => {
+            const row = {
+                user_id: userId,
+                date,
+                ...fields,
+            };
 
-        const { data, error } = await supabase
-            .from("daily_health_tracking")
-            .upsert(row, { onConflict: "user_id,date" })
-            .select()
-            .single();
+            const { data, error } = await supabase
+                .from("daily_health_tracking")
+                .upsert(row, { onConflict: "user_id,date" })
+                .select()
+                .single();
 
-        if (error) throw new Error(`Failed to save daily health data: ${error.message}`);
-        return data;
-    }, { context: "upsertDailyHealth" });
+            if (error) throw new Error(`Failed to save daily health data: ${error.message}`);
+            return data;
+        },
+        { context: "upsertDailyHealth" }
+    );
 }
 
 /**
@@ -107,4 +116,3 @@ export function dbRowsToStepData(rows) {
     }
     return stepData;
 }
-

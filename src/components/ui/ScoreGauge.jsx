@@ -22,11 +22,12 @@ function ScoreGauge({ score = 0, size = 120, label = "Score" }) {
     else band = "Needs Work";
 
     return (
-        <div className="score-gauge" style={{ width: size, height: size * 0.65 }} aria-label={`${label}: ${clampedScore} out of 100 — ${band}`}>
-            <svg
-                viewBox={`0 0 ${size} ${size * 0.6}`}
-                className="score-gauge-svg"
-            >
+        <div
+            className="score-gauge"
+            style={{ width: size, height: size * 0.65 }}
+            aria-label={`${label}: ${clampedScore} out of 100 — ${band}`}
+        >
+            <svg viewBox={`0 0 ${size} ${size * 0.6}`} className="score-gauge-svg">
                 {/* Background arc */}
                 <path
                     d={describeArc(size / 2, size * 0.55, radius, 180, 360)}
@@ -48,8 +49,12 @@ function ScoreGauge({ score = 0, size = 120, label = "Score" }) {
                 />
             </svg>
             <div className="score-gauge-center">
-                <span className="score-gauge-value" style={{ color }}>{clampedScore}</span>
-                <span className="score-gauge-band" style={{ color }}>{band}</span>
+                <span className="score-gauge-value" style={{ color }}>
+                    {clampedScore}
+                </span>
+                <span className="score-gauge-band" style={{ color }}>
+                    {band}
+                </span>
             </div>
         </div>
     );
@@ -69,4 +74,3 @@ function polarToCartesian(cx, cy, r, angleDeg) {
 }
 
 export default ScoreGauge;
-

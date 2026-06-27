@@ -152,7 +152,6 @@ describe("AuthContext", () => {
 
         let contextValue;
         function Spy() {
-            // eslint-disable-next-line react-hooks/globals
             contextValue = useContext(AuthContext);
             return null;
         }
@@ -185,7 +184,6 @@ describe("AuthContext", () => {
 
         let contextValue;
         function Spy() {
-            // eslint-disable-next-line react-hooks/globals
             contextValue = useContext(AuthContext);
             return null;
         }

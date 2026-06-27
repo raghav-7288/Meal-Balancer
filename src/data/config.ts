@@ -125,4 +125,3 @@ export const APP_CONFIG: AppConfig = {
         moderate: 50,
     },
 };
-

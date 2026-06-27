@@ -7,6 +7,9 @@
 /* ─── Smooth Scroll & Selection ─── */
 html {
     scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 ::selection {
@@ -21,8 +24,8 @@ body.dark-mode ::selection {
 
 /* ─── Custom Scrollbar ─── */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -32,6 +35,8 @@ body.dark-mode ::selection {
 ::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 999px;
+    border: 1px solid transparent;
+    background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -46,19 +51,33 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
     background: #64748b;
 }
 
+/* Firefox scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+body.dark-mode * {
+    scrollbar-color: #475569 transparent;
+}
+
 /* ─── Glassmorphism Navigation ─── */
 .top-nav {
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-    background: rgba(255, 255, 255, 0.85) !important;
-    border-bottom: 1px solid rgba(229, 231, 235, 0.6) !important;
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    background: rgba(255, 255, 255, 0.88) !important;
+    border-bottom: 1px solid rgba(229, 231, 235, 0.5) !important;
+    box-shadow:
+        0 1px 3px rgba(15, 23, 42, 0.04),
+        0 4px 16px rgba(15, 23, 42, 0.02) !important;
 }
 
 body.dark-mode .top-nav {
-    background: rgba(30, 41, 59, 0.88) !important;
-    border-bottom-color: rgba(51, 65, 85, 0.6) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+    background: rgba(30, 41, 59, 0.9) !important;
+    border-bottom-color: rgba(51, 65, 85, 0.5) !important;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.2),
+        0 4px 16px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* ─── Enhanced Nav Links ─── */
@@ -72,11 +91,11 @@ body.dark-mode .top-nav {
 }
 
 .nav-link.active {
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
 }
 
 body.dark-mode .nav-link.active {
-    box-shadow: 0 4px 12px rgba(241, 245, 249, 0.1);
+    box-shadow: 0 2px 8px rgba(241, 245, 249, 0.1);
 }
 
 /* ─── Page Transitions ─── */
@@ -88,13 +107,13 @@ body.dark-mode .nav-link.active {
 .food-search-page,
 .weekly-planner-page,
 .progress-page {
-    animation: pageEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: pageEnter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes pageEnter {
     from {
         opacity: 0;
-        transform: translateY(8px);
+        transform: translateY(6px);
     }
     to {
         opacity: 1;
@@ -104,40 +123,46 @@ body.dark-mode .nav-link.active {
 
 /* ─── Enhanced Cards & Sections ─── */
 .section {
-    transition: box-shadow 0.25s ease, transform 0.25s ease !important;
+    transition:
+        box-shadow 0.25s ease,
+        transform 0.25s ease !important;
 }
 
 .section:hover {
-    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08) !important;
+    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.06) !important;
 }
 
 body.dark-mode .section:hover {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25) !important;
 }
 
 .kpi,
 .stat-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease !important;
 }
 
 .kpi:hover,
 .stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08) !important;
+    box-shadow: 0 10px 32px rgba(15, 23, 42, 0.07) !important;
 }
 
 body.dark-mode .kpi:hover,
 body.dark-mode .stat-card:hover {
-    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.25) !important;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* ─── Enhanced Welcome Card ─── */
 .welcome-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease !important;
 }
 
 .welcome-card:hover {
-    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.1) !important;
+    box-shadow: 0 20px 56px rgba(15, 23, 42, 0.09) !important;
 }
 
 .welcome-icon {
@@ -145,41 +170,50 @@ body.dark-mode .stat-card:hover {
 }
 
 .welcome-card:hover .welcome-icon {
-    transform: scale(1.05) rotate(-3deg);
+    transform: scale(1.05) rotate(-2deg);
 }
 
 /* ─── Button Enhancements ─── */
 button {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    font-weight: 600;
 }
 
 button:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
 }
 
 button:active:not(:disabled) {
     transform: translateY(0) scale(0.98);
+    box-shadow: none;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 .welcome-cta {
     background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%) !important;
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.25) !important;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2) !important;
 }
 
 .welcome-cta:hover {
-    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.35) !important;
-    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.3) !important;
+    transform: translateY(-2px) scale(1.01) !important;
 }
 
 .bmi-continue-btn {
     background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%) !important;
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.25) !important;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2) !important;
 }
 
 .bmi-continue-btn:hover:not(:disabled) {
-    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.35) !important;
-    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.3) !important;
+    transform: translateY(-2px) scale(1.01) !important;
 }
 
 /* ─── Focus Visible Accessibility ─── */
@@ -192,7 +226,8 @@ button:active:not(:disabled) {
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
-select:focus-visible {
+select:focus-visible,
+textarea:focus-visible {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
 }
@@ -210,49 +245,61 @@ body.dark-mode :focus-visible {
 
 /* ─── Enhanced Meal Cards ─── */
 .meal-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease !important;
 }
 
 .meal-card:hover {
     border-color: #cbd5e1 !important;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
 }
 
 body.dark-mode .meal-card:hover {
     border-color: #475569 !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* ─── Compare Cards Animation ─── */
 .compare-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease !important;
 }
 
 .compare-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
 }
 
 /* ─── Enhanced Toast Notifications ─── */
 .toast-popup {
     backdrop-filter: blur(8px) !important;
     background: rgba(5, 150, 105, 0.95) !important;
-    box-shadow: 0 12px 40px rgba(5, 150, 105, 0.25), 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    box-shadow:
+        0 8px 32px rgba(5, 150, 105, 0.2),
+        0 4px 12px rgba(0, 0, 0, 0.08) !important;
 }
 
 .delete-toast-popup {
     backdrop-filter: blur(8px) !important;
     background: rgba(30, 41, 59, 0.95) !important;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.25),
+        0 4px 12px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* ─── Enhanced Modal ─── */
 .modal-overlay {
     backdrop-filter: blur(8px) saturate(120%) !important;
+    transition: opacity 0.2s ease;
 }
 
 .modal-content {
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.15),
+        0 8px 20px rgba(0, 0, 0, 0.08) !important;
 }
 
 /* ─── Plan Row Hover ─── */
@@ -271,11 +318,14 @@ body.dark-mode .plan-row:hover:not(.active) {
 
 /* ─── Score Pill Enhancement ─── */
 .score-pill {
-    transition: transform 0.2s ease !important;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease !important;
 }
 
 .score-pill:hover {
-    transform: scale(1.05);
+    transform: scale(1.03);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 /* ─── Table Row Hover ─── */
@@ -284,11 +334,11 @@ table tbody tr {
 }
 
 table tbody tr:hover {
-    background: #f8fafc;
+    background: rgba(248, 250, 252, 0.8);
 }
 
 body.dark-mode table tbody tr:hover {
-    background: #1a2332;
+    background: rgba(26, 35, 50, 0.6);
 }
 
 /* ─── Loading Skeleton Animation ─── */
@@ -319,32 +369,32 @@ body.dark-mode .skeleton {
 }
 
 .auth-card:hover {
-    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.1) !important;
+    box-shadow: 0 16px 48px rgba(15, 23, 42, 0.08) !important;
 }
 
 .auth-btn {
     background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%) !important;
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.2) !important;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18) !important;
     transition: all 0.2s ease !important;
 }
 
 .auth-btn:hover:not(:disabled) {
-    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.3) !important;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.25) !important;
     transform: translateY(-1px) !important;
 }
 
 body.dark-mode .auth-btn {
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3) !important;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25) !important;
     color: #ffffff !important;
 }
 
 body.dark-mode .auth-btn:hover:not(:disabled) {
-    box-shadow: 0 8px 28px rgba(59, 130, 246, 0.4) !important;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35) !important;
 }
 
 body.dark-mode .auth-card:hover {
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* ─── Nutrient Bar Fill Animation ─── */
@@ -354,16 +404,21 @@ body.dark-mode .auth-card:hover {
 
 /* ─── Welcome Highlight Items Stagger ─── */
 .welcome-highlight-item {
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease !important;
 }
 
 .welcome-highlight-item:hover {
-    transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    transform: translateX(3px);
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
 }
 
 body.dark-mode .welcome-highlight-item:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-color: #475569;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* ─── Profile Details ─── */
@@ -390,7 +445,7 @@ body.dark-mode .profile-details:hover {
 }
 
 .bmi-result-card:hover {
-    transform: scale(1.01);
+    transform: scale(1.005);
 }
 
 /* ─── Enhanced Input Focus ─── */
@@ -399,7 +454,6 @@ body.dark-mode .profile-details:hover {
 .builder-row input:focus,
 .builder-row select:focus,
 .auth-field input:focus {
-    transform: translateY(-1px);
     transition: all 0.2s ease;
 }
 
@@ -427,14 +481,26 @@ body.dark-mode .profile-details:hover {
     .nav-brand-text small {
         display: none;
     }
+
+    /* Reduce hover effects on touch devices */
+    button:hover:not(:disabled) {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .kpi:hover,
+    .stat-card:hover {
+        transform: none;
+    }
+
+    .section:hover {
+        box-shadow: 0 10px 35px rgba(15, 23, 42, 0.05) !important;
+    }
 }
 
 @media (max-width: 480px) {
     .nav-brand-text span {
         font-size: 15px !important;
-    }
-
-    .nav-logo-img {
     }
 
     .welcome-card {
@@ -445,11 +511,21 @@ body.dark-mode .profile-details:hover {
         border-radius: 20px !important;
         padding: 28px !important;
     }
+
+    .section {
+        border-radius: 18px !important;
+    }
+
+    .meal-card {
+        border-radius: 16px !important;
+    }
 }
 
 /* ─── Smooth Color Transitions for Dark Mode ─── */
 body {
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
 }
 
 .top-nav,
@@ -462,13 +538,18 @@ body {
 .bmi-calculator-card,
 .plan-row,
 .compare-card,
-.nutrient-row {
-    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+.nutrient-row,
+.app-footer {
+    transition:
+        background-color 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease,
+        transform 0.2s ease;
 }
 
 /* ─── Subtle Gradient Backgrounds ─── */
 .welcome-page {
-    background: linear-gradient(180deg, #f8fafc 0%, #f0f4f8 100%) !important;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%) !important;
 }
 
 body.dark-mode .welcome-page {
@@ -476,17 +557,19 @@ body.dark-mode .welcome-page {
 }
 
 .auth-page {
-    background: linear-gradient(180deg, #f4f7fb 0%, #e8ecf4 100%) !important;
+    background: linear-gradient(180deg, #f4f7fb 0%, #edf2f7 100%) !important;
 }
-
 
 /* ─── Badge/Pill Improvements ─── */
 .goal-tag {
-    transition: transform 0.15s ease !important;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease !important;
 }
 
 .goal-tag:hover {
-    transform: scale(1.05);
+    transform: scale(1.03);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 /* ─── Nav Brand Animation ─── */
@@ -495,6 +578,283 @@ body.dark-mode .welcome-page {
 }
 
 .nav-brand:hover {
-    opacity: 0.8;
+    opacity: 0.85;
 }
 
+/* ─── Consistent Icon Sizing ─── */
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    min-height: 36px;
+}
+
+.icon-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ─── Improved Link Styling ─── */
+.link-btn {
+    transition:
+        color 0.15s ease,
+        opacity 0.15s ease !important;
+}
+
+.link-btn:hover {
+    opacity: 0.75;
+}
+
+/* ─── Enhanced Sync Badge ─── */
+.sync-badge {
+    transition: all 0.2s ease;
+}
+
+/* ─── Consistent Toggle Button ─── */
+.toggle-switch {
+    transition: background 0.25s ease !important;
+}
+
+.toggle-switch::after {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* ─── Improved Textarea ─── */
+textarea {
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+/* ─── Better Disabled Inputs ─── */
+input:disabled,
+select:disabled,
+textarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #f1f5f9 !important;
+}
+
+body.dark-mode input:disabled,
+body.dark-mode select:disabled,
+body.dark-mode textarea:disabled {
+    background: #1a2332 !important;
+    opacity: 0.5;
+}
+
+/* ─── Responsive Typography ─── */
+@media (max-width: 640px) {
+    .section-title h2 {
+        font-size: 16px !important;
+    }
+
+    .kpi-value {
+        font-size: 28px !important;
+    }
+
+    .meal-head h3 {
+        font-size: 16px !important;
+    }
+}
+
+/* ─── Reduce motion for accessibility ─── */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    html {
+        scroll-behavior: auto;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
+   FINAL POLISH PASS — Touch targets, mobile spacing,
+   textarea focus, transition smoothness.
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── Remove mobile tap highlight (iOS/Android) ─── */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ─── Minimum touch targets on mobile (44×44px WCAG 2.5.5) ─── */
+@media (pointer: coarse) {
+    .icon-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .day-chip {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .plan-row {
+        min-height: 48px;
+    }
+
+    .health-tools-tab {
+        min-height: 48px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+    .nav-link {
+        min-height: 44px;
+    }
+
+    .nav-hamburger,
+    .nav-theme-toggle {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    /* Larger add-food button tap target */
+    .add-inline-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/* ─── Textarea consistent focus ─── */
+textarea:focus {
+    border-color: var(--ds-focus-border, #3b82f6);
+    box-shadow: var(--ds-focus-ring, 0 0 0 3px rgba(59, 130, 246, 0.12));
+    outline: none;
+}
+
+body.dark-mode textarea:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+
+/* ─── Smooth collapsible meal card body transition ─── */
+.meal-card .table-wrap,
+.meal-card .reason-box {
+    animation: content-expand 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes content-expand {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ─── Button aria-busy loading pulse ─── */
+button[aria-busy="true"] {
+    position: relative;
+    pointer-events: none;
+}
+
+button[aria-busy="true"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(255, 255, 255, 0.1);
+    animation: btn-loading-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes btn-loading-pulse {
+    0%,
+    100% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* ─── Nutrient limit progress bar smoothness ─── */
+.nutrient-limit-bar-fill {
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Enhanced empty cell styling ─── */
+.empty-cell {
+    color: var(--ds-text-faint, #94a3b8);
+    font-style: italic;
+    padding: 24px 16px !important;
+    text-align: center;
+}
+
+/* ─── Mobile: Improve spacing for dense views ─── */
+@media (max-width: 640px) {
+    /* Tighter KPI grid on mobile */
+    .kpi-grid--flex {
+        gap: 8px !important;
+    }
+
+    /* Ensure meal builder table is scrollable */
+    .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Improve plan sidebar mobile collapse */
+    .plan-sidebar {
+        border-radius: var(--ds-radius-xl, 16px) !important;
+    }
+
+    /* Stack footer text tighter */
+    .app-footer p {
+        font-size: 11px;
+    }
+}
+
+/* ─── Tablet: Better two-column breakpoints ─── */
+@media (min-width: 641px) and (max-width: 1024px) {
+    .two-col {
+        grid-template-columns: 1fr !important;
+    }
+
+    .comparison-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* ─── Improved progress bar accessibility ─── */
+[role="progressbar"] {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--ds-radius-full, 999px);
+}
+
+/* ─── Better inline-add-row visual separation ─── */
+.inline-add-row {
+    border-top: 1px dashed var(--ds-border, #e5e7eb);
+}
+
+.inline-add-row td {
+    padding-top: 12px !important;
+}
+
+body.dark-mode .inline-add-row {
+    border-top-color: var(--ds-border, #334155);
+}
+
+/* ─── Weekly planner: Better item tooltips ─── */
+.weekly-item-tooltip {
+    pointer-events: none;
+    z-index: 100;
+}
+
+/* ─── Subtle border on active day chip ─── */
+.day-chip.active {
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+
+body.dark-mode .day-chip.active {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}

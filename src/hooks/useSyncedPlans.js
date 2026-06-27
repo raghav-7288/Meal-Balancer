@@ -79,9 +79,13 @@ export function useSyncedPlans() {
     const isMounted = useRef(true);
     const syncInProgress = useRef(false);
     const plansRef = useRef(plans);
+    const syncDebounceRef = useRef(null);
 
     useEffect(() => {
-        return () => { isMounted.current = false; };
+        return () => {
+            isMounted.current = false;
+            if (syncDebounceRef.current) clearTimeout(syncDebounceRef.current);
+        };
     }, []);
 
     // Keep plansRef in sync with latest state
@@ -96,7 +100,11 @@ export function useSyncedPlans() {
 
     // Initial sync when user logs in
     useEffect(() => {
-        if (!isAuthenticated || !user?.id) return;
+        if (!isAuthenticated || !user?.id) {
+            // Reset sync flag when user logs out so next login isn't blocked
+            syncInProgress.current = false;
+            return;
+        }
         if (syncInProgress.current) return;
 
         async function initialSync() {
@@ -166,9 +174,21 @@ export function useSyncedPlans() {
             const next = typeof updater === "function" ? updater(prev) : updater;
             const { isAuthenticated: authed, userId } = authRef.current;
 
-            // Async Supabase sync with status tracking
+            // Debounce Supabase sync — coalesce rapid mutations into a single call
             if (authed && userId) {
-                syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncErrorRef, isMounted);
+                if (syncDebounceRef.current) clearTimeout(syncDebounceRef.current);
+                const capturedPrev = prev;
+                const capturedNext = next;
+                syncDebounceRef.current = setTimeout(() => {
+                    syncToSupabase(
+                        capturedPrev,
+                        capturedNext,
+                        userId,
+                        setSyncStatusRef,
+                        setSyncErrorRef,
+                        isMounted
+                    );
+                }, 300);
             }
 
             return next;
@@ -237,5 +257,3 @@ async function syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncError
         }
     }
 }
-
-

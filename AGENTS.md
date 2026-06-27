@@ -9,28 +9,41 @@ React 19 SPA for Indian diet planning. Users build meals in grams, score dietary
 - **UI Layer**: React JSX components (`src/components/`) with lazy-loaded pages via `lazyWithRetry()` in `App.jsx`
 - **Engines** (TypeScript): Pure scoring/nutrient logic in `src/engines/` — imported by JSX components
 - **Services**: Supabase CRUD in `src/services/` — every service imports the singleton `supabase` from `src/lib/supabaseClient.js`
+- **Stores**: Zustand stores in `src/stores/` — `usePlanStore` centralizes plan UI state (replaces prop-drilling)
+- **Context**: React context providers in `src/context/` — `AuthContext` (auth state) and `ProfileContext` (user profile)
 - **Hooks**: State + side-effects in `src/hooks/` — `useSyncedPlans` is the core bi-directional sync (localStorage ↔ Supabase)
+- **Utils**: `src/utils/` — `queryCache.js` (5-min TTL cache with dedup), `withRetry.js` (exponential backoff for Supabase), `schemas.js` (Zod validation), `generatePlanPdf.js`
 - **Data**: Static config/types in `src/data/config.ts`, local foods in `src/data/foods.js`
 
 ## Key Conventions
 
+- **Node**: 22.x (specified in `package.json` `engines` field).
 - **Mixed TS/JS**: Only `src/engines/*.ts` and `src/data/config.ts` are TypeScript. Everything else is JSX/JS. Don't convert files to TS without explicit instruction.
 - **Imports**: Use relative paths (no aliases). Supabase client is always `import { supabase } from "../lib/supabaseClient"`.
 - **Env vars**: Prefixed with `VITE_` — access via `import.meta.env.VITE_SUPABASE_URL`.
 - **Styling**: Tailwind CSS 4 (`@tailwindcss/vite` plugin) + component-scoped CSS files. No CSS modules.
 - **Icons**: `lucide-react` — import individual icons: `import { Home } from "lucide-react"`.
 - **Toasts**: Use `react-hot-toast` (`toast.success(...)` / `toast.error(...)`). Global `<Toaster>` is in `App.jsx`.
+- **State**: Zustand for shared UI state (`import { usePlanStore } from "../stores/planStore"`). React context only for auth/profile.
+- **Validation**: Zod schemas in `src/utils/schemas.js` validate Supabase responses at service boundaries. Use `validateResponse(schema, data, context)` — gracefully degrades on mismatch.
+- **Retry**: Wrap Supabase calls with `withRetry(fn, { context })` from `src/utils/withRetry.js` — exponential backoff (1s, 2s, 4s), only retries network/5xx errors.
 
 ## Commands
 
 ```bash
 npm run dev          # Vite dev server (localhost:5173)
+npm run build        # Production build (output: dist/)
+npm run build:analyze # Bundle analysis (opens treemap in browser)
+npm run preview      # Preview production build locally
 npm test             # Vitest (unit tests, excludes e2e/)
 npm run test:watch   # Vitest watch mode
+npm run test:coverage # Vitest with coverage report
+npm run test:e2e     # Playwright E2E tests (auto-starts dev server)
 npm run typecheck    # tsc --noEmit (engines + config only)
 npm run lint         # ESLint
 npm run format       # Prettier write
 npm run context      # Regenerate CONTEXT.md
+npm run seed:preset-plans # Seed preset plans to Supabase (requires VITE_SUPABASE_SERVICE_ROLE_KEY)
 ```
 
 ## Testing Patterns
@@ -40,6 +53,7 @@ npm run context      # Regenerate CONTEXT.md
 - Supabase is mocked via `vi.mock("../src/lib/supabaseClient")` with chainable query builders — see `tests/__mocks__/supabaseClient.js` for the shared mock pattern.
 - Service tests use a `terminalResult` variable pattern to control mock responses per-test.
 - Engine tests import directly from `src/engines/` — no mocking needed (pure functions).
+- **E2E tests**: Playwright specs in `e2e/`. Config in `playwright.config.js` — auto-starts dev server. Run with `npm run test:e2e`.
 
 ## Data Flow: Plan Sync
 
@@ -69,4 +83,7 @@ Supabase with RLS on user-scoped tables. Migrations in `supabase/migrations/` (n
 - UI primitives: `src/components/ui/<Name>.jsx`
 - Hooks: `src/hooks/use<Name>.js`
 - Services: `src/services/<name>Service.js`
+- Stores: `src/stores/<name>Store.js`
+- Context: `src/context/<Name>Context.jsx`
+- Utils: `src/utils/<name>.js`
 

@@ -45,7 +45,9 @@ export function useMealHistory() {
     }, [isAuthenticated, user?.id]);
 
     useEffect(() => {
-        return () => { isMounted.current = false; };
+        return () => {
+            isMounted.current = false;
+        };
     }, []);
 
     // Persist to localStorage whenever history changes

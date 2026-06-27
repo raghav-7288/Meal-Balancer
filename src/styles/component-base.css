@@ -1,0 +1,710 @@
+/* ═══════════════════════════════════════════════════════
+   COMPONENT BASE — Reusable composable patterns.
+   Uses design tokens. Reduces duplication across pages.
+   Import AFTER design-tokens.css.
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── Base Card ───
+   Shared card pattern used by .section, .kpi, .stat-card,
+   .meal-card, .pro-card, .nutrient-limits-strip, etc.
+   ─────────────────────────────────────────────────────── */
+.ds-card {
+    background: var(--ds-card-bg);
+    border: 1px solid var(--ds-card-border);
+    border-radius: var(--ds-card-radius);
+    box-shadow: var(--ds-card-shadow);
+    padding: var(--ds-card-padding);
+}
+
+.ds-card--sm {
+    border-radius: var(--ds-radius-xl);
+    padding: var(--ds-space-4);
+}
+
+.ds-card--lg {
+    border-radius: var(--ds-radius-3xl);
+    padding: var(--ds-space-12);
+}
+
+body.dark-mode .ds-card {
+    background: var(--ds-surface);
+    border-color: var(--ds-border);
+    box-shadow: var(--ds-shadow-md);
+}
+
+/* ─── Base Input ───
+   Shared input styling used by .field input, .auth-field input,
+   .pro-input, .bmi-input-group input, .modal-input, etc.
+   ─────────────────────────────────────────────────────── */
+.ds-input {
+    width: 100%;
+    height: var(--ds-input-height);
+    padding: var(--ds-input-padding-y) var(--ds-input-padding-x);
+    background: var(--ds-input-bg);
+    border: 1px solid var(--ds-input-border);
+    border-radius: var(--ds-input-radius);
+    font-size: var(--ds-input-font-size);
+    font-family: inherit;
+    color: var(--ds-text);
+    outline: none;
+    box-sizing: border-box;
+    line-height: 1.4;
+    transition:
+        border-color var(--ds-transition-fast),
+        box-shadow var(--ds-transition-fast);
+}
+
+.ds-input:focus {
+    border-color: var(--ds-focus-border);
+    box-shadow: var(--ds-focus-ring);
+}
+
+.ds-input::placeholder {
+    color: var(--ds-text-faint);
+}
+
+body.dark-mode .ds-input {
+    background: #1a2332;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+
+body.dark-mode .ds-input:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+
+body.dark-mode .ds-input::placeholder {
+    color: #64748b;
+}
+
+/* ─── Base Select ─── */
+.ds-select {
+    width: 100%;
+    height: var(--ds-input-height);
+    padding: var(--ds-input-padding-y) var(--ds-input-padding-x);
+    background: var(--ds-input-bg);
+    border: 1px solid var(--ds-input-border);
+    border-radius: var(--ds-input-radius);
+    font-size: var(--ds-input-font-size);
+    font-family: inherit;
+    color: var(--ds-text);
+    outline: none;
+    box-sizing: border-box;
+    line-height: 1.4;
+    transition:
+        border-color var(--ds-transition-fast),
+        box-shadow var(--ds-transition-fast);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    cursor: pointer;
+}
+
+.ds-select:focus {
+    border-color: var(--ds-focus-border);
+    box-shadow: var(--ds-focus-ring);
+}
+
+/* ─── Base Button ───
+   Common button base. Variants via modifiers.
+   ─────────────────────────────────────────────────────── */
+.ds-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-2);
+    padding: var(--ds-btn-padding-y) var(--ds-btn-padding-x);
+    border: none;
+    border-radius: var(--ds-btn-radius);
+    font-size: var(--ds-btn-font-size);
+    font-weight: var(--ds-btn-font-weight);
+    font-family: inherit;
+    line-height: 1.4;
+    cursor: pointer;
+    background: var(--ds-primary);
+    color: #ffffff;
+    transition: all var(--ds-transition-fast);
+}
+
+.ds-btn:hover:not(:disabled) {
+    background: var(--ds-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+}
+
+.ds-btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+    box-shadow: none;
+}
+
+.ds-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Button variants */
+.ds-btn--secondary {
+    background: var(--ds-surface-hover);
+    color: var(--ds-text);
+    border: 1px solid var(--ds-border-input);
+}
+
+.ds-btn--secondary:hover:not(:disabled) {
+    background: #e2e8f0;
+    box-shadow: none;
+}
+
+.ds-btn--accent {
+    background: var(--ds-accent);
+    color: #ffffff;
+}
+
+.ds-btn--accent:hover:not(:disabled) {
+    background: var(--ds-accent-hover);
+}
+
+.ds-btn--danger {
+    background: var(--ds-danger);
+    color: #ffffff;
+}
+
+.ds-btn--danger:hover:not(:disabled) {
+    background: #b91c1c;
+}
+
+.ds-btn--success {
+    background: var(--ds-success);
+    color: #ffffff;
+}
+
+.ds-btn--success:hover:not(:disabled) {
+    background: #047857;
+}
+
+.ds-btn--ghost {
+    background: transparent;
+    color: var(--ds-text-tertiary);
+    border: none;
+}
+
+.ds-btn--ghost:hover:not(:disabled) {
+    background: var(--ds-surface-hover);
+    color: var(--ds-text);
+    box-shadow: none;
+    transform: none;
+}
+
+.ds-btn--sm {
+    padding: 6px 12px;
+    font-size: var(--ds-text-base);
+    border-radius: var(--ds-radius-sm);
+}
+
+.ds-btn--lg {
+    padding: 14px 28px;
+    font-size: var(--ds-text-xl);
+    font-weight: var(--ds-font-bold);
+    border-radius: var(--ds-radius-lg);
+}
+
+body.dark-mode .ds-btn {
+    background: var(--ds-accent);
+}
+
+body.dark-mode .ds-btn:hover:not(:disabled) {
+    background: var(--ds-accent-hover);
+}
+
+body.dark-mode .ds-btn--secondary {
+    background: #334155;
+    color: #e2e8f0;
+    border-color: #475569;
+}
+
+body.dark-mode .ds-btn--secondary:hover:not(:disabled) {
+    background: #475569;
+}
+
+/* ─── Badge / Pill ───
+   Shared pattern for sync badges, status pills, tags.
+   ─────────────────────────────────────────────────────── */
+.ds-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-1);
+    padding: var(--ds-badge-padding-y) var(--ds-badge-padding-x);
+    border-radius: var(--ds-badge-radius);
+    font-size: var(--ds-badge-font-size);
+    font-weight: var(--ds-badge-font-weight);
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.ds-badge--success {
+    background: var(--ds-success-bg);
+    color: var(--ds-success-text);
+    border: 1px solid var(--ds-success-border);
+}
+
+.ds-badge--warning {
+    background: var(--ds-warning-bg);
+    color: var(--ds-warning-text);
+    border: 1px solid var(--ds-warning-border);
+}
+
+.ds-badge--danger {
+    background: var(--ds-danger-bg);
+    color: var(--ds-danger-text);
+    border: 1px solid var(--ds-danger-border);
+}
+
+.ds-badge--info {
+    background: var(--ds-info-bg);
+    color: var(--ds-info-text);
+    border: 1px solid var(--ds-info-border);
+}
+
+.ds-badge--neutral {
+    background: var(--ds-surface-hover);
+    color: var(--ds-text-muted);
+    border: 1px solid var(--ds-border);
+}
+
+body.dark-mode .ds-badge--success {
+    background: var(--ds-success-bg);
+    border-color: var(--ds-success-border);
+    color: var(--ds-success-text);
+}
+
+body.dark-mode .ds-badge--warning {
+    background: var(--ds-warning-bg);
+    border-color: var(--ds-warning-border);
+    color: var(--ds-warning-text);
+}
+
+body.dark-mode .ds-badge--danger {
+    background: var(--ds-danger-bg);
+    border-color: var(--ds-danger-border);
+    color: var(--ds-danger-text);
+}
+
+body.dark-mode .ds-badge--info {
+    background: var(--ds-info-bg);
+    border-color: var(--ds-info-border);
+    color: var(--ds-info-text);
+}
+
+/* ─── Alert / Banner ───
+   Shared pattern for test-*, auth-error, auth-success,
+   reason-box, progress-trend-banner, unassigned-notice, etc.
+   ─────────────────────────────────────────────────────── */
+.ds-alert {
+    padding: var(--ds-alert-padding);
+    border-radius: var(--ds-alert-radius);
+    font-size: var(--ds-alert-font-size);
+    font-weight: var(--ds-font-medium);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ds-space-2);
+}
+
+.ds-alert--success {
+    background: var(--ds-success-bg);
+    border: 1px solid var(--ds-success-border);
+    color: var(--ds-success-text);
+}
+
+.ds-alert--warning {
+    background: var(--ds-warning-bg);
+    border: 1px solid var(--ds-warning-border);
+    color: var(--ds-warning-text);
+}
+
+.ds-alert--danger {
+    background: var(--ds-danger-bg);
+    border: 1px solid var(--ds-danger-border);
+    color: var(--ds-danger-text);
+}
+
+.ds-alert--info {
+    background: var(--ds-info-bg);
+    border: 1px solid var(--ds-info-border);
+    color: var(--ds-info-text);
+}
+
+body.dark-mode .ds-alert--success {
+    background: var(--ds-success-bg);
+    border-color: var(--ds-success-border);
+    color: var(--ds-success-text);
+}
+
+body.dark-mode .ds-alert--warning {
+    background: var(--ds-warning-bg);
+    border-color: var(--ds-warning-border);
+    color: var(--ds-warning-text);
+}
+
+body.dark-mode .ds-alert--danger {
+    background: var(--ds-danger-bg);
+    border-color: var(--ds-danger-border);
+    color: var(--ds-danger-text);
+}
+
+body.dark-mode .ds-alert--info {
+    background: var(--ds-info-bg);
+    border-color: var(--ds-info-border);
+    color: var(--ds-info-text);
+}
+
+/* ─── Table ─── */
+.ds-table-wrap {
+    overflow: visible;
+    border-radius: var(--ds-table-radius);
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+}
+
+.ds-table-wrap table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--ds-text-md);
+}
+
+.ds-table-wrap th {
+    background: var(--ds-table-header-bg);
+    color: var(--ds-text-tertiary);
+    font-size: var(--ds-text-xs);
+    font-weight: var(--ds-font-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-align: left;
+    padding: var(--ds-table-cell-padding);
+    border-bottom: 1px solid var(--ds-table-border);
+}
+
+.ds-table-wrap td {
+    text-align: left;
+    padding: var(--ds-table-cell-padding);
+    border-bottom: 1px solid var(--ds-table-border);
+}
+
+.ds-table-wrap th:first-child {
+    border-radius: var(--ds-table-radius) 0 0 0;
+}
+
+.ds-table-wrap th:last-child {
+    border-radius: 0 var(--ds-table-radius) 0 0;
+}
+
+body.dark-mode .ds-table-wrap {
+    background: var(--ds-surface);
+    border-color: var(--ds-border);
+}
+
+body.dark-mode .ds-table-wrap th {
+    background: #1a2332;
+    color: var(--ds-text-faint);
+}
+
+body.dark-mode .ds-table-wrap td {
+    border-bottom-color: var(--ds-border);
+}
+
+/* ─── Field Label ───
+   Consistent field label pattern.
+   ─────────────────────────────────────────────────────── */
+.ds-label {
+    font-size: var(--ds-text-sm);
+    font-weight: var(--ds-font-bold);
+    color: var(--ds-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+body.dark-mode .ds-label {
+    color: var(--ds-text-faint);
+}
+
+/* ─── Section Title ───
+   Consistent section heading.
+   ─────────────────────────────────────────────────────── */
+.ds-section-title {
+    margin: 0;
+    font-size: var(--ds-section-title-size);
+    font-weight: var(--ds-section-title-weight);
+    letter-spacing: -0.02em;
+    color: var(--ds-text);
+}
+
+body.dark-mode .ds-section-title {
+    color: #f1f5f9;
+}
+
+/* ─── Chip / Toggle Chip ───
+   Shared pattern for day-chip, filter chips, option chips.
+   ─────────────────────────────────────────────────────── */
+.ds-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-2);
+    padding: var(--ds-space-2) var(--ds-space-3);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-md);
+    background: var(--ds-surface-alt);
+    color: var(--ds-text-tertiary);
+    font-size: var(--ds-text-base);
+    font-weight: var(--ds-font-semibold);
+    cursor: pointer;
+    transition: all var(--ds-transition-fast);
+}
+
+.ds-chip:hover {
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--ds-text);
+}
+
+.ds-chip.active,
+.ds-chip[aria-pressed="true"] {
+    background: var(--ds-primary);
+    color: #ffffff;
+    border-color: var(--ds-primary);
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
+}
+
+body.dark-mode .ds-chip {
+    color: var(--ds-text-faint);
+    border-color: var(--ds-border);
+    background: transparent;
+}
+
+body.dark-mode .ds-chip:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #f1f5f9;
+}
+
+body.dark-mode .ds-chip.active,
+body.dark-mode .ds-chip[aria-pressed="true"] {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #f1f5f9;
+}
+
+/* ─── Icon Button ───
+   Square icon-only button with consistent sizing.
+   ─────────────────────────────────────────────────────── */
+.ds-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: var(--ds-space-2);
+    border-radius: var(--ds-radius-md);
+    background: var(--ds-surface-hover);
+    color: var(--ds-text);
+    border: 1px solid var(--ds-border-input);
+    cursor: pointer;
+    transition: all var(--ds-transition-fast);
+}
+
+.ds-icon-btn:hover:not(:disabled) {
+    background: #e2e8f0;
+}
+
+.ds-icon-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.ds-icon-btn--danger {
+    background: var(--ds-danger-bg);
+    color: var(--ds-danger-text);
+    border-color: var(--ds-danger-border);
+}
+
+.ds-icon-btn--danger:hover:not(:disabled) {
+    background: #fee2e2;
+}
+
+body.dark-mode .ds-icon-btn {
+    background: #334155;
+    color: #e2e8f0;
+    border-color: #475569;
+}
+
+body.dark-mode .ds-icon-btn--danger {
+    background: #450a0a;
+    color: #fca5a5;
+    border-color: #7f1d1d;
+}
+
+/* ─── Modal ───
+   Base modal styling.
+   ─────────────────────────────────────────────────────── */
+.ds-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: var(--ds-space-6);
+    animation: modal-fade-in 0.2s ease;
+}
+
+.ds-modal {
+    background: var(--ds-surface);
+    border-radius: var(--ds-modal-radius);
+    padding: var(--ds-modal-padding);
+    min-width: 340px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: var(--ds-modal-shadow);
+    animation: modal-scale-in 0.2s ease;
+}
+
+.ds-modal h3 {
+    margin: 0 0 var(--ds-space-4);
+    font-size: var(--ds-text-2xl);
+    font-weight: var(--ds-font-bold);
+    color: var(--ds-text);
+    letter-spacing: -0.01em;
+}
+
+body.dark-mode .ds-modal {
+    background: var(--ds-surface);
+}
+
+body.dark-mode .ds-modal h3 {
+    color: #f1f5f9;
+}
+
+/* ─── Tooltip ─── */
+.ds-tooltip {
+    position: absolute;
+    background: var(--ds-tooltip-bg);
+    color: var(--ds-tooltip-color);
+    font-size: var(--ds-tooltip-font-size);
+    font-weight: var(--ds-font-semibold);
+    padding: 5px 10px;
+    border-radius: var(--ds-tooltip-radius);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--ds-transition-fast);
+    z-index: 100;
+}
+
+body.dark-mode .ds-tooltip {
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+/* ─── Loading Spinner ─── */
+.ds-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--ds-border);
+    border-top-color: var(--ds-primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+body.dark-mode .ds-spinner {
+    border-color: #334155;
+    border-top-color: #60a5fa;
+}
+
+/* ─── Skeleton Loading ─── */
+.ds-skeleton {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--ds-radius-sm);
+}
+
+body.dark-mode .ds-skeleton {
+    background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+    background-size: 200% 100%;
+}
+
+/* ─── Empty State ─── */
+.ds-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 56px var(--ds-space-6);
+    min-height: 280px;
+    gap: var(--ds-space-3);
+}
+
+.ds-empty-state-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    background: var(--ds-surface-hover);
+    color: var(--ds-text-faint);
+    margin-bottom: var(--ds-space-2);
+    animation: float 3s ease-in-out infinite;
+}
+
+.ds-empty-state-title {
+    margin: 0;
+    font-size: var(--ds-text-2xl);
+    font-weight: var(--ds-font-bold);
+    color: var(--ds-text);
+    letter-spacing: -0.02em;
+}
+
+.ds-empty-state-desc {
+    margin: 0;
+    font-size: var(--ds-text-md);
+    color: var(--ds-text-tertiary);
+    max-width: 360px;
+    line-height: 1.6;
+}
+
+body.dark-mode .ds-empty-state-icon {
+    background: #1a2332;
+    color: #64748b;
+}
+
+body.dark-mode .ds-empty-state-title {
+    color: #f1f5f9;
+}
+
+body.dark-mode .ds-empty-state-desc {
+    color: var(--ds-text-faint);
+}
+
+/* ─── Progress Bar ─── */
+.ds-progress-track {
+    height: 8px;
+    background: var(--ds-border);
+    border-radius: var(--ds-radius-full);
+    overflow: hidden;
+}
+
+.ds-progress-fill {
+    height: 100%;
+    border-radius: var(--ds-radius-full);
+    transition: width 0.5s ease;
+    min-width: 2px;
+}
+
+body.dark-mode .ds-progress-track {
+    background: #334155;
+}

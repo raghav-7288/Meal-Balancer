@@ -68,4 +68,3 @@ function useFocusTrap(isActive) {
 }
 
 export default useFocusTrap;
-

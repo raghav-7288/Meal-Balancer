@@ -6,10 +6,10 @@
 .verification-banner {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 12px 16px;
-    margin-bottom: 16px;
-    border-radius: 8px;
+    gap: var(--ds-space-2);
+    padding: var(--ds-space-3) var(--ds-space-4);
+    margin-bottom: var(--ds-space-4);
+    border-radius: var(--ds-radius-sm);
     background: #fffbeb;
     border: 1px solid #f59e0b;
 }
@@ -22,8 +22,8 @@
 .verification-banner-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
+    gap: var(--ds-space-2);
+    font-size: var(--ds-text-md);
     color: #92400e;
 }
 
@@ -35,11 +35,11 @@
 .verification-badge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    padding: 2px 8px;
-    border-radius: 9999px;
+    gap: var(--ds-space-1);
+    font-size: var(--ds-text-sm);
+    font-weight: var(--ds-font-medium);
+    padding: 2px var(--ds-space-2);
+    border-radius: var(--ds-badge-radius);
     white-space: nowrap;
 }
 
@@ -49,8 +49,8 @@
 }
 
 .dark-mode .verification-badge.verified {
-    background: #064e3b;
-    color: #6ee7b7;
+    background: var(--ds-success-bg);
+    color: var(--ds-success-text);
 }
 
 .verification-badge.unverified {
@@ -67,23 +67,23 @@
 .verification-action {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--ds-space-2);
     flex-wrap: wrap;
 }
 
 .verification-btn {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    padding: 4px 10px;
-    border-radius: 6px;
+    gap: var(--ds-space-1);
+    font-size: var(--ds-text-sm);
+    font-weight: var(--ds-font-medium);
+    padding: var(--ds-space-1) var(--ds-space-3);
+    border-radius: var(--ds-radius-xs);
     border: 1px solid #d1d5db;
-    background: #ffffff;
-    color: #374151;
+    background: var(--ds-surface);
+    color: var(--ds-text-secondary);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--ds-transition-fast);
 }
 
 .verification-btn:hover:not(:disabled) {
@@ -99,7 +99,7 @@
 .verification-btn.secondary {
     border-color: transparent;
     background: transparent;
-    color: #6b7280;
+    color: var(--ds-text-muted);
     text-decoration: underline;
 }
 
@@ -118,35 +118,31 @@
 }
 
 .verification-sent {
-    font-size: 0.75rem;
-    color: #059669;
-    font-weight: 500;
+    font-size: var(--ds-text-sm);
+    color: var(--ds-success);
+    font-weight: var(--ds-font-medium);
 }
 
 .dark-mode .verification-sent {
-    color: #6ee7b7;
+    color: var(--ds-success-text);
 }
 
 .verification-error {
-    font-size: 0.75rem;
-    color: #dc2626;
+    font-size: var(--ds-text-sm);
+    color: var(--ds-danger);
     display: block;
     width: 100%;
-    margin-top: 4px;
+    margin-top: var(--ds-space-1);
 }
 
 .dark-mode .verification-error {
-    color: #fca5a5;
+    color: var(--ds-danger-text);
 }
-
 
 /* Profile row with verification badge */
 .profile-value-with-badge {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
+    gap: var(--ds-space-1);
 }
-
-
-

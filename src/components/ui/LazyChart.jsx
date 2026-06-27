@@ -28,7 +28,7 @@ function LazyChart({ children, height = "300px", className = "", rootMargin = 10
             {
                 rootMargin: `${rootMargin}px`,
                 threshold: 0,
-            },
+            }
         );
 
         observer.observe(el);
@@ -59,4 +59,3 @@ function LazyChart({ children, height = "300px", className = "", rootMargin = 10
 }
 
 export default LazyChart;
-

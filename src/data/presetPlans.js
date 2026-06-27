@@ -1,5 +1,19 @@
-export const MEALS = ["Early morning", "Breakfast", "Post breakfast snack", "Lunch", "Post lunch snack", "Dinner", "Bed time"];
+export const MEALS = [
+    "Early morning",
+    "Breakfast",
+    "Post breakfast snack",
+    "Lunch",
+    "Post lunch snack",
+    "Dinner",
+    "Bed time",
+];
 export const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+/** Get today's weekday name (Monday–Sunday) from DAYS array. */
+export function getTodayName() {
+    const idx = new Date().getDay(); // 0=Sun … 6=Sat
+    return DAYS[idx === 0 ? 6 : idx - 1];
+}
 
 function createWeeklyPlan(name, dayTemplate) {
     const meals = {};
@@ -118,4 +132,3 @@ export const PRESET_PLANS = [
         ],
     }),
 ];
-

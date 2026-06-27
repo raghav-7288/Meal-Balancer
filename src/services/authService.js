@@ -48,7 +48,10 @@ export async function signOut() {
  * @returns {Promise<object|null>}
  */
 export async function getCurrentUser() {
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const {
+        data: { user },
+        error,
+    } = await supabase.auth.getUser();
 
     if (error) {
         return null;
@@ -62,7 +65,10 @@ export async function getCurrentUser() {
  * @returns {Promise<object|null>}
  */
 export async function getSession() {
-    const { data: { session }, error } = await supabase.auth.getSession();
+    const {
+        data: { session },
+        error,
+    } = await supabase.auth.getSession();
 
     if (error) {
         return null;
@@ -79,7 +85,9 @@ export async function getSession() {
 export async function fetchUserProfile(userId) {
     const { data, error } = await supabase
         .from("user_profiles")
-        .select("user_id, username, full_name, created_at, height_cm, weight_kg, current_bmi, age, contact_number, activity, goal, diet_type, sex, bmi_target")
+        .select(
+            "user_id, username, full_name, created_at, height_cm, weight_kg, current_bmi, age, contact_number, activity, goal, diet_type, sex, bmi_target"
+        )
         .eq("user_id", userId)
         .single();
 
@@ -159,7 +167,8 @@ export async function createUserProfile(userId, username, fullName, contactNumbe
  * @returns {object} subscription with unsubscribe method.
  */
 export function onAuthStateChange(callback) {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(callback);
+    const {
+        data: { subscription },
+    } = supabase.auth.onAuthStateChange(callback);
     return subscription;
 }
-

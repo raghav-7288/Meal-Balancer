@@ -28,7 +28,17 @@ export function calculateFoodNutrients(food: LocalFood, grams: number) {
  * @param items - Array of objects with nutrient properties
  * @returns Aggregated nutrient totals
  */
-export function calculateMealTotals(items: Array<{ carbs: number; protein: number; fat: number; fibre: number; vitamins: number; minerals: number; kcal: number }>) {
+export function calculateMealTotals(
+    items: Array<{
+        carbs: number;
+        protein: number;
+        fat: number;
+        fibre: number;
+        vitamins: number;
+        minerals: number;
+        kcal: number;
+    }>
+) {
     return items.reduce(
         (acc, item) => {
             acc.carbs += item.carbs;
@@ -72,7 +82,15 @@ export function foodById(id: string): LocalFood | undefined {
  */
 export function accumulateNutrients(
     totals: NutrientTotals,
-    nutrients: { kcal?: number; carbs?: number; protein?: number; fat?: number; fibre?: number; vitamins?: number; minerals?: number },
+    nutrients: {
+        kcal?: number;
+        carbs?: number;
+        protein?: number;
+        fat?: number;
+        fibre?: number;
+        vitamins?: number;
+        minerals?: number;
+    },
     factor: number
 ): number {
     const kcal = (nutrients.kcal || 0) * factor;
@@ -107,9 +125,19 @@ export function accumulateNutrients(
  */
 export function aggregateMeal(items: MealItem[]): NutrientTotals {
     const totals: NutrientTotals = {
-        kcal: 0, carbs: 0, protein: 0, fat: 0, fibre: 0,
-        vitamins: 0, minerals: 0, addedSugar: 0, visibleFat: 0,
-        vegetablesG: 0, cerealEnergy: 0, cerealEnergyPct: 0, exchangeTotals: {},
+        kcal: 0,
+        carbs: 0,
+        protein: 0,
+        fat: 0,
+        fibre: 0,
+        vitamins: 0,
+        minerals: 0,
+        addedSugar: 0,
+        visibleFat: 0,
+        vegetablesG: 0,
+        cerealEnergy: 0,
+        cerealEnergyPct: 0,
+        exchangeTotals: {},
     };
 
     for (const item of items) {
@@ -161,9 +189,19 @@ export function aggregateMeal(items: MealItem[]): NutrientTotals {
  */
 export function combineDay(mealTotals: Record<string, NutrientTotals>): NutrientTotals {
     const day: NutrientTotals = {
-        kcal: 0, carbs: 0, protein: 0, fat: 0, fibre: 0,
-        vitamins: 0, minerals: 0, addedSugar: 0, visibleFat: 0,
-        vegetablesG: 0, cerealEnergy: 0, cerealEnergyPct: 0, exchangeTotals: {},
+        kcal: 0,
+        carbs: 0,
+        protein: 0,
+        fat: 0,
+        fibre: 0,
+        vitamins: 0,
+        minerals: 0,
+        addedSugar: 0,
+        visibleFat: 0,
+        vegetablesG: 0,
+        cerealEnergy: 0,
+        cerealEnergyPct: 0,
+        exchangeTotals: {},
     };
 
     for (const meal of Object.values(mealTotals)) {
@@ -187,4 +225,3 @@ export function combineDay(mealTotals: Record<string, NutrientTotals>): Nutrient
     day.cerealEnergyPct = day.kcal > 0 ? (day.cerealEnergy / day.kcal) * 100 : 0;
     return day;
 }
-

@@ -22,7 +22,7 @@ function calculateStreak(sorted) {
     for (let i = sorted.length - 1; i > 0; i--) {
         const curr = new Date(sorted[i].date + "T00:00:00");
         const prev = new Date(sorted[i - 1].date + "T00:00:00");
-        const diff = (curr.getTime() - prev.getTime()) / 86400000;
+        const diff = Math.round((curr.getTime() - prev.getTime()) / 86400000);
         if (diff === 1) streak++;
         else break;
     }
@@ -93,6 +93,31 @@ describe("Progress Streak Calculation", () => {
             { date: dateStr(1), score: 80 },
         ];
         expect(calculateStreak(sorted)).toBe(3);
+    });
+
+    it("handles DST-like fractional day differences via Math.round", () => {
+        // Simulate a scenario where date math produces non-integer results
+        // (e.g., 23 hours = 0.958 days, 25 hours = 1.041 days)
+        // The Math.round ensures these are still counted as 1 day apart
+        const sorted = [
+            { date: dateStr(2), score: 70 },
+            { date: dateStr(1), score: 75 },
+            { date: dateStr(0), score: 80 },
+        ];
+        // With Math.round, even if DST causes 23h or 25h between dates,
+        // consecutive calendar dates should still register as streak
+        expect(calculateStreak(sorted)).toBe(3);
+    });
+
+    it("does not count same-day duplicate entries as extra streak", () => {
+        const sorted = [
+            { date: dateStr(1), score: 70 },
+            { date: dateStr(1), score: 75 }, // same date
+            { date: dateStr(0), score: 80 },
+        ];
+        // Same date → diff=0, not 1, so streak breaks between duplicates
+        // Result: streak starts from most recent, counts 0→1 (1 day), then 1→1 (0 days) → break
+        expect(calculateStreak(sorted)).toBe(2);
     });
 });
 

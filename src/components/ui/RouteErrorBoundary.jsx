@@ -17,7 +17,11 @@ class RouteErrorBoundary extends Component {
     }
 
     componentDidCatch(error, errorInfo) {
-        console.error(`[RouteErrorBoundary] ${this.props.routeName || "Unknown"} crashed:`, error, errorInfo);
+        console.error(
+            `[RouteErrorBoundary] ${this.props.routeName || "Unknown"} crashed:`,
+            error,
+            errorInfo
+        );
     }
 
     handleRetry = () => {
@@ -27,13 +31,24 @@ class RouteErrorBoundary extends Component {
     render() {
         if (this.state.hasError) {
             return (
-                <div className="error-boundary" style={{ textAlign: "center", padding: "3rem 1.5rem" }}>
+                <div
+                    className="error-boundary"
+                    style={{ textAlign: "center", padding: "3rem 1.5rem" }}
+                >
                     <AlertTriangle size={48} style={{ color: "#f59e0b", marginBottom: "1rem" }} />
                     <h2 style={{ marginBottom: "0.5rem" }}>
                         {this.props.routeName || "This page"} encountered an error
                     </h2>
-                    <p style={{ color: "#64748b", marginBottom: "1.5rem", maxWidth: 420, margin: "0 auto 1.5rem" }}>
-                        {this.state.error?.message || "An unexpected error occurred. The rest of the app is still working."}
+                    <p
+                        style={{
+                            color: "#64748b",
+                            marginBottom: "1.5rem",
+                            maxWidth: 420,
+                            margin: "0 auto 1.5rem",
+                        }}
+                    >
+                        {this.state.error?.message ||
+                            "An unexpected error occurred. The rest of the app is still working."}
                     </p>
                     <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center" }}>
                         <button
@@ -82,4 +97,3 @@ class RouteErrorBoundary extends Component {
 }
 
 export default RouteErrorBoundary;
-

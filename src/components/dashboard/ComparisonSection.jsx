@@ -1,77 +1,70 @@
+import { memo, useMemo } from "react";
 import { Sparkles } from "lucide-react";
-import {
-    RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-    ResponsiveContainer, Legend, Tooltip,
-} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import Section from "../ui/Section";
 
-const RADAR_COLORS = ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+const PLAN_COLORS = ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
-function buildRadarData(summaries) {
-    // Normalize each metric to 0–100 scale for radar comparison
-    const maxKcal = Math.max(...summaries.map((s) => s.dayTotals.kcal || 1));
-    const maxProtein = Math.max(...summaries.map((s) => s.dayTotals.protein || 1));
-    const maxFibre = Math.max(...summaries.map((s) => s.dayTotals.fibre || 1));
-    const maxVeg = Math.max(...summaries.map((s) => s.dayTotals.vegetablesG || 1));
-
+function buildComparisonData(summaries) {
     const metrics = [
-        { metric: "Score", key: "score" },
-        { metric: "Energy", key: "energy" },
-        { metric: "Protein", key: "protein" },
-        { metric: "Fibre", key: "fibre" },
-        { metric: "Vegetables", key: "veg" },
+        { metric: "Score", getValue: (s) => s.dayScore.score },
+        { metric: "Energy", getValue: (s) => Math.round(s.dayTotals.kcal || 0) },
+        { metric: "Protein (g)", getValue: (s) => Math.round(s.dayTotals.protein || 0) },
+        { metric: "Fibre (g)", getValue: (s) => Math.round(s.dayTotals.fibre || 0) },
+        { metric: "Vegetables (g)", getValue: (s) => Math.round(s.dayTotals.vegetablesG || 0) },
     ];
 
     return metrics.map((m) => {
         const point = { metric: m.metric };
         summaries.forEach((s) => {
-            const name = s.plan.name.length > 12 ? s.plan.name.slice(0, 12) + "…" : s.plan.name;
-            if (m.key === "score") point[name] = s.dayScore.score;
-            else if (m.key === "energy") point[name] = Math.round((s.dayTotals.kcal / maxKcal) * 100);
-            else if (m.key === "protein") point[name] = Math.round((s.dayTotals.protein / maxProtein) * 100);
-            else if (m.key === "fibre") point[name] = Math.round((s.dayTotals.fibre / maxFibre) * 100);
-            else if (m.key === "veg") point[name] = Math.round((s.dayTotals.vegetablesG / maxVeg) * 100);
+            const name = s.plan.name.length > 14 ? s.plan.name.slice(0, 14) + "…" : s.plan.name;
+            point[name] = m.getValue(s);
         });
         return point;
     });
 }
 
 function ComparisonSection({ summaries, bestSummary }) {
-    const radarData = buildRadarData(summaries);
-    const planNames = summaries.map((s) =>
-        s.plan.name.length > 12 ? s.plan.name.slice(0, 12) + "…" : s.plan.name
+    const chartData = useMemo(() => buildComparisonData(summaries), [summaries]);
+    const planNames = useMemo(
+        () =>
+            summaries.map((s) =>
+                s.plan.name.length > 14 ? s.plan.name.slice(0, 14) + "…" : s.plan.name
+            ),
+        [summaries]
     );
 
     return (
         <>
-            <Section title="Plan comparison radar" icon={<Sparkles size={16} />}>
-                <div className="comparison-radar-wrap" role="img" aria-label="Radar chart comparing plans">
+            <Section title="Plan comparison" icon={<Sparkles size={16} />}>
+                <div
+                    className="comparison-radar-wrap"
+                    role="img"
+                    aria-label="Bar chart comparing plans"
+                >
                     <ResponsiveContainer width="100%" height={280}>
-                        <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
-                            <PolarGrid stroke="#e5e7eb" />
-                            <PolarAngleAxis
+                        <BarChart
+                            data={chartData}
+                            layout="vertical"
+                            margin={{ top: 4, right: 30, left: 10, bottom: 4 }}
+                        >
+                            <XAxis type="number" tick={{ fontSize: 11 }} />
+                            <YAxis
+                                type="category"
                                 dataKey="metric"
                                 tick={{ fontSize: 12, fontWeight: 600 }}
-                            />
-                            <PolarRadiusAxis
-                                angle={90}
-                                domain={[0, 100]}
-                                tick={{ fontSize: 10 }}
+                                width={90}
                             />
                             {planNames.map((name, idx) => (
-                                <Radar
+                                <Bar
                                     key={name}
-                                    name={name}
                                     dataKey={name}
-                                    stroke={RADAR_COLORS[idx % RADAR_COLORS.length]}
-                                    fill={RADAR_COLORS[idx % RADAR_COLORS.length]}
-                                    fillOpacity={0.15}
-                                    strokeWidth={2}
+                                    fill={PLAN_COLORS[idx % PLAN_COLORS.length]}
+                                    radius={[0, 4, 4, 0]}
+                                    barSize={12}
                                 />
                             ))}
-                            <Legend
-                                wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }}
-                            />
+                            <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
                             <Tooltip
                                 contentStyle={{
                                     borderRadius: "12px",
@@ -79,7 +72,7 @@ function ComparisonSection({ summaries, bestSummary }) {
                                     fontSize: "12px",
                                 }}
                             />
-                        </RadarChart>
+                        </BarChart>
                     </ResponsiveContainer>
                 </div>
             </Section>
@@ -98,8 +91,12 @@ function ComparisonSection({ summaries, bestSummary }) {
                                 <span>{summary.dayScore.score} / 100</span>
                             </div>
                             <p>{summary.dayScore.band}</p>
-                            <p className="small-copy">Energy: {Math.round(summary.dayTotals.kcal)} kcal</p>
-                            <p className="small-copy">Vegetables: {Math.round(summary.dayTotals.vegetablesG)} g</p>
+                            <p className="small-copy">
+                                Energy: {Math.round(summary.dayTotals.kcal)} kcal
+                            </p>
+                            <p className="small-copy">
+                                Vegetables: {Math.round(summary.dayTotals.vegetablesG)} g
+                            </p>
                         </div>
                     ))}
                 </div>
@@ -128,5 +125,4 @@ function ComparisonSection({ summaries, bestSummary }) {
     );
 }
 
-export default ComparisonSection;
-
+export default memo(ComparisonSection);

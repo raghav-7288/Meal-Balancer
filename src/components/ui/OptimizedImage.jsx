@@ -56,4 +56,3 @@ function OptimizedImage({
 }
 
 export default OptimizedImage;
-

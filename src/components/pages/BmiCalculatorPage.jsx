@@ -50,27 +50,23 @@ function BmiCalculatorPage() {
 
     // Internal state always stored in metric (cm / kg)
     const [heightCm, setHeightCm] = useState(
-        dbProfile?.height_cm ? String(dbProfile.height_cm) : (profile.height || "")
+        dbProfile?.height_cm ? String(dbProfile.height_cm) : profile.height || ""
     );
     const [weightKg, setWeightKgState] = useState(
-        dbProfile?.weight_kg ? String(dbProfile.weight_kg) : (profile.weight || "")
+        dbProfile?.weight_kg ? String(dbProfile.weight_kg) : profile.weight || ""
     );
 
     // US-unit local display state
     const initFtIn = heightCm ? cmToFtIn(parseFloat(heightCm)) : { ft: "", inches: "" };
     const [ft, setFt] = useState(initFtIn.ft || "");
     const [inches, setInches] = useState(initFtIn.inches || "");
-    const [lbs, setLbs] = useState(
-        weightKg ? kgToLbs(parseFloat(weightKg)) : ""
-    );
+    const [lbs, setLbs] = useState(weightKg ? kgToLbs(parseFloat(weightKg)) : "");
 
     // Derived metric values for BMI calculation
     const heightM = heightCm ? parseFloat(heightCm) / 100 : 0;
     const weightKgNum = weightKg ? parseFloat(weightKg) : 0;
     const bmi =
-        heightM > 0 && weightKgNum > 0
-            ? (weightKgNum / (heightM * heightM)).toFixed(1)
-            : null;
+        heightM > 0 && weightKgNum > 0 ? (weightKgNum / (heightM * heightM)).toFixed(1) : null;
     const category = bmi ? getBmiCategory(parseFloat(bmi)) : null;
 
     // Ideal weight range for normal BMI (18.5–24.9)
@@ -140,10 +136,7 @@ function BmiCalculatorPage() {
     }
 
     // Display strings for info box
-    const heightDisplay =
-        unit === "metric"
-            ? `${heightCm} cm`
-            : `${ft}′${inches}″`;
+    const heightDisplay = unit === "metric" ? `${heightCm} cm` : `${ft}′${inches}″`;
     const weightRangeDisplay =
         unit === "metric"
             ? `${idealWeightMin} – ${idealWeightMax} kg`
@@ -295,4 +288,3 @@ function BmiCalculatorPage() {
 }
 
 export default BmiCalculatorPage;
-

@@ -25,5 +25,3 @@ export async function resendEmailVerification(email) {
 export function isEmailVerified(user) {
     return !!user?.email_confirmed_at;
 }
-
-

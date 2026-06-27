@@ -254,11 +254,11 @@ describe("FoodAutocomplete", () => {
         });
 
         // Should show loading indicator
-        expect(screen.getByText("Searching...")).toBeInTheDocument();
+        expect(screen.getByText("Searching…")).toBeInTheDocument();
 
         // Wait for results
         await waitFor(() => {
-            expect(screen.queryByText("Searching...")).not.toBeInTheDocument();
+            expect(screen.queryByText("Searching…")).not.toBeInTheDocument();
         });
     });
 

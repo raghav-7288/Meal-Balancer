@@ -228,7 +228,16 @@
 <a name='L163'></a><a href='#L163'>163</a>
 <a name='L164'></a><a href='#L164'>164</a>
 <a name='L165'></a><a href='#L165'>165</a>
-<a name='L166'></a><a href='#L166'>166</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L166'></a><a href='#L166'>166</a>
+<a name='L167'></a><a href='#L167'>167</a>
+<a name='L168'></a><a href='#L168'>168</a>
+<a name='L169'></a><a href='#L169'>169</a>
+<a name='L170'></a><a href='#L170'>170</a>
+<a name='L171'></a><a href='#L171'>171</a>
+<a name='L172'></a><a href='#L172'>172</a>
+<a name='L173'></a><a href='#L173'>173</a>
+<a name='L174'></a><a href='#L174'>174</a>
+<a name='L175'></a><a href='#L175'>175</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -270,6 +279,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -285,6 +297,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -308,6 +323,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -389,9 +406,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { supabase } from "../lib/supabaseClient";
 &nbsp;
@@ -443,7 +461,10 @@ export async function signOut() {
  * @returns {Promise&lt;object|null&gt;}
  */
 export async function getCurrentUser() {
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const {
+        data: { user },
+        error,
+    } = await supabase.auth.getUser();
 &nbsp;
     if (error) {
         return null;
@@ -457,7 +478,10 @@ export async function getCurrentUser() {
  * @returns {Promise&lt;object|null&gt;}
  */
 export async function getSession() {
-    const { data: { session }, error } = await supabase.auth.getSession();
+    const {
+        data: { session },
+        error,
+    } = await supabase.auth.getSession();
 &nbsp;
     if (error) {
         return null;
@@ -474,7 +498,9 @@ export async function getSession() {
 export async function fetchUserProfile(userId) {
     const { data, error } = await supabase
         .from("user_profiles")
-        .select("user_id, username, full_name, created_at, height_cm, weight_kg, current_bmi, age, contact_number, activity, goal, diet_type, sex, bmi_target")
+        .select(
+            "user_id, username, full_name, created_at, height_cm, weight_kg, current_bmi, age, contact_number, activity, goal, diet_type, sex, bmi_target"
+        )
         .eq("user_id", userId)
         .single();
 &nbsp;
@@ -554,10 +580,11 @@ export async function createUserProfile(userId, username, fullName, contactNumbe
  * @returns {object} subscription with unsubscribe method.
  */
 export function onAuthStateChange(callback) {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(callback);
+    const {
+        data: { subscription },
+    } = supabase.auth.onAuthStateChange(callback);
     return subscription;
 }
-&nbsp;
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -565,7 +592,7 @@ export function onAuthStateChange(callback) {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-26T13:10:15.271Z
+                at 2026-06-27T17:32:58.664Z
             </div>
         <script src="../prettify.js"></script>
         <script>

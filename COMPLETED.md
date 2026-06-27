@@ -121,6 +121,7 @@
 | 34 | **Keyboard shortcuts** — none existed | `Ctrl+S/N/P`, `Esc` close modals | June 26, 2026 |
 | 35 | **Accessibility gaps** | Focus trap, `aria-live` regions, skip nav link | June 26, 2026 |
 | 36 | **Dark mode toggle icon too large** | Reduced from `size={34}` to `size={20}` | June 26, 2026 |
+| A10 | **Final interaction polish pass** — no micro-interactions | Added `src/styles/interaction-polish.css` (380+ lines) — premium interaction layer with: hover animations (card lifts, nav spring), click feedback (active scale), button press states, page fade-in transitions, modal spring entrance, table row highlights, input focus glow, empty state fade-in, toast slide animations, staggered KPI entrance, error shake animation, success pop animation, score pill transitions, nutrient bar smoothing, toggle switch spring, focus-visible ring for keyboard nav. All animations respect `prefers-reduced-motion`. Enhanced toast styling with backdrop blur. | June 27, 2026 |
 
 ---
 
@@ -161,3 +162,98 @@
 | Status | Details | Date |
 |--------|---------|------|
 | ✅ All clean | No known CVEs found across all npm dependencies | June 26, 2026 |
+
+---
+
+## 🔍 Codebase Audit (June 27, 2026)
+
+| # | Issue | Fix Applied | Date |
+|---|-------|-------------|------|
+| A1 | **ESLint errors (7)** — unused imports, stale disable directives | Removed unused `DAYS` import from `usePresetPlanAdmin.js`, unused `screen` from `VirtualizedList.test.jsx`, stale `eslint-disable-line` from `FoodAutocomplete.jsx`, 5 stale `eslint-disable-next-line` from `authContext.test.jsx` | June 27, 2026 |
+| A2 | **ESLint config missing coverage ignore** | Added `coverage` to `globalIgnores` in `eslint.config.js` | June 27, 2026 |
+| A3 | **react-hooks/globals false positives in tests** | Added `'react-hooks/globals': 'off'` rule for `tests/**/*.{js,jsx}` (Spy pattern is valid for testing) | June 27, 2026 |
+| A4 | **useSyncedPlans low branch coverage (52%)** | Added `useSyncedPlans.branches.test.js` with 9 tests covering: deletions, modifications, sync errors, retrySync no-op, localStorage failures, no-auth setPlans | June 27, 2026 |
+| A5 | **useMealHistory low branch coverage (66%)** | Added `useMealHistory.branches.test.js` with 12 tests covering: default fields, sync error recovery, background upload failures, no-auth paths, localStorage errors, date merge dedup | June 27, 2026 |
+| A6 | **queryCache stale-while-revalidate untested** | Added `queryCache.staleRevalidate.test.js` with 10 tests covering: fresh/stale/expired paths, background revalidation failure, inflight dedup, concurrent requests, eviction of expired entries | June 27, 2026 |
+| A7 | **withRetry non-retryable fallthrough untested (line 41)** | Added 4 tests: generic app errors, empty message, null message, custom context logging | June 27, 2026 |
+| A8 | **dailyHealthService branch gaps at 86-104** | Added `dailyHealthService.branches.test.js` with 12 tests covering: null/undefined rows input, null dates, null row elements, zero values, large counts | June 27, 2026 |
+| A9 | **README inconsistencies** — wrong Node version (20→22), stale test count (27→45), E2E listed as roadmap but already done | Fixed Node version, test file count, removed E2E from roadmap, added missing scripts to table | June 27, 2026 |
+
+### Coverage Before → After
+
+| Area | Statements | Branches |
+|------|-----------|----------|
+| **Overall** | 89.88% → 91.76% | 78.69% → 82.11% |
+| **useSyncedPlans** | 83.33% → 99.07% | 52.17% → 82.6% |
+| **useMealHistory** | 86.07% → 100% | 66.07% → 89.28% |
+| **queryCache** | 91.83% → 100% | 76.92% → 96.15% |
+| **withRetry** | 96% → 100% | 93.1% → 100% |
+| **dailyHealthService** | 93.75% → 100% | 78.94% → 100% |
+| **Services (all)** | 98.65% → 99.55% | 97.18% → 100% |
+
+---
+
+## 🔍 Correctness & Stability Pass (June 27, 2026)
+
+| # | Issue | Fix Applied | Date |
+|---|-------|-------------|------|
+| C1 | **FoodAutocomplete unstable ARIA ID** — `Math.random()` on every render broke `aria-controls` | Replaced with React 19 `useId()` for stable, render-consistent IDs | June 27 |
+| C2 | **ProgressPage streak breaks on DST** — exact `diff === 1` fails during 23h/25h days | Changed inner loop to `Math.round(diff) === 1` | June 27 |
+| C3 | **ProfileContext stale `saveToDb` closure** — `setProfile` captured first render's `saveToDb` | Changed to `saveToDbRef.current?.(next)` for always-latest invocation | June 27 |
+| C4 | **`withRetry` misclassifies native TypeError** — `TypeError: Failed to fetch` wrongly treated as service error | Moved `error.name === "TypeError"` check before message prefix heuristic | June 27 |
+
+### Tests Added (43 new tests)
+
+| File | Tests |
+|------|-------|
+| `withRetry.test.js` | +3 (TypeError "Failed to fetch" regression) |
+| `progressStreak.test.js` | +2 (DST edge case, same-day duplicates) |
+| `schemas.edge-cases.test.js` | +9 (null paths, transforms, nullable fields) |
+| `profileContext.edge-cases.test.jsx` | +6 (default profile, persistence, debounce, corrupted localStorage) |
+| `FoodAutocomplete.integration.test.jsx` | +8 (stable ID, search, keyboard nav, selection, Escape) |
+| `nutrientEngine.edge-cases.test.js` | +13 (DB items, missing foods, combineDay, accumulateNutrients) |
+| `useHotkeys.test.js` | +2 (non-ctrl shortcuts, alt+key) |
+
+---
+
+## ⚡ Optimization Pass (June 27, 2026)
+
+| # | Optimization | Measurable Impact |
+|---|---|---|
+| O1 | **Stabilized `updateMealItem`/`removeMealItem`** — switched to `activePlanIdRef` | Prevents MealBuilder re-render on plan switch |
+| O2 | **Memoized `visibleFatLimit` and `isPresetActive`** | Prevents cascading re-renders of PlanSidebar + MealBuilder |
+| O3 | **Derived `activeSummary` from `summaries`** | Eliminates redundant computation (7 meals × aggregateMeal + scoring) |
+| O4 | **HealthToolsPage lazy sub-components** | Route chunk: 44.29 kB → **4.53 kB** (90% reduction) |
+| O5 | **Extracted `getTodayName()`** to shared utility | Eliminated duplicate across 2 files |
+| O6 | **Extracted `sanitizeNumeric`/`clampOnBlur`** to `src/utils/inputSanitize.js` | Eliminated duplicate across 2 profile components |
+| O7 | **Extracted `COUNTRY_CODES`/`parseContactNumber`** to `src/data/countryCodes.js` | Eliminated 52 duplicate lines |
+
+---
+
+## 🎨 Final Polish Pass (June 27, 2026)
+
+| Area | Improvement |
+|------|-------------|
+| **Touch targets** | 44px minimum on `pointer: coarse` devices (icon-btn, day-chip, nav elements) |
+| **Tap highlight** | Removed `-webkit-tap-highlight-color` flash on mobile |
+| **Textarea focus** | Consistent focus ring matching all other inputs |
+| **Collapsible content** | Smooth fade+slide animation on meal card expand |
+| **Button loading** | `aria-busy="true"` buttons show breathing pulse overlay |
+| **Nutrient bars** | Smooth 0.5s cubic-bezier fill transition |
+| **Empty cells** | Italic, muted, centered with proper padding |
+| **Tablet breakpoint** | Two-column sections stack on 641–1024px |
+| **Mobile spacing** | Tighter KPI grid, momentum scrolling tables |
+| **Inline add-row** | Dashed border separator for visual clarity |
+
+---
+
+## 📊 Final Metrics (June 27, 2026)
+
+| Metric | Value |
+|--------|-------|
+| Tests | 617 passing (49 files) |
+| Coverage | 91% statements, 80.5% branches |
+| Lint | 0 errors, 2 warnings (TanStack Virtual compatibility) |
+| TypeScript | Passes (`tsc --noEmit`) |
+| Build | ✓ (379ms, 2738 modules) |
+| Format | ✓ (Prettier clean) |

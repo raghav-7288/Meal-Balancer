@@ -29,7 +29,10 @@ export const usePlanStore = create((set, get) => ({
     setActivePlanId: (id) => set({ activePlanId: id }),
     setViewDay: (day) => set({ viewDay: day }),
     setPlanView: (view) => set({ planView: view }),
-    setNutrientLimits: (limits) => set({ nutrientLimits: typeof limits === "function" ? limits(get().nutrientLimits) : limits }),
+    setNutrientLimits: (limits) =>
+        set({
+            nutrientLimits: typeof limits === "function" ? limits(get().nutrientLimits) : limits,
+        }),
     setIsAddingFood: (val) => set({ isAddingFood: val }),
     setCopyModal: (modal) => set({ copyModal: modal }),
     setCopyPlanName: (name) => set({ copyPlanName: name }),
@@ -40,4 +43,3 @@ export const usePlanStore = create((set, get) => ({
     // ── Batch update (e.g., when switching plans) ──
     batchUpdate: (partial) => set(partial),
 }));
-

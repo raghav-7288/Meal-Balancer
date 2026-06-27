@@ -70,4 +70,3 @@ function VirtualizedList({
 }
 
 export default VirtualizedList;
-

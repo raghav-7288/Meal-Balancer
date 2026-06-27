@@ -4,7 +4,11 @@ function FatBenchmarkCard({ visibleFatLimit, profile }) {
     return (
         <div className="pro-card">
             <div className="pro-card-header">
-                <div className="pro-card-icon" style={{ background: "#fff7ed", color: "#ea580c" }}>
+                <div
+                    className="pro-card-icon"
+                    style={{ background: "#fff7ed", color: "#ea580c" }}
+                    aria-hidden="true"
+                >
                     <Leaf size={16} />
                 </div>
                 <h2>Daily Fat Benchmark</h2>
@@ -29,4 +33,3 @@ function FatBenchmarkCard({ visibleFatLimit, profile }) {
 }
 
 export default FatBenchmarkCard;
-

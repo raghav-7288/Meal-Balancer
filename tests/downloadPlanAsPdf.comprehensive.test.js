@@ -3,7 +3,7 @@
  * Tests the full PDF generation flow with mocked jsPDF/autoTable
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { downloadPlanAsPdf, capitalize, computeWeeklyAverages, buildMealTableRow, buildDailySummaryRows } from "../src/utils/generatePlanPdf";
+import { downloadPlanAsPdf } from "../src/utils/generatePlanPdf";
 
 // Mock jspdf
 const mockDoc = {

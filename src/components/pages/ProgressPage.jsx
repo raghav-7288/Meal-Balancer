@@ -37,6 +37,13 @@ function fmtMonth(ym) {
     return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
 
+function scoreColor(score) {
+    if (score >= 85) return "#059669";
+    if (score >= 70) return "#0d9488";
+    if (score >= 50) return "#d97706";
+    return "#dc2626";
+}
+
 function ProgressPage() {
     const { history, removeEntry, clearHistory } = useMealHistory();
     const [confirmClear, setConfirmClear] = useState(false);
@@ -44,7 +51,7 @@ function ProgressPage() {
     // Sort history by date (oldest first for charts)
     const sorted = useMemo(
         () => [...history].sort((a, b) => (a.date || "").localeCompare(b.date || "")),
-        [history],
+        [history]
     );
 
     // ── Stats ──
@@ -78,7 +85,7 @@ function ProgressPage() {
                 for (let i = sorted.length - 1; i > 0; i--) {
                     const curr = new Date(sorted[i].date + "T00:00:00");
                     const prev = new Date(sorted[i - 1].date + "T00:00:00");
-                    const diff = (curr.getTime() - prev.getTime()) / 86400000;
+                    const diff = Math.round((curr.getTime() - prev.getTime()) / 86400000);
                     if (diff === 1) streak++;
                     else break;
                 }
@@ -92,8 +99,7 @@ function ProgressPage() {
             const mid = Math.floor(sorted.length / 2);
             const firstHalf = sorted.slice(0, mid);
             const secondHalf = sorted.slice(mid);
-            const avgFirst =
-                firstHalf.reduce((s, e) => s + (e.score ?? 0), 0) / firstHalf.length;
+            const avgFirst = firstHalf.reduce((s, e) => s + (e.score ?? 0), 0) / firstHalf.length;
             const avgSecond =
                 secondHalf.reduce((s, e) => s + (e.score ?? 0), 0) / secondHalf.length;
             trendDelta = Math.round(avgSecond - avgFirst);
@@ -118,36 +124,25 @@ function ProgressPage() {
             .map(([ym, data]) => ({
                 month: ym,
                 label: fmtMonth(ym),
-                avgScore: Math.round(
-                    data.scores.reduce((s, v) => s + v, 0) / data.scores.length,
-                ),
-                avgKcal: Math.round(
-                    data.kcals.reduce((s, v) => s + v, 0) / data.kcals.length,
-                ),
+                avgScore: Math.round(data.scores.reduce((s, v) => s + v, 0) / data.scores.length),
+                avgKcal: Math.round(data.kcals.reduce((s, v) => s + v, 0) / data.kcals.length),
                 entries: data.scores.length,
             }));
     }, [sorted]);
 
     // ── Chart data ──
-    const chartData = sorted.map((e) => ({
-        date: fmtDate(e.date),
-        score: e.score ?? 0,
-        kcal: e.kcal ?? 0,
-    }));
-
-    const scoreColor = (score) => {
-        if (score >= 85) return "#059669";
-        if (score >= 70) return "#0d9488";
-        if (score >= 50) return "#d97706";
-        return "#dc2626";
-    };
+    const chartData = useMemo(
+        () =>
+            sorted.map((e) => ({
+                date: fmtDate(e.date),
+                score: e.score ?? 0,
+                kcal: e.kcal ?? 0,
+            })),
+        [sorted]
+    );
 
     const TrendIcon =
-        stats.trend === "up"
-            ? ArrowUpRight
-            : stats.trend === "down"
-              ? ArrowDownRight
-              : Minus;
+        stats.trend === "up" ? ArrowUpRight : stats.trend === "down" ? ArrowDownRight : Minus;
 
     // ── Empty state ──
     if (sorted.length === 0) {
@@ -191,10 +186,7 @@ function ProgressPage() {
                         >
                             Yes, clear
                         </button>
-                        <button
-                            className="secondary"
-                            onClick={() => setConfirmClear(false)}
-                        >
+                        <button className="secondary" onClick={() => setConfirmClear(false)}>
                             Cancel
                         </button>
                     </div>
@@ -219,7 +211,11 @@ function ProgressPage() {
                     <span className="progress-stat-label">Day Streak</span>
                 </div>
                 <div className="progress-stat-card">
-                    <Calendar size={20} className="progress-stat-icon" style={{ color: "#8b5cf6" }} />
+                    <Calendar
+                        size={20}
+                        className="progress-stat-icon"
+                        style={{ color: "#8b5cf6" }}
+                    />
                     <span className="progress-stat-value">{stats.total}</span>
                     <span className="progress-stat-label">Days Logged</span>
                 </div>
@@ -252,8 +248,8 @@ function ProgressPage() {
                     <TrendIcon size={16} />
                     {stats.trend === "up" && (
                         <span>
-                            Your average score improved by <strong>{stats.trendDelta} points</strong>{" "}
-                            recently. Keep it up! 🎉
+                            Your average score improved by{" "}
+                            <strong>{stats.trendDelta} points</strong> recently. Keep it up! 🎉
                         </span>
                     )}
                     {stats.trend === "down" && (
@@ -406,4 +402,3 @@ function ProgressPage() {
 }
 
 export default ProgressPage;
-

@@ -53,15 +53,17 @@ export async function cachedFetch(key, fetcher, ttl = DEFAULT_TTL) {
         return inflight.get(key);
     }
 
-    const promise = fetcher().then((data) => {
-        cache.set(key, { data, timestamp: Date.now() });
-        inflight.delete(key);
-        evictIfNeeded();
-        return data;
-    }).catch((err) => {
-        inflight.delete(key);
-        throw err;
-    });
+    const promise = fetcher()
+        .then((data) => {
+            cache.set(key, { data, timestamp: Date.now() });
+            inflight.delete(key);
+            evictIfNeeded();
+            return data;
+        })
+        .catch((err) => {
+            inflight.delete(key);
+            throw err;
+        });
 
     inflight.set(key, promise);
     return promise;
@@ -89,14 +91,17 @@ export async function staleWhileRevalidate(key, fetcher, ttl = DEFAULT_TTL) {
     if (entry && now - entry.timestamp < STALE_TTL) {
         // Fire-and-forget background revalidation
         if (!inflight.has(key)) {
-            const bgPromise = fetcher().then((data) => {
-                cache.set(key, { data, timestamp: Date.now() });
-                inflight.delete(key);
-                return data;
-            }).catch((err) => {
-                inflight.delete(key);
-                console.warn(`[queryCache] Background revalidation failed for key "${key}":`, err?.message || err);
-            });
+            const bgPromise = fetcher()
+                .then((data) => {
+                    cache.set(key, { data, timestamp: Date.now() });
+                    inflight.delete(key);
+                    return data;
+                })
+                .catch(() => {
+                    // Background revalidation failed — stale data remains cached
+                    // This is expected under poor network; no action needed
+                    inflight.delete(key);
+                });
             inflight.set(key, bgPromise);
         }
         return entry.data;
@@ -120,4 +125,3 @@ export function invalidateCache(key) {
 export function clearCache() {
     cache.clear();
 }
-

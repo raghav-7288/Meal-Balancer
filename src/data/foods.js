@@ -95,5 +95,5 @@ export const FOODS = [
         vitamins: 3,
         minerals: 2,
         kcal: 90,
-    }
+    },
 ];

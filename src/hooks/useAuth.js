@@ -19,4 +19,3 @@ export function useOptionalAuth() {
     const context = useContext(AuthContext);
     return context || { user: null, isAuthenticated: false };
 }
-

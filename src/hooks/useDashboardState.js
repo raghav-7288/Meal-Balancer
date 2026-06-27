@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { APP_CONFIG } from "../data/config";
@@ -133,16 +133,19 @@ export function useDashboardState() {
         setGuidelines(plan?.guidelines || "");
     }, [activePlanId]);
 
-    function saveGuidelines() {
+    const guidelinesRef = useRef(guidelines);
+    useEffect(() => { guidelinesRef.current = guidelines; }, [guidelines]);
+
+    const saveGuidelines = useCallback(() => {
         setUserPlans((prev) =>
             prev.map((plan) =>
-                plan.id === activePlanId
-                    ? { ...plan, guidelines }
+                plan.id === activePlanIdRef.current
+                    ? { ...plan, guidelines: guidelinesRef.current }
                     : plan
             )
         );
         toast.success("Guidelines saved!");
-    }
+    }, [setUserPlans]);
 
     const activePlan = plans.find((p) => p.id === activePlanId) || plans[0];
 
@@ -202,7 +205,7 @@ export function useDashboardState() {
 
     const isPresetActive = presetPlans.some(p => p.id === activePlanId);
 
-    function updateMealItem(mealName, itemId, updates) {
+    const updateMealItem = useCallback((mealName, itemId, updates) => {
         setUserPlans((prev) =>
             prev.map((plan) =>
                 plan.id === activePlanId
@@ -218,9 +221,9 @@ export function useDashboardState() {
                     : plan
             )
         );
-    }
+    }, [activePlanId, setUserPlans]);
 
-    function removeMealItem(mealName, itemId) {
+    const removeMealItem = useCallback((mealName, itemId) => {
         setUserPlans((prev) =>
             prev.map((plan) =>
                 plan.id === activePlanId
@@ -234,9 +237,18 @@ export function useDashboardState() {
                     : plan
             )
         );
-    }
+    }, [activePlanId, setUserPlans]);
 
-    async function addFood(selectedMeal, selectedFoodId, selectedFoodName, gramsVal, instructionsVal, selectedFoodGroupId) {
+    // Keep refs for addFood closure to avoid re-creating callback on every plan/day change
+    const viewDayRef = useRef(viewDay);
+    const activePlanIdRef = useRef(activePlanId);
+    const majorGroupsRef = useRef(majorGroups);
+    useEffect(() => { viewDayRef.current = viewDay; }, [viewDay]);
+    // eslint-disable-next-line react-hooks/immutability
+    useEffect(() => { activePlanIdRef.current = activePlanId; }, [activePlanId]);
+    useEffect(() => { majorGroupsRef.current = majorGroups; }, [majorGroups]);
+
+    const addFood = useCallback(async (selectedMeal, selectedFoodId, selectedFoodName, gramsVal, instructionsVal, selectedFoodGroupId) => {
         if (!selectedMeal || !selectedFoodId || !gramsVal) return;
         setIsAddingFood(true);
 
@@ -252,8 +264,8 @@ export function useDashboardState() {
                 if (result) {
                     nutrients = result.nutrients;
                 }
-                if (selectedFoodGroupId && majorGroups.length > 0) {
-                    const group = majorGroups.find(g => g.major_group_id === selectedFoodGroupId);
+                if (selectedFoodGroupId && majorGroupsRef.current.length > 0) {
+                    const group = majorGroupsRef.current.find(g => g.major_group_id === selectedFoodGroupId);
                     foodGroup = group?.group_name?.toLowerCase() || "";
                 }
             }
@@ -263,7 +275,7 @@ export function useDashboardState() {
                 foodId: selectedFoodId,
                 foodName: selectedFoodName || foodName,
                 grams: Number(gramsVal),
-                day: viewDay,
+                day: viewDayRef.current,
                 instructions: instructionsVal || "",
                 ...(nutrients && { nutrients }),
                 ...(foodGroup && { foodGroup }),
@@ -271,7 +283,7 @@ export function useDashboardState() {
 
             setUserPlans((prev) =>
                 prev.map((plan) =>
-                    plan.id === activePlanId
+                    plan.id === activePlanIdRef.current
                         ? {
                             ...plan,
                             meals: {
@@ -285,17 +297,17 @@ export function useDashboardState() {
                         : plan
                 )
             );
-            toast.success(`"${foodName}" added to ${selectedMeal} (${viewDay})`);
+            toast.success(`"${foodName}" added to ${selectedMeal} (${viewDayRef.current})`);
         } catch (err) {
             console.error("Error adding food:", err);
             toast.error("Failed to add food. Please try again.");
         } finally {
             setIsAddingFood(false);
         }
-    }
+    }, [setUserPlans]);
 
-    function saveNewPlan() {
-        const name = newPlanName.trim() || `My Plan ${userPlans.length + 1}`;
+    const saveNewPlan = useCallback(() => {
+        const name = newPlanName.trim() || `My Plan ${userPlansRef.current.length + 1}`;
         const emptyMeals = {};
         for (const slot of MEALS) {
             emptyMeals[slot] = [];
@@ -305,7 +317,7 @@ export function useDashboardState() {
         setActivePlanId(nextPlan.id);
         setPlanView("user");
         setNewPlanName("");
-    }
+    }, [newPlanName, setUserPlans]);
 
     function deleteUserPlan(planId) {
         const deletedPlan = userPlans.find((p) => p.id === planId);
@@ -333,12 +345,12 @@ export function useDashboardState() {
         });
     }
 
-    function duplicatePresetAsUserPlan(presetPlan) {
+    const duplicatePresetAsUserPlan = useCallback((presetPlan) => {
         setCopyPlanName(`${presetPlan.name} (copy)`);
         setCopyModal(presetPlan);
-    }
+    }, []);
 
-    function confirmCopyPlan() {
+    const confirmCopyPlan = useCallback(() => {
         if (!copyModal) return;
         const name = copyPlanName.trim() || `${copyModal.name} (copy)`;
         const copyMeals = copyModal.meals || {};
@@ -353,23 +365,23 @@ export function useDashboardState() {
         toast.success(`Copied "${copyModal.name}" as "${name}"`);
         setCopyModal(null);
         setCopyPlanName("");
-    }
+    }, [copyModal, copyPlanName, setUserPlans]);
 
-    function resetActivePlan() {
+    const resetActivePlan = useCallback(() => {
         const emptyMeals = {};
         for (const slot of MEALS) {
             emptyMeals[slot] = [];
         }
         setUserPlans((prev) =>
             prev.map((plan) =>
-                plan.id === activePlanId
+                plan.id === activePlanIdRef.current
                     ? { ...plan, meals: emptyMeals }
                     : plan
             )
         );
-    }
+    }, [setUserPlans]);
 
-    function logToday() {
+    const logToday = useCallback(() => {
         if (!activeSummary) return;
         const dt = activeSummary.dayTotals;
         const ds = activeSummary.dayScore;
@@ -386,7 +398,7 @@ export function useDashboardState() {
             visibleFat: dt?.visibleFat ?? 0,
         });
         toast.success("Today's score logged to Progress! 📊");
-    }
+    }, [activeSummary, activePlan?.name, logDay]);
 
     const dayScore = activeSummary?.dayScore?.score || 0;
     const scoreTone =

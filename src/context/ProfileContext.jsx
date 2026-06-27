@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
+import {
+    createContext,
+    useContext,
+    useState,
+    useEffect,
+    useRef,
+    useCallback,
+    useMemo,
+} from "react";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../lib/supabaseClient";
 
@@ -123,9 +131,16 @@ export function ProfileProvider({ children }) {
     // Save profile to Supabase (debounced) — uses upsert to handle missing rows
     const lastSavedProfile = useRef(null);
     const saveToDbRef = useRef(null);
+    const authRef = useRef({ isAuthenticated, userId: user?.id });
+
+    // Keep auth ref in sync so debounced save always has latest values
+    useEffect(() => {
+        authRef.current = { isAuthenticated, userId: user?.id };
+    }, [isAuthenticated, user?.id]);
 
     function saveToDb(newProfile) {
-        if (!isAuthenticated || !user?.id) return;
+        const { isAuthenticated: authed, userId } = authRef.current;
+        if (!authed || !userId) return;
 
         // Skip if nothing changed since last save
         const dbFields = {};
@@ -142,7 +157,7 @@ export function ProfileProvider({ children }) {
 
         supabase
             .from("user_profiles")
-            .upsert({ user_id: user.id, ...dbFields }, { onConflict: "user_id" })
+            .upsert({ user_id: authRef.current.userId, ...dbFields }, { onConflict: "user_id" })
             .then(({ error }) => {
                 if (!isMounted.current) return;
                 if (error) {
@@ -172,28 +187,32 @@ export function ProfileProvider({ children }) {
     }, [profileSyncStatus, profile]);
 
     // Wrapper that also triggers DB save (debounced)
-    function setProfile(updater) {
+    const setProfile = useCallback((updater) => {
         setProfileInternal((prev) => {
             const next = typeof updater === "function" ? updater(prev) : updater;
 
             // Debounce DB sync by 1 second
             if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
             syncTimeoutRef.current = setTimeout(() => {
-                saveToDb(next);
+                // Use ref to always invoke the latest saveToDb (avoids stale closure)
+                saveToDbRef.current?.(next);
             }, 1000);
 
             return next;
         });
-    }
+    }, []); // stable — uses refs internally for latest values
 
-    const value = {
-        profile,
-        setProfile,
-        darkMode,
-        setDarkMode,
-        profileSyncStatus,
-        retrySync,
-    };
+    const value = useMemo(
+        () => ({
+            profile,
+            setProfile,
+            darkMode,
+            setDarkMode,
+            profileSyncStatus,
+            retrySync,
+        }),
+        [profile, setProfile, darkMode, setDarkMode, profileSyncStatus, retrySync]
+    );
 
     return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
 }
@@ -206,4 +225,3 @@ export function useProfile() {
     }
     return context;
 }
-
