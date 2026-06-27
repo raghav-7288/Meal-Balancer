@@ -1,6 +1,6 @@
 import { DAYS } from "../../data/presetPlans";
 import { Link } from "react-router-dom";
-import { Calendar, Cloud, CloudOff, Loader } from "lucide-react";
+import { Calendar, Cloud, CloudOff, Loader, Settings } from "lucide-react";
 
 function DaySelector({
     viewDay,
@@ -42,6 +42,11 @@ function DaySelector({
                             </button>
                         )}
                     </span>
+                )}
+                {isAuthenticated && (
+                    <Link to="/preset-admin" className="planner-nav-link" title="Manage preset plans">
+                        <Settings size={14} /> Manage Presets
+                    </Link>
                 )}
                 <button className="log-today-btn" onClick={logToday}>
                     📊 Log today

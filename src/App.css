@@ -333,6 +333,7 @@ body.dark-mode .nav-theme-toggle::after {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 /* Sync status badge */
@@ -961,6 +962,25 @@ button.secondary {
 }
 
 .plan-name-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.preset-guidelines-textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+    background: #f8fafc;
+    color: #0f172a;
+    box-sizing: border-box;
+}
+
+.preset-guidelines-textarea:focus {
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
@@ -2339,6 +2359,17 @@ body.dark-mode .plan-name-input {
     background: #1a2332 !important;
     border-color: #475569 !important;
     color: #e2e8f0 !important;
+}
+
+body.dark-mode .preset-guidelines-textarea {
+    background: #1a2332;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+
+body.dark-mode .preset-guidelines-textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
 body.dark-mode .dark-mode-toggle {

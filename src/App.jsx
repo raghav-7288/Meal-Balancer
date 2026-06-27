@@ -53,6 +53,7 @@ const WeeklyPlannerPage = lazyWithRetry(() => import("./components/pages/WeeklyP
 const ProgressPage = lazyWithRetry(() => import("./components/pages/ProgressPage"));
 const ProfilePage = lazyWithRetry(() => import("./components/pages/ProfilePage"));
 const FoodSearchPage = lazyWithRetry(() => import("./components/FoodSearchPage"));
+const PresetAdminPage = lazyWithRetry(() => import("./components/pages/PresetAdminPage"));
 
 function PageLoader() {
     return (
@@ -224,6 +225,7 @@ function AppShell() {
                             <Route path="/weekly-planner" element={<RouteErrorBoundary routeName="Weekly Planner"><WeeklyPlannerPage /></RouteErrorBoundary>} />
                             <Route path="/progress" element={<RouteErrorBoundary routeName="Progress"><ProgressPage /></RouteErrorBoundary>} />
                             <Route path="/foods" element={<RouteErrorBoundary routeName="Food Search"><FoodSearchPage /></RouteErrorBoundary>} />
+                            <Route path="/preset-admin" element={<RouteErrorBoundary routeName="Preset Admin"><PresetAdminPage /></RouteErrorBoundary>} />
                             <Route path="/profile" element={<RouteErrorBoundary routeName="Profile"><ProfilePage /></RouteErrorBoundary>} />
                             <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
