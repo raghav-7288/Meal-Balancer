@@ -52,6 +52,12 @@ function FoodAutocomplete({ value, onChange, onSelect, placeholder = "Type to se
                 setIsLoading(false);
                 setHighlightIndex(-1);
             }
+        }).catch(() => {
+            if (!cancelled) {
+                setSuggestions([]);
+                setIsOpen(false);
+                setIsLoading(false);
+            }
         });
 
         return () => { cancelled = true; };

@@ -12,10 +12,19 @@ import './styles/profile-page.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext'
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  </StrictMode>,
-)
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  document.body.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;text-align:center;padding:2rem">' +
+    '<div><h1 style="font-size:1.25rem;margin-bottom:0.5rem">Failed to load application</h1>' +
+    '<p style="color:#64748b">Please refresh the page or try again later.</p></div></div>';
+} else {
+  createRoot(rootElement).render(
+    <StrictMode>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </StrictMode>,
+  );
+}

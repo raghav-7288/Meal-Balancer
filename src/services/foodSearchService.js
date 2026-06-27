@@ -32,7 +32,7 @@ export async function searchFoodItems(query, limit = 15) {
             .limit(limit);
 
         if (error) {
-            console.error("Food search error:", error);
+            if (import.meta.env.DEV) console.error("Food search error:", error);
             return [];
         }
 
@@ -63,7 +63,7 @@ export async function fetchFoodNutrients(foodId) {
             .eq("food_id", foodId);
 
         if (error) {
-            console.error("Nutrient fetch error:", error);
+            if (import.meta.env.DEV) console.error("Nutrient fetch error:", error);
             return null;
         }
 

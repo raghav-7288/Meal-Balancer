@@ -171,23 +171,6 @@ function PresetAdminPage() {
                     <Link to="/dashboard" className="planner-nav-link">
                         <ArrowLeft size={14} /> Dashboard
                     </Link>
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                        {activePlan && (
-                            <span style={{ fontSize: "12px", color: saving ? "#f59e0b" : isDirty ? "#ef4444" : "#10b981", fontWeight: 500 }}>
-                                {saving ? "Saving…" : isDirty ? "Unsaved changes" : "All changes saved"}
-                            </span>
-                        )}
-                        {activePlan && (
-                            <button
-                                className="log-today-btn"
-                                onClick={handleSavePlan}
-                                disabled={saving}
-                            >
-                                {saving ? <Loader2 size={14} className="spin" /> : <Save size={14} />}
-                                Save Plan
-                            </button>
-                        )}
-                    </div>
                 </div>
             </div>
 
@@ -260,7 +243,26 @@ function PresetAdminPage() {
                     ) : (
                         <>
                             {/* Plan metadata section */}
-                            <Section title={`Editing: ${activePlan.name}`} icon={<Pencil size={16} />}>
+                            <Section
+                                title={`Editing: ${activePlan.name}`}
+                                icon={<Pencil size={16} />}
+                                headerRight={
+                                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                        <span style={{ fontSize: "12px", color: saving ? "#f59e0b" : isDirty ? "#ef4444" : "#10b981", fontWeight: 500, whiteSpace: "nowrap" }}>
+                                            {saving ? "Saving…" : isDirty ? "Unsaved changes" : "All changes saved"}
+                                        </span>
+                                        <button
+                                            className="log-today-btn"
+                                            onClick={handleSavePlan}
+                                            disabled={saving}
+                                            style={{ margin: 0, padding: "6px 14px", fontSize: "13px" }}
+                                        >
+                                            {saving ? <Loader2 size={14} className="spin" /> : <Save size={14} />}
+                                            Save Plan
+                                        </button>
+                                    </div>
+                                }
+                            >
                                 <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "12px", marginBottom: "12px" }}>
                                     <div>
                                         <label className="small-copy" style={{ display: "block", marginBottom: "4px", fontWeight: 600 }}>Plan Name</label>

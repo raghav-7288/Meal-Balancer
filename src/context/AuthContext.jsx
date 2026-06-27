@@ -22,6 +22,7 @@ export function AuthProvider({ children }) {
     // Restore session on mount
     useEffect(() => {
         let timeout;
+        let initComplete = false;
 
         async function init() {
             try {
@@ -30,12 +31,18 @@ export function AuthProvider({ children }) {
 
                 if (currentSession?.user) {
                     setUser(currentSession.user);
-                    const userProfile = await fetchUserProfile(currentSession.user.id);
-                    setProfile(userProfile);
+                    try {
+                        const userProfile = await fetchUserProfile(currentSession.user.id);
+                        setProfile(userProfile);
+                    } catch (profileErr) {
+                        // Auth succeeded but profile fetch failed — user can still use the app
+                        console.error("Profile fetch error during init:", profileErr);
+                    }
                 }
             } catch (err) {
                 console.error("Auth init error:", err);
             } finally {
+                initComplete = true;
                 clearTimeout(timeout);
                 setLoading(false);
             }
@@ -49,6 +56,10 @@ export function AuthProvider({ children }) {
         init();
 
         const subscription = onAuthStateChange(async (event, newSession) => {
+            // Skip auth state changes while init() is still running to avoid
+            // duplicate profile fetches and race conditions
+            if (!initComplete) return;
+
             setSession(newSession);
 
             if (newSession?.user) {
@@ -81,8 +92,14 @@ export function AuthProvider({ children }) {
             window.history.replaceState(null, "", "/");
             setUser(data.user);
             setSession(data.session);
-            const newProfile = await createUserProfile(data.user.id, username, fullName, contactNumber);
-            setProfile(newProfile);
+            try {
+                const newProfile = await createUserProfile(data.user.id, username, fullName, contactNumber);
+                setProfile(newProfile);
+            } catch (profileErr) {
+                // Auth succeeded but profile creation failed — user is still authenticated
+                // Profile will be retried on next login or page load
+                console.error("Profile creation failed:", profileErr);
+            }
         }
 
         return data;
@@ -94,8 +111,13 @@ export function AuthProvider({ children }) {
         if (data.user) {
             setUser(data.user);
             setSession(data.session);
-            const userProfile = await fetchUserProfile(data.user.id);
-            setProfile(userProfile);
+            try {
+                const userProfile = await fetchUserProfile(data.user.id);
+                setProfile(userProfile);
+            } catch (profileErr) {
+                // Auth succeeded but profile fetch failed — user can still use the app
+                console.error("Profile fetch failed during sign in:", profileErr);
+            }
         }
 
         return data;

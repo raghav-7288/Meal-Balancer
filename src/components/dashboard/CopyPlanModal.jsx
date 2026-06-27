@@ -11,12 +11,13 @@ function CopyPlanModal({ copyModal, setCopyModal, copyPlanName, setCopyPlanName,
                     className="modal-input"
                     value={copyPlanName}
                     onChange={(e) => setCopyPlanName(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && confirmCopyPlan()}
+                    onKeyDown={(e) => e.key === "Enter" && copyPlanName.trim() && confirmCopyPlan()}
                     autoFocus
                     placeholder="Enter plan name"
+                    aria-label="Plan name"
                 />
                 <div className="modal-actions">
-                    <button onClick={confirmCopyPlan}>Save</button>
+                    <button onClick={confirmCopyPlan} disabled={!copyPlanName.trim()}>Save</button>
                     <button className="secondary" onClick={() => setCopyModal(null)}>Cancel</button>
                 </div>
             </div>

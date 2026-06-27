@@ -91,7 +91,7 @@ function NutrientLimits({ limits, onChangeLimit, dayTotals }) {
                                         <input
                                             type="number"
                                             min="0"
-                                            value={limits[field.key] || ""}
+                                            value={limits[field.key] != null && limits[field.key] !== 0 ? limits[field.key] : ""}
                                             placeholder="—"
                                             onChange={(e) => {
                                                 const val = e.target.value;

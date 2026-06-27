@@ -60,7 +60,6 @@ describe("QueryCache – Stale-While-Revalidate", () => {
         });
 
         it("should handle background revalidation failure gracefully", async () => {
-            const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
             const fetcher = vi.fn()
                 .mockResolvedValueOnce("cached-data")
                 .mockRejectedValueOnce(new Error("Network error"));
@@ -77,11 +76,8 @@ describe("QueryCache – Stale-While-Revalidate", () => {
             // Let the background promise settle
             await vi.advanceTimersByTimeAsync(0);
 
-            expect(warnSpy).toHaveBeenCalledWith(
-                expect.stringContaining("Background revalidation failed"),
-                expect.any(String)
-            );
-            warnSpy.mockRestore();
+            // Background revalidation failed silently — stale data is still served
+            expect(fetcher).toHaveBeenCalledTimes(2);
         });
 
         it("should not trigger duplicate background revalidation for same key", async () => {

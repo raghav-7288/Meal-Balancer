@@ -71,10 +71,12 @@ export async function withRetry(fn, options = {}) {
             }
 
             const delay = baseDelay * Math.pow(2, attempt); // 1s, 2s, 4s
-            console.warn(
-                `[Retry] ${context || "operation"} failed (attempt ${attempt + 1}/${maxRetries}), retrying in ${delay}ms...`,
-                error.message,
-            );
+            if (import.meta.env.DEV) {
+                console.warn(
+                    `[Retry] ${context || "operation"} failed (attempt ${attempt + 1}/${maxRetries}), retrying in ${delay}ms...`,
+                    error.message,
+                );
+            }
 
             await new Promise((resolve) => setTimeout(resolve, delay));
         }

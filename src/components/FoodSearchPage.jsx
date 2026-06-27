@@ -77,7 +77,7 @@ function FoodSearchPage() {
                     .limit(1);
 
                 if (nutrientError) {
-                    console.error("Search error:", nutrientError);
+                    if (import.meta.env.DEV) console.error("Search error:", nutrientError);
                     if (!cancelled) {
                         setSearchError(nutrientError.message || "Search failed. Check your network connection and try again.");
                         setResults([]);
@@ -97,7 +97,7 @@ function FoodSearchPage() {
                     );
 
                     if (nfError) {
-                        console.error("Search error:", nfError);
+                        if (import.meta.env.DEV) console.error("Search error:", nfError);
                         if (!cancelled) {
                             setSearchError(nfError.message || "Nutrient search failed. Please try again.");
                             setResults([]);
@@ -127,7 +127,7 @@ function FoodSearchPage() {
                     );
 
                     if (error) {
-                        console.error("Search error:", error);
+                        if (import.meta.env.DEV) console.error("Search error:", error);
                         if (!cancelled) {
                             setSearchError(error.message || "Food search failed. Please try again.");
                             setResults([]);
@@ -148,7 +148,7 @@ function FoodSearchPage() {
                     }
                 }
             } catch (err) {
-                console.error("Search error:", err);
+                if (import.meta.env.DEV) console.error("Search error:", err);
                 if (!cancelled) {
                     setResults([]);
                     setIsNutrientSearch(false);
@@ -184,13 +184,13 @@ function FoodSearchPage() {
                     { p_food_id: selectedFood.food_id }
                 );
                 if (error) {
-                    console.error("Nutrient fetch error:", error);
+                    if (import.meta.env.DEV) console.error("Nutrient fetch error:", error);
                     if (!cancelled) setNutrients([]);
                     return;
                 }
                 if (!cancelled) setNutrients(data || []);
             } catch (err) {
-                console.error("Nutrient fetch error:", err);
+                if (import.meta.env.DEV) console.error("Nutrient fetch error:", err);
                 if (!cancelled) setNutrients([]);
             } finally {
                 if (!cancelled) setNutrientsLoading(false);
@@ -228,7 +228,7 @@ function FoodSearchPage() {
                 setActiveIndex((prev) =>
                     prev > 0 ? prev - 1 : results.length - 1
                 );
-            } else if (e.key === "Enter" && activeIndex >= 0) {
+            } else if (e.key === "Enter" && activeIndex >= 0 && activeIndex < results.length) {
                 e.preventDefault();
                 setSelectedFood(results[activeIndex]);
             }
@@ -246,14 +246,14 @@ function FoodSearchPage() {
                 { search_text: debouncedQuery, p_limit: PAGE_SIZE, p_offset: results.length }
             );
             if (error) {
-                console.error("Load more error:", error);
+                if (import.meta.env.DEV) console.error("Load more error:", error);
                 return;
             }
             const newResults = data || [];
             setResults((prev) => [...prev, ...newResults]);
             setHasMore(newResults.length >= PAGE_SIZE);
         } catch (err) {
-            console.error("Load more error:", err);
+            if (import.meta.env.DEV) console.error("Load more error:", err);
         } finally {
             setLoadingMore(false);
         }
@@ -261,8 +261,8 @@ function FoodSearchPage() {
 
     // Scroll active item into view
     useEffect(() => {
-        if (activeIndex >= 0 && resultListRef.current) {
-            const item = resultListRef.current.children[activeIndex];
+        if (activeIndex >= 0) {
+            const item = document.getElementById(`food-result-${activeIndex}`);
             if (item) item.scrollIntoView({ block: "nearest" });
         }
     }, [activeIndex]);
@@ -496,5 +496,8 @@ function NutrientGroupTable({ groupName, items }) {
 }
 
 export default FoodSearchPage;
+
+
+
 
 

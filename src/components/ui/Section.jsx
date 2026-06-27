@@ -1,4 +1,4 @@
-function Section({ title, icon, children }) {
+function Section({ title, icon, headerRight, children }) {
     return (
         <section className="section">
             <div className="section-head">
@@ -6,6 +6,7 @@ function Section({ title, icon, children }) {
                     {icon}
                     <h2>{title}</h2>
                 </div>
+                {headerRight}
             </div>
             {children}
         </section>

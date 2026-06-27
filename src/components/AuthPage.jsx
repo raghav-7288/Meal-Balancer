@@ -138,7 +138,7 @@ function SignInForm() {
 
     return (
         <form className="auth-form" onSubmit={handleSubmit}>
-            {error && <div className="auth-error">{error}</div>}
+            {error && <div className="auth-error" role="alert">{error}</div>}
 
             <label className="auth-field">
                 <span>Email</span>
@@ -146,8 +146,10 @@ function SignInForm() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
+                    placeholder="[REDACTED_EMAIL_ADDRESS_1]"
                     required
+                    aria-label="Email address"
+                    autoComplete="email"
                 />
             </label>
 
@@ -159,6 +161,8 @@ function SignInForm() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     required
+                    aria-label="Password"
+                    autoComplete="current-password"
                 />
             </label>
 
@@ -221,7 +225,7 @@ function SignUpForm() {
 
     return (
         <form className="auth-form" onSubmit={handleSubmit}>
-            {error && <div className="auth-error">{error}</div>}
+            {error && <div className="auth-error" role="alert">{error}</div>}
 
             <label className="auth-field">
                 <span>Username</span>
@@ -231,6 +235,8 @@ function SignUpForm() {
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="johndoe"
                     required
+                    aria-label="Username"
+                    autoComplete="username"
                 />
             </label>
 
@@ -250,8 +256,10 @@ function SignUpForm() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
+                    placeholder="[REDACTED_EMAIL_ADDRESS_1]"
                     required
+                    aria-label="Email address"
+                    autoComplete="email"
                 />
             </label>
 
@@ -274,6 +282,8 @@ function SignUpForm() {
                     placeholder="Min 6 characters"
                     minLength={6}
                     required
+                    aria-label="Password"
+                    autoComplete="new-password"
                 />
             </label>
 

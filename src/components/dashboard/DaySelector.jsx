@@ -31,7 +31,7 @@ function DaySelector({
                     <span className={`sync-badge sync-badge--${syncStatus}`} title={
                         syncStatus === "syncing" ? "Syncing plans…" :
                         syncStatus === "synced" ? "Plans synced to cloud" :
-                        syncStatus === "error" ? `Sync failed — ${syncError || "using local data"}` :
+                        syncStatus === "error" ? `Sync failed — ${syncError ?? "using local data"}` :
                         "Plans stored locally"
                     }>
                         {syncStatus === "syncing" && <><Loader size={12} className="spin" /> Syncing</>}

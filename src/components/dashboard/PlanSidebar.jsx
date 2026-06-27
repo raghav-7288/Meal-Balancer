@@ -79,10 +79,10 @@ function PlanSidebar({
                                         <button
                                             className={`plan-row ${active ? "active" : ""}`}
                                             onClick={() => setActivePlanId(plan.id)}
-                                            aria-label={`Select plan: ${plan.name}, score ${summary?.dayScore?.score || 0}`}
+                                            aria-label={`Select plan: ${plan.name}, score ${summary?.dayScore?.score ?? 0}`}
                                         >
                                             <span>{plan.name}</span>
-                                            <strong>{summary?.dayScore?.score || 0}</strong>
+                                            <strong>{summary?.dayScore?.score ?? 0}</strong>
                                         </button>
                                         <button
                                             className="copy-btn"
@@ -118,10 +118,10 @@ function PlanSidebar({
                                         <button
                                             className={`plan-row ${active ? "active" : ""}`}
                                             onClick={() => setActivePlanId(plan.id)}
-                                            aria-label={`Select plan: ${plan.name}, score ${summary?.dayScore?.score || 0}`}
+                                            aria-label={`Select plan: ${plan.name}, score ${summary?.dayScore?.score ?? 0}`}
                                         >
                                             <span>{plan.name}</span>
-                                            <strong>{summary?.dayScore?.score || 0}</strong>
+                                            <strong>{summary?.dayScore?.score ?? 0}</strong>
                                         </button>
                                         <div className="plan-action-btns">
                                             <button

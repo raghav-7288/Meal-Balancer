@@ -128,6 +128,7 @@ function ProfilePage() {
 
     // ── Health goals loading ──
     useEffect(() => {
+        let cancelled = false;
         async function loadGoals() {
             try {
                 setGoalsLoading(true);
@@ -136,15 +137,20 @@ function ProfilePage() {
                     getHealthGoals(),
                     user?.id ? getUserHealthGoals(user.id) : Promise.resolve([]),
                 ]);
-                setHealthGoals(goals);
-                setSelectedGoalIds(userGoals.map((ug) => ug.health_goal_id));
+                if (!cancelled) {
+                    setHealthGoals(goals || []);
+                    setSelectedGoalIds((userGoals || []).map((ug) => ug.health_goal_id));
+                }
             } catch (err) {
-                setGoalsError(err.message);
+                if (!cancelled) {
+                    setGoalsError(err?.message || "Failed to load health goals");
+                }
             } finally {
-                setGoalsLoading(false);
+                if (!cancelled) setGoalsLoading(false);
             }
         }
         loadGoals();
+        return () => { cancelled = true; };
     }, [user?.id]);
 
     function toggleGoal(goalId) {

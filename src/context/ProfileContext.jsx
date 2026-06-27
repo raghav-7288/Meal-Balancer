@@ -123,9 +123,16 @@ export function ProfileProvider({ children }) {
     // Save profile to Supabase (debounced) — uses upsert to handle missing rows
     const lastSavedProfile = useRef(null);
     const saveToDbRef = useRef(null);
+    const authRef = useRef({ isAuthenticated, userId: user?.id });
+
+    // Keep auth ref in sync so debounced save always has latest values
+    useEffect(() => {
+        authRef.current = { isAuthenticated, userId: user?.id };
+    }, [isAuthenticated, user?.id]);
 
     function saveToDb(newProfile) {
-        if (!isAuthenticated || !user?.id) return;
+        const { isAuthenticated: authed, userId } = authRef.current;
+        if (!authed || !userId) return;
 
         // Skip if nothing changed since last save
         const dbFields = {};
@@ -142,7 +149,7 @@ export function ProfileProvider({ children }) {
 
         supabase
             .from("user_profiles")
-            .upsert({ user_id: user.id, ...dbFields }, { onConflict: "user_id" })
+            .upsert({ user_id: authRef.current.userId, ...dbFields }, { onConflict: "user_id" })
             .then(({ error }) => {
                 if (!isMounted.current) return;
                 if (error) {
