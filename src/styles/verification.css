@@ -139,7 +139,6 @@
     color: var(--ds-danger-text);
 }
 
-
 /* Profile row with verification badge */
 .profile-value-with-badge {
     display: flex;
@@ -147,6 +146,3 @@
     align-items: flex-start;
     gap: var(--ds-space-1);
 }
-
-
-

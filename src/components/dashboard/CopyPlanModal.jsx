@@ -1,16 +1,25 @@
-
 import { useEffect, useCallback } from "react";
 import useFocusTrap from "../../hooks/useFocusTrap";
 
-function CopyPlanModal({ copyModal, setCopyModal, copyPlanName, setCopyPlanName, confirmCopyPlan, copyModalRef }) {
+function CopyPlanModal({
+    copyModal,
+    setCopyModal,
+    copyPlanName,
+    setCopyPlanName,
+    confirmCopyPlan,
+    copyModalRef,
+}) {
     const focusTrapRef = useFocusTrap(!!copyModal);
 
     // Close on Escape key
-    const handleKeyDown = useCallback((e) => {
-        if (e.key === "Escape") {
-            setCopyModal(null);
-        }
-    }, [setCopyModal]);
+    const handleKeyDown = useCallback(
+        (e) => {
+            if (e.key === "Escape") {
+                setCopyModal(null);
+            }
+        },
+        [setCopyModal]
+    );
 
     useEffect(() => {
         if (!copyModal) return;
@@ -21,12 +30,22 @@ function CopyPlanModal({ copyModal, setCopyModal, copyPlanName, setCopyPlanName,
     if (!copyModal) return null;
 
     return (
-        <div className="modal-overlay" onClick={() => setCopyModal(null)} role="dialog" aria-modal="true" aria-labelledby="copy-plan-title">
-            <div className="modal-content" onClick={(e) => e.stopPropagation()} ref={(node) => {
-                // Merge refs
-                if (copyModalRef) copyModalRef.current = node;
-                if (focusTrapRef) focusTrapRef.current = node;
-            }}>
+        <div
+            className="modal-overlay"
+            onClick={() => setCopyModal(null)}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="copy-plan-title"
+        >
+            <div
+                className="modal-content"
+                onClick={(e) => e.stopPropagation()}
+                ref={(node) => {
+                    // Merge refs
+                    if (copyModalRef) copyModalRef.current = node;
+                    if (focusTrapRef) focusTrapRef.current = node;
+                }}
+            >
                 <h3 id="copy-plan-title">Save plan as:</h3>
                 <input
                     type="text"
@@ -40,8 +59,12 @@ function CopyPlanModal({ copyModal, setCopyModal, copyPlanName, setCopyPlanName,
                     aria-required="true"
                 />
                 <div className="modal-actions">
-                    <button type="button" onClick={confirmCopyPlan} disabled={!copyPlanName.trim()}>Save</button>
-                    <button type="button" className="secondary" onClick={() => setCopyModal(null)}>Cancel</button>
+                    <button type="button" onClick={confirmCopyPlan} disabled={!copyPlanName.trim()}>
+                        Save
+                    </button>
+                    <button type="button" className="secondary" onClick={() => setCopyModal(null)}>
+                        Cancel
+                    </button>
                 </div>
             </div>
         </div>
@@ -49,4 +72,3 @@ function CopyPlanModal({ copyModal, setCopyModal, copyPlanName, setCopyPlanName,
 }
 
 export default CopyPlanModal;
-

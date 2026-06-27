@@ -17,11 +17,21 @@ export function computeWeeklyAverages(daySummaries, days) {
         return dt && (dt.protein || 0) + (dt.carbs || 0) + (dt.fat || 0) > 0;
     });
     const numDays = daysWithFood.length || 1;
-    const avgKcal = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.kcal || 0), 0) / numDays);
-    const avgProtein = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.protein || 0), 0) / numDays);
-    const avgCarbs = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.carbs || 0), 0) / numDays);
-    const avgFat = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.fat || 0), 0) / numDays);
-    const avgFibre = Math.round(daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.fibre || 0), 0) / numDays);
+    const avgKcal = Math.round(
+        daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.kcal || 0), 0) / numDays
+    );
+    const avgProtein = Math.round(
+        daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.protein || 0), 0) / numDays
+    );
+    const avgCarbs = Math.round(
+        daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.carbs || 0), 0) / numDays
+    );
+    const avgFat = Math.round(
+        daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.fat || 0), 0) / numDays
+    );
+    const avgFibre = Math.round(
+        daysWithFood.reduce((s, d) => s + (daySummaries[d]?.dayTotals?.fibre || 0), 0) / numDays
+    );
 
     return { daysWithFood, avgKcal, avgProtein, avgCarbs, avgFat, avgFibre };
 }
@@ -39,7 +49,11 @@ export function buildMealTableRow(item, lookupFood, options = {}) {
     const name = food?.name || item.foodName || item.foodId;
     const grams = item.grams;
     const instructions = item.instructions || "";
-    let kcal = 0, protein = "0", carbs = "0", fat = "0", fibre = "0";
+    let kcal = 0,
+        protein = "0",
+        carbs = "0",
+        fat = "0",
+        fibre = "0";
 
     if (item.nutrients) {
         const factor = grams / 100;
@@ -82,25 +96,25 @@ export function buildDailySummaryRows(dayTotals) {
 
 /* ─── Color Palette ─── */
 const COLORS = {
-    primary: [37, 99, 235],       // Blue-600
-    primaryDark: [29, 78, 216],   // Blue-700
-    accent: [16, 185, 129],       // Emerald-500
-    dark: [15, 23, 42],           // Slate-900
-    text: [51, 65, 85],           // Slate-700
-    muted: [100, 116, 139],       // Slate-500
-    light: [241, 245, 249],       // Slate-100
-    border: [226, 232, 240],      // Slate-200
+    primary: [37, 99, 235], // Blue-600
+    primaryDark: [29, 78, 216], // Blue-700
+    accent: [16, 185, 129], // Emerald-500
+    dark: [15, 23, 42], // Slate-900
+    text: [51, 65, 85], // Slate-700
+    muted: [100, 116, 139], // Slate-500
+    light: [241, 245, 249], // Slate-100
+    border: [226, 232, 240], // Slate-200
     white: [255, 255, 255],
     headerBg: [37, 99, 235],
     summaryHeaderBg: [16, 185, 129],
-    totalRowBg: [239, 246, 255],  // Blue-50
+    totalRowBg: [239, 246, 255], // Blue-50
     // Light pastel section backgrounds
-    dayCardBg: [248, 250, 255],       // Very light blue tint
-    dayCardBorder: [214, 226, 252],   // Soft blue border
-    mealSlotBg: [240, 249, 245],      // Very light emerald tint
-    mealSlotBorder: [209, 237, 225],  // Soft emerald border
-    dayTotalBg: [245, 243, 255],      // Very light indigo tint
-    dayTotalBorder: [224, 220, 252],  // Soft indigo border
+    dayCardBg: [248, 250, 255], // Very light blue tint
+    dayCardBorder: [214, 226, 252], // Soft blue border
+    mealSlotBg: [240, 249, 245], // Very light emerald tint
+    mealSlotBorder: [209, 237, 225], // Soft emerald border
+    dayTotalBg: [245, 243, 255], // Very light indigo tint
+    dayTotalBorder: [224, 220, 252], // Soft indigo border
 };
 
 /**
@@ -121,14 +135,34 @@ function drawLogo(doc, x, y, small = false) {
 
     const scale = small ? 0.78 : 1;
     // Fork prongs
-    doc.line(circleX - 2.5 * scale, circleY - 4 * scale, circleX - 2.5 * scale, circleY - 1 * scale);
+    doc.line(
+        circleX - 2.5 * scale,
+        circleY - 4 * scale,
+        circleX - 2.5 * scale,
+        circleY - 1 * scale
+    );
     doc.line(circleX - 1 * scale, circleY - 4 * scale, circleX - 1 * scale, circleY - 1 * scale);
-    doc.line(circleX + 0.5 * scale, circleY - 4 * scale, circleX + 0.5 * scale, circleY - 1 * scale);
+    doc.line(
+        circleX + 0.5 * scale,
+        circleY - 4 * scale,
+        circleX + 0.5 * scale,
+        circleY - 1 * scale
+    );
     // Fork handle
     doc.line(circleX - 1 * scale, circleY - 1 * scale, circleX - 1 * scale, circleY + 4 * scale);
     // Knife
-    doc.line(circleX + 2.5 * scale, circleY - 4 * scale, circleX + 2.5 * scale, circleY + 4 * scale);
-    doc.line(circleX + 2.5 * scale, circleY - 4 * scale, circleX + 3.5 * scale, circleY - 2 * scale);
+    doc.line(
+        circleX + 2.5 * scale,
+        circleY - 4 * scale,
+        circleX + 2.5 * scale,
+        circleY + 4 * scale
+    );
+    doc.line(
+        circleX + 2.5 * scale,
+        circleY - 4 * scale,
+        circleX + 3.5 * scale,
+        circleY - 2 * scale
+    );
     doc.line(circleX + 3.5 * scale, circleY - 2 * scale, circleX + 2.5 * scale, circleY);
 
     // Reset line color
@@ -136,7 +170,7 @@ function drawLogo(doc, x, y, small = false) {
     doc.setLineWidth(0.2);
 
     // "Diet Specifix" text
-    const textX = x + (radius * 2) + 4;
+    const textX = x + radius * 2 + 4;
     doc.setFontSize(small ? 10 : 13);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...COLORS.dark);
@@ -163,7 +197,12 @@ function drawPageHeader(doc, pageWidth) {
     doc.setFontSize(7);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...COLORS.muted);
-    doc.text(new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }), pageWidth - 14, 12, { align: "right" });
+    doc.text(
+        new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }),
+        pageWidth - 14,
+        12,
+        { align: "right" }
+    );
 
     // Separator line
     doc.setDrawColor(...COLORS.border);
@@ -350,7 +389,9 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
     doc.setTextColor(...COLORS.muted);
     doc.text(
         new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }),
-        pageWidth - 14, 14, { align: "right" }
+        pageWidth - 14,
+        14,
+        { align: "right" }
     );
 
     // Separator line below logo
@@ -409,7 +450,8 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
     // ─── 4. WEEKLY OVERVIEW STATS (only for weekly plans) ───
     if (daySummaries) {
         // Compute weekly averages
-        const { daysWithFood, avgKcal, avgProtein, avgCarbs, avgFat, avgFibre } = computeWeeklyAverages(daySummaries, DAYS);
+        const { daysWithFood, avgKcal, avgProtein, avgCarbs, avgFat, avgFibre } =
+            computeWeeklyAverages(daySummaries, DAYS);
 
         // Check page space
         if (yPos > pageHeight - 55) {
@@ -465,13 +507,14 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
         yPos += statsCardHeight - 2;
     }
 
-
     // ─── WEEKLY FORMAT ───
     if (daySummaries) {
         for (const day of DAYS) {
             const daySummary = daySummaries[day];
             const dayTotals = daySummary?.dayTotals;
-            const hasFood = dayTotals && (dayTotals.protein || 0) + (dayTotals.carbs || 0) + (dayTotals.fat || 0) > 0;
+            const hasFood =
+                dayTotals &&
+                (dayTotals.protein || 0) + (dayTotals.carbs || 0) + (dayTotals.fat || 0) > 0;
 
             if (!hasFood) continue;
 
@@ -491,9 +534,7 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
 
             // Meals for this day
             for (const mealName of MEALS) {
-                const items = (plan.meals[mealName] || []).filter(
-                    (i) => i.day === day || !i.day
-                );
+                const items = (plan.meals[mealName] || []).filter((i) => i.day === day || !i.day);
                 if (items.length === 0) continue;
 
                 // Check if we need a new page (overflow within a day)
@@ -521,15 +562,27 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
                 yPos += 6;
 
                 // Build table data
-                const tableBody = items.map((item) => buildMealTableRow(item, foodById, { includeFibre: false }));
+                const tableBody = items.map((item) =>
+                    buildMealTableRow(item, foodById, { includeFibre: false })
+                );
 
                 autoTable(doc, {
                     startY: yPos,
-                    head: [["Food Item", "Qty", "Instructions", "Kcal", "Protein (g)", "Carbs (g)", "Fat (g)"]],
+                    head: [
+                        [
+                            "Food Item",
+                            "Qty",
+                            "Instructions",
+                            "Kcal",
+                            "Protein (g)",
+                            "Carbs (g)",
+                            "Fat (g)",
+                        ],
+                    ],
                     body: tableBody,
                     theme: "grid",
                     headStyles: {
-                        fillColor: [15, 23, 42],   // Slate-900 (dark contrast)
+                        fillColor: [15, 23, 42], // Slate-900 (dark contrast)
                         textColor: COLORS.white,
                         fontSize: 7.5,
                         fontStyle: "bold",
@@ -585,7 +638,6 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
                 yPos += totalCardHeight + 6;
             }
         }
-
     } else {
         // ─── SINGLE DAY FORMAT (fallback) ───
         for (const mealName of MEALS) {
@@ -606,7 +658,9 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
             doc.setTextColor(0);
             yPos += 4;
 
-            const tableBody = items.map((item) => buildMealTableRow(item, foodById, { includeFibre: true }));
+            const tableBody = items.map((item) =>
+                buildMealTableRow(item, foodById, { includeFibre: true })
+            );
 
             const mealTotals = summary?.mealTotals?.[mealName];
             if (mealTotals) {
@@ -624,7 +678,18 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
 
             autoTable(doc, {
                 startY: yPos,
-                head: [["Food Item", "Qty", "Instructions", "Kcal", "Protein (g)", "Carbs (g)", "Fat (g)", "Fibre (g)"]],
+                head: [
+                    [
+                        "Food Item",
+                        "Qty",
+                        "Instructions",
+                        "Kcal",
+                        "Protein (g)",
+                        "Carbs (g)",
+                        "Fat (g)",
+                        "Fibre (g)",
+                    ],
+                ],
                 body: tableBody,
                 theme: "grid",
                 headStyles: {

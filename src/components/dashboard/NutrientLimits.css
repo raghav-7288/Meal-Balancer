@@ -86,7 +86,9 @@
     background: var(--ds-surface-alt);
     border: 1px solid var(--ds-border-input);
     border-radius: var(--ds-radius-md);
-    transition: border-color var(--ds-transition-base), background var(--ds-transition-base);
+    transition:
+        border-color var(--ds-transition-base),
+        background var(--ds-transition-base);
 }
 
 .nutrient-limit-item.exceeded {
@@ -301,4 +303,3 @@ body.dark-mode .nutrient-warn-pill {
         grid-template-columns: repeat(2, 1fr);
     }
 }
-

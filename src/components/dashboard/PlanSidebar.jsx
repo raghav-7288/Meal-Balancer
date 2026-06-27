@@ -41,7 +41,7 @@ function PlanSidebar({
                         type="button"
                         className="secondary"
                         onClick={onResetPlan}
-                        disabled={presetPlans.some(p => p.id === activePlanId)}
+                        disabled={presetPlans.some((p) => p.id === activePlanId)}
                         aria-label="Reset all meals in active plan"
                     >
                         Reset meals
@@ -73,15 +73,23 @@ function PlanSidebar({
 
                 {planView === "preset" && (
                     <>
-                        <p className="small-copy" style={{ marginBottom: "0.5rem", fontStyle: "italic", opacity: 0.8 }}>
-                            Ready-made templates — click to preview, use &quot;Copy&quot; to make your own
+                        <p
+                            className="small-copy"
+                            style={{ marginBottom: "0.5rem", fontStyle: "italic", opacity: 0.8 }}
+                        >
+                            Ready-made templates — click to preview, use &quot;Copy&quot; to make
+                            your own
                         </p>
                         <div className="saved-plans" role="list" aria-label="Preset plans">
                             {presetPlans.map((plan) => {
                                 const summary = summaries.find((s) => s.plan.id === plan.id);
                                 const active = plan.id === activePlanId;
                                 return (
-                                    <div key={plan.id} className={`plan-row-wrapper ${active ? "active" : ""}`} role="listitem">
+                                    <div
+                                        key={plan.id}
+                                        className={`plan-row-wrapper ${active ? "active" : ""}`}
+                                        role="listitem"
+                                    >
                                         <button
                                             type="button"
                                             className={`plan-row ${active ? "active" : ""}`}
@@ -115,15 +123,23 @@ function PlanSidebar({
                         </p>
                         <div className="saved-plans" role="list" aria-label="User plans">
                             {userPlans.length === 0 && (
-                                <p className="small-copy" style={{ textAlign: "center", padding: "1rem 0" }}>
-                                    No plans yet. Click &quot;Create&quot; or copy a pre-saved template.
+                                <p
+                                    className="small-copy"
+                                    style={{ textAlign: "center", padding: "1rem 0" }}
+                                >
+                                    No plans yet. Click &quot;Create&quot; or copy a pre-saved
+                                    template.
                                 </p>
                             )}
                             {userPlans.map((plan) => {
                                 const summary = summaries.find((s) => s.plan.id === plan.id);
                                 const active = plan.id === activePlanId;
                                 return (
-                                    <div key={plan.id} className={`plan-row-wrapper ${active ? "active" : ""}`} role="listitem">
+                                    <div
+                                        key={plan.id}
+                                        className={`plan-row-wrapper ${active ? "active" : ""}`}
+                                        role="listitem"
+                                    >
                                         <button
                                             type="button"
                                             className={`plan-row ${active ? "active" : ""}`}
@@ -158,12 +174,12 @@ function PlanSidebar({
             </Section>
 
             <Section title="Visible fat reference" icon={<Leaf size={16} />}>
-                <p className="small-copy">
-                    Current editable benchmark for this profile:
-                </p>
+                <p className="small-copy">Current editable benchmark for this profile:</p>
                 <div className="fat-box">
                     <strong>{visibleFatLimit} g/day</strong>
-                    <span>{profile.sex} · {profile.activity}</span>
+                    <span>
+                        {profile.sex} · {profile.activity}
+                    </span>
                 </div>
             </Section>
 
@@ -171,7 +187,9 @@ function PlanSidebar({
                 {userGoalNames.length > 0 ? (
                     <div className="goals-tags" role="list" aria-label="Health goals">
                         {userGoalNames.map((name) => (
-                            <span key={name} className="goal-tag" role="listitem">{name}</span>
+                            <span key={name} className="goal-tag" role="listitem">
+                                {name}
+                            </span>
                         ))}
                     </div>
                 ) : (
@@ -185,4 +203,3 @@ function PlanSidebar({
 }
 
 export default memo(PlanSidebar);
-

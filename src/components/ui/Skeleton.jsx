@@ -55,7 +55,11 @@ function SkeletonStatCard() {
 /** Food search result skeleton */
 function SkeletonFoodResult() {
     return (
-        <div className="food-result-card skeleton-card" aria-hidden="true" style={{ padding: "14px 16px" }}>
+        <div
+            className="food-result-card skeleton-card"
+            aria-hidden="true"
+            style={{ padding: "14px 16px" }}
+        >
             <SkeletonBlock width="80%" height="14px" style={{ marginBottom: 8 }} />
             <div style={{ display: "flex", gap: 8 }}>
                 <SkeletonBlock width="60px" height="12px" />
@@ -124,4 +128,3 @@ export {
     DashboardSkeleton,
     ProfileSkeleton,
 };
-

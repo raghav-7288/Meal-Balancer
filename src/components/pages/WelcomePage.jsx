@@ -22,14 +22,20 @@ function WelcomePage() {
                 <div className="welcome-icon" aria-hidden="true">
                     <UtensilsCrossed size={48} />
                 </div>
-                <h1>Welcome{profile?.username ? `, ${profile.username}` : profile?.full_name ? `, ${profile.full_name}` : ""}!</h1>
-                <p className="welcome-subtitle">
-                    Your personal Indian diet planning dashboard
-                </p>
+                <h1>
+                    Welcome
+                    {profile?.username
+                        ? `, ${profile.username}`
+                        : profile?.full_name
+                          ? `, ${profile.full_name}`
+                          : ""}
+                    !
+                </h1>
+                <p className="welcome-subtitle">Your personal Indian diet planning dashboard</p>
                 <p className="welcome-desc">
                     Build meals in grams, convert them into exchange-style categories, and score
-                    your dietary pattern with transparent reasons. Track your nutrition across the week
-                    with personalized targets.
+                    your dietary pattern with transparent reasons. Track your nutrition across the
+                    week with personalized targets.
                 </p>
                 <div className="welcome-highlights">
                     <div className="welcome-highlight-item">
@@ -54,7 +60,11 @@ function WelcomePage() {
                         </div>
                     </div>
                 </div>
-                <button type="button" className="welcome-cta" onClick={() => navigate("/dashboard")}>
+                <button
+                    type="button"
+                    className="welcome-cta"
+                    onClick={() => navigate("/dashboard")}
+                >
                     Go to Dashboard <ArrowRight size={16} aria-hidden="true" />
                 </button>
             </div>

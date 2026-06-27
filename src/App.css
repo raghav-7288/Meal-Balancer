@@ -6,7 +6,13 @@ body {
     margin: 0;
     background: #f4f7fb;
     color: #111827;
-    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
 }
 
 button,
@@ -119,7 +125,10 @@ body.dark-mode .nav-brand-text small {
     background: transparent;
     color: #64748b;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s, transform 0.15s;
+    transition:
+        background 0.2s,
+        color 0.2s,
+        transform 0.15s;
     flex-shrink: 0;
 }
 
@@ -149,7 +158,9 @@ body.dark-mode .nav-brand-text small {
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.15s, transform 0.15s;
+    transition:
+        opacity 0.15s,
+        transform 0.15s;
 }
 
 .nav-theme-toggle:hover::after {
@@ -205,8 +216,13 @@ body.dark-mode .nav-theme-toggle::after {
 }
 
 @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
 }
 
 .welcome-card h1 {
@@ -278,7 +294,9 @@ body.dark-mode .nav-theme-toggle::after {
     color: white;
     border: none;
     cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.2s ease;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.2s ease;
 }
 
 .welcome-cta:hover {
@@ -386,8 +404,12 @@ body.dark-mode .nav-theme-toggle::after {
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .spin {
@@ -727,7 +749,9 @@ body.dark-mode .sync-badge--idle {
     background: white;
     outline: none;
     box-sizing: border-box;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
 }
 
 .field select,
@@ -1588,7 +1612,9 @@ body.dark-mode .add-inline-btn:hover:not(:disabled) {
     background: #f8fafc;
     margin-bottom: 20px;
     box-sizing: border-box;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
 }
 
 .modal-input:focus {
@@ -1611,13 +1637,23 @@ body.dark-mode .add-inline-btn:hover:not(:disabled) {
 }
 
 @keyframes modal-fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes modal-scale-in {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 body.dark-mode .modal-content {
@@ -1695,7 +1731,6 @@ body.dark-mode .modal-input {
     animation: spin 0.7s linear infinite;
 }
 
-
 .auth-page {
     display: flex;
     align-items: center;
@@ -1756,7 +1791,9 @@ body.dark-mode .modal-input {
     background: white;
     outline: none;
     font: inherit;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
 }
 
 .auth-field input:focus {
@@ -1992,7 +2029,6 @@ body.dark-mode .modal-input {
 .error-boundary button:hover {
     background: #2563eb;
 }
-
 
 /* Nav links as anchor tags (react-router NavLink) */
 a.nav-link {
@@ -2522,7 +2558,10 @@ body.dark-mode .plan-action-btns .download-btn {
     color: #64748b;
     cursor: pointer;
     text-align: center;
-    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    transition:
+        background 0.2s,
+        color 0.2s,
+        box-shadow 0.2s;
 }
 
 .bmi-unit-btn.active {
@@ -2666,7 +2705,9 @@ body.dark-mode .plan-action-btns .download-btn {
     color: white;
     border: none;
     cursor: pointer;
-    transition: transform 0.1s ease, opacity 0.2s;
+    transition:
+        transform 0.1s ease,
+        opacity 0.2s;
 }
 
 .bmi-continue-btn:hover:not(:disabled) {
@@ -2744,7 +2785,9 @@ body.dark-mode .plan-action-btns .download-btn {
     border-radius: var(--ds-radius-lg);
     border: none;
     cursor: pointer;
-    transition: transform 0.1s ease, background 0.2s;
+    transition:
+        transform 0.1s ease,
+        background 0.2s;
 }
 
 .profile-complete-btn.complete {
@@ -2888,8 +2931,14 @@ body.dark-mode .profile-complete-btn.incomplete {
 }
 
 @keyframes health-tool-fade-in {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* BMI embedded (no full-page centering) */
@@ -4896,7 +4945,9 @@ body.dark-mode .onboarding-back-btn:hover {
     color: white;
     border: none;
     cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
     white-space: nowrap;
 }
 
@@ -4983,7 +5034,9 @@ body.dark-mode .onboarding-back-btn:hover {
     border: 1px solid #e5e7eb;
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .weekly-summary-stat:hover {
@@ -5039,7 +5092,10 @@ body.dark-mode .onboarding-back-btn:hover {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
 }
 
 .weekly-day-col:hover {
@@ -5162,7 +5218,9 @@ body.dark-mode .onboarding-back-btn:hover {
     font-size: 14px;
     line-height: 1;
     flex-shrink: 0;
-    transition: color 0.15s, background 0.15s;
+    transition:
+        color 0.15s,
+        background 0.15s;
 }
 
 .weekly-item-remove:hover {
@@ -5420,7 +5478,9 @@ body.dark-mode .onboarding-back-btn:hover {
     min-height: 80px;
     background: #f8fafc;
     color: #0f172a;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
 }
 
 .plan-guidelines-input:focus {
@@ -5462,7 +5522,9 @@ body.dark-mode .onboarding-back-btn:hover {
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
+    transition:
+        background 0.15s,
+        transform 0.1s;
 }
 
 .plan-guidelines-save-btn:hover {
@@ -5551,7 +5613,9 @@ body.dark-mode .plan-guidelines-save-btn:hover {
     border: 1px solid #e5e7eb;
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .progress-stat-card:hover {
@@ -6227,7 +6291,9 @@ body.dark-mode :focus-visible {
     background: transparent;
     color: #64748b;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s;
+    transition:
+        background 0.2s,
+        color 0.2s;
     flex-shrink: 0;
 }
 
@@ -6333,8 +6399,12 @@ body.dark-mode .skeleton-shimmer {
 }
 
 @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 .skeleton-card {
@@ -6412,7 +6482,9 @@ body.dark-mode .empty-state-desc {
     border: none;
     cursor: pointer;
     text-decoration: none;
-    transition: transform 0.15s ease, box-shadow 0.2s ease;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.2s ease;
 }
 
 .empty-state-cta:hover {
@@ -6534,5 +6606,3 @@ body.dark-mode .shortcut-hint kbd {
         display: none;
     }
 }
-
-

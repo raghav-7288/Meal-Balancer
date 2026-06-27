@@ -1,30 +1,14 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import {
-    Calendar,
-    BarChart3,
-    AlertCircle,
-    Info,
-    BookOpen,
-    Download,
-    Edit3,
-} from "lucide-react";
-import { MEALS, DAYS } from "../../data/presetPlans";
+import { Calendar, BarChart3, AlertCircle, Info, BookOpen, Download, Edit3 } from "lucide-react";
+import { MEALS, DAYS, getTodayName } from "../../data/presetPlans";
 import { aggregateMeal, combineDay, foodById } from "../../engines/nutrientEngine";
 import { scoreDay } from "../../engines/scoringEngine";
 import { useSyncedPlans } from "../../hooks/useSyncedPlans";
 import { usePresetPlans } from "../../hooks/usePresetPlans";
 import { useAuth } from "../../hooks/useAuth";
 import { useProfile } from "../../context/ProfileContext";
-import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    Tooltip,
-    ResponsiveContainer,
-    Cell,
-} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import Section from "../ui/Section";
 
 function WeeklyPlannerPage() {
@@ -33,9 +17,7 @@ function WeeklyPlannerPage() {
     const { presetPlans, isLoading: presetLoading } = usePresetPlans();
     const [userPlans] = useSyncedPlans();
     const allPlans = useMemo(() => [...presetPlans, ...userPlans], [presetPlans, userPlans]);
-    const [activePlanId, setActivePlanId] = useState(
-        userPlans[0]?.id || presetPlans[0]?.id || ""
-    );
+    const [activePlanId, setActivePlanId] = useState(userPlans[0]?.id || presetPlans[0]?.id || "");
 
     // Ref to avoid re-triggering effect when userPlans changes
     const userPlansRef = useRef(userPlans);
@@ -48,7 +30,9 @@ function WeeklyPlannerPage() {
         if (presetPlans.length > 0) {
             setActivePlanId((prev) => {
                 const allIds = [...presetPlans, ...userPlansRef.current].map((p) => p.id);
-                return allIds.includes(prev) ? prev : (userPlansRef.current[0]?.id || presetPlans[0].id);
+                return allIds.includes(prev)
+                    ? prev
+                    : userPlansRef.current[0]?.id || presetPlans[0].id;
             });
         }
     }, [presetPlans]);
@@ -61,11 +45,9 @@ function WeeklyPlannerPage() {
         (day, meal) => {
             if (!activePlan) return [];
             const meals = activePlan.meals || {};
-            return (meals[meal] || []).filter(
-                (item) => item.day === day || !item.day
-            );
+            return (meals[meal] || []).filter((item) => item.day === day || !item.day);
         },
-        [activePlan],
+        [activePlan]
     );
 
     // Per-day summaries
@@ -76,9 +58,7 @@ function WeeklyPlannerPage() {
         for (const day of DAYS) {
             const mealTotals = {};
             for (const meal of MEALS) {
-                const items = (planMeals[meal] || []).filter(
-                    (i) => i.day === day || !i.day
-                );
+                const items = (planMeals[meal] || []).filter((i) => i.day === day || !i.day);
                 mealTotals[meal] = aggregateMeal(items);
             }
             const dayTotals = combineDay(mealTotals);
@@ -106,10 +86,18 @@ function WeeklyPlannerPage() {
 
         const sum = (fn) => daysWithFood.reduce((s, d) => s + fn(d), 0);
         return {
-            avgScore: Math.round(sum((d) => daySummaries[d]?.dayScore?.score || 0) / daysWithFood.length),
-            avgKcal: Math.round(sum((d) => daySummaries[d]?.dayTotals?.kcal || 0) / daysWithFood.length),
-            avgProtein: Math.round(sum((d) => daySummaries[d]?.dayTotals?.protein || 0) / daysWithFood.length),
-            avgFibre: Math.round(sum((d) => daySummaries[d]?.dayTotals?.fibre || 0) / daysWithFood.length),
+            avgScore: Math.round(
+                sum((d) => daySummaries[d]?.dayScore?.score || 0) / daysWithFood.length
+            ),
+            avgKcal: Math.round(
+                sum((d) => daySummaries[d]?.dayTotals?.kcal || 0) / daysWithFood.length
+            ),
+            avgProtein: Math.round(
+                sum((d) => daySummaries[d]?.dayTotals?.protein || 0) / daysWithFood.length
+            ),
+            avgFibre: Math.round(
+                sum((d) => daySummaries[d]?.dayTotals?.fibre || 0) / daysWithFood.length
+            ),
             daysPlanned: daysWithFood.length,
         };
     }, [daySummaries]);
@@ -118,8 +106,7 @@ function WeeklyPlannerPage() {
     async function handleDownloadPdf() {
         if (!activePlan) return;
         // Build a combined summary for the plan using today's day
-        const todayIdx = new Date().getDay();
-        const todayName = DAYS[todayIdx === 0 ? 6 : todayIdx - 1];
+        const todayName = getTodayName();
         const summary = daySummaries[todayName] || Object.values(daySummaries)[0];
 
         const userInfo = {
@@ -153,9 +140,21 @@ function WeeklyPlannerPage() {
     // Show loading state until plans are available
     if (presetLoading && allPlans.length === 0) {
         return (
-            <div className="weekly-planner-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
+            <div
+                className="weekly-planner-page"
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minHeight: "60vh",
+                }}
+            >
                 <div style={{ textAlign: "center" }}>
-                    <Calendar size={32} className="spin" style={{ color: "#3b82f6", marginBottom: "1rem" }} />
+                    <Calendar
+                        size={32}
+                        className="spin"
+                        style={{ color: "#3b82f6", marginBottom: "1rem" }}
+                    />
                     <p style={{ fontSize: "14px", color: "#64748b" }}>Loading meal plans…</p>
                 </div>
             </div>
@@ -214,18 +213,25 @@ function WeeklyPlannerPage() {
             </div>
 
             {/* Read-only notice */}
-            <div className="weekly-unassigned-notice" style={{ background: "#eff6ff", borderColor: "#bfdbfe", color: "#1e40af" }}>
+            <div
+                className="weekly-unassigned-notice"
+                style={{ background: "#eff6ff", borderColor: "#bfdbfe", color: "#1e40af" }}
+            >
                 <AlertCircle size={16} />
                 <span>
                     This is a <strong>read-only view</strong>.{" "}
                     {!isPresetPlan && (
-                        <>To edit meals or plan details, go to the{" "}
-                        <Link to="/dashboard"><strong>Dashboard</strong></Link>.{" "}</>
+                        <>
+                            To edit meals or plan details, go to the{" "}
+                            <Link to="/dashboard">
+                                <strong>Dashboard</strong>
+                            </Link>
+                            .{" "}
+                        </>
                     )}
                     Hover over a meal item to see its preparation instructions.
                 </span>
             </div>
-
 
             {/* Weekly Summary Bar */}
             <div className="weekly-summary-bar">
@@ -261,7 +267,8 @@ function WeeklyPlannerPage() {
                         const summary = daySummaries[day];
                         const score = summary?.dayScore?.score || 0;
                         const dt = summary?.dayTotals;
-                        const hasFood = dt && (dt.protein || 0) + (dt.carbs || 0) + (dt.fat || 0) > 0;
+                        const hasFood =
+                            dt && (dt.protein || 0) + (dt.carbs || 0) + (dt.fat || 0) > 0;
 
                         return (
                             <div
@@ -293,15 +300,23 @@ function WeeklyPlannerPage() {
                                                 <div className="weekly-items">
                                                     {items.map((item) => {
                                                         const food = foodById(item.foodId);
-                                                        const hasInstructions = item.instructions && item.instructions.trim();
+                                                        const hasInstructions =
+                                                            item.instructions &&
+                                                            item.instructions.trim();
                                                         return (
                                                             <div
                                                                 key={item.id}
                                                                 className={`weekly-item ${hasInstructions ? "has-instructions" : ""}`}
-                                                                title={hasInstructions ? `📝 ${item.instructions}` : ""}
+                                                                title={
+                                                                    hasInstructions
+                                                                        ? `📝 ${item.instructions}`
+                                                                        : ""
+                                                                }
                                                             >
                                                                 <span className="weekly-item-name">
-                                                                    {food?.name || item.foodName || "?"}
+                                                                    {food?.name ||
+                                                                        item.foodName ||
+                                                                        "?"}
                                                                 </span>
                                                                 <span className="weekly-item-g">
                                                                     {item.grams}g

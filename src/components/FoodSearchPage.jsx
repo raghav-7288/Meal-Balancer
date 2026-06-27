@@ -10,7 +10,6 @@ import "./FoodSearchPage.css";
 
 const PAGE_SIZE = 20;
 
-
 const HighlightMatch = memo(function HighlightMatch({ text, query }) {
     if (!text) return null;
     if (!query || query.length < 2) return <>{text}</>;
@@ -21,7 +20,9 @@ const HighlightMatch = memo(function HighlightMatch({ text, query }) {
         <>
             {parts.map((part, i) =>
                 testRegex.test(part) ? (
-                    <mark key={i} className="food-search-highlight">{part}</mark>
+                    <mark key={i} className="food-search-highlight">
+                        {part}
+                    </mark>
                 ) : (
                     <span key={i}>{part}</span>
                 )
@@ -62,7 +63,9 @@ function FoodSearchPage() {
                 setMatchedNutrientName("");
                 setHasMore(false);
             });
-            return () => { cancelled = true; };
+            return () => {
+                cancelled = true;
+            };
         }
 
         async function search() {
@@ -79,7 +82,10 @@ function FoodSearchPage() {
                 if (nutrientError) {
                     if (import.meta.env.DEV) console.error("Search error:", nutrientError);
                     if (!cancelled) {
-                        setSearchError(nutrientError.message || "Search failed. Check your network connection and try again.");
+                        setSearchError(
+                            nutrientError.message ||
+                                "Search failed. Check your network connection and try again."
+                        );
                         setResults([]);
                         setIsNutrientSearch(false);
                         setMatchedNutrientName("");
@@ -99,7 +105,9 @@ function FoodSearchPage() {
                     if (nfError) {
                         if (import.meta.env.DEV) console.error("Search error:", nfError);
                         if (!cancelled) {
-                            setSearchError(nfError.message || "Nutrient search failed. Please try again.");
+                            setSearchError(
+                                nfError.message || "Nutrient search failed. Please try again."
+                            );
                             setResults([]);
                             setIsNutrientSearch(false);
                             setMatchedNutrientName("");
@@ -121,15 +129,18 @@ function FoodSearchPage() {
                     }
                 } else {
                     // No nutrient match — full text field search via RPC
-                    const { data, error } = await supabase.rpc(
-                        "search_foods_all_fields",
-                        { search_text: debouncedQuery, p_limit: PAGE_SIZE, p_offset: 0 }
-                    );
+                    const { data, error } = await supabase.rpc("search_foods_all_fields", {
+                        search_text: debouncedQuery,
+                        p_limit: PAGE_SIZE,
+                        p_offset: 0,
+                    });
 
                     if (error) {
                         if (import.meta.env.DEV) console.error("Search error:", error);
                         if (!cancelled) {
-                            setSearchError(error.message || "Food search failed. Please try again.");
+                            setSearchError(
+                                error.message || "Food search failed. Please try again."
+                            );
                             setResults([]);
                             setIsNutrientSearch(false);
                             setMatchedNutrientName("");
@@ -161,7 +172,9 @@ function FoodSearchPage() {
         }
 
         search();
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
     }, [debouncedQuery]);
 
     // Fetch nutrient details for selected food
@@ -173,16 +186,17 @@ function FoodSearchPage() {
                 if (cancelled) return;
                 setNutrients([]);
             });
-            return () => { cancelled = true; };
+            return () => {
+                cancelled = true;
+            };
         }
 
         async function fetchNutrients() {
             setNutrientsLoading(true);
             try {
-                const { data, error } = await supabase.rpc(
-                    "get_food_details",
-                    { p_food_id: selectedFood.food_id }
-                );
+                const { data, error } = await supabase.rpc("get_food_details", {
+                    p_food_id: selectedFood.food_id,
+                });
                 if (error) {
                     if (import.meta.env.DEV) console.error("Nutrient fetch error:", error);
                     if (!cancelled) setNutrients([]);
@@ -198,9 +212,10 @@ function FoodSearchPage() {
         }
 
         fetchNutrients();
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
     }, [selectedFood]);
-
 
     // Group nutrients by nutrient_group
     const groupedNutrients = useMemo(() => {
@@ -220,14 +235,10 @@ function FoodSearchPage() {
 
             if (e.key === "ArrowDown") {
                 e.preventDefault();
-                setActiveIndex((prev) =>
-                    prev < results.length - 1 ? prev + 1 : 0
-                );
+                setActiveIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0));
             } else if (e.key === "ArrowUp") {
                 e.preventDefault();
-                setActiveIndex((prev) =>
-                    prev > 0 ? prev - 1 : results.length - 1
-                );
+                setActiveIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1));
             } else if (e.key === "Enter" && activeIndex >= 0 && activeIndex < results.length) {
                 e.preventDefault();
                 setSelectedFood(results[activeIndex]);
@@ -241,10 +252,11 @@ function FoodSearchPage() {
         if (loadingMore || !hasMore) return;
         setLoadingMore(true);
         try {
-            const { data, error } = await supabase.rpc(
-                "search_foods_all_fields",
-                { search_text: debouncedQuery, p_limit: PAGE_SIZE, p_offset: results.length }
-            );
+            const { data, error } = await supabase.rpc("search_foods_all_fields", {
+                search_text: debouncedQuery,
+                p_limit: PAGE_SIZE,
+                p_offset: results.length,
+            });
             if (error) {
                 if (import.meta.env.DEV) console.error("Load more error:", error);
                 return;
@@ -286,7 +298,9 @@ function FoodSearchPage() {
                         role="combobox"
                         aria-expanded={results.length > 0}
                         aria-controls="food-search-results"
-                        aria-activedescendant={activeIndex >= 0 ? `food-result-${activeIndex}` : undefined}
+                        aria-activedescendant={
+                            activeIndex >= 0 ? `food-result-${activeIndex}` : undefined
+                        }
                         aria-label="Search foods, nutrients, or food groups"
                     />
                     {query && (
@@ -303,7 +317,9 @@ function FoodSearchPage() {
                             <ArrowRight size={18} aria-hidden="true" />
                         </button>
                     )}
-                    {loading && <Loader2 size={18} className="food-search-spinner" aria-hidden="true" />}
+                    {loading && (
+                        <Loader2 size={18} className="food-search-spinner" aria-hidden="true" />
+                    )}
                 </div>
 
                 <div className="food-source-note">
@@ -330,17 +346,25 @@ function FoodSearchPage() {
                         </div>
                     )}
 
-                    {debouncedQuery.length >= 2 && !loading && results.length === 0 && !searchError && (
-                        <EmptyState
-                            icon={<Search size={36} strokeWidth={1.5} />}
-                            title="No matching foods found"
-                            description="Try a different search term or check your spelling."
-                        />
-                    )}
+                    {debouncedQuery.length >= 2 &&
+                        !loading &&
+                        results.length === 0 &&
+                        !searchError && (
+                            <EmptyState
+                                icon={<Search size={36} strokeWidth={1.5} />}
+                                title="No matching foods found"
+                                description="Try a different search term or check your spelling."
+                            />
+                        )}
 
                     {/* Loading skeletons (#30) */}
                     {loading && (
-                        <div className="food-search-results-list" aria-label="Loading search results" role="status" aria-live="polite">
+                        <div
+                            className="food-search-results-list"
+                            aria-label="Loading search results"
+                            role="status"
+                            aria-live="polite"
+                        >
                             {Array.from({ length: 6 }).map((_, i) => (
                                 <SkeletonFoodResult key={i} />
                             ))}
@@ -348,7 +372,11 @@ function FoodSearchPage() {
                     )}
 
                     {searchError && (
-                        <div className="food-search-empty-state" style={{ color: "#ef4444" }} role="alert">
+                        <div
+                            className="food-search-empty-state"
+                            style={{ color: "#ef4444" }}
+                            role="alert"
+                        >
                             <p>{searchError}</p>
                         </div>
                     )}
@@ -373,25 +401,39 @@ function FoodSearchPage() {
                                             selectedFood?.food_id === food.food_id ? "selected" : ""
                                         } ${activeIndex === index ? "keyboard-active" : ""}`}
                                         onClick={() => setSelectedFood(food)}
-                                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedFood(food); } }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                e.preventDefault();
+                                                setSelectedFood(food);
+                                            }
+                                        }}
                                         role="option"
                                         aria-selected={selectedFood?.food_id === food.food_id}
                                         tabIndex={0}
                                     >
                                         <div className="food-result-name-row">
                                             <span className="food-result-name">
-                                                <HighlightMatch text={food.food_name} query={debouncedQuery} />
+                                                <HighlightMatch
+                                                    text={food.food_name}
+                                                    query={debouncedQuery}
+                                                />
                                             </span>
                                             {isNutrientSearch && food.value != null && (
                                                 <span className="food-result-nutrient-value">
-                                                    {Number(food.value).toFixed(1)} <small>{food.unit || ""}</small>
+                                                    {Number(food.value).toFixed(1)}{" "}
+                                                    <small>{food.unit || ""}</small>
                                                 </span>
                                             )}
                                         </div>
                                         <div className="food-result-meta">
-                                            <span className="food-result-code">{food.food_code}</span>
+                                            <span className="food-result-code">
+                                                {food.food_code}
+                                            </span>
                                             <span className="food-result-group">
-                                                <HighlightMatch text={food.food_group || ""} query={debouncedQuery} />
+                                                <HighlightMatch
+                                                    text={food.food_group || ""}
+                                                    query={debouncedQuery}
+                                                />
                                             </span>
                                         </div>
                                     </div>
@@ -440,7 +482,9 @@ function FoodSearchPage() {
                             <div className="food-detail-header">
                                 <h2 className="food-detail-name">{selectedFood.food_name}</h2>
                                 <div className="food-detail-meta">
-                                    <span className="food-detail-code">{selectedFood.food_code}</span>
+                                    <span className="food-detail-code">
+                                        {selectedFood.food_code}
+                                    </span>
                                     <span className="food-detail-group-badge">
                                         {selectedFood.food_group}
                                     </span>
@@ -478,7 +522,11 @@ const NutrientGroupTable = memo(function NutrientGroupTable({ groupName, items }
                 aria-controls={`nutrient-group-${groupName.replace(/\s+/g, "-").toLowerCase()}`}
             >
                 <h3>{groupName}</h3>
-                {collapsed ? <ChevronDown size={16} aria-hidden="true" /> : <ChevronUp size={16} aria-hidden="true" />}
+                {collapsed ? (
+                    <ChevronDown size={16} aria-hidden="true" />
+                ) : (
+                    <ChevronUp size={16} aria-hidden="true" />
+                )}
             </button>
             {!collapsed && (
                 <table
@@ -489,8 +537,12 @@ const NutrientGroupTable = memo(function NutrientGroupTable({ groupName, items }
                     <thead>
                         <tr>
                             <th scope="col">Nutrient</th>
-                            <th scope="col" className="food-nutrient-value-col">Value</th>
-                            <th scope="col" className="food-nutrient-unit-col">Unit</th>
+                            <th scope="col" className="food-nutrient-value-col">
+                                Value
+                            </th>
+                            <th scope="col" className="food-nutrient-unit-col">
+                                Unit
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -511,8 +563,3 @@ const NutrientGroupTable = memo(function NutrientGroupTable({ groupName, items }
 });
 
 export default FoodSearchPage;
-
-
-
-
-

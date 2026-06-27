@@ -180,7 +180,14 @@ export function useSyncedPlans() {
                 const capturedPrev = prev;
                 const capturedNext = next;
                 syncDebounceRef.current = setTimeout(() => {
-                    syncToSupabase(capturedPrev, capturedNext, userId, setSyncStatusRef, setSyncErrorRef, isMounted);
+                    syncToSupabase(
+                        capturedPrev,
+                        capturedNext,
+                        userId,
+                        setSyncStatusRef,
+                        setSyncErrorRef,
+                        isMounted
+                    );
                 }, 300);
             }
 
@@ -250,5 +257,3 @@ async function syncToSupabase(prev, next, userId, setSyncStatusRef, setSyncError
         }
     }
 }
-
-

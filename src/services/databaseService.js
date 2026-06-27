@@ -99,7 +99,8 @@ export async function getFoodNutrients(foodId) {
     return cachedFetch(`food_nutrients_${foodId}`, async () => {
         const { data, error } = await supabase
             .from("food_nutrient_values")
-            .select(`
+            .select(
+                `
                 food_nutrient_value_id,
                 food_id,
                 nutrient_id,
@@ -109,10 +110,12 @@ export async function getFoodNutrients(foodId) {
                     nutrient_code,
                     unit
                 )
-            `)
+            `
+            )
             .eq("food_id", foodId)
             .order("nutrient_id");
-        if (error) throw new Error(`Failed to fetch nutrients for food ${foodId}: ${error.message}`);
+        if (error)
+            throw new Error(`Failed to fetch nutrients for food ${foodId}: ${error.message}`);
         return data;
     });
 }

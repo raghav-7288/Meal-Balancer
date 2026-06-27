@@ -49,7 +49,9 @@ body.dark-mode .ds-card {
     outline: none;
     box-sizing: border-box;
     line-height: 1.4;
-    transition: border-color var(--ds-transition-fast), box-shadow var(--ds-transition-fast);
+    transition:
+        border-color var(--ds-transition-fast),
+        box-shadow var(--ds-transition-fast);
 }
 
 .ds-input:focus {
@@ -90,7 +92,9 @@ body.dark-mode .ds-input::placeholder {
     outline: none;
     box-sizing: border-box;
     line-height: 1.4;
-    transition: border-color var(--ds-transition-fast), box-shadow var(--ds-transition-fast);
+    transition:
+        border-color var(--ds-transition-fast),
+        box-shadow var(--ds-transition-fast);
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
@@ -704,5 +708,3 @@ body.dark-mode .ds-empty-state-desc {
 body.dark-mode .ds-progress-track {
     background: #334155;
 }
-
-

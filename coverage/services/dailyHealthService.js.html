@@ -173,7 +173,15 @@
 <a name='L108'></a><a href='#L108'>108</a>
 <a name='L109'></a><a href='#L109'>109</a>
 <a name='L110'></a><a href='#L110'>110</a>
-<a name='L111'></a><a href='#L111'>111</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -189,6 +197,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -208,7 +217,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -233,7 +245,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -248,6 +263,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -282,7 +299,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { supabase } from "../lib/supabaseClient";
 import { validateResponse, DailyHealthArraySchema, DailyHealthRowSchema } from "../utils/schemas";
 import { withRetry } from "../utils/withRetry";
@@ -298,17 +314,20 @@ import { withRetry } from "../utils/withRetry";
  * @returns {Promise&lt;Array&gt;} array of daily health entries
  */
 export async function fetchDailyHealthData(userId, limit = 90) {
-    return withRetry(async () =&gt; {
-        const { data, error } = await supabase
-            .from("daily_health_tracking")
-            .select("*")
-            .eq("user_id", userId)
-            .order("date", { ascending: false })
-            .limit(limit);
+    return withRetry(
+        async () =&gt; {
+            const { data, error } = await supabase
+                .from("daily_health_tracking")
+                .select("*")
+                .eq("user_id", userId)
+                .order("date", { ascending: false })
+                .limit(limit);
 &nbsp;
-        if (error) throw new Error(`Failed to fetch daily health data: ${error.message}`);
-        return validateResponse(DailyHealthArraySchema, data || [], "fetchDailyHealthData");
-    }, { context: "fetchDailyHealthData" });
+            if (error) throw new Error(`Failed to fetch daily health data: ${error.message}`);
+            return validateResponse(DailyHealthArraySchema, data || [], "fetchDailyHealthData");
+        },
+        { context: "fetchDailyHealthData" }
+    );
 }
 &nbsp;
 /**
@@ -318,20 +337,23 @@ export async function fetchDailyHealthData(userId, limit = 90) {
  * @returns {Promise&lt;object|null&gt;}
  */
 export async function fetchDailyHealthForDate(userId, date) {
-    return withRetry(async () =&gt; {
-        const { data, error } = await supabase
-            .from("daily_health_tracking")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("date", date)
-            .single();
+    return withRetry(
+        async () =&gt; {
+            const { data, error } = await supabase
+                .from("daily_health_tracking")
+                .select("*")
+                .eq("user_id", userId)
+                .eq("date", date)
+                .single();
 &nbsp;
-        if (error) {
-            if (error.code === "PGRST116") return null; // No row found
-            throw new Error(`Failed to fetch daily health for date: ${error.message}`);
-        }
-        return validateResponse(DailyHealthRowSchema, data, "fetchDailyHealthForDate");
-    }, { context: "fetchDailyHealthForDate" });
+            if (error) {
+                if (error.code === "PGRST116") return null; // No row found
+                throw new Error(`Failed to fetch daily health for date: ${error.message}`);
+            }
+            return validateResponse(DailyHealthRowSchema, data, "fetchDailyHealthForDate");
+        },
+        { context: "fetchDailyHealthForDate" }
+    );
 }
 &nbsp;
 /**
@@ -343,22 +365,25 @@ export async function fetchDailyHealthForDate(userId, date) {
  * @returns {Promise&lt;object&gt;} the upserted row
  */
 export async function upsertDailyHealth(userId, date, fields) {
-    return withRetry(async () =&gt; {
-        const row = {
-            user_id: userId,
-            date,
-            ...fields,
-        };
+    return withRetry(
+        async () =&gt; {
+            const row = {
+                user_id: userId,
+                date,
+                ...fields,
+            };
 &nbsp;
-        const { data, error } = await supabase
-            .from("daily_health_tracking")
-            .upsert(row, { onConflict: "user_id,date" })
-            .select()
-            .single();
+            const { data, error } = await supabase
+                .from("daily_health_tracking")
+                .upsert(row, { onConflict: "user_id,date" })
+                .select()
+                .single();
 &nbsp;
-        if (error) throw new Error(`Failed to save daily health data: ${error.message}`);
-        return data;
-    }, { context: "upsertDailyHealth" });
+            if (error) throw new Error(`Failed to save daily health data: ${error.message}`);
+            return data;
+        },
+        { context: "upsertDailyHealth" }
+    );
 }
 &nbsp;
 /**
@@ -392,7 +417,6 @@ export function dbRowsToStepData(rows) {
     }
     return stepData;
 }
-&nbsp;
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -400,7 +424,7 @@ export function dbRowsToStepData(rows) {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-27T10:05:28.689Z
+                at 2026-06-27T17:32:58.664Z
             </div>
         <script src="../prettify.js"></script>
         <script>

@@ -59,7 +59,12 @@ function NutrientLimits({ limits, onChangeLimit, dayTotals }) {
             <div
                 className="nutrient-limits-header"
                 onClick={() => setExpanded(!expanded)}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpanded(!expanded); } }}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setExpanded(!expanded);
+                    }
+                }}
                 role="button"
                 tabIndex={0}
                 aria-expanded={expanded}
@@ -69,10 +74,14 @@ function NutrientLimits({ limits, onChangeLimit, dayTotals }) {
                     <AlertTriangle size={14} aria-hidden="true" />
                     <span>Daily Nutrient Limits</span>
                     {warnings.length > 0 && (
-                        <span className="nutrient-limits-badge warn" role="status">{warnings.length} exceeded</span>
+                        <span className="nutrient-limits-badge warn" role="status">
+                            {warnings.length} exceeded
+                        </span>
                     )}
                     {warnings.length === 0 && dayTotals && (
-                        <span className="nutrient-limits-badge ok" role="status">✓ All OK</span>
+                        <span className="nutrient-limits-badge ok" role="status">
+                            ✓ All OK
+                        </span>
                     )}
                 </div>
                 <span className="nutrient-limits-toggle" aria-hidden="true">
@@ -81,7 +90,12 @@ function NutrientLimits({ limits, onChangeLimit, dayTotals }) {
             </div>
 
             {expanded && (
-                <div className="nutrient-limits-body" id="nutrient-limits-body" role="region" aria-label="Nutrient limit settings">
+                <div
+                    className="nutrient-limits-body"
+                    id="nutrient-limits-body"
+                    role="region"
+                    aria-label="Nutrient limit settings"
+                >
                     <div className="nutrient-limits-grid">
                         {LIMIT_FIELDS.map((field) => {
                             const actual = getActualValue(dayTotals, field.key);
@@ -89,13 +103,28 @@ function NutrientLimits({ limits, onChangeLimit, dayTotals }) {
                             const exceeded = limitVal > 0 && actual > limitVal;
 
                             return (
-                                <div key={field.key} className={`nutrient-limit-item ${exceeded ? "exceeded" : ""}`}>
+                                <div
+                                    key={field.key}
+                                    className={`nutrient-limit-item ${exceeded ? "exceeded" : ""}`}
+                                >
                                     <div className="nutrient-limit-top">
-                                        <span className="nutrient-limit-label" id={`limit-label-${field.key}`}>{field.label}</span>
+                                        <span
+                                            className="nutrient-limit-label"
+                                            id={`limit-label-${field.key}`}
+                                        >
+                                            {field.label}
+                                        </span>
                                         {dayTotals && limitVal > 0 && (
-                                            <span className={`nutrient-limit-actual ${exceeded ? "over" : "ok"}`}>
-                                                {Math.round(actual)}/{limitVal}{field.unit}
-                                                <span className="sr-only">{exceeded ? " — limit exceeded" : " — within limit"}</span>
+                                            <span
+                                                className={`nutrient-limit-actual ${exceeded ? "over" : "ok"}`}
+                                            >
+                                                {Math.round(actual)}/{limitVal}
+                                                {field.unit}
+                                                <span className="sr-only">
+                                                    {exceeded
+                                                        ? " — limit exceeded"
+                                                        : " — within limit"}
+                                                </span>
                                             </span>
                                         )}
                                     </div>
@@ -103,17 +132,26 @@ function NutrientLimits({ limits, onChangeLimit, dayTotals }) {
                                         <input
                                             type="number"
                                             min="0"
-                                            value={limits[field.key] != null && limits[field.key] !== 0 ? limits[field.key] : ""}
+                                            value={
+                                                limits[field.key] != null && limits[field.key] !== 0
+                                                    ? limits[field.key]
+                                                    : ""
+                                            }
                                             placeholder="—"
                                             onChange={(e) => {
                                                 const val = e.target.value;
-                                                onChangeLimit(field.key, val === "" ? 0 : Number(val));
+                                                onChangeLimit(
+                                                    field.key,
+                                                    val === "" ? 0 : Number(val)
+                                                );
                                             }}
                                             className="nutrient-limit-input"
                                             aria-label={`${field.label} daily limit in ${field.unit}`}
                                             aria-describedby={`limit-label-${field.key}`}
                                         />
-                                        <span className="nutrient-limit-unit" aria-hidden="true">{field.unit}</span>
+                                        <span className="nutrient-limit-unit" aria-hidden="true">
+                                            {field.unit}
+                                        </span>
                                     </div>
                                     {limitVal > 0 && (
                                         <div
@@ -126,7 +164,9 @@ function NutrientLimits({ limits, onChangeLimit, dayTotals }) {
                                         >
                                             <div
                                                 className={`nutrient-limit-bar-fill ${exceeded ? "over" : "ok"}`}
-                                                style={{ width: `${Math.min((actual / limitVal) * 100, 100)}%` }}
+                                                style={{
+                                                    width: `${Math.min((actual / limitVal) * 100, 100)}%`,
+                                                }}
                                             />
                                         </div>
                                     )}
@@ -139,7 +179,9 @@ function NutrientLimits({ limits, onChangeLimit, dayTotals }) {
                         <div className="nutrient-warnings-inline" role="alert" aria-live="polite">
                             {warnings.map((w) => (
                                 <span key={w.label} className="nutrient-warn-pill">
-                                    ⚠ {w.label}: {w.actual}{w.unit} / {w.limit}{w.unit}
+                                    ⚠ {w.label}: {w.actual}
+                                    {w.unit} / {w.limit}
+                                    {w.unit}
                                 </span>
                             ))}
                         </div>
@@ -151,4 +193,3 @@ function NutrientLimits({ limits, onChangeLimit, dayTotals }) {
 }
 
 export default memo(NutrientLimits);
-

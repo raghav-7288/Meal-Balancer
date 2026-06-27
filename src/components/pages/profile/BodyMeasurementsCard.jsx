@@ -1,57 +1,6 @@
-import {
-    Calendar,
-    Edit2,
-    Phone,
-    Ruler,
-    Save,
-    Scale,
-    User,
-} from "lucide-react";
-
-const COUNTRY_CODES = [
-    { code: "+91", country: "IN", label: "🇮🇳 +91" },
-    { code: "+1", country: "US", label: "🇺🇸 +1" },
-    { code: "+44", country: "GB", label: "🇬🇧 +44" },
-    { code: "+61", country: "AU", label: "🇦🇺 +61" },
-    { code: "+86", country: "CN", label: "🇨🇳 +86" },
-    { code: "+81", country: "JP", label: "🇯🇵 +81" },
-    { code: "+49", country: "DE", label: "🇩🇪 +49" },
-    { code: "+33", country: "FR", label: "🇫🇷 +33" },
-    { code: "+971", country: "AE", label: "🇦🇪 +971" },
-    { code: "+65", country: "SG", label: "🇸🇬 +65" },
-    { code: "+966", country: "SA", label: "🇸🇦 +966" },
-    { code: "+82", country: "KR", label: "🇰🇷 +82" },
-    { code: "+55", country: "BR", label: "🇧🇷 +55" },
-    { code: "+7", country: "RU", label: "🇷🇺 +7" },
-    { code: "+27", country: "ZA", label: "🇿🇦 +27" },
-    { code: "+234", country: "NG", label: "🇳🇬 +234" },
-    { code: "+62", country: "ID", label: "🇮🇩 +62" },
-    { code: "+60", country: "MY", label: "🇲🇾 +60" },
-    { code: "+64", country: "NZ", label: "🇳🇿 +64" },
-    { code: "+39", country: "IT", label: "🇮🇹 +39" },
-    { code: "+34", country: "ES", label: "🇪🇸 +34" },
-    { code: "+52", country: "MX", label: "🇲🇽 +52" },
-    { code: "+977", country: "NP", label: "🇳🇵 +977" },
-    { code: "+94", country: "LK", label: "🇱🇰 +94" },
-    { code: "+880", country: "BD", label: "🇧🇩 +880" },
-    { code: "+92", country: "PK", label: "🇵🇰 +92" },
-];
-
-/** Allow free typing but strip negatives. */
-function sanitizeNumeric(value) {
-    if (value === "") return "";
-    const cleaned = value.replace(/^-/, "").replace(/[^0-9.]/g, "");
-    if (cleaned === "" || cleaned === ".") return "";
-    return cleaned;
-}
-
-/** Clamp value to [min, max] — call on blur only */
-function clampOnBlur(value, min = 0, max = Infinity) {
-    if (value === "") return "";
-    const num = parseFloat(value);
-    if (isNaN(num)) return "";
-    return String(Math.min(Math.max(num, min), max));
-}
+import { Calendar, Edit2, Phone, Ruler, Save, Scale, User } from "lucide-react";
+import { sanitizeNumeric, clampOnBlur } from "../../../utils/inputSanitize";
+import { COUNTRY_CODES } from "../../../data/countryCodes";
 
 function BodyMeasurementsCard({
     isEditing,
@@ -75,7 +24,11 @@ function BodyMeasurementsCard({
     return (
         <div className="pro-card">
             <div className="pro-card-header">
-                <div className="pro-card-icon" style={{ background: "#d1fae5", color: "#059669" }} aria-hidden="true">
+                <div
+                    className="pro-card-icon"
+                    style={{ background: "#d1fae5", color: "#059669" }}
+                    aria-hidden="true"
+                >
                     <Ruler size={16} />
                 </div>
                 <h2>Body Details</h2>
@@ -110,10 +63,16 @@ function BodyMeasurementsCard({
                                         max="300"
                                         value={height}
                                         onChange={(e) => setHeight(sanitizeNumeric(e.target.value))}
-                                        onBlur={(e) => setHeight(clampOnBlur(e.target.value, 30, 300))}
-                                        onKeyDown={(e) => { if (e.key === "-" || e.key === "e") e.preventDefault(); }}
+                                        onBlur={(e) =>
+                                            setHeight(clampOnBlur(e.target.value, 30, 300))
+                                        }
+                                        onKeyDown={(e) => {
+                                            if (e.key === "-" || e.key === "e") e.preventDefault();
+                                        }}
                                     />
-                                    <span className="pro-unit" aria-hidden="true">cm</span>
+                                    <span className="pro-unit" aria-hidden="true">
+                                        cm
+                                    </span>
                                 </div>
                             </div>
                             <div className="pro-measure-field">
@@ -130,10 +89,16 @@ function BodyMeasurementsCard({
                                         max="500"
                                         value={weight}
                                         onChange={(e) => setWeight(sanitizeNumeric(e.target.value))}
-                                        onBlur={(e) => setWeight(clampOnBlur(e.target.value, 1, 500))}
-                                        onKeyDown={(e) => { if (e.key === "-" || e.key === "e") e.preventDefault(); }}
+                                        onBlur={(e) =>
+                                            setWeight(clampOnBlur(e.target.value, 1, 500))
+                                        }
+                                        onKeyDown={(e) => {
+                                            if (e.key === "-" || e.key === "e") e.preventDefault();
+                                        }}
                                     />
-                                    <span className="pro-unit" aria-hidden="true">kg</span>
+                                    <span className="pro-unit" aria-hidden="true">
+                                        kg
+                                    </span>
                                 </div>
                             </div>
                             <div className="pro-measure-field">
@@ -151,9 +116,13 @@ function BodyMeasurementsCard({
                                         value={age}
                                         onChange={(e) => setAge(sanitizeNumeric(e.target.value))}
                                         onBlur={(e) => setAge(clampOnBlur(e.target.value, 1, 150))}
-                                        onKeyDown={(e) => { if (e.key === "-" || e.key === "e") e.preventDefault(); }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "-" || e.key === "e") e.preventDefault();
+                                        }}
                                     />
-                                    <span className="pro-unit" aria-hidden="true">yrs</span>
+                                    <span className="pro-unit" aria-hidden="true">
+                                        yrs
+                                    </span>
                                 </div>
                             </div>
                             <div className="pro-measure-field">
@@ -226,24 +195,42 @@ function BodyMeasurementsCard({
                 ) : (
                     <div className="pro-details-view">
                         <div className="pro-detail-row">
-                            <span className="pro-detail-label"><Ruler size={13} aria-hidden="true" /> Height</span>
-                            <span className="pro-detail-value">{height ? `${height} cm` : "—"}</span>
+                            <span className="pro-detail-label">
+                                <Ruler size={13} aria-hidden="true" /> Height
+                            </span>
+                            <span className="pro-detail-value">
+                                {height ? `${height} cm` : "—"}
+                            </span>
                         </div>
                         <div className="pro-detail-row">
-                            <span className="pro-detail-label"><Scale size={13} aria-hidden="true" /> Weight</span>
-                            <span className="pro-detail-value">{weight ? `${weight} kg` : "—"}</span>
+                            <span className="pro-detail-label">
+                                <Scale size={13} aria-hidden="true" /> Weight
+                            </span>
+                            <span className="pro-detail-value">
+                                {weight ? `${weight} kg` : "—"}
+                            </span>
                         </div>
                         <div className="pro-detail-row">
-                            <span className="pro-detail-label"><Calendar size={13} aria-hidden="true" /> Age</span>
+                            <span className="pro-detail-label">
+                                <Calendar size={13} aria-hidden="true" /> Age
+                            </span>
                             <span className="pro-detail-value">{age ? `${age} yrs` : "—"}</span>
                         </div>
                         <div className="pro-detail-row">
-                            <span className="pro-detail-label"><User size={13} aria-hidden="true" /> Sex</span>
-                            <span className="pro-detail-value">{editSex ? editSex.charAt(0).toUpperCase() + editSex.slice(1) : "—"}</span>
+                            <span className="pro-detail-label">
+                                <User size={13} aria-hidden="true" /> Sex
+                            </span>
+                            <span className="pro-detail-value">
+                                {editSex ? editSex.charAt(0).toUpperCase() + editSex.slice(1) : "—"}
+                            </span>
                         </div>
                         <div className="pro-detail-row">
-                            <span className="pro-detail-label"><Phone size={13} aria-hidden="true" /> Contact</span>
-                            <span className="pro-detail-value">{contactNumber ? `${countryCode} ${contactNumber}` : "—"}</span>
+                            <span className="pro-detail-label">
+                                <Phone size={13} aria-hidden="true" /> Contact
+                            </span>
+                            <span className="pro-detail-value">
+                                {contactNumber ? `${countryCode} ${contactNumber}` : "—"}
+                            </span>
                         </div>
                     </div>
                 )}
@@ -253,4 +240,3 @@ function BodyMeasurementsCard({
 }
 
 export default BodyMeasurementsCard;
-

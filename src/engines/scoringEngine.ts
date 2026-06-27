@@ -120,8 +120,7 @@ export function score(totals: Partial<NutrientTotals>, rules: ScoringRule[]): Sc
 
     for (const rule of rules) {
         const value = (totals[rule.field] as number) ?? 0;
-        const violated =
-            rule.op === ">" ? value > rule.threshold : value < rule.threshold;
+        const violated = rule.op === ">" ? value > rule.threshold : value < rule.threshold;
 
         if (violated) {
             points -= rule.penalty;
@@ -180,4 +179,3 @@ export function scoreMeal(totals: Partial<NutrientTotals>): ScoreResult {
 export function scoreDay(dayTotals: Partial<NutrientTotals>): ScoreResult {
     return score(dayTotals, DAY_RULES);
 }
-

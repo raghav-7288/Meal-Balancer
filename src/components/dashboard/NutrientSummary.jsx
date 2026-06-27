@@ -14,15 +14,16 @@ const NUTRIENT_COLORS = {
 };
 
 function NutrientSummary({ activeSummary, activePlan, viewDay }) {
-    const nutrients = useMemo(() =>
-        [
-            { name: "Carbs", value: Number(activeSummary?.dayTotals?.carbs || 0) },
-            { name: "Protein", value: Number(activeSummary?.dayTotals?.protein || 0) },
-            { name: "Fats", value: Number(activeSummary?.dayTotals?.fat || 0) },
-            { name: "Fibre", value: Number(activeSummary?.dayTotals?.fibre || 0) },
-            { name: "Vitamins", value: Number(activeSummary?.dayTotals?.vitamins || 0) },
-            { name: "Minerals", value: Number(activeSummary?.dayTotals?.minerals || 0) },
-        ].map((n) => ({ ...n, value: Math.round(n.value * 10) / 10 })),
+    const nutrients = useMemo(
+        () =>
+            [
+                { name: "Carbs", value: Number(activeSummary?.dayTotals?.carbs || 0) },
+                { name: "Protein", value: Number(activeSummary?.dayTotals?.protein || 0) },
+                { name: "Fats", value: Number(activeSummary?.dayTotals?.fat || 0) },
+                { name: "Fibre", value: Number(activeSummary?.dayTotals?.fibre || 0) },
+                { name: "Vitamins", value: Number(activeSummary?.dayTotals?.vitamins || 0) },
+                { name: "Minerals", value: Number(activeSummary?.dayTotals?.minerals || 0) },
+            ].map((n) => ({ ...n, value: Math.round(n.value * 10) / 10 })),
         [activeSummary?.dayTotals]
     );
 
@@ -43,7 +44,11 @@ function NutrientSummary({ activeSummary, activePlan, viewDay }) {
         <div className="two-col">
             <Section title="Daily nutrient-category summary" icon={<BarChart3 size={16} />}>
                 {hasData ? (
-                    <div className="nutrient-chart-wrap" role="img" aria-label="Daily nutrient bar chart">
+                    <div
+                        className="nutrient-chart-wrap"
+                        role="img"
+                        aria-label="Daily nutrient bar chart"
+                    >
                         <ResponsiveContainer width="100%" height={240}>
                             <BarChart
                                 data={nutrients}
@@ -83,10 +88,21 @@ function NutrientSummary({ activeSummary, activePlan, viewDay }) {
             <Section title="Exchange conversion table" icon={<Leaf size={16} />}>
                 <div className="table-wrap">
                     <table aria-label="Exchange conversion for all meals">
-                        <thead><tr><th scope="col">Food</th><th scope="col">g</th><th scope="col">Group</th><th scope="col">Exchange</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th scope="col">Food</th>
+                                <th scope="col">g</th>
+                                <th scope="col">Group</th>
+                                <th scope="col">Exchange</th>
+                            </tr>
+                        </thead>
                         <tbody>
                             {exchangeItems.length === 0 ? (
-                                <tr><td colSpan={4} className="empty-cell">Add foods to see exchange conversion.</td></tr>
+                                <tr>
+                                    <td colSpan={4} className="empty-cell">
+                                        Add foods to see exchange conversion.
+                                    </td>
+                                </tr>
                             ) : (
                                 exchangeItems.map(({ item, food, exchange }) => (
                                     <tr key={item.id}>
@@ -106,4 +122,3 @@ function NutrientSummary({ activeSummary, activePlan, viewDay }) {
 }
 
 export default memo(NutrientSummary);
-

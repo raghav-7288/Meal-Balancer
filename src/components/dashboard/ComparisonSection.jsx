@@ -1,9 +1,6 @@
 import { memo, useMemo } from "react";
 import { Sparkles } from "lucide-react";
-import {
-    BarChart, Bar, XAxis, YAxis, Tooltip,
-    ResponsiveContainer, Legend,
-} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import Section from "../ui/Section";
 
 const PLAN_COLORS = ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
@@ -29,14 +26,22 @@ function buildComparisonData(summaries) {
 
 function ComparisonSection({ summaries, bestSummary }) {
     const chartData = useMemo(() => buildComparisonData(summaries), [summaries]);
-    const planNames = useMemo(() => summaries.map((s) =>
-        s.plan.name.length > 14 ? s.plan.name.slice(0, 14) + "…" : s.plan.name
-    ), [summaries]);
+    const planNames = useMemo(
+        () =>
+            summaries.map((s) =>
+                s.plan.name.length > 14 ? s.plan.name.slice(0, 14) + "…" : s.plan.name
+            ),
+        [summaries]
+    );
 
     return (
         <>
             <Section title="Plan comparison" icon={<Sparkles size={16} />}>
-                <div className="comparison-radar-wrap" role="img" aria-label="Bar chart comparing plans">
+                <div
+                    className="comparison-radar-wrap"
+                    role="img"
+                    aria-label="Bar chart comparing plans"
+                >
                     <ResponsiveContainer width="100%" height={280}>
                         <BarChart
                             data={chartData}
@@ -59,9 +64,7 @@ function ComparisonSection({ summaries, bestSummary }) {
                                     barSize={12}
                                 />
                             ))}
-                            <Legend
-                                wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }}
-                            />
+                            <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
                             <Tooltip
                                 contentStyle={{
                                     borderRadius: "12px",
@@ -88,8 +91,12 @@ function ComparisonSection({ summaries, bestSummary }) {
                                 <span>{summary.dayScore.score} / 100</span>
                             </div>
                             <p>{summary.dayScore.band}</p>
-                            <p className="small-copy">Energy: {Math.round(summary.dayTotals.kcal)} kcal</p>
-                            <p className="small-copy">Vegetables: {Math.round(summary.dayTotals.vegetablesG)} g</p>
+                            <p className="small-copy">
+                                Energy: {Math.round(summary.dayTotals.kcal)} kcal
+                            </p>
+                            <p className="small-copy">
+                                Vegetables: {Math.round(summary.dayTotals.vegetablesG)} g
+                            </p>
                         </div>
                     ))}
                 </div>
@@ -119,4 +126,3 @@ function ComparisonSection({ summaries, bestSummary }) {
 }
 
 export default memo(ComparisonSection);
-

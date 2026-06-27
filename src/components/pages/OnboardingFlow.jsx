@@ -105,12 +105,18 @@ function OnboardingFlow({ onComplete }) {
                 {/* Progress indicator */}
                 <div className="onboarding-progress">
                     {[1, 2, 3].map((s) => (
-                        <div key={s} className={`onboarding-step-dot ${step >= s ? "active" : ""} ${step === s ? "current" : ""}`}>
+                        <div
+                            key={s}
+                            className={`onboarding-step-dot ${step >= s ? "active" : ""} ${step === s ? "current" : ""}`}
+                        >
                             {step > s ? <CheckCircle size={16} /> : s}
                         </div>
                     ))}
                     <div className="onboarding-progress-line">
-                        <div className="onboarding-progress-fill" style={{ width: `${((step - 1) / 2) * 100}%` }} />
+                        <div
+                            className="onboarding-progress-fill"
+                            style={{ width: `${((step - 1) / 2) * 100}%` }}
+                        />
                     </div>
                 </div>
 
@@ -122,7 +128,10 @@ function OnboardingFlow({ onComplete }) {
                                 <User size={28} />
                             </div>
                             <h2>Set Up Your Profile</h2>
-                            <p>Tell us about yourself so we can personalize your nutrition recommendations.</p>
+                            <p>
+                                Tell us about yourself so we can personalize your nutrition
+                                recommendations.
+                            </p>
                         </div>
 
                         <div className="onboarding-form">
@@ -211,7 +220,10 @@ function OnboardingFlow({ onComplete }) {
                                 <UtensilsCrossed size={28} />
                             </div>
                             <h2>Pick a Starter Plan</h2>
-                            <p>Choose a preset meal plan to get started. You can customize it later on the dashboard.</p>
+                            <p>
+                                Choose a preset meal plan to get started. You can customize it later
+                                on the dashboard.
+                            </p>
                         </div>
 
                         <div className="onboarding-plans">
@@ -257,7 +269,11 @@ function OnboardingFlow({ onComplete }) {
                                 <Trophy size={28} />
                             </div>
                             <h2>Your Plan Score</h2>
-                            <p>Here's how <strong>"{selectedPlan?.name || "Selected Plan"}"</strong> scores based on your profile.</p>
+                            <p>
+                                Here's how{" "}
+                                <strong>"{selectedPlan?.name || "Selected Plan"}"</strong> scores
+                                based on your profile.
+                            </p>
                         </div>
 
                         {planScore && (
@@ -265,13 +281,21 @@ function OnboardingFlow({ onComplete }) {
                                 <div className="onboarding-score-ring">
                                     <svg viewBox="0 0 120 120" className="onboarding-ring-svg">
                                         <circle
-                                            cx="60" cy="60" r="50"
-                                            fill="none" stroke="currentColor" strokeWidth="10"
+                                            cx="60"
+                                            cy="60"
+                                            r="50"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="10"
                                             className="onboarding-ring-bg"
                                         />
                                         <circle
-                                            cx="60" cy="60" r="50"
-                                            fill="none" stroke={getScoreColor(planScore.score)} strokeWidth="10"
+                                            cx="60"
+                                            cy="60"
+                                            r="50"
+                                            fill="none"
+                                            stroke={getScoreColor(planScore.score)}
+                                            strokeWidth="10"
                                             className="onboarding-ring-fill"
                                             strokeDasharray={`${2 * Math.PI * 50}`}
                                             strokeDashoffset={`${2 * Math.PI * 50 * (1 - planScore.score / 100)}`}
@@ -280,14 +304,20 @@ function OnboardingFlow({ onComplete }) {
                                         />
                                     </svg>
                                     <div className="onboarding-ring-content">
-                                        <span className="onboarding-score-value" style={{ color: getScoreColor(planScore.score) }}>
+                                        <span
+                                            className="onboarding-score-value"
+                                            style={{ color: getScoreColor(planScore.score) }}
+                                        >
                                             {planScore.score}
                                         </span>
                                         <span className="onboarding-score-label">/100</span>
                                     </div>
                                 </div>
 
-                                <div className="onboarding-score-band" style={{ color: getScoreColor(planScore.score) }}>
+                                <div
+                                    className="onboarding-score-band"
+                                    style={{ color: getScoreColor(planScore.score) }}
+                                >
                                     {planScore.band}
                                 </div>
 
@@ -313,8 +343,8 @@ function OnboardingFlow({ onComplete }) {
 
                         <div className="onboarding-finish-hint">
                             <p>
-                                🎉 You're all set! Head to the <strong>Dashboard</strong> to customize your plan,
-                                add foods, and track your progress.
+                                🎉 You're all set! Head to the <strong>Dashboard</strong> to
+                                customize your plan, add foods, and track your progress.
                             </p>
                         </div>
 
@@ -334,4 +364,3 @@ function OnboardingFlow({ onComplete }) {
 }
 
 export default OnboardingFlow;
-

@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">96.87% </span>
+                <span class="strong">97.05% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>31/32</span>
+                <span class='fraction'>33/34</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">91.3% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>19/19</span>
+                <span class='fraction'>21/23</span>
             </div>
         
             
@@ -176,7 +176,19 @@
 <a name='L111'></a><a href='#L111'>111</a>
 <a name='L112'></a><a href='#L112'>112</a>
 <a name='L113'></a><a href='#L113'>113</a>
-<a name='L114'></a><a href='#L114'>114</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -240,6 +252,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -273,6 +287,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -287,7 +312,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">22x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { supabase } from "../lib/supabaseClient";
 import { validateResponse, FoodItemArraySchema, FoodNutrientArraySchema } from "../utils/schemas";
@@ -323,7 +347,7 @@ export async function searchFoodItems(query, limit = 15) {
             .limit(limit);
 &nbsp;
         if (error) {
-            console.error("Food search error:", error);
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (import.meta.env.DEV) console.error("Food search error:", error);
             return [];
         }
 &nbsp;
@@ -343,18 +367,20 @@ export async function fetchFoodNutrients(foodId) {
     return staleWhileRevalidate(cacheKey, async () =&gt; {
         const { data, error } = await supabase
             .from("food_nutrient_values")
-            .select(`
+            .select(
+                `
                 value,
                 nutrient_definitions (
                     nutrient_name,
                     nutrient_code,
                     unit
                 )
-            `)
+            `
+            )
             .eq("food_id", foodId);
 &nbsp;
         if (error) {
-            console.error("Nutrient fetch error:", error);
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (import.meta.env.DEV) console.error("Nutrient fetch error:", error);
             return null;
         }
 &nbsp;
@@ -378,10 +404,21 @@ export async function fetchFoodNutrients(foodId) {
         // Map DB nutrient names to the app's internal nutrient keys (values are per 100g)
         const nutrients = {
             kcal: findNutrientValue(rawNutrients, ["energy", "energy (kcal)", "calories", "kcal"]),
-            carbs: findNutrientValue(rawNutrients, ["carbohydrate", "carbs", "total carbohydrate", "carbohydrate, total"]),
+            carbs: findNutrientValue(rawNutrients, [
+                "carbohydrate",
+                "carbs",
+                "total carbohydrate",
+                "carbohydrate, total",
+            ]),
             protein: findNutrientValue(rawNutrients, ["protein", "total protein"]),
             fat: findNutrientValue(rawNutrients, ["fat", "total fat", "fat, total"]),
-            fibre: findNutrientValue(rawNutrients, ["fibre", "fiber", "dietary fibre", "dietary fiber", "total dietary fibre"]),
+            fibre: findNutrientValue(rawNutrients, [
+                "fibre",
+                "fiber",
+                "dietary fibre",
+                "dietary fiber",
+                "total dietary fibre",
+            ]),
             vitamins: findNutrientValue(rawNutrients, ["total vitamins", "vitamins"]),
             minerals: findNutrientValue(rawNutrients, ["total minerals", "minerals", "mineral"]),
         };
@@ -401,7 +438,6 @@ function findNutrientValue(rawNutrients, possibleNames) {
     }
     return 0;
 }
-&nbsp;
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -409,7 +445,7 @@ function findNutrientValue(rawNutrients, possibleNames) {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-27T10:05:28.689Z
+                at 2026-06-27T17:32:58.664Z
             </div>
         <script src="../prettify.js"></script>
         <script>

@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { MEALS } from "../data/presetPlans";
-import { fetchAllPresetPlans, upsertPresetPlan, deletePresetPlan } from "../services/presetPlanService";
+import {
+    fetchAllPresetPlans,
+    upsertPresetPlan,
+    deletePresetPlan,
+} from "../services/presetPlanService";
 import toast from "react-hot-toast";
 
 /**
@@ -43,7 +47,9 @@ export function usePresetPlanAdmin() {
             }
         }
         load();
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const activePlan = plans.find((p) => p.id === activePlanId) || null;
@@ -120,33 +126,36 @@ export function usePresetPlanAdmin() {
     }, [deleteToast]);
 
     // ─── Create a new preset plan ─────────────────────────────────────
-    const createPlan = useCallback(async (name) => {
-        if (!name || !name.trim()) {
-            toast.error("Plan name is required");
-            return;
-        }
-        setSaving(true);
-        try {
-            const emptyMeals = {};
-            for (const slot of MEALS) {
-                emptyMeals[slot] = [];
+    const createPlan = useCallback(
+        async (name) => {
+            if (!name || !name.trim()) {
+                toast.error("Plan name is required");
+                return;
             }
-            const newPlan = await upsertPresetPlan({
-                name: name.trim(),
-                meals: emptyMeals,
-                guidelines: "",
-                displayOrder: plans.length + 1,
-                isActive: true,
-            });
-            setPlans((prev) => [...prev, newPlan]);
-            setActivePlanId(newPlan.id);
-            toast.success(`Created "${newPlan.name}"`);
-        } catch (err) {
-            toast.error(err.message);
-        } finally {
-            setSaving(false);
-        }
-    }, [plans.length]);
+            setSaving(true);
+            try {
+                const emptyMeals = {};
+                for (const slot of MEALS) {
+                    emptyMeals[slot] = [];
+                }
+                const newPlan = await upsertPresetPlan({
+                    name: name.trim(),
+                    meals: emptyMeals,
+                    guidelines: "",
+                    displayOrder: plans.length + 1,
+                    isActive: true,
+                });
+                setPlans((prev) => [...prev, newPlan]);
+                setActivePlanId(newPlan.id);
+                toast.success(`Created "${newPlan.name}"`);
+            } catch (err) {
+                toast.error(err.message);
+            } finally {
+                setSaving(false);
+            }
+        },
+        [plans.length]
+    );
 
     // ─── Save / update the active plan ────────────────────────────────
     const savePlan = useCallback(async (planData) => {
@@ -169,115 +178,133 @@ export function usePresetPlanAdmin() {
     }, []);
 
     // ─── Delete a preset plan (with undo) ──────────────────────────────
-    const removePlan = useCallback((id) => {
-        const deletedPlan = plans.find((p) => p.id === id);
-        if (!deletedPlan) return;
+    const removePlan = useCallback(
+        (id) => {
+            const deletedPlan = plans.find((p) => p.id === id);
+            if (!deletedPlan) return;
 
-        // Remove from local state immediately
-        setPlans((prev) => prev.filter((p) => p.id !== id));
-        if (activePlanId === id) {
-            const remaining = plans.filter((p) => p.id !== id);
-            setActivePlanId(remaining.length > 0 ? remaining[0].id : null);
-        }
+            // Remove from local state immediately
+            setPlans((prev) => prev.filter((p) => p.id !== id));
+            if (activePlanId === id) {
+                const remaining = plans.filter((p) => p.id !== id);
+                setActivePlanId(remaining.length > 0 ? remaining[0].id : null);
+            }
 
-        // Cancel any pending delete timer from a previous toast
-        if (deleteTimerRef.current) {
-            clearTimeout(deleteTimerRef.current);
-        }
+            // Cancel any pending delete timer from a previous toast
+            if (deleteTimerRef.current) {
+                clearTimeout(deleteTimerRef.current);
+            }
 
-        // Show undo toast — actual Supabase deletion happens on auto-dismiss
-        setDeleteToast({
-            planId: id,
-            planName: deletedPlan.name,
-            undoAction: () => {
-                setPlans((prev) => [...prev, deletedPlan]);
-                setActivePlanId(deletedPlan.id);
-                setDeleteToast(null);
-                if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
-            },
-        });
-    }, [activePlanId, plans]);
+            // Show undo toast — actual Supabase deletion happens on auto-dismiss
+            setDeleteToast({
+                planId: id,
+                planName: deletedPlan.name,
+                undoAction: () => {
+                    setPlans((prev) => [...prev, deletedPlan]);
+                    setActivePlanId(deletedPlan.id);
+                    setDeleteToast(null);
+                    if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
+                },
+            });
+        },
+        [activePlanId, plans]
+    );
 
     // ─── Toggle active status ─────────────────────────────────────────
-    const toggleActive = useCallback(async (id) => {
-        const plan = plans.find((p) => p.id === id);
-        if (!plan) return;
-        const updated = { ...plan, isActive: !plan.isActive };
-        setSaving(true);
-        try {
-            const result = await upsertPresetPlan(updated);
-            setPlans((prev) => prev.map((p) => (p.id === result.id ? result : p)));
-            toast.success(result.isActive ? "Plan activated" : "Plan deactivated");
-        } catch (err) {
-            toast.error(err.message);
-        } finally {
-            setSaving(false);
-        }
-    }, [plans]);
+    const toggleActive = useCallback(
+        async (id) => {
+            const plan = plans.find((p) => p.id === id);
+            if (!plan) return;
+            const updated = { ...plan, isActive: !plan.isActive };
+            setSaving(true);
+            try {
+                const result = await upsertPresetPlan(updated);
+                setPlans((prev) => prev.map((p) => (p.id === result.id ? result : p)));
+                toast.success(result.isActive ? "Plan activated" : "Plan deactivated");
+            } catch (err) {
+                toast.error(err.message);
+            } finally {
+                setSaving(false);
+            }
+        },
+        [plans]
+    );
 
     // ─── Update plan metadata (name, guidelines, displayOrder) ────────
-    const updatePlanField = useCallback((field, value) => {
-        if (!activePlanId) return;
-        setPlans((prev) =>
-            prev.map((p) => (p.id === activePlanId ? { ...p, [field]: value } : p))
-        );
-        markDirty();
-    }, [activePlanId, markDirty]);
+    const updatePlanField = useCallback(
+        (field, value) => {
+            if (!activePlanId) return;
+            setPlans((prev) =>
+                prev.map((p) => (p.id === activePlanId ? { ...p, [field]: value } : p))
+            );
+            markDirty();
+        },
+        [activePlanId, markDirty]
+    );
 
     // ─── Add a food item to a meal slot ───────────────────────────────
-    const addFood = useCallback((meal, foodId, foodName, grams, instructions, foodGroupId, foodGroup) => {
-        if (!activePlanId) return;
-        const newItem = {
-            id: crypto.randomUUID(),
-            foodId: String(foodId),
-            foodName,
-            grams: Number(grams),
-            instructions: instructions || "",
-            foodGroupId: foodGroupId || null,
-            foodGroup: foodGroup || "",
-            day: viewDay,
-        };
-        setPlans((prev) =>
-            prev.map((p) => {
-                if (p.id !== activePlanId) return p;
-                const meals = { ...p.meals };
-                meals[meal] = [...(meals[meal] || []), newItem];
-                return { ...p, meals };
-            })
-        );
-        markDirty();
-        toast.success(`"${foodName}" added to ${meal} (${viewDay})`);
-    }, [activePlanId, viewDay, markDirty]);
+    const addFood = useCallback(
+        (meal, foodId, foodName, grams, instructions, foodGroupId, foodGroup) => {
+            if (!activePlanId) return;
+            const newItem = {
+                id: crypto.randomUUID(),
+                foodId: String(foodId),
+                foodName,
+                grams: Number(grams),
+                instructions: instructions || "",
+                foodGroupId: foodGroupId || null,
+                foodGroup: foodGroup || "",
+                day: viewDay,
+            };
+            setPlans((prev) =>
+                prev.map((p) => {
+                    if (p.id !== activePlanId) return p;
+                    const meals = { ...p.meals };
+                    meals[meal] = [...(meals[meal] || []), newItem];
+                    return { ...p, meals };
+                })
+            );
+            markDirty();
+            toast.success(`"${foodName}" added to ${meal} (${viewDay})`);
+        },
+        [activePlanId, viewDay, markDirty]
+    );
 
     // ─── Update a meal item's grams or instructions ───────────────────
-    const updateMealItem = useCallback((meal, itemId, patch) => {
-        if (!activePlanId) return;
-        setPlans((prev) =>
-            prev.map((p) => {
-                if (p.id !== activePlanId) return p;
-                const meals = { ...p.meals };
-                meals[meal] = (meals[meal] || []).map((item) =>
-                    item.id === itemId ? { ...item, ...patch } : item
-                );
-                return { ...p, meals };
-            })
-        );
-        markDirty();
-    }, [activePlanId, markDirty]);
+    const updateMealItem = useCallback(
+        (meal, itemId, patch) => {
+            if (!activePlanId) return;
+            setPlans((prev) =>
+                prev.map((p) => {
+                    if (p.id !== activePlanId) return p;
+                    const meals = { ...p.meals };
+                    meals[meal] = (meals[meal] || []).map((item) =>
+                        item.id === itemId ? { ...item, ...patch } : item
+                    );
+                    return { ...p, meals };
+                })
+            );
+            markDirty();
+        },
+        [activePlanId, markDirty]
+    );
 
     // ─── Remove a meal item ───────────────────────────────────────────
-    const removeMealItem = useCallback((meal, itemId) => {
-        if (!activePlanId) return;
-        setPlans((prev) =>
-            prev.map((p) => {
-                if (p.id !== activePlanId) return p;
-                const meals = { ...p.meals };
-                meals[meal] = (meals[meal] || []).filter((item) => item.id !== itemId);
-                return { ...p, meals };
-            })
-        );
-        markDirty();
-    }, [activePlanId, markDirty]);
+    const removeMealItem = useCallback(
+        (meal, itemId) => {
+            if (!activePlanId) return;
+            setPlans((prev) =>
+                prev.map((p) => {
+                    if (p.id !== activePlanId) return p;
+                    const meals = { ...p.meals };
+                    meals[meal] = (meals[meal] || []).filter((item) => item.id !== itemId);
+                    return { ...p, meals };
+                })
+            );
+            markDirty();
+        },
+        [activePlanId, markDirty]
+    );
 
     // ─── Reload plans from DB ─────────────────────────────────────────
     const reload = useCallback(async () => {
@@ -317,4 +344,3 @@ export function usePresetPlanAdmin() {
         reload,
     };
 }
-

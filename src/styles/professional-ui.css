@@ -67,13 +67,17 @@ body.dark-mode * {
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     background: rgba(255, 255, 255, 0.88) !important;
     border-bottom: 1px solid rgba(229, 231, 235, 0.5) !important;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.02) !important;
+    box-shadow:
+        0 1px 3px rgba(15, 23, 42, 0.04),
+        0 4px 16px rgba(15, 23, 42, 0.02) !important;
 }
 
 body.dark-mode .top-nav {
     background: rgba(30, 41, 59, 0.9) !important;
     border-bottom-color: rgba(51, 65, 85, 0.5) !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.2),
+        0 4px 16px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* ─── Enhanced Nav Links ─── */
@@ -119,7 +123,9 @@ body.dark-mode .nav-link.active {
 
 /* ─── Enhanced Cards & Sections ─── */
 .section {
-    transition: box-shadow 0.25s ease, transform 0.25s ease !important;
+    transition:
+        box-shadow 0.25s ease,
+        transform 0.25s ease !important;
 }
 
 .section:hover {
@@ -132,7 +138,9 @@ body.dark-mode .section:hover {
 
 .kpi,
 .stat-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease !important;
 }
 
 .kpi:hover,
@@ -148,7 +156,9 @@ body.dark-mode .stat-card:hover {
 
 /* ─── Enhanced Welcome Card ─── */
 .welcome-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease !important;
 }
 
 .welcome-card:hover {
@@ -235,7 +245,10 @@ body.dark-mode :focus-visible {
 
 /* ─── Enhanced Meal Cards ─── */
 .meal-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease !important;
 }
 
 .meal-card:hover {
@@ -250,7 +263,9 @@ body.dark-mode .meal-card:hover {
 
 /* ─── Compare Cards Animation ─── */
 .compare-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease !important;
 }
 
 .compare-card:hover {
@@ -262,13 +277,17 @@ body.dark-mode .meal-card:hover {
 .toast-popup {
     backdrop-filter: blur(8px) !important;
     background: rgba(5, 150, 105, 0.95) !important;
-    box-shadow: 0 8px 32px rgba(5, 150, 105, 0.2), 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    box-shadow:
+        0 8px 32px rgba(5, 150, 105, 0.2),
+        0 4px 12px rgba(0, 0, 0, 0.08) !important;
 }
 
 .delete-toast-popup {
     backdrop-filter: blur(8px) !important;
     background: rgba(30, 41, 59, 0.95) !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.25),
+        0 4px 12px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* ─── Enhanced Modal ─── */
@@ -278,7 +297,9 @@ body.dark-mode .meal-card:hover {
 }
 
 .modal-content {
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.08) !important;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.15),
+        0 8px 20px rgba(0, 0, 0, 0.08) !important;
 }
 
 /* ─── Plan Row Hover ─── */
@@ -297,7 +318,9 @@ body.dark-mode .plan-row:hover:not(.active) {
 
 /* ─── Score Pill Enhancement ─── */
 .score-pill {
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease !important;
 }
 
 .score-pill:hover {
@@ -381,7 +404,10 @@ body.dark-mode .auth-card:hover {
 
 /* ─── Welcome Highlight Items Stagger ─── */
 .welcome-highlight-item {
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease !important;
 }
 
 .welcome-highlight-item:hover {
@@ -497,7 +523,9 @@ body.dark-mode .profile-details:hover {
 
 /* ─── Smooth Color Transitions for Dark Mode ─── */
 body {
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
 }
 
 .top-nav,
@@ -512,7 +540,11 @@ body {
 .compare-card,
 .nutrient-row,
 .app-footer {
-    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    transition:
+        background-color 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease,
+        transform 0.2s ease;
 }
 
 /* ─── Subtle Gradient Backgrounds ─── */
@@ -530,7 +562,9 @@ body.dark-mode .welcome-page {
 
 /* ─── Badge/Pill Improvements ─── */
 .goal-tag {
-    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease !important;
 }
 
 .goal-tag:hover {
@@ -563,7 +597,9 @@ body.dark-mode .welcome-page {
 
 /* ─── Improved Link Styling ─── */
 .link-btn {
-    transition: color 0.15s ease, opacity 0.15s ease !important;
+    transition:
+        color 0.15s ease,
+        opacity 0.15s ease !important;
 }
 
 .link-btn:hover {
@@ -586,7 +622,9 @@ body.dark-mode .welcome-page {
 
 /* ─── Improved Textarea ─── */
 textarea {
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 /* ─── Better Disabled Inputs ─── */
@@ -635,3 +673,188 @@ body.dark-mode textarea:disabled {
     }
 }
 
+/* ═══════════════════════════════════════════════════════
+   FINAL POLISH PASS — Touch targets, mobile spacing,
+   textarea focus, transition smoothness.
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── Remove mobile tap highlight (iOS/Android) ─── */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ─── Minimum touch targets on mobile (44×44px WCAG 2.5.5) ─── */
+@media (pointer: coarse) {
+    .icon-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .day-chip {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .plan-row {
+        min-height: 48px;
+    }
+
+    .health-tools-tab {
+        min-height: 48px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+    .nav-link {
+        min-height: 44px;
+    }
+
+    .nav-hamburger,
+    .nav-theme-toggle {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    /* Larger add-food button tap target */
+    .add-inline-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/* ─── Textarea consistent focus ─── */
+textarea:focus {
+    border-color: var(--ds-focus-border, #3b82f6);
+    box-shadow: var(--ds-focus-ring, 0 0 0 3px rgba(59, 130, 246, 0.12));
+    outline: none;
+}
+
+body.dark-mode textarea:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+
+/* ─── Smooth collapsible meal card body transition ─── */
+.meal-card .table-wrap,
+.meal-card .reason-box {
+    animation: content-expand 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes content-expand {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ─── Button aria-busy loading pulse ─── */
+button[aria-busy="true"] {
+    position: relative;
+    pointer-events: none;
+}
+
+button[aria-busy="true"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(255, 255, 255, 0.1);
+    animation: btn-loading-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes btn-loading-pulse {
+    0%,
+    100% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* ─── Nutrient limit progress bar smoothness ─── */
+.nutrient-limit-bar-fill {
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Enhanced empty cell styling ─── */
+.empty-cell {
+    color: var(--ds-text-faint, #94a3b8);
+    font-style: italic;
+    padding: 24px 16px !important;
+    text-align: center;
+}
+
+/* ─── Mobile: Improve spacing for dense views ─── */
+@media (max-width: 640px) {
+    /* Tighter KPI grid on mobile */
+    .kpi-grid--flex {
+        gap: 8px !important;
+    }
+
+    /* Ensure meal builder table is scrollable */
+    .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Improve plan sidebar mobile collapse */
+    .plan-sidebar {
+        border-radius: var(--ds-radius-xl, 16px) !important;
+    }
+
+    /* Stack footer text tighter */
+    .app-footer p {
+        font-size: 11px;
+    }
+}
+
+/* ─── Tablet: Better two-column breakpoints ─── */
+@media (min-width: 641px) and (max-width: 1024px) {
+    .two-col {
+        grid-template-columns: 1fr !important;
+    }
+
+    .comparison-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* ─── Improved progress bar accessibility ─── */
+[role="progressbar"] {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--ds-radius-full, 999px);
+}
+
+/* ─── Better inline-add-row visual separation ─── */
+.inline-add-row {
+    border-top: 1px dashed var(--ds-border, #e5e7eb);
+}
+
+.inline-add-row td {
+    padding-top: 12px !important;
+}
+
+body.dark-mode .inline-add-row {
+    border-top-color: var(--ds-border, #334155);
+}
+
+/* ─── Weekly planner: Better item tooltips ─── */
+.weekly-item-tooltip {
+    pointer-events: none;
+    z-index: 100;
+}
+
+/* ─── Subtle border on active day chip ─── */
+.day-chip.active {
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+
+body.dark-mode .day-chip.active {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}

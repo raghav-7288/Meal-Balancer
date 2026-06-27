@@ -12,10 +12,16 @@ const ACTIVITY_MULTIPLIERS = {
 };
 
 const GOAL_ADJUSTMENTS = {
-    "weight loss": { label: "Weight Loss", offset: -500, carb: 0.40, protein: 0.30, fat: 0.30 },
-    maintenance: { label: "Maintenance", offset: 0, carb: 0.50, protein: 0.25, fat: 0.25 },
-    "weight gain": { label: "Weight Gain", offset: 300, carb: 0.45, protein: 0.30, fat: 0.25 },
-    "metabolic improvement": { label: "Metabolic Improvement", offset: -200, carb: 0.40, protein: 0.30, fat: 0.30 },
+    "weight loss": { label: "Weight Loss", offset: -500, carb: 0.4, protein: 0.3, fat: 0.3 },
+    maintenance: { label: "Maintenance", offset: 0, carb: 0.5, protein: 0.25, fat: 0.25 },
+    "weight gain": { label: "Weight Gain", offset: 300, carb: 0.45, protein: 0.3, fat: 0.25 },
+    "metabolic improvement": {
+        label: "Metabolic Improvement",
+        offset: -200,
+        carb: 0.4,
+        protein: 0.3,
+        fat: 0.3,
+    },
 };
 
 /**
@@ -39,9 +45,7 @@ function CalorieCalculatorPage() {
     const [height, setHeight] = useState(
         dbProfile?.height_cm ? String(dbProfile.height_cm) : profile.height || ""
     );
-    const [age, setAge] = useState(
-        dbProfile?.age ? String(dbProfile.age) : ""
-    );
+    const [age, setAge] = useState(dbProfile?.age ? String(dbProfile.age) : "");
     const [sex, setSex] = useState(profile.sex || "female");
     const [activity, setActivity] = useState(profile.activity || "moderate");
     const [goal, setGoal] = useState(profile.goal || "maintenance");
@@ -84,7 +88,8 @@ function CalorieCalculatorPage() {
                 </div>
                 <h2>Calorie Target Calculator</h2>
                 <p className="calorie-calc-subtitle">
-                    Calculate your daily calorie needs and recommended macro split based on your body and goals.
+                    Calculate your daily calorie needs and recommended macro split based on your
+                    body and goals.
                 </p>
             </div>
 
@@ -163,7 +168,9 @@ function CalorieCalculatorPage() {
                                 onClick={() => setGoal(key)}
                             >
                                 <strong>{val.label}</strong>
-                                <span>{val.offset > 0 ? `+${val.offset}` : val.offset} kcal/day</span>
+                                <span>
+                                    {val.offset > 0 ? `+${val.offset}` : val.offset} kcal/day
+                                </span>
                             </button>
                         ))}
                     </div>
@@ -228,7 +235,9 @@ function CalorieCalculatorPage() {
                                 <div>
                                     <strong>Carbs</strong>
                                     <span>{results.macros.carbs.grams}g</span>
-                                    <span className="macro-percent">{results.macros.carbs.percent}%</span>
+                                    <span className="macro-percent">
+                                        {results.macros.carbs.percent}%
+                                    </span>
                                 </div>
                             </div>
                             <div className="calorie-macro-card protein">
@@ -236,7 +245,9 @@ function CalorieCalculatorPage() {
                                 <div>
                                     <strong>Protein</strong>
                                     <span>{results.macros.protein.grams}g</span>
-                                    <span className="macro-percent">{results.macros.protein.percent}%</span>
+                                    <span className="macro-percent">
+                                        {results.macros.protein.percent}%
+                                    </span>
                                 </div>
                             </div>
                             <div className="calorie-macro-card fat">
@@ -244,7 +255,9 @@ function CalorieCalculatorPage() {
                                 <div>
                                     <strong>Fat</strong>
                                     <span>{results.macros.fat.grams}g</span>
-                                    <span className="macro-percent">{results.macros.fat.percent}%</span>
+                                    <span className="macro-percent">
+                                        {results.macros.fat.percent}%
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -253,8 +266,9 @@ function CalorieCalculatorPage() {
                     <div className="calorie-info-box">
                         <Info size={16} />
                         <p>
-                            These values are estimates based on the <strong>Mifflin-St Jeor equation</strong>.
-                            Individual needs may vary. Consult a registered dietitian for personalized advice.
+                            These values are estimates based on the{" "}
+                            <strong>Mifflin-St Jeor equation</strong>. Individual needs may vary.
+                            Consult a registered dietitian for personalized advice.
                         </p>
                     </div>
                 </div>
@@ -264,5 +278,3 @@ function CalorieCalculatorPage() {
 }
 
 export default CalorieCalculatorPage;
-
-

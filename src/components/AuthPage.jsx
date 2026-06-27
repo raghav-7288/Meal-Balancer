@@ -34,25 +34,34 @@ function AuthPage() {
             </nav>
             <div className="auth-page">
                 <div className="auth-card">
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
-                        <div style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '56px',
-                            height: '56px',
-                            borderRadius: '16px',
-                            background: darkMode ? '#064e3b' : '#f0fdf4',
-                            color: darkMode ? '#6ee7b7' : '#059669'
-                        }}>
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginBottom: "20px",
+                        }}
+                    >
+                        <div
+                            style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: "56px",
+                                height: "56px",
+                                borderRadius: "16px",
+                                background: darkMode ? "#064e3b" : "#f0fdf4",
+                                color: darkMode ? "#6ee7b7" : "#059669",
+                            }}
+                        >
                             <UtensilsCrossed size={28} />
                         </div>
                     </div>
-                    <h1 className="auth-title" style={{ textAlign: 'center' }}>Diet Specifix</h1>
-                    <p className="auth-subtitle" style={{ textAlign: 'center' }}>
-                        {mode === "signin"
-                            ? "Sign in to your account"
-                            : "Create a new account"}
+                    <h1 className="auth-title" style={{ textAlign: "center" }}>
+                        Diet Specifix
+                    </h1>
+                    <p className="auth-subtitle" style={{ textAlign: "center" }}>
+                        {mode === "signin" ? "Sign in to your account" : "Create a new account"}
                     </p>
 
                     {mode === "signin" ? <SignInForm /> : <SignUpForm />}
@@ -138,7 +147,11 @@ function SignInForm() {
 
     return (
         <form className="auth-form" onSubmit={handleSubmit}>
-            {error && <div className="auth-error" role="alert">{error}</div>}
+            {error && (
+                <div className="auth-error" role="alert">
+                    {error}
+                </div>
+            )}
 
             <label className="auth-field">
                 <span>Email</span>
@@ -166,13 +179,18 @@ function SignInForm() {
                 />
             </label>
 
-            <button type="submit" className="auth-btn" disabled={loading || isLockedOut} aria-busy={loading}>
-                {loading ? <Loader2 size={16} className="spin" aria-hidden="true" /> : <LogIn size={16} aria-hidden="true" />}
-                {isLockedOut
-                    ? `Locked (${lockRemaining}s)`
-                    : loading
-                        ? "Signing in…"
-                        : "Sign in"}
+            <button
+                type="submit"
+                className="auth-btn"
+                disabled={loading || isLockedOut}
+                aria-busy={loading}
+            >
+                {loading ? (
+                    <Loader2 size={16} className="spin" aria-hidden="true" />
+                ) : (
+                    <LogIn size={16} aria-hidden="true" />
+                )}
+                {isLockedOut ? `Locked (${lockRemaining}s)` : loading ? "Signing in…" : "Sign in"}
             </button>
         </form>
     );
@@ -213,10 +231,10 @@ function SignUpForm() {
         return (
             <div className="auth-success" role="status" aria-live="polite">
                 <p>
-                    ✓ Account created! Please check your email to confirm your account,
-                    then sign in.
+                    ✓ Account created! Please check your email to confirm your account, then sign
+                    in.
                 </p>
-                <p style={{ fontSize: '0.85rem', marginTop: '8px', color: '#6b7280' }}>
+                <p style={{ fontSize: "0.85rem", marginTop: "8px", color: "#6b7280" }}>
                     You can verify your mobile number after signing in from your profile.
                 </p>
             </div>
@@ -225,7 +243,11 @@ function SignUpForm() {
 
     return (
         <form className="auth-form" onSubmit={handleSubmit}>
-            {error && <div className="auth-error" role="alert">{error}</div>}
+            {error && (
+                <div className="auth-error" role="alert">
+                    {error}
+                </div>
+            )}
 
             <label className="auth-field">
                 <span>Username</span>
@@ -288,7 +310,11 @@ function SignUpForm() {
             </label>
 
             <button type="submit" className="auth-btn" disabled={loading} aria-busy={loading}>
-                {loading ? <Loader2 size={16} className="spin" aria-hidden="true" /> : <UserPlus size={16} aria-hidden="true" />}
+                {loading ? (
+                    <Loader2 size={16} className="spin" aria-hidden="true" />
+                ) : (
+                    <UserPlus size={16} aria-hidden="true" />
+                )}
                 {loading ? "Creating account…" : "Sign up"}
             </button>
         </form>

@@ -78,4 +78,3 @@ function MacroChart({ dayTotals }) {
 }
 
 export default memo(MacroChart);
-

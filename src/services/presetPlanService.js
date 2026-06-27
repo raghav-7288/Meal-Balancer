@@ -100,14 +100,10 @@ export async function upsertPresetPlan(plan) {
  * @param {string} id - UUID of the plan to delete
  */
 export async function deletePresetPlan(id) {
-    const { error } = await supabase
-        .from("preset_plans")
-        .delete()
-        .eq("id", id);
+    const { error } = await supabase.from("preset_plans").delete().eq("id", id);
 
     if (error) throw new Error(`Failed to delete preset plan: ${error.message}`);
 
     // Invalidate cache
     invalidateCache("preset_plans");
 }
-

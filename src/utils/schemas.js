@@ -33,7 +33,10 @@ export const UserPlanSchema = z.object({
     id: z.string(),
     user_id: z.string(),
     name: z.string(),
-    meals: z.record(z.string(), z.array(z.object({}).passthrough())).nullable().default({}),
+    meals: z
+        .record(z.string(), z.array(z.object({}).passthrough()))
+        .nullable()
+        .default({}),
     guidelines: z.string().nullable().optional(),
     created_at: z.string().nullable().optional(),
     updated_at: z.string().nullable().optional(),
@@ -95,11 +98,10 @@ export function validateResponse(schema, data, context = "unknown") {
         if (import.meta.env.DEV) {
             console.warn(
                 `[Schema Validation] ${context}: response shape mismatch`,
-                result.error.issues.slice(0, 3),
+                result.error.issues.slice(0, 3)
             );
         }
         return data; // Graceful degradation — don't break the app
     }
     return result.data;
 }
-

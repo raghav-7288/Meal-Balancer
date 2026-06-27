@@ -191,3 +191,69 @@
 | **dailyHealthService** | 93.75% → 100% | 78.94% → 100% |
 | **Services (all)** | 98.65% → 99.55% | 97.18% → 100% |
 
+---
+
+## 🔍 Correctness & Stability Pass (June 27, 2026)
+
+| # | Issue | Fix Applied | Date |
+|---|-------|-------------|------|
+| C1 | **FoodAutocomplete unstable ARIA ID** — `Math.random()` on every render broke `aria-controls` | Replaced with React 19 `useId()` for stable, render-consistent IDs | June 27 |
+| C2 | **ProgressPage streak breaks on DST** — exact `diff === 1` fails during 23h/25h days | Changed inner loop to `Math.round(diff) === 1` | June 27 |
+| C3 | **ProfileContext stale `saveToDb` closure** — `setProfile` captured first render's `saveToDb` | Changed to `saveToDbRef.current?.(next)` for always-latest invocation | June 27 |
+| C4 | **`withRetry` misclassifies native TypeError** — `TypeError: Failed to fetch` wrongly treated as service error | Moved `error.name === "TypeError"` check before message prefix heuristic | June 27 |
+
+### Tests Added (43 new tests)
+
+| File | Tests |
+|------|-------|
+| `withRetry.test.js` | +3 (TypeError "Failed to fetch" regression) |
+| `progressStreak.test.js` | +2 (DST edge case, same-day duplicates) |
+| `schemas.edge-cases.test.js` | +9 (null paths, transforms, nullable fields) |
+| `profileContext.edge-cases.test.jsx` | +6 (default profile, persistence, debounce, corrupted localStorage) |
+| `FoodAutocomplete.integration.test.jsx` | +8 (stable ID, search, keyboard nav, selection, Escape) |
+| `nutrientEngine.edge-cases.test.js` | +13 (DB items, missing foods, combineDay, accumulateNutrients) |
+| `useHotkeys.test.js` | +2 (non-ctrl shortcuts, alt+key) |
+
+---
+
+## ⚡ Optimization Pass (June 27, 2026)
+
+| # | Optimization | Measurable Impact |
+|---|---|---|
+| O1 | **Stabilized `updateMealItem`/`removeMealItem`** — switched to `activePlanIdRef` | Prevents MealBuilder re-render on plan switch |
+| O2 | **Memoized `visibleFatLimit` and `isPresetActive`** | Prevents cascading re-renders of PlanSidebar + MealBuilder |
+| O3 | **Derived `activeSummary` from `summaries`** | Eliminates redundant computation (7 meals × aggregateMeal + scoring) |
+| O4 | **HealthToolsPage lazy sub-components** | Route chunk: 44.29 kB → **4.53 kB** (90% reduction) |
+| O5 | **Extracted `getTodayName()`** to shared utility | Eliminated duplicate across 2 files |
+| O6 | **Extracted `sanitizeNumeric`/`clampOnBlur`** to `src/utils/inputSanitize.js` | Eliminated duplicate across 2 profile components |
+| O7 | **Extracted `COUNTRY_CODES`/`parseContactNumber`** to `src/data/countryCodes.js` | Eliminated 52 duplicate lines |
+
+---
+
+## 🎨 Final Polish Pass (June 27, 2026)
+
+| Area | Improvement |
+|------|-------------|
+| **Touch targets** | 44px minimum on `pointer: coarse` devices (icon-btn, day-chip, nav elements) |
+| **Tap highlight** | Removed `-webkit-tap-highlight-color` flash on mobile |
+| **Textarea focus** | Consistent focus ring matching all other inputs |
+| **Collapsible content** | Smooth fade+slide animation on meal card expand |
+| **Button loading** | `aria-busy="true"` buttons show breathing pulse overlay |
+| **Nutrient bars** | Smooth 0.5s cubic-bezier fill transition |
+| **Empty cells** | Italic, muted, centered with proper padding |
+| **Tablet breakpoint** | Two-column sections stack on 641–1024px |
+| **Mobile spacing** | Tighter KPI grid, momentum scrolling tables |
+| **Inline add-row** | Dashed border separator for visual clarity |
+
+---
+
+## 📊 Final Metrics (June 27, 2026)
+
+| Metric | Value |
+|--------|-------|
+| Tests | 617 passing (49 files) |
+| Coverage | 91% statements, 80.5% branches |
+| Lint | 0 errors, 2 warnings (TanStack Virtual compatibility) |
+| TypeScript | Passes (`tsc --noEmit`) |
+| Build | ✓ (379ms, 2738 modules) |
+| Format | ✓ (Prettier clean) |

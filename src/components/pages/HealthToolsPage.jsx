@@ -1,9 +1,10 @@
-import { useState, useCallback } from "react";
-import { Calculator, Droplets, Flame, Footprints } from "lucide-react";
-import BmiCalculatorPage from "./BmiCalculatorPage";
-import WaterTrackerPage from "./WaterTrackerPage";
-import CalorieCalculatorPage from "./CalorieCalculatorPage";
-import StepTrackerPage from "./StepTrackerPage";
+import { useState, useCallback, lazy, Suspense } from "react";
+import { Calculator, Droplets, Flame, Footprints, Loader2 } from "lucide-react";
+
+const BmiCalculatorPage = lazy(() => import("./BmiCalculatorPage"));
+const WaterTrackerPage = lazy(() => import("./WaterTrackerPage"));
+const CalorieCalculatorPage = lazy(() => import("./CalorieCalculatorPage"));
+const StepTrackerPage = lazy(() => import("./StepTrackerPage"));
 
 const TOOLS = [
     { id: "bmi", label: "BMI Calculator", icon: Calculator, color: "#2563eb" },
@@ -73,15 +74,21 @@ function HealthToolsPage() {
                 id={`health-panel-${activeTab}`}
                 aria-labelledby={`health-tab-${activeTab}`}
             >
-                {activeTab === "bmi" && <BmiCalculatorPage />}
-                {activeTab === "water" && <WaterTrackerPage />}
-                {activeTab === "calories" && <CalorieCalculatorPage />}
-                {activeTab === "steps" && <StepTrackerPage />}
+                <Suspense
+                    fallback={
+                        <div style={{ display: "flex", justifyContent: "center", padding: "3rem" }}>
+                            <Loader2 size={24} className="spin" style={{ color: "#3b82f6" }} />
+                        </div>
+                    }
+                >
+                    {activeTab === "bmi" && <BmiCalculatorPage />}
+                    {activeTab === "water" && <WaterTrackerPage />}
+                    {activeTab === "calories" && <CalorieCalculatorPage />}
+                    {activeTab === "steps" && <StepTrackerPage />}
+                </Suspense>
             </div>
         </div>
     );
 }
 
 export default HealthToolsPage;
-
-

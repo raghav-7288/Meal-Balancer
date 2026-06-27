@@ -1,10 +1,5 @@
-import {
-    Activity,
-    Cloud,
-    CloudOff,
-    Loader,
-    RefreshCw,
-} from "lucide-react";
+import { Activity, Cloud, CloudOff, Loader, RefreshCw } from "lucide-react";
+import { sanitizeNumeric, clampOnBlur } from "../../../utils/inputSanitize";
 
 const ACTIVITY_OPTIONS = [
     { value: "sedentary", label: "Sedentary", desc: "Little or no exercise" },
@@ -26,39 +21,38 @@ const DIET_OPTIONS = [
     { value: "Jain-compatible", label: "Jain-Compatible", icon: "🌱" },
 ];
 
-/** Allow free typing but strip negatives. Clamp only on blur via validateOnBlur. */
-function sanitizeNumeric(value) {
-    if (value === "") return "";
-    const cleaned = value.replace(/^-/, "").replace(/[^0-9.]/g, "");
-    if (cleaned === "" || cleaned === ".") return "";
-    return cleaned;
-}
-
-/** Clamp value to [min, max] — call on blur only so user can type freely */
-function clampOnBlur(value, min = 0, max = Infinity) {
-    if (value === "") return "";
-    const num = parseFloat(value);
-    if (isNaN(num)) return "";
-    return String(Math.min(Math.max(num, min), max));
-}
-
 function ProfileSetupCard({ profile, setProfile, profileSyncStatus, retrySync }) {
     return (
         <div className="pro-card">
             <div className="pro-card-header">
-                <div className="pro-card-icon" style={{ background: "#ede9fe", color: "#7c3aed" }} aria-hidden="true">
+                <div
+                    className="pro-card-icon"
+                    style={{ background: "#ede9fe", color: "#7c3aed" }}
+                    aria-hidden="true"
+                >
                     <Activity size={16} />
                 </div>
                 <h2>Profile Setup</h2>
                 {/* Sync status indicator */}
-                <div className="pro-sync-status" style={{ marginLeft: "auto" }} role="status" aria-live="polite">
+                <div
+                    className="pro-sync-status"
+                    style={{ marginLeft: "auto" }}
+                    role="status"
+                    aria-live="polite"
+                >
                     {profileSyncStatus === "syncing" && (
-                        <span className="pro-sync-badge pro-sync-syncing" aria-label="Syncing preferences">
+                        <span
+                            className="pro-sync-badge pro-sync-syncing"
+                            aria-label="Syncing preferences"
+                        >
                             <Loader size={13} className="pro-spin" aria-hidden="true" /> Saving…
                         </span>
                     )}
                     {profileSyncStatus === "synced" && (
-                        <span className="pro-sync-badge pro-sync-synced" aria-label="Preferences saved to cloud">
+                        <span
+                            className="pro-sync-badge pro-sync-synced"
+                            aria-label="Preferences saved to cloud"
+                        >
                             <Cloud size={13} aria-hidden="true" /> Synced
                         </span>
                     )}
@@ -69,7 +63,8 @@ function ProfileSetupCard({ profile, setProfile, profileSyncStatus, retrySync })
                             aria-label="Sync failed, click to retry"
                             onClick={retrySync}
                         >
-                            <CloudOff size={13} aria-hidden="true" /> Failed — <RefreshCw size={11} aria-hidden="true" /> Retry
+                            <CloudOff size={13} aria-hidden="true" /> Failed —{" "}
+                            <RefreshCw size={11} aria-hidden="true" /> Retry
                         </button>
                     )}
                 </div>
@@ -148,7 +143,9 @@ function ProfileSetupCard({ profile, setProfile, profileSyncStatus, retrySync })
                 </fieldset>
 
                 <div className="pro-field-group">
-                    <label className="pro-field-label" htmlFor="bmi-target-input">BMI Target</label>
+                    <label className="pro-field-label" htmlFor="bmi-target-input">
+                        BMI Target
+                    </label>
                     <input
                         id="bmi-target-input"
                         className="pro-input"
@@ -161,9 +158,14 @@ function ProfileSetupCard({ profile, setProfile, profileSyncStatus, retrySync })
                             setProfile({ ...profile, bmiTarget: sanitizeNumeric(e.target.value) })
                         }
                         onBlur={(e) =>
-                            setProfile({ ...profile, bmiTarget: clampOnBlur(e.target.value, 10, 50) })
+                            setProfile({
+                                ...profile,
+                                bmiTarget: clampOnBlur(e.target.value, 10, 50),
+                            })
                         }
-                        onKeyDown={(e) => { if (e.key === "-" || e.key === "e") e.preventDefault(); }}
+                        onKeyDown={(e) => {
+                            if (e.key === "-" || e.key === "e") e.preventDefault();
+                        }}
                         aria-label="BMI target value"
                     />
                 </div>
@@ -173,4 +175,3 @@ function ProfileSetupCard({ profile, setProfile, profileSyncStatus, retrySync })
 }
 
 export default ProfileSetupCard;
-

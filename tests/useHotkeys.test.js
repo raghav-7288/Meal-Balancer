@@ -136,5 +136,27 @@ describe("useHotkeys", () => {
         expect(spy).toHaveBeenCalledWith("keydown", expect.any(Function));
         spy.mockRestore();
     });
+
+    it("triggers non-ctrl shortcut when NOT inside an input", () => {
+        const handler = vi.fn();
+        renderHook(() => useHotkeys({ "d": handler }));
+
+        // Simulate keydown on document body (not an input)
+        const event = new KeyboardEvent("keydown", {
+            key: "d",
+            bubbles: true,
+            cancelable: true,
+        });
+        Object.defineProperty(event, "target", { value: document.body });
+        document.dispatchEvent(event);
+
+        expect(handler).toHaveBeenCalledTimes(1);
+    });
+
+    it("triggers alt+d shortcut", () => {
+        renderHook(() => useHotkeys(shortcuts));
+        fireKeydown({ key: "d", altKey: true });
+        expect(shortcuts["alt+d"]).toHaveBeenCalledTimes(1);
+    });
 });
 

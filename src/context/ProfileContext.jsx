@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from "react";
+import {
+    createContext,
+    useContext,
+    useState,
+    useEffect,
+    useRef,
+    useCallback,
+    useMemo,
+} from "react";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../lib/supabaseClient";
 
@@ -186,21 +194,25 @@ export function ProfileProvider({ children }) {
             // Debounce DB sync by 1 second
             if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
             syncTimeoutRef.current = setTimeout(() => {
-                saveToDb(next);
+                // Use ref to always invoke the latest saveToDb (avoids stale closure)
+                saveToDbRef.current?.(next);
             }, 1000);
 
             return next;
         });
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, []); // stable — uses refs internally for latest values
 
-    const value = useMemo(() => ({
-        profile,
-        setProfile,
-        darkMode,
-        setDarkMode,
-        profileSyncStatus,
-        retrySync,
-    }), [profile, setProfile, darkMode, setDarkMode, profileSyncStatus, retrySync]);
+    const value = useMemo(
+        () => ({
+            profile,
+            setProfile,
+            darkMode,
+            setDarkMode,
+            profileSyncStatus,
+            retrySync,
+        }),
+        [profile, setProfile, darkMode, setDarkMode, profileSyncStatus, retrySync]
+    );
 
     return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
 }
@@ -213,4 +225,3 @@ export function useProfile() {
     }
     return context;
 }
-

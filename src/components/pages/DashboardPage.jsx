@@ -66,9 +66,12 @@ function DashboardPage() {
         logToday,
     } = useDashboardState();
 
-    const handleChangeLimit = useCallback((key, value) => {
-        setNutrientLimits((prev) => ({ ...prev, [key]: value }));
-    }, [setNutrientLimits]);
+    const handleChangeLimit = useCallback(
+        (key, value) => {
+            setNutrientLimits((prev) => ({ ...prev, [key]: value }));
+        },
+        [setNutrientLimits]
+    );
 
     // Show skeleton loading state until plans are available (#30)
     if (presetLoading && plans.length === 0) {
@@ -77,15 +80,23 @@ function DashboardPage() {
 
     return (
         <div className="dashboard-page">
-
             <VerificationBanner />
 
             {deleteToast && (
                 <div className="delete-toast-popup" role="alert" aria-live="assertive">
                     <span>Plan &ldquo;{deleteToast.planName}&rdquo; deleted</span>
                     <div className="delete-toast-actions">
-                        <button type="button" className="undo-btn" onClick={deleteToast.undoAction}>Undo</button>
-                        <button type="button" className="close-btn" onClick={() => setDeleteToast(null)} aria-label="Dismiss notification">✕</button>
+                        <button type="button" className="undo-btn" onClick={deleteToast.undoAction}>
+                            Undo
+                        </button>
+                        <button
+                            type="button"
+                            className="close-btn"
+                            onClick={() => setDeleteToast(null)}
+                            aria-label="Dismiss notification"
+                        >
+                            ✕
+                        </button>
                     </div>
                 </div>
             )}
@@ -133,10 +144,27 @@ function DashboardPage() {
                 <div className="content" role="region" aria-label="Meal plan details">
                     {/* KPI row (#33) */}
                     <div className="kpi-grid kpi-grid--flex">
-                        <Kpi label={`${viewDay} score`} value={dayScore} tone={scoreTone} hint={activeSummary?.dayScore?.band || "No band"} />
-                        <Kpi label="Energy" value={Math.round(activeSummary?.dayTotals?.kcal || 0)} hint="kcal/day" />
-                        <Kpi label="Vegetables" value={Math.round(activeSummary?.dayTotals?.vegetablesG || 0)} hint="g/day" />
-                        <Kpi label="Visible fat" value={Math.round(activeSummary?.dayTotals?.visibleFat || 0)} hint="g/day" />
+                        <Kpi
+                            label={`${viewDay} score`}
+                            value={dayScore}
+                            tone={scoreTone}
+                            hint={activeSummary?.dayScore?.band || "No band"}
+                        />
+                        <Kpi
+                            label="Energy"
+                            value={Math.round(activeSummary?.dayTotals?.kcal || 0)}
+                            hint="kcal/day"
+                        />
+                        <Kpi
+                            label="Vegetables"
+                            value={Math.round(activeSummary?.dayTotals?.vegetablesG || 0)}
+                            hint="g/day"
+                        />
+                        <Kpi
+                            label="Visible fat"
+                            value={Math.round(activeSummary?.dayTotals?.visibleFat || 0)}
+                            hint="g/day"
+                        />
                     </div>
 
                     <NutrientLimits
@@ -162,7 +190,6 @@ function DashboardPage() {
                         saveGuidelines={saveGuidelines}
                         isPresetActive={isPresetActive}
                     />
-
 
                     <NutrientSummary
                         activeSummary={activeSummary}

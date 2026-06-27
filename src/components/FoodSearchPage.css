@@ -32,7 +32,9 @@
     border: 2px solid var(--ds-border-input);
     border-radius: var(--ds-radius-md);
     padding: 0.75rem 1rem;
-    transition: border-color var(--ds-transition-base), box-shadow var(--ds-transition-base);
+    transition:
+        border-color var(--ds-transition-base),
+        box-shadow var(--ds-transition-base);
     max-width: 800px;
     margin: 0 auto;
 }
@@ -84,8 +86,12 @@
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ==========================================
@@ -336,8 +342,14 @@ body.dark-mode .food-source-note {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .food-detail-header {
@@ -731,7 +743,9 @@ body.dark-mode .food-nutrient-unit {
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
     flex-shrink: 0;
 }
 
@@ -748,4 +762,3 @@ body.dark-mode .food-nutrient-unit {
     justify-content: center;
     gap: 0.5rem;
 }
-

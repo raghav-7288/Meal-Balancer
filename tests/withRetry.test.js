@@ -147,6 +147,45 @@ describe("withRetry", () => {
         );
         warnSpy.mockRestore();
     });
+
+    it("should retry on native TypeError 'Failed to fetch' (browser network failure)", async () => {
+        // This is the browser's native error when a network request fails.
+        // It starts with "Failed to" which previously matched the service-layer heuristic.
+        const nativeNetworkError = new TypeError("Failed to fetch");
+        const fn = vi.fn()
+            .mockRejectedValueOnce(nativeNetworkError)
+            .mockResolvedValueOnce("recovered");
+
+        const promise = withRetry(fn, { baseDelay: 10 });
+        await vi.advanceTimersByTimeAsync(15);
+        const result = await promise;
+
+        expect(result).toBe("recovered");
+        expect(fn).toHaveBeenCalledTimes(2);
+    });
+
+    it("should NOT retry service-layer Error with 'Failed to' prefix (non-TypeError)", async () => {
+        // Service-layer errors are regular Error objects (not TypeError)
+        const serviceError = new Error("Failed to fetch user plans: row not found");
+        const fn = vi.fn().mockRejectedValue(serviceError);
+
+        await expect(withRetry(fn)).rejects.toThrow("Failed to fetch user plans: row not found");
+        expect(fn).toHaveBeenCalledTimes(1);
+    });
+
+    it("should retry TypeError even when message is empty", async () => {
+        const typeError = new TypeError("");
+        const fn = vi.fn()
+            .mockRejectedValueOnce(typeError)
+            .mockResolvedValueOnce("ok");
+
+        const promise = withRetry(fn, { baseDelay: 10 });
+        await vi.advanceTimersByTimeAsync(15);
+        const result = await promise;
+
+        expect(result).toBe("ok");
+        expect(fn).toHaveBeenCalledTimes(2);
+    });
 });
 
 

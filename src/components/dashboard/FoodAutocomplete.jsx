@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useRef } from "react";
+import { memo, useId, useState, useEffect, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useDebounce } from "../../hooks/useDebounce";
 import { searchFoodItems } from "../../services/foodSearchService";
@@ -45,22 +45,26 @@ function FoodAutocomplete({ value, onChange, onSelect, placeholder = "Type to se
         let cancelled = false;
         setIsLoading(true);
 
-        searchFoodItems(debouncedQuery).then((results) => {
-            if (!cancelled) {
-                setSuggestions(results);
-                setIsOpen(results.length > 0);
-                setIsLoading(false);
-                setHighlightIndex(-1);
-            }
-        }).catch(() => {
-            if (!cancelled) {
-                setSuggestions([]);
-                setIsOpen(false);
-                setIsLoading(false);
-            }
-        });
+        searchFoodItems(debouncedQuery)
+            .then((results) => {
+                if (!cancelled) {
+                    setSuggestions(results);
+                    setIsOpen(results.length > 0);
+                    setIsLoading(false);
+                    setHighlightIndex(-1);
+                }
+            })
+            .catch(() => {
+                if (!cancelled) {
+                    setSuggestions([]);
+                    setIsOpen(false);
+                    setIsLoading(false);
+                }
+            });
 
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
     }, [debouncedQuery]);
 
     // Close dropdown on outside click
@@ -107,7 +111,8 @@ function FoodAutocomplete({ value, onChange, onSelect, placeholder = "Type to se
         }
     }
 
-    const listboxId = `food-autocomplete-listbox-${Math.random().toString(36).slice(2, 8)}`;
+    const reactId = useId();
+    const listboxId = `food-autocomplete-listbox-${reactId}`;
 
     return (
         <div className="food-autocomplete" ref={wrapperRef} style={{ position: "relative" }}>
@@ -117,17 +122,25 @@ function FoodAutocomplete({ value, onChange, onSelect, placeholder = "Type to se
                 value={inputValue}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
-                onFocus={() => { if (suggestions.length > 0) setIsOpen(true); }}
+                onFocus={() => {
+                    if (suggestions.length > 0) setIsOpen(true);
+                }}
                 placeholder={placeholder}
                 aria-label="Search food item"
                 autoComplete="off"
                 role="combobox"
                 aria-expanded={isOpen}
                 aria-controls={listboxId}
-                aria-activedescendant={highlightIndex >= 0 && isOpen ? `food-option-${highlightIndex}` : undefined}
+                aria-activedescendant={
+                    highlightIndex >= 0 && isOpen ? `food-option-${highlightIndex}` : undefined
+                }
                 aria-autocomplete="list"
             />
-            {isLoading && <span className="food-autocomplete-loading" role="status" aria-live="polite">Searching…</span>}
+            {isLoading && (
+                <span className="food-autocomplete-loading" role="status" aria-live="polite">
+                    Searching…
+                </span>
+            )}
             {isOpen && suggestions.length > 0 && (
                 <ul
                     className="food-autocomplete-dropdown"
@@ -137,7 +150,9 @@ function FoodAutocomplete({ value, onChange, onSelect, placeholder = "Type to se
                     style={{ maxHeight: 240, overflow: "auto" }}
                     aria-label="Food search results"
                 >
-                    <div style={{ height: `${virtualizer.getTotalSize()}px`, position: "relative" }}>
+                    <div
+                        style={{ height: `${virtualizer.getTotalSize()}px`, position: "relative" }}
+                    >
                         {virtualizer.getVirtualItems().map((virtualRow) => {
                             const item = suggestions[virtualRow.index];
                             const index = virtualRow.index;
@@ -171,5 +186,3 @@ function FoodAutocomplete({ value, onChange, onSelect, placeholder = "Type to se
 }
 
 export default memo(FoodAutocomplete);
-
-

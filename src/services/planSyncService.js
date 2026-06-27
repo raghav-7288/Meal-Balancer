@@ -12,16 +12,19 @@ import { withRetry } from "../utils/withRetry";
  * @returns {Promise<Array>} array of plan objects
  */
 export async function fetchUserPlans(userId) {
-    return withRetry(async () => {
-        const { data, error } = await supabase
-            .from("user_plans")
-            .select("id, user_id, name, meals, guidelines, created_at, updated_at")
-            .eq("user_id", userId)
-            .order("created_at", { ascending: true });
+    return withRetry(
+        async () => {
+            const { data, error } = await supabase
+                .from("user_plans")
+                .select("id, user_id, name, meals, guidelines, created_at, updated_at")
+                .eq("user_id", userId)
+                .order("created_at", { ascending: true });
 
-        if (error) throw new Error(`Failed to fetch user plans: ${error.message}`);
-        return validateResponse(UserPlanArraySchema, data || [], "fetchUserPlans");
-    }, { context: "fetchUserPlans" });
+            if (error) throw new Error(`Failed to fetch user plans: ${error.message}`);
+            return validateResponse(UserPlanArraySchema, data || [], "fetchUserPlans");
+        },
+        { context: "fetchUserPlans" }
+    );
 }
 
 /**
@@ -31,24 +34,27 @@ export async function fetchUserPlans(userId) {
  * @returns {Promise<object>} the upserted plan row
  */
 export async function upsertPlan(userId, plan) {
-    return withRetry(async () => {
-        const row = {
-            id: plan.id,
-            user_id: userId,
-            name: plan.name,
-            meals: plan.meals,
-            guidelines: plan.guidelines || "",
-        };
+    return withRetry(
+        async () => {
+            const row = {
+                id: plan.id,
+                user_id: userId,
+                name: plan.name,
+                meals: plan.meals,
+                guidelines: plan.guidelines || "",
+            };
 
-        const { data, error } = await supabase
-            .from("user_plans")
-            .upsert(row, { onConflict: "id" })
-            .select()
-            .single();
+            const { data, error } = await supabase
+                .from("user_plans")
+                .upsert(row, { onConflict: "id" })
+                .select()
+                .single();
 
-        if (error) throw new Error(`Failed to save plan: ${error.message}`);
-        return data;
-    }, { context: "upsertPlan" });
+            if (error) throw new Error(`Failed to save plan: ${error.message}`);
+            return data;
+        },
+        { context: "upsertPlan" }
+    );
 }
 
 /**
@@ -60,23 +66,26 @@ export async function upsertPlan(userId, plan) {
 export async function upsertPlans(userId, plans) {
     if (!plans.length) return [];
 
-    return withRetry(async () => {
-        const rows = plans.map((plan) => ({
-            id: plan.id,
-            user_id: userId,
-            name: plan.name,
-            meals: plan.meals,
-            guidelines: plan.guidelines || "",
-        }));
+    return withRetry(
+        async () => {
+            const rows = plans.map((plan) => ({
+                id: plan.id,
+                user_id: userId,
+                name: plan.name,
+                meals: plan.meals,
+                guidelines: plan.guidelines || "",
+            }));
 
-        const { data, error } = await supabase
-            .from("user_plans")
-            .upsert(rows, { onConflict: "id" })
-            .select();
+            const { data, error } = await supabase
+                .from("user_plans")
+                .upsert(rows, { onConflict: "id" })
+                .select();
 
-        if (error) throw new Error(`Failed to batch save plans: ${error.message}`);
-        return data || [];
-    }, { context: "upsertPlans" });
+            if (error) throw new Error(`Failed to batch save plans: ${error.message}`);
+            return data || [];
+        },
+        { context: "upsertPlans" }
+    );
 }
 
 /**
@@ -85,14 +94,16 @@ export async function upsertPlans(userId, plans) {
  * @param {string} planId
  */
 export async function deletePlan(userId, planId) {
-    return withRetry(async () => {
-        const { error } = await supabase
-            .from("user_plans")
-            .delete()
-            .eq("id", planId)
-            .eq("user_id", userId);
+    return withRetry(
+        async () => {
+            const { error } = await supabase
+                .from("user_plans")
+                .delete()
+                .eq("id", planId)
+                .eq("user_id", userId);
 
-        if (error) throw new Error(`Failed to delete plan: ${error.message}`);
-    }, { context: "deletePlan" });
+            if (error) throw new Error(`Failed to delete plan: ${error.message}`);
+        },
+        { context: "deletePlan" }
+    );
 }
-

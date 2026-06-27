@@ -8,7 +8,11 @@ import { Link } from "react-router-dom";
 function EmptyState({ icon, title, description, actionLabel, actionTo, onAction }) {
     return (
         <div className="empty-state" role="status" aria-label={title}>
-            {icon && <div className="empty-state-icon" aria-hidden="true">{icon}</div>}
+            {icon && (
+                <div className="empty-state-icon" aria-hidden="true">
+                    {icon}
+                </div>
+            )}
             <h2 className="empty-state-title">{title}</h2>
             {description && <p className="empty-state-desc">{description}</p>}
             {actionLabel && actionTo && (
@@ -26,4 +30,3 @@ function EmptyState({ icon, title, description, actionLabel, actionTo, onAction 
 }
 
 export default memo(EmptyState);
-
