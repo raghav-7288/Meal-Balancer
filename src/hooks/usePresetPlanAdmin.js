@@ -242,20 +242,42 @@ export function usePresetPlanAdmin() {
         [activePlanId, markDirty]
     );
 
-    // ─── Add a food item to a meal slot ───────────────────────────────
+    // ─── Add a food item to a meal slot (supports multi-ingredient) ──
     const addFood = useCallback(
-        (meal, foodId, foodName, grams, instructions, foodGroupId, foodGroup) => {
-            if (!activePlanId) return;
-            const newItem = {
-                id: crypto.randomUUID(),
-                foodId: String(foodId),
-                foodName,
-                grams: Number(grams),
-                instructions: instructions || "",
-                foodGroupId: foodGroupId || null,
-                foodGroup: foodGroup || "",
-                day: viewDay,
-            };
+        (meal, instructions, ingredients) => {
+            if (!activePlanId || !ingredients || ingredients.length === 0) return;
+
+            const totalGrams = ingredients.reduce((sum, ing) => sum + Number(ing.grams), 0);
+            const isSingle = ingredients.length === 1;
+            const singleIng = ingredients[0];
+
+            const newItem = isSingle
+                ? {
+                      id: crypto.randomUUID(),
+                      foodId: String(singleIng.foodId),
+                      foodName: singleIng.foodName,
+                      grams: Number(singleIng.grams),
+                      instructions: instructions || "",
+                      foodGroupId: singleIng.foodGroupId || null,
+                      foodGroup: singleIng.foodGroup || "",
+                      day: viewDay,
+                  }
+                : {
+                      id: crypto.randomUUID(),
+                      foodId: "composite",
+                      foodName: instructions || ingredients.map((i) => i.foodName).join(" + "),
+                      grams: totalGrams,
+                      instructions: instructions || "",
+                      day: viewDay,
+                      ingredients: ingredients.map((ing) => ({
+                          foodId: String(ing.foodId),
+                          foodName: ing.foodName,
+                          grams: Number(ing.grams),
+                          foodGroupId: ing.foodGroupId || null,
+                          foodGroup: ing.foodGroup || "",
+                      })),
+                  };
+
             setPlans((prev) =>
                 prev.map((p) => {
                     if (p.id !== activePlanId) return p;
@@ -265,7 +287,8 @@ export function usePresetPlanAdmin() {
                 })
             );
             markDirty();
-            toast.success(`"${foodName}" added to ${meal} (${viewDay})`);
+            const label = isSingle ? `"${singleIng.foodName}"` : `"${newItem.foodName}"`;
+            toast.success(`${label} added to ${meal} (${viewDay})`);
         },
         [activePlanId, viewDay, markDirty]
     );

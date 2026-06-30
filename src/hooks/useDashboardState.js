@@ -270,47 +270,69 @@ export function useDashboardState() {
     }, [majorGroups]);
 
     const addFood = useCallback(
-        async (
-            selectedMeal,
-            selectedFoodId,
-            selectedFoodName,
-            gramsVal,
-            instructionsVal,
-            selectedFoodGroupId
-        ) => {
-            if (!selectedMeal || !selectedFoodId || !gramsVal) return;
+        async (selectedMeal, instructionsVal, ingredients) => {
+            if (!selectedMeal || !ingredients || ingredients.length === 0) return;
             setIsAddingFood(true);
 
             try {
-                const food = foodById(selectedFoodId);
-                const foodName = food?.name || selectedFoodName || "Unknown food";
+                // Resolve nutrients for each ingredient
+                const resolvedIngredients = [];
+                for (const ing of ingredients) {
+                    const food = foodById(ing.foodId);
+                    let nutrients = null;
+                    let foodGroup = "";
 
-                let nutrients = null;
-                let foodGroup = "";
+                    if (!food) {
+                        const result = await fetchFoodNutrients(ing.foodId);
+                        if (result) {
+                            nutrients = result.nutrients;
+                        }
+                        if (ing.foodGroupId && majorGroupsRef.current.length > 0) {
+                            const group = majorGroupsRef.current.find(
+                                (g) => g.major_group_id === ing.foodGroupId
+                            );
+                            foodGroup = group?.group_name?.toLowerCase() || "";
+                        }
+                    } else {
+                        foodGroup = food.group || "";
+                    }
 
-                if (!food) {
-                    const result = await fetchFoodNutrients(selectedFoodId);
-                    if (result) {
-                        nutrients = result.nutrients;
-                    }
-                    if (selectedFoodGroupId && majorGroupsRef.current.length > 0) {
-                        const group = majorGroupsRef.current.find(
-                            (g) => g.major_group_id === selectedFoodGroupId
-                        );
-                        foodGroup = group?.group_name?.toLowerCase() || "";
-                    }
+                    resolvedIngredients.push({
+                        foodId: ing.foodId,
+                        foodName: ing.foodName,
+                        grams: Number(ing.grams),
+                        foodGroupId: ing.foodGroupId || null,
+                        foodGroup,
+                        ...(nutrients && { nutrients }),
+                    });
                 }
 
-                const mealItem = {
-                    id: crypto.randomUUID(),
-                    foodId: selectedFoodId,
-                    foodName: selectedFoodName || foodName,
-                    grams: Number(gramsVal),
-                    day: viewDayRef.current,
-                    instructions: instructionsVal || "",
-                    ...(nutrients && { nutrients }),
-                    ...(foodGroup && { foodGroup }),
-                };
+                const totalGrams = resolvedIngredients.reduce((sum, ing) => sum + ing.grams, 0);
+
+                // For single ingredient, store as flat item (backward compatible)
+                const isSingle = resolvedIngredients.length === 1;
+                const singleIng = resolvedIngredients[0];
+
+                const mealItem = isSingle
+                    ? {
+                          id: crypto.randomUUID(),
+                          foodId: singleIng.foodId,
+                          foodName: singleIng.foodName,
+                          grams: singleIng.grams,
+                          day: viewDayRef.current,
+                          instructions: instructionsVal || "",
+                          ...(singleIng.nutrients && { nutrients: singleIng.nutrients }),
+                          ...(singleIng.foodGroup && { foodGroup: singleIng.foodGroup }),
+                      }
+                    : {
+                          id: crypto.randomUUID(),
+                          foodId: "composite",
+                          foodName: instructionsVal || resolvedIngredients.map((i) => i.foodName).join(" + "),
+                          grams: totalGrams,
+                          day: viewDayRef.current,
+                          instructions: instructionsVal || "",
+                          ingredients: resolvedIngredients,
+                      };
 
                 setUserPlans((prev) =>
                     prev.map((plan) =>
@@ -328,7 +350,8 @@ export function useDashboardState() {
                             : plan
                     )
                 );
-                toast.success(`"${foodName}" added to ${selectedMeal} (${viewDayRef.current})`);
+                const label = isSingle ? `"${singleIng.foodName}"` : `"${mealItem.foodName}"`;
+                toast.success(`${label} added to ${selectedMeal} (${viewDayRef.current})`);
             } catch (err) {
                 console.error("Error adding food:", err);
                 toast.error("Failed to add food. Please try again.");

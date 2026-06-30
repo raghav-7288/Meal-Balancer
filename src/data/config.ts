@@ -76,6 +76,24 @@ export interface LocalFood {
     kcal: number;
 }
 
+/** A single ingredient within a composite meal item */
+export interface Ingredient {
+    foodId: string;
+    foodName: string;
+    grams: number;
+    foodGroupId?: number | null;
+    foodGroup?: string;
+    nutrients?: {
+        kcal?: number;
+        carbs?: number;
+        protein?: number;
+        fat?: number;
+        fibre?: number;
+        vitamins?: number;
+        minerals?: number;
+    };
+}
+
 /** A meal item that may come from DB (with nutrients) or be a legacy item (with foodId) */
 export interface MealItem {
     foodId: string;
@@ -91,6 +109,8 @@ export interface MealItem {
     };
     foodGroup?: string;
     day?: string;
+    /** If present, this is a composite item (e.g., "Banana Shake") with multiple ingredients */
+    ingredients?: Ingredient[];
 }
 
 export const APP_CONFIG: AppConfig = {

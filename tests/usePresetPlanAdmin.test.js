@@ -218,7 +218,9 @@ describe("usePresetPlanAdmin", () => {
         await waitFor(() => expect(result.current.isLoading).toBe(false));
 
         act(() => {
-            result.current.addFood("Lunch", "123", "Rice", 200, "Steamed", 2);
+            result.current.addFood("Lunch", "Steamed", [
+                { foodId: "123", foodName: "Rice", grams: 200, foodGroupId: 2, foodGroup: "" }
+            ]);
         });
 
         const lunchItems = result.current.activePlan.meals.Lunch;
@@ -235,7 +237,11 @@ describe("usePresetPlanAdmin", () => {
         await waitFor(() => expect(result.current.isLoading).toBe(false));
 
         act(() => { result.current.setViewDay("Friday"); });
-        act(() => { result.current.addFood("Dinner", "456", "Dal", 150, "", null); });
+        act(() => {
+            result.current.addFood("Dinner", "", [
+                { foodId: "456", foodName: "Dal", grams: 150, foodGroupId: null, foodGroup: "" }
+            ]);
+        });
 
         const dinnerItems = result.current.activePlan.meals.Dinner;
         expect(dinnerItems[0].day).toBe("Friday");
@@ -246,7 +252,11 @@ describe("usePresetPlanAdmin", () => {
         const { result } = renderHook(() => usePresetPlanAdmin());
         await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-        act(() => { result.current.addFood("Lunch", "123", "Rice", 200, "", null); });
+        act(() => {
+            result.current.addFood("Lunch", "", [
+                { foodId: "123", foodName: "Rice", grams: 200, foodGroupId: null, foodGroup: "" }
+            ]);
+        });
         expect(result.current.activePlan).toBeNull();
     });
 

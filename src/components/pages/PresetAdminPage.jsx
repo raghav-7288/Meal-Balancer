@@ -14,12 +14,12 @@ import {
     Settings,
 } from "lucide-react";
 import { MEALS, DAYS } from "../../data/presetPlans";
-import { foodById } from "../../engines/nutrientEngine";
 import { usePresetPlanAdmin } from "../../hooks/usePresetPlanAdmin";
 import { getMajorGroups } from "../../services/databaseService";
 import Section from "../ui/Section";
-import FoodAutocomplete from "../dashboard/FoodAutocomplete";
+import IngredientAddForm from "../dashboard/IngredientAddForm";
 import "../dashboard/FoodAutocomplete.css";
+import "../dashboard/IngredientAddForm.css";
 
 function PresetAdminPage() {
     const {
@@ -51,12 +51,6 @@ function PresetAdminPage() {
     const [editingItemId, setEditingItemId] = useState(null);
     const [editValues, setEditValues] = useState({ grams: "", instructions: "" });
     const [majorGroups, setMajorGroups] = useState([]);
-    const [slotForms, setSlotForms] = useState(() => {
-        const init = {};
-        for (const m of MEALS)
-            init[m] = { foodId: "", foodName: "", foodGroupId: null, grams: "", instructions: "" };
-        return init;
-    });
 
     // Fetch major groups for resolving group IDs to names
     useEffect(() => {
@@ -75,23 +69,15 @@ function PresetAdminPage() {
         setCollapsedSlots((prev) => ({ ...prev, [meal]: !prev[meal] }));
     };
 
-    const updateSlotForm = (meal, patch) => {
-        setSlotForms((prev) => ({ ...prev, [meal]: { ...prev[meal], ...patch } }));
-    };
-
-    const resetSlotForm = (meal) => {
-        setSlotForms((prev) => ({
-            ...prev,
-            [meal]: { foodId: "", foodName: "", foodGroupId: null, grams: "", instructions: "" },
+    /** Handler for IngredientAddForm submit */
+    const handleAddIngredients = (meal, instructions, ingredients) => {
+        if (!ingredients || ingredients.length === 0) return;
+        // Resolve foodGroup names from majorGroups for each ingredient
+        const enriched = ingredients.map((ing) => ({
+            ...ing,
+            foodGroup: groupNameById(ing.foodGroupId),
         }));
-    };
-
-    const handleAddFood = (meal) => {
-        const f = slotForms[meal];
-        if (!f.foodName || !f.foodId || !f.grams || Number(f.grams) <= 0) return;
-        const foodGroup = groupNameById(f.foodGroupId);
-        addFood(meal, f.foodId, f.foodName, f.grams, f.instructions, f.foodGroupId, foodGroup);
-        resetSlotForm(meal);
+        addFood(meal, instructions, enriched);
     };
 
     const handleCreatePlan = () => {
@@ -436,7 +422,6 @@ function PresetAdminPage() {
                                 <div className="meal-panels">
                                     {MEALS.map((meal) => {
                                         const items = getDayItems(meal);
-                                        const form = slotForms[meal];
 
                                         return (
                                             <div
@@ -485,14 +470,15 @@ function PresetAdminPage() {
                                                                     <th>Menu/Instructions</th>
                                                                     <th>Food</th>
                                                                     <th>g</th>
-                                                                    <th>Group</th>
-                                                                    <th>Exchange</th>
                                                                     <th>Actions</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
                                                                 {items.length > 0 ? (
                                                                     items.map((item) => {
+                                                                        const isComposite =
+                                                                            item.ingredients &&
+                                                                            item.ingredients.length > 0;
                                                                         const isEditing =
                                                                             editingItemId ===
                                                                             item.id;
@@ -500,38 +486,13 @@ function PresetAdminPage() {
                                                                             isEditing
                                                                                 ? editValues.grams
                                                                                 : item.grams;
-                                                                        const food = foodById(
-                                                                            item.foodId
-                                                                        );
-                                                                        const foodGroup =
-                                                                            food?.group ||
-                                                                            item.foodGroup ||
-                                                                            groupNameById(
-                                                                                item.foodGroupId
-                                                                            ) ||
-                                                                            "-";
-                                                                        const rawExchange = food
-                                                                            ? Number(displayGrams) /
-                                                                              (food.gramsPerExchange ||
-                                                                                  1)
-                                                                            : Number(displayGrams) /
-                                                                              100;
-                                                                        const exchange =
-                                                                            Number.isFinite(
-                                                                                rawExchange
-                                                                            )
-                                                                                ? rawExchange
-                                                                                : 0;
 
                                                                         const startEditing = () => {
-                                                                            setEditingItemId(
-                                                                                item.id
-                                                                            );
+                                                                            setEditingItemId(item.id);
                                                                             setEditValues({
                                                                                 grams: item.grams,
                                                                                 instructions:
-                                                                                    item.instructions ||
-                                                                                    "",
+                                                                                    item.instructions || "",
                                                                             });
                                                                         };
 
@@ -540,11 +501,8 @@ function PresetAdminPage() {
                                                                                 meal,
                                                                                 item.id,
                                                                                 {
-                                                                                    grams: Number(
-                                                                                        editValues.grams
-                                                                                    ),
-                                                                                    instructions:
-                                                                                        editValues.instructions,
+                                                                                    grams: Number(editValues.grams),
+                                                                                    instructions: editValues.instructions,
                                                                                 }
                                                                             );
                                                                             setEditingItemId(null);
@@ -556,117 +514,70 @@ function PresetAdminPage() {
                                                                                     {isEditing ? (
                                                                                         <input
                                                                                             type="text"
-                                                                                            value={
-                                                                                                editValues.instructions
-                                                                                            }
-                                                                                            onChange={(
-                                                                                                e
-                                                                                            ) =>
-                                                                                                setEditValues(
-                                                                                                    (
-                                                                                                        v
-                                                                                                    ) => ({
-                                                                                                        ...v,
-                                                                                                        instructions:
-                                                                                                            e
-                                                                                                                .target
-                                                                                                                .value,
-                                                                                                    })
-                                                                                                )
+                                                                                            value={editValues.instructions}
+                                                                                            onChange={(e) =>
+                                                                                                setEditValues((v) => ({
+                                                                                                    ...v,
+                                                                                                    instructions: e.target.value,
+                                                                                                }))
                                                                                             }
                                                                                             aria-label={`Edit instructions for ${item.foodName || item.foodId}`}
                                                                                             placeholder="Menu/Instructions"
                                                                                         />
                                                                                     ) : (
-                                                                                        item.instructions ||
-                                                                                        "-"
+                                                                                        item.instructions || "-"
                                                                                     )}
                                                                                 </td>
                                                                                 <td>
-                                                                                    {item.foodName ||
-                                                                                        item.foodId}
+                                                                                    {isComposite ? (
+                                                                                        <div className="ingredients-summary">
+                                                                                            {item.ingredients.map((ing, idx) => (
+                                                                                                <span key={idx} className="ingredients-summary__item">
+                                                                                                    {ing.foodName}
+                                                                                                    <span style={{ opacity: 0.7, marginLeft: 2 }}>
+                                                                                                        ({ing.grams}g)
+                                                                                                    </span>
+                                                                                                </span>
+                                                                                            ))}
+                                                                                        </div>
+                                                                                    ) : (
+                                                                                        item.foodName || item.foodId
+                                                                                    )}
                                                                                 </td>
                                                                                 <td>
-                                                                                    {isEditing ? (
+                                                                                    {isEditing && !isComposite ? (
                                                                                         <input
                                                                                             type="number"
                                                                                             min="0"
-                                                                                            value={
-                                                                                                editValues.grams
+                                                                                            value={editValues.grams}
+                                                                                            onChange={(e) =>
+                                                                                                setEditValues((v) => ({
+                                                                                                    ...v,
+                                                                                                    grams: e.target.value,
+                                                                                                }))
                                                                                             }
-                                                                                            onChange={(
-                                                                                                e
-                                                                                            ) =>
-                                                                                                setEditValues(
-                                                                                                    (
-                                                                                                        v
-                                                                                                    ) => ({
-                                                                                                        ...v,
-                                                                                                        grams: e
-                                                                                                            .target
-                                                                                                            .value,
-                                                                                                    })
-                                                                                                )
-                                                                                            }
-                                                                                            style={{
-                                                                                                width: "60px",
-                                                                                            }}
+                                                                                            style={{ width: "60px" }}
                                                                                             aria-label={`Edit grams for ${item.foodName || item.foodId}`}
                                                                                         />
                                                                                     ) : (
                                                                                         displayGrams
                                                                                     )}
                                                                                 </td>
-                                                                                <td>{foodGroup}</td>
-                                                                                <td>
-                                                                                    {exchange.toFixed(
-                                                                                        2
-                                                                                    )}
-                                                                                </td>
                                                                                 <td>
                                                                                     <div className="icon-row">
                                                                                         <button
                                                                                             className="icon-btn"
-                                                                                            onClick={
-                                                                                                isEditing
-                                                                                                    ? saveEditing
-                                                                                                    : startEditing
-                                                                                            }
-                                                                                            aria-label={
-                                                                                                isEditing
-                                                                                                    ? "Save"
-                                                                                                    : "Edit"
-                                                                                            }
+                                                                                            onClick={isEditing ? saveEditing : startEditing}
+                                                                                            aria-label={isEditing ? "Save" : "Edit"}
                                                                                         >
-                                                                                            {isEditing ? (
-                                                                                                <Check
-                                                                                                    size={
-                                                                                                        14
-                                                                                                    }
-                                                                                                />
-                                                                                            ) : (
-                                                                                                <Pencil
-                                                                                                    size={
-                                                                                                        14
-                                                                                                    }
-                                                                                                />
-                                                                                            )}
+                                                                                            {isEditing ? <Check size={14} /> : <Pencil size={14} />}
                                                                                         </button>
                                                                                         <button
                                                                                             className="icon-btn danger"
-                                                                                            onClick={() =>
-                                                                                                removeMealItem(
-                                                                                                    meal,
-                                                                                                    item.id
-                                                                                                )
-                                                                                            }
+                                                                                            onClick={() => removeMealItem(meal, item.id)}
                                                                                             aria-label={`Remove ${item.foodName || item.foodId}`}
                                                                                         >
-                                                                                            <Trash2
-                                                                                                size={
-                                                                                                    14
-                                                                                                }
-                                                                                            />
+                                                                                            <Trash2 size={14} />
                                                                                         </button>
                                                                                     </div>
                                                                                 </td>
@@ -675,120 +586,18 @@ function PresetAdminPage() {
                                                                     })
                                                                 ) : (
                                                                     <tr>
-                                                                        <td
-                                                                            colSpan={6}
-                                                                            className="empty-cell"
-                                                                        >
+                                                                        <td colSpan={4} className="empty-cell">
                                                                             No items for {viewDay}.
                                                                         </td>
                                                                     </tr>
                                                                 )}
 
-                                                                {/* Inline add-food row */}
-                                                                <tr className="inline-add-row">
-                                                                    <td>
-                                                                        <input
-                                                                            type="text"
-                                                                            value={
-                                                                                form.instructions
-                                                                            }
-                                                                            placeholder="Menu/Instructions"
-                                                                            onChange={(e) =>
-                                                                                updateSlotForm(
-                                                                                    meal,
-                                                                                    {
-                                                                                        instructions:
-                                                                                            e.target
-                                                                                                .value,
-                                                                                    }
-                                                                                )
-                                                                            }
-                                                                            aria-label={`Instructions for new food in ${meal}`}
-                                                                        />
-                                                                    </td>
-                                                                    <td>
-                                                                        <FoodAutocomplete
-                                                                            value={form.foodName}
-                                                                            onChange={(val) => {
-                                                                                updateSlotForm(
-                                                                                    meal,
-                                                                                    {
-                                                                                        foodName:
-                                                                                            val,
-                                                                                    }
-                                                                                );
-                                                                                if (!val) {
-                                                                                    updateSlotForm(
-                                                                                        meal,
-                                                                                        {
-                                                                                            foodId: "",
-                                                                                            foodGroupId:
-                                                                                                null,
-                                                                                        }
-                                                                                    );
-                                                                                }
-                                                                            }}
-                                                                            onSelect={(item) => {
-                                                                                updateSlotForm(
-                                                                                    meal,
-                                                                                    {
-                                                                                        foodId: String(
-                                                                                            item.food_id
-                                                                                        ),
-                                                                                        foodName:
-                                                                                            item.food_name,
-                                                                                        foodGroupId:
-                                                                                            item.major_group_id,
-                                                                                    }
-                                                                                );
-                                                                            }}
-                                                                            placeholder="Search food…"
-                                                                        />
-                                                                    </td>
-                                                                    <td>
-                                                                        <input
-                                                                            type="number"
-                                                                            min="0"
-                                                                            value={form.grams}
-                                                                            placeholder="g"
-                                                                            onChange={(e) => {
-                                                                                const val =
-                                                                                    e.target.value;
-                                                                                if (
-                                                                                    val === "" ||
-                                                                                    Number(val) >= 0
-                                                                                )
-                                                                                    updateSlotForm(
-                                                                                        meal,
-                                                                                        {
-                                                                                            grams: val,
-                                                                                        }
-                                                                                    );
-                                                                            }}
-                                                                            aria-label={`Grams for new food in ${meal}`}
-                                                                        />
-                                                                    </td>
-                                                                    <td colSpan={2}></td>
-                                                                    <td>
-                                                                        <button
-                                                                            className="icon-btn add-inline-btn"
-                                                                            onClick={() =>
-                                                                                handleAddFood(meal)
-                                                                            }
-                                                                            disabled={
-                                                                                !form.foodName ||
-                                                                                !form.grams ||
-                                                                                Number(
-                                                                                    form.grams
-                                                                                ) <= 0
-                                                                            }
-                                                                            aria-label={`Add food to ${meal}`}
-                                                                            title="Add food"
-                                                                        >
-                                                                            <Plus size={16} />
-                                                                        </button>
-                                                                    </td>
-                                                                </tr>
+                                                                {/* Multi-ingredient add form */}
+                                                                <IngredientAddForm
+                                                                    meal={meal}
+                                                                    onAdd={handleAddIngredients}
+                                                                    disabled={saving}
+                                                                />
                                                             </tbody>
                                                         </table>
                                                     </div>

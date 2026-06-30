@@ -38,13 +38,51 @@ export function computeWeeklyAverages(daySummaries, days) {
 
 /**
  * Build a single table row for a meal item.
- * @param {object} item - Meal item { foodId, foodName, grams, instructions, nutrients }
+ * Supports composite items (with `ingredients` array) and single-food items.
+ * @param {object} item - Meal item { foodId, foodName, grams, instructions, nutrients, ingredients? }
  * @param {function} lookupFood - Function to look up food by ID (e.g., foodById)
  * @param {object} [options] - { includeFibre: boolean }
  * @returns {Array} Table row array: [name, qty, instructions, kcal, protein, carbs, fat, ...fibre?]
  */
 export function buildMealTableRow(item, lookupFood, options = {}) {
     const { includeFibre = false } = options;
+    const isComposite = item.ingredients && item.ingredients.length > 0;
+
+    if (isComposite) {
+        // Composite item: aggregate nutrients from all ingredients
+        const name = item.ingredients.map((ing) => `${ing.foodName} ${ing.grams}g`).join(", ");
+        const grams = item.grams || item.ingredients.reduce((s, ing) => s + ing.grams, 0);
+        const instructions = item.instructions || "";
+        let kcal = 0, protein = 0, carbs = 0, fat = 0, fibre = 0;
+
+        for (const ing of item.ingredients) {
+            if (ing.nutrients) {
+                const factor = ing.grams / 100;
+                kcal += (ing.nutrients.kcal || 0) * factor;
+                protein += (ing.nutrients.protein || 0) * factor;
+                carbs += (ing.nutrients.carbs || 0) * factor;
+                fat += (ing.nutrients.fat || 0) * factor;
+                fibre += (ing.nutrients.fibre || 0) * factor;
+            } else {
+                const food = lookupFood(ing.foodId);
+                if (food) {
+                    const factor = ing.grams / food.gramsPerExchange;
+                    kcal += food.kcal * factor;
+                    protein += food.protein * factor;
+                    carbs += food.carbs * factor;
+                    fat += food.fat * factor;
+                    fibre += food.fibre * factor;
+                }
+            }
+        }
+
+        if (includeFibre) {
+            return [name, `${grams}g`, instructions, Math.round(kcal), protein.toFixed(1), carbs.toFixed(1), fat.toFixed(1), fibre.toFixed(1)];
+        }
+        return [name, `${grams}g`, instructions, Math.round(kcal), protein.toFixed(1), carbs.toFixed(1), fat.toFixed(1)];
+    }
+
+    // Single food item (original behavior)
     const food = lookupFood(item.foodId);
     const name = food?.name || item.foodName || item.foodId;
     const grams = item.grams;

@@ -1,5 +1,5 @@
 import { FOODS } from "../data/foods";
-import type { LocalFood, MealItem, NutrientTotals } from "../data/config";
+import type { Ingredient, LocalFood, MealItem, NutrientTotals } from "../data/config";
 
 /**
  * Calculate scaled nutrient values for a food item at a given gram amount.
@@ -124,6 +124,24 @@ export function accumulateNutrients(
  * @returns NutrientTotals object with all macros, micros, exchange info, and derived percentages
  */
 export function aggregateMeal(items: MealItem[]): NutrientTotals {
+    // Flatten composite items: expand ingredients into virtual MealItems
+    const flatItems: MealItem[] = [];
+    for (const item of items) {
+        if (item.ingredients && item.ingredients.length > 0) {
+            for (const ing of item.ingredients) {
+                flatItems.push({
+                    foodId: ing.foodId,
+                    grams: ing.grams,
+                    nutrients: ing.nutrients,
+                    foodGroup: ing.foodGroup,
+                    day: item.day,
+                });
+            }
+        } else {
+            flatItems.push(item);
+        }
+    }
+
     const totals: NutrientTotals = {
         kcal: 0,
         carbs: 0,
@@ -140,7 +158,7 @@ export function aggregateMeal(items: MealItem[]): NutrientTotals {
         exchangeTotals: {},
     };
 
-    for (const item of items) {
+    for (const item of flatItems) {
         if (item.nutrients) {
             // DB items: nutrients are per 100g
             const factor = item.grams / 100;
