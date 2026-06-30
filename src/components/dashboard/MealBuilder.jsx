@@ -3,17 +3,9 @@ import { Plus, Pencil, Check, Trash2, ChevronDown } from "lucide-react";
 import { MEALS } from "../../data/presetPlans";
 import { foodById } from "../../engines/nutrientEngine";
 import Section from "../ui/Section";
-import FoodAutocomplete from "./FoodAutocomplete";
+import IngredientAddForm from "./IngredientAddForm";
 import "./FoodAutocomplete.css";
-
-/** Per-slot empty state */
-const emptySlotForm = () => ({
-    foodId: "",
-    foodName: "",
-    foodGroupId: null,
-    grams: "",
-    instructions: "",
-});
+import "./IngredientAddForm.css";
 
 function MealBuilder({
     activePlan,
@@ -28,30 +20,15 @@ function MealBuilder({
     const [collapsedSlots, setCollapsedSlots] = useState({});
     const [editingItemId, setEditingItemId] = useState(null);
     const [editValues, setEditValues] = useState({ grams: "", instructions: "" });
-    // Per-slot add-food form state
-    const [slotForms, setSlotForms] = useState(() => {
-        const init = {};
-        for (const m of MEALS) init[m] = emptySlotForm();
-        return init;
-    });
 
     const toggleSlot = (meal) => {
         setCollapsedSlots((prev) => ({ ...prev, [meal]: !prev[meal] }));
     };
 
-    const updateSlotForm = (meal, patch) => {
-        setSlotForms((prev) => ({ ...prev, [meal]: { ...prev[meal], ...patch } }));
-    };
-
-    const resetSlotForm = (meal) => {
-        setSlotForms((prev) => ({ ...prev, [meal]: emptySlotForm() }));
-    };
-
-    const handleAdd = (meal) => {
-        const f = slotForms[meal];
-        if (!f.foodName || !f.foodId || !f.grams || Number(f.grams) <= 0) return;
-        onAddFood(meal, f.foodId, f.foodName, f.grams, f.instructions, f.foodGroupId);
-        resetSlotForm(meal);
+    /** Handler for IngredientAddForm submit */
+    const handleAddIngredients = (meal, instructions, ingredients) => {
+        if (!ingredients || ingredients.length === 0) return;
+        onAddFood(meal, instructions, ingredients);
     };
 
     return (
@@ -81,7 +58,6 @@ function MealBuilder({
                             const mealBand =
                                 activeSummary?.mealScores?.[meal]?.band || "Poor balance";
                             const mealReasons = activeSummary?.mealScores?.[meal]?.reasons || [];
-                            const form = slotForms[meal];
 
                             return (
                                 <div
@@ -134,8 +110,6 @@ function MealBuilder({
                                                             <th scope="col">Menu/Instructions</th>
                                                             <th scope="col">Food</th>
                                                             <th scope="col">g</th>
-                                                            <th scope="col">Group</th>
-                                                            <th scope="col">Exchange</th>
                                                             {!isPresetActive && (
                                                                 <th scope="col">Actions</th>
                                                             )}
@@ -144,30 +118,24 @@ function MealBuilder({
                                                     <tbody>
                                                         {mealItems.length ? (
                                                             mealItems.map((item) => {
-                                                                const food = foodById(item.foodId);
-                                                                const foodName =
-                                                                    food?.name ||
-                                                                    item.foodName ||
-                                                                    "-";
-                                                                const foodGroup =
-                                                                    food?.group ||
-                                                                    item.foodGroup ||
-                                                                    "-";
+                                                                const isComposite =
+                                                                    item.ingredients &&
+                                                                    item.ingredients.length > 0;
+                                                                const food = !isComposite
+                                                                    ? foodById(item.foodId)
+                                                                    : null;
+                                                                const foodName = isComposite
+                                                                    ? item.ingredients
+                                                                          .map((ing) => ing.foodName)
+                                                                          .join(", ")
+                                                                    : food?.name ||
+                                                                      item.foodName ||
+                                                                      "-";
                                                                 const isEditing =
                                                                     editingItemId === item.id;
                                                                 const displayGrams = isEditing
                                                                     ? editValues.grams
                                                                     : item.grams;
-                                                                const gramsPerExchange =
-                                                                    food?.gramsPerExchange || 100;
-                                                                const rawExchange =
-                                                                    Number(displayGrams) /
-                                                                    gramsPerExchange;
-                                                                const exchange = Number.isFinite(
-                                                                    rawExchange
-                                                                )
-                                                                    ? rawExchange
-                                                                    : 0;
 
                                                                 const startEditing = () => {
                                                                     setEditingItemId(item.id);
@@ -223,9 +191,29 @@ function MealBuilder({
                                                                                 "-"
                                                                             )}
                                                                         </td>
-                                                                        <td>{foodName}</td>
                                                                         <td>
-                                                                            {isEditing ? (
+                                                                            {isComposite ? (
+                                                                                <div className="ingredients-summary">
+                                                                                    {item.ingredients.map(
+                                                                                        (ing, idx) => (
+                                                                                            <span
+                                                                                                key={idx}
+                                                                                                className="ingredients-summary__item"
+                                                                                            >
+                                                                                                {ing.foodName}
+                                                                                                <span style={{ opacity: 0.7, marginLeft: 2 }}>
+                                                                                                    ({ing.grams}g)
+                                                                                                </span>
+                                                                                            </span>
+                                                                                        )
+                                                                                    )}
+                                                                                </div>
+                                                                            ) : (
+                                                                                foodName
+                                                                            )}
+                                                                        </td>
+                                                                        <td>
+                                                                            {isEditing && !isComposite ? (
                                                                                 <input
                                                                                     type="number"
                                                                                     min="0"
@@ -252,10 +240,6 @@ function MealBuilder({
                                                                             ) : (
                                                                                 item.grams
                                                                             )}
-                                                                        </td>
-                                                                        <td>{foodGroup}</td>
-                                                                        <td>
-                                                                            {exchange.toFixed(2)}
                                                                         </td>
                                                                         {!isPresetActive && (
                                                                             <td>
@@ -314,7 +298,7 @@ function MealBuilder({
                                                         ) : (
                                                             <tr>
                                                                 <td
-                                                                    colSpan={isPresetActive ? 5 : 6}
+                                                                    colSpan={isPresetActive ? 3 : 4}
                                                                     className="empty-cell"
                                                                 >
                                                                     No items for {viewDay}.
@@ -322,97 +306,13 @@ function MealBuilder({
                                                             </tr>
                                                         )}
 
-                                                        {/* Inline add-food row for this slot */}
+                                                        {/* Multi-ingredient add form */}
                                                         {!isPresetActive && (
-                                                            <tr className="inline-add-row">
-                                                                <td>
-                                                                    <input
-                                                                        type="text"
-                                                                        value={form.instructions}
-                                                                        placeholder="Menu/Instructions"
-                                                                        onChange={(e) =>
-                                                                            updateSlotForm(meal, {
-                                                                                instructions:
-                                                                                    e.target.value,
-                                                                            })
-                                                                        }
-                                                                        aria-label={`Instructions for new food in ${meal}`}
-                                                                    />
-                                                                </td>
-                                                                <td>
-                                                                    <FoodAutocomplete
-                                                                        value={form.foodName}
-                                                                        onChange={(val) => {
-                                                                            updateSlotForm(meal, {
-                                                                                foodName: val,
-                                                                            });
-                                                                            if (!val) {
-                                                                                updateSlotForm(
-                                                                                    meal,
-                                                                                    {
-                                                                                        foodId: "",
-                                                                                        foodGroupId:
-                                                                                            null,
-                                                                                    }
-                                                                                );
-                                                                            }
-                                                                        }}
-                                                                        onSelect={(item) => {
-                                                                            updateSlotForm(meal, {
-                                                                                foodId: String(
-                                                                                    item.food_id
-                                                                                ),
-                                                                                foodName:
-                                                                                    item.food_name,
-                                                                                foodGroupId:
-                                                                                    item.major_group_id,
-                                                                            });
-                                                                        }}
-                                                                        placeholder="Search food…"
-                                                                    />
-                                                                </td>
-                                                                <td>
-                                                                    <input
-                                                                        type="number"
-                                                                        min="0"
-                                                                        value={form.grams}
-                                                                        placeholder="g"
-                                                                        onChange={(e) => {
-                                                                            const val =
-                                                                                e.target.value;
-                                                                            if (
-                                                                                val === "" ||
-                                                                                Number(val) >= 0
-                                                                            )
-                                                                                updateSlotForm(
-                                                                                    meal,
-                                                                                    { grams: val }
-                                                                                );
-                                                                        }}
-                                                                        aria-label={`Grams for new food in ${meal}`}
-                                                                    />
-                                                                </td>
-                                                                <td colSpan={2}></td>
-                                                                <td>
-                                                                    <button
-                                                                        type="button"
-                                                                        className="icon-btn add-inline-btn"
-                                                                        onClick={() =>
-                                                                            handleAdd(meal)
-                                                                        }
-                                                                        disabled={
-                                                                            isAddingFood ||
-                                                                            !form.foodName ||
-                                                                            !form.grams ||
-                                                                            Number(form.grams) <= 0
-                                                                        }
-                                                                        aria-label={`Add food to ${meal}`}
-                                                                        title="Add food"
-                                                                    >
-                                                                        <Plus size={16} />
-                                                                    </button>
-                                                                </td>
-                                                            </tr>
+                                                            <IngredientAddForm
+                                                                meal={meal}
+                                                                onAdd={handleAddIngredients}
+                                                                disabled={isAddingFood}
+                                                            />
                                                         )}
                                                     </tbody>
                                                 </table>

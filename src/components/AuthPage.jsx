@@ -286,12 +286,13 @@ function SignUpForm() {
             </label>
 
             <label className="auth-field">
-                <span>Password</span>
+                <span>Contact number</span>
                 <input
                     type="tel"
                     value={contactNumber}
                     onChange={(e) => setContactNumber(e.target.value)}
                     placeholder="+91 9876543210"
+                    aria-label="Contact number"
                 />
             </label>
 
