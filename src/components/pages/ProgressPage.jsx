@@ -268,7 +268,11 @@ function ProgressPage() {
             {/* Score Progress Chart */}
             <Section title="Score over time" icon={<TrendingUp size={16} />}>
                 <LazyChart height="260px">
-                    <div style={{ width: "100%", height: 260 }}>
+                    <div
+                        style={{ width: "100%", height: 260 }}
+                        role="img"
+                        aria-label={`Score trend chart showing ${chartData.length} data points. Latest score: ${chartData.length > 0 ? chartData[chartData.length - 1].score : 0} out of 100.`}
+                    >
                         <ResponsiveContainer>
                             <AreaChart data={chartData}>
                                 <defs>
@@ -299,6 +303,17 @@ function ProgressPage() {
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
+                    {/* Screen-reader accessible data alternative */}
+                    <table className="sr-only" aria-label="Score data over time">
+                        <thead>
+                            <tr><th>Date</th><th>Score</th><th>Calories</th></tr>
+                        </thead>
+                        <tbody>
+                            {chartData.map((d, i) => (
+                                <tr key={i}><td>{d.date}</td><td>{d.score}</td><td>{d.kcal}</td></tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </LazyChart>
             </Section>
 

@@ -12,6 +12,7 @@ import ComparisonSection from "../dashboard/ComparisonSection";
 import DaySelector from "../dashboard/DaySelector";
 import CopyPlanModal from "../dashboard/CopyPlanModal";
 import PlanGuidelines from "../dashboard/PlanGuidelines";
+import DashboardTour from "../dashboard/DashboardTour";
 import { VerificationBanner } from "../VerificationStatus";
 
 function DashboardPage() {
@@ -61,6 +62,8 @@ function DashboardPage() {
         saveGuidelines,
         deleteToast,
         setDeleteToast,
+        itemDeleteToast,
+        setItemDeleteToast,
         visibleFatLimit,
         userGoalNames,
         logToday,
@@ -80,6 +83,7 @@ function DashboardPage() {
 
     return (
         <div className="dashboard-page">
+            <DashboardTour />
             <VerificationBanner />
 
             {deleteToast && (
@@ -93,6 +97,25 @@ function DashboardPage() {
                             type="button"
                             className="close-btn"
                             onClick={() => setDeleteToast(null)}
+                            aria-label="Dismiss notification"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {itemDeleteToast && (
+                <div className="delete-toast-popup" role="alert" aria-live="assertive">
+                    <span>🗑️ Removed &ldquo;{itemDeleteToast.foodLabel}&rdquo;</span>
+                    <div className="delete-toast-actions">
+                        <button type="button" className="undo-btn" onClick={itemDeleteToast.undoAction}>
+                            Undo
+                        </button>
+                        <button
+                            type="button"
+                            className="close-btn"
+                            onClick={() => setItemDeleteToast(null)}
                             aria-label="Dismiss notification"
                         >
                             ✕
