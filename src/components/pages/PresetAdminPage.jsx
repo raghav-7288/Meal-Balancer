@@ -33,6 +33,8 @@ function PresetAdminPage() {
         isDirty,
         deleteToast,
         setDeleteToast,
+        itemDeleteToast,
+        setItemDeleteToast,
         viewDay,
         setViewDay,
         createPlan,
@@ -146,10 +148,24 @@ function PresetAdminPage() {
                 <div className="delete-toast-popup" role="alert" aria-live="assertive">
                     <span>Plan &ldquo;{deleteToast.planName}&rdquo; deleted</span>
                     <div className="delete-toast-actions">
-                        <button className="undo-btn" onClick={deleteToast.undoAction}>
+                        <button type="button" className="undo-btn" onClick={deleteToast.undoAction}>
                             Undo
                         </button>
-                        <button className="close-btn" onClick={() => setDeleteToast(null)}>
+                        <button type="button" className="close-btn" onClick={() => setDeleteToast(null)}>
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {itemDeleteToast && (
+                <div className="delete-toast-popup" role="alert" aria-live="assertive">
+                    <span>🗑️ Removed &ldquo;{itemDeleteToast.foodLabel}&rdquo;</span>
+                    <div className="delete-toast-actions">
+                        <button type="button" className="undo-btn" onClick={itemDeleteToast.undoAction}>
+                            Undo
+                        </button>
+                        <button type="button" className="close-btn" onClick={() => setItemDeleteToast(null)} aria-label="Dismiss">
                             ✕
                         </button>
                     </div>
@@ -177,10 +193,11 @@ function PresetAdminPage() {
                             placeholder="Enter plan name"
                         />
                         <div className="modal-actions">
-                            <button onClick={handleCreatePlan} disabled={!newPlanName.trim()}>
+                            <button type="button" onClick={handleCreatePlan} disabled={!newPlanName.trim()}>
                                 Create
                             </button>
                             <button
+                                type="button"
                                 className="secondary"
                                 onClick={() => {
                                     setShowCreateModal(false);
@@ -199,6 +216,7 @@ function PresetAdminPage() {
                 <div className="day-chips" role="tablist" aria-label="Select day to view">
                     {DAYS.map((d) => (
                         <button
+                            type="button"
                             key={d}
                             className={`day-chip ${viewDay === d ? "active" : ""}`}
                             onClick={() => setViewDay(d)}
@@ -232,6 +250,7 @@ function PresetAdminPage() {
                         </p>
                         <div className="button-row">
                             <button
+                                type="button"
                                 onClick={() => setShowCreateModal(true)}
                                 disabled={saving}
                                 aria-label="Create new preset plan"
@@ -258,6 +277,7 @@ function PresetAdminPage() {
                                     style={!plan.isActive ? { opacity: 0.55 } : undefined}
                                 >
                                     <button
+                                        type="button"
                                         className={`plan-row ${plan.id === activePlanId ? "active" : ""}`}
                                         onClick={() => setActivePlanId(plan.id)}
                                         aria-label={`Select plan: ${plan.name}, order #${plan.displayOrder}`}
@@ -267,6 +287,7 @@ function PresetAdminPage() {
                                     </button>
                                     <div className="plan-action-btns">
                                         <button
+                                            type="button"
                                             className="download-btn tooltip-btn"
                                             data-tooltip={plan.isActive ? "Deactivate" : "Activate"}
                                             onClick={() => toggleActive(plan.id)}
@@ -283,6 +304,7 @@ function PresetAdminPage() {
                                             )}
                                         </button>
                                         <button
+                                            type="button"
                                             className="delete-btn tooltip-btn"
                                             data-tooltip="Delete Plan"
                                             onClick={() => removePlan(plan.id)}
@@ -341,6 +363,7 @@ function PresetAdminPage() {
                                                   : "All changes saved"}
                                         </span>
                                         <button
+                                            type="button"
                                             className="log-today-btn"
                                             onClick={handleSavePlan}
                                             disabled={saving}
@@ -566,6 +589,7 @@ function PresetAdminPage() {
                                                                                 <td>
                                                                                     <div className="icon-row">
                                                                                         <button
+                                                                                            type="button"
                                                                                             className="icon-btn"
                                                                                             onClick={isEditing ? saveEditing : startEditing}
                                                                                             aria-label={isEditing ? "Save" : "Edit"}
@@ -573,6 +597,7 @@ function PresetAdminPage() {
                                                                                             {isEditing ? <Check size={14} /> : <Pencil size={14} />}
                                                                                         </button>
                                                                                         <button
+                                                                                            type="button"
                                                                                             className="icon-btn danger"
                                                                                             onClick={() => removeMealItem(meal, item.id)}
                                                                                             aria-label={`Remove ${item.foodName || item.foodId}`}

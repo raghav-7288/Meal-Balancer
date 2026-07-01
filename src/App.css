@@ -1089,12 +1089,13 @@ button.secondary {
 }
 
 .instructions-cell {
-    max-width: 180px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: #6b7280;
-    font-size: 13px;
+    max-width: 200px;
+    white-space: normal;
+    word-break: break-word;
+    color: #1e293b;
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.4;
 }
 
 .meal-panels {
@@ -2145,6 +2146,10 @@ body.dark-mode th {
 
 body.dark-mode td {
     border-bottom-color: #334155 !important;
+}
+
+body.dark-mode .instructions-cell {
+    color: #f1f5f9 !important;
 }
 
 body.dark-mode .field input,

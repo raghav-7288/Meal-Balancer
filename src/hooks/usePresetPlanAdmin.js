@@ -21,6 +21,7 @@ export function usePresetPlanAdmin() {
     const [viewDay, setViewDay] = useState("Monday");
     const [isDirty, setIsDirty] = useState(false);
     const [deleteToast, setDeleteToast] = useState(null);
+    const [itemDeleteToast, setItemDeleteToast] = useState(null);
 
     // Track the last saved snapshot to detect meaningful changes
     const lastSavedRef = useRef(null);
@@ -124,6 +125,14 @@ export function usePresetPlanAdmin() {
             };
         }
     }, [deleteToast]);
+
+    // ─── Auto-dismiss item delete toast ──────────────────────────────────
+    useEffect(() => {
+        if (itemDeleteToast) {
+            const timer = setTimeout(() => setItemDeleteToast(null), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [itemDeleteToast]);
 
     // ─── Create a new preset plan ─────────────────────────────────────
     const createPlan = useCallback(
@@ -312,10 +321,15 @@ export function usePresetPlanAdmin() {
         [activePlanId, markDirty]
     );
 
-    // ─── Remove a meal item ───────────────────────────────────────────
+    // ─── Remove a meal item (with undo) ────────────────────────────────
     const removeMealItem = useCallback(
         (meal, itemId) => {
             if (!activePlanId) return;
+
+            // Find the item being removed for undo
+            const currentPlan = plans.find((p) => p.id === activePlanId);
+            const removedItem = currentPlan?.meals?.[meal]?.find((item) => item.id === itemId);
+
             setPlans((prev) =>
                 prev.map((p) => {
                     if (p.id !== activePlanId) return p;
@@ -325,8 +339,29 @@ export function usePresetPlanAdmin() {
                 })
             );
             markDirty();
+
+            // Show undo toast
+            if (removedItem) {
+                const foodLabel = removedItem.foodName || removedItem.foodId || "Item";
+                setItemDeleteToast({
+                    foodLabel,
+                    undoAction: () => {
+                        setPlans((prev) =>
+                            prev.map((p) => {
+                                if (p.id !== activePlanId) return p;
+                                const meals = { ...p.meals };
+                                meals[meal] = [...(meals[meal] || []), removedItem];
+                                return { ...p, meals };
+                            })
+                        );
+                        markDirty();
+                        setItemDeleteToast(null);
+                        toast.success(`"${foodLabel}" restored`);
+                    },
+                });
+            }
         },
-        [activePlanId, markDirty]
+        [activePlanId, plans, markDirty]
     );
 
     // ─── Reload plans from DB ─────────────────────────────────────────
@@ -354,6 +389,8 @@ export function usePresetPlanAdmin() {
         isDirty,
         deleteToast,
         setDeleteToast,
+        itemDeleteToast,
+        setItemDeleteToast,
         viewDay,
         setViewDay,
         createPlan,
