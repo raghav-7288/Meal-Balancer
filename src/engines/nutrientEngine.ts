@@ -1,5 +1,5 @@
 import { FOODS } from "../data/foods";
-import type { Ingredient, LocalFood, MealItem, NutrientTotals } from "../data/config";
+import type { LocalFood, MealItem, NutrientTotals } from "../data/config";
 
 /**
  * Calculate scaled nutrient values for a food item at a given gram amount.

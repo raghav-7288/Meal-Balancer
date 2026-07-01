@@ -135,7 +135,6 @@ export function AuthProvider({ children }) {
         setProfile(null);
     }, []);
 
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
     const updateProfile = useCallback(
         async (fields) => {
             if (!user?.id) throw new Error("No authenticated user");
@@ -143,16 +142,15 @@ export function AuthProvider({ children }) {
             setProfile(updated);
             return updated;
         },
-        [user?.id]
+        [user]
     );
 
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
     const refreshProfile = useCallback(async () => {
         if (!user?.id) return;
         const userProfile = await fetchUserProfile(user.id);
         setProfile(userProfile);
         return userProfile;
-    }, [user?.id]);
+    }, [user]);
 
     const isAuthenticated = !!user;
 

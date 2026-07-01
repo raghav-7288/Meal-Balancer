@@ -6,7 +6,6 @@ const LIMIT_FIELDS = [
     { key: "protein", label: "Protein", unit: "g" },
     { key: "fat", label: "Fat", unit: "g" },
     { key: "sugar", label: "Sugar", unit: "g" },
-    { key: "salt", label: "Salt", unit: "g" },
     { key: "fibre", label: "Fibre", unit: "g" },
 ];
 
@@ -16,7 +15,6 @@ const TOTALS_KEY_MAP = {
     protein: "protein",
     fat: "fat",
     sugar: "addedSugar",
-    salt: "salt",
     fibre: "fibre",
 };
 

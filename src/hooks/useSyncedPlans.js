@@ -107,6 +107,8 @@ export function useSyncedPlans() {
         }
         if (syncInProgress.current) return;
 
+        let cancelled = false;
+
         async function initialSync() {
             syncInProgress.current = true;
             setSyncStatus("syncing");
@@ -114,19 +116,23 @@ export function useSyncedPlans() {
 
             try {
                 const remotePlans = await fetchUserPlans(user.id);
+                if (cancelled) return;
+
                 const localPlans = readLocal();
                 const { merged, toUpload } = mergePlans(localPlans, remotePlans);
 
                 // Upload local-only plans to Supabase
                 if (toUpload.length > 0) {
                     await upsertPlans(user.id, toUpload);
+                    if (cancelled) return;
                 }
 
-                if (isMounted.current) {
+                if (isMounted.current && !cancelled) {
                     setPlansInternal(merged);
                     setSyncStatus("synced");
                 }
             } catch (err) {
+                if (cancelled) return;
                 console.error("Plan sync error:", err);
                 if (isMounted.current) {
                     setSyncStatus("error");
@@ -138,6 +144,11 @@ export function useSyncedPlans() {
         }
 
         initialSync();
+
+        return () => {
+            cancelled = true;
+            syncInProgress.current = false;
+        };
     }, [isAuthenticated, user?.id]);
 
     // Keep a ref to the latest auth info for the setter
