@@ -257,3 +257,45 @@
 | TypeScript | Passes (`tsc --noEmit`) |
 | Build | ✓ (379ms, 2738 modules) |
 | Format | ✓ (Prettier clean) |
+
+---
+
+## 🔍 Pre-Release Review (July 1, 2026)
+
+### Bugs Fixed
+
+| # | Bug | Root Cause | Fix |
+|---|-----|-----------|-----|
+| R1 | **Salt nutrient limit always shows false "All OK"** | `NutrientLimits.jsx` mapped `salt` to non-existent `dayTotals.salt`. Engine never computes salt. | Removed salt from LIMIT_FIELDS, TOTALS_KEY_MAP, defaults |
+| R2 | **Stale closure in `ctrl+n` keyboard shortcut** | `shortcuts` useMemo had `[]` deps, capturing `saveNewPlan` at mount time | Changed to ref pattern for all shortcuts |
+| R3 | **Unused `displayGrams` variable** | Dead code in MealBuilder | Removed |
+| R4 | **DB foods without nutrient data silently excluded from scoring** | `fetchFoodNutrients` returning null left items without nutrients; `aggregateMeal` skipped them | Provide zero-value fallback so food group tracking still works |
+| R5 | **Race condition in plan sync on user switch** | No cancellation of in-flight sync when user changes | Added cancelled flag + cleanup |
+| R6 | **Race condition in meal history sync** | Same pattern as R5 | Added cancelled flag + cleanup |
+| R7 | **Race condition in profile context DB load** | Same pattern as R5 | Added cancelled flag + cleanup |
+| R8 | **Unused `Ingredient` type import** | ESLint error in nutrientEngine.ts | Removed import |
+| R9 | **Missing `vi` import in test file** | ESLint no-undef error | Added explicit import |
+
+### Tests Added (45 new tests, 7 new files)
+
+| File | Tests | Coverage |
+|------|-------|----------|
+| `tests/presetPlans.test.js` | 7 | getTodayName for all weekdays |
+| `tests/useAuth.test.js` | 4 | useAuth + useOptionalAuth |
+| `tests/withRetry.branches.test.js` | 8 | All retry/non-retry paths |
+| `tests/useSyncedPlans.cancellation.test.js` | 4 | Cancellation + merge logic |
+| `tests/NutrientLimits.test.jsx` | 10 | Component after salt removal |
+| `tests/useMealHistory.cancellation.test.js` | 8 | Cancellation + all operations |
+| `tests/useLocalStorage.edge-cases.test.js` | 4 | Error handling + edge cases |
+
+### Final Metrics (July 1, 2026)
+
+| Metric | Value |
+|--------|-------|
+| Tests | **661 passing (56 files)** |
+| Coverage | **90% statements, 79% branches** |
+| Lint | 1 error (React Compiler — pre-existing), 3 warnings |
+| TypeScript | ✅ Passes (`tsc --noEmit`) |
+| Build | ✅ (403ms, 2740 modules) |
+| All checks | ✅ Green |
+

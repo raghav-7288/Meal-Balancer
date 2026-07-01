@@ -91,6 +91,8 @@ export function ProfileProvider({ children }) {
     useEffect(() => {
         if (!isAuthenticated || !user?.id) return;
 
+        let cancelled = false;
+
         async function loadFromDb() {
             try {
                 setProfileSyncStatus("syncing");
@@ -99,6 +101,8 @@ export function ProfileProvider({ children }) {
                     .select("activity, goal, diet_type, sex, bmi_target, height_cm, weight_kg")
                     .eq("user_id", user.id)
                     .single();
+
+                if (cancelled) return;
 
                 if (error && error.code !== "PGRST116") {
                     console.error("Failed to load profile from Supabase:", error);
@@ -120,12 +124,17 @@ export function ProfileProvider({ children }) {
                     setProfileSyncStatus("synced");
                 }
             } catch (err) {
+                if (cancelled) return;
                 console.error("Failed to load profile from Supabase:", err);
                 if (isMounted.current) setProfileSyncStatus("error");
             }
         }
 
         loadFromDb();
+
+        return () => {
+            cancelled = true;
+        };
     }, [isAuthenticated, user?.id]);
 
     // Save profile to Supabase (debounced) — uses upsert to handle missing rows

@@ -59,13 +59,17 @@ export function useMealHistory() {
     useEffect(() => {
         if (!isAuthenticated || !user?.id) return;
 
+        let cancelled = false;
+
         async function loadFromDb() {
             try {
                 setSyncStatus("syncing");
                 const remoteRows = await fetchMealHistory(user.id);
+                if (cancelled) return;
+
                 const remoteEntries = remoteRows.map(dbRowToEntry);
 
-                if (isMounted.current) {
+                if (isMounted.current && !cancelled) {
                     // Merge: remote is source of truth, add any local-only entries
                     const localHistory = readLocal();
                     const remoteMap = new Map(remoteEntries.map((e) => [e.date, e]));
@@ -93,12 +97,17 @@ export function useMealHistory() {
                     }
                 }
             } catch (err) {
+                if (cancelled) return;
                 console.error("Failed to load meal history from Supabase:", err);
                 if (isMounted.current) setSyncStatus("error");
             }
         }
 
         loadFromDb();
+
+        return () => {
+            cancelled = true;
+        };
     }, [isAuthenticated, user?.id]);
 
     /**

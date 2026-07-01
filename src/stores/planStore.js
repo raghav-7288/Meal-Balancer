@@ -15,7 +15,6 @@ export const usePlanStore = create((set, get) => ({
         protein: 60,
         fat: 65,
         sugar: 25,
-        salt: 5,
         fibre: 30,
     },
     isAddingFood: false,

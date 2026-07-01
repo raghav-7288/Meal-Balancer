@@ -147,7 +147,7 @@ SPA routing is handled by `vercel.json` rewrites. Set environment variables (`VI
 │   ├── migrations/          SQL migration files (001–012)
 │   ├── diagnostic-queries.sql
 │   └── SUPABASE_AUDIT.md
-├── tests/                   Unit & component tests (Vitest, 49 test files, 617 tests)
+├── tests/                   Unit & component tests (Vitest, 56 test files, 661 tests)
 ├── COMPLETED.md             Implemented changes log
 ├── CONTEXT.md               Auto-generated project context
 ├── DATABASE_SCHEMA.md       Full Supabase schema documentation
@@ -247,7 +247,7 @@ See [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) for full schema details including
 - **TypeScript** — Typed engines (`config.ts`, `scoringEngine.ts`, `nutrientEngine.ts`) with full interface definitions
 - **Prettier** — Auto-formats code on save/commit
 - **Husky + lint-staged** — Pre-commit hooks run format + lint on staged files
-- **@testing-library/react** — Component testing with jsdom environment (49 test files, 617 tests)
+- **@testing-library/react** — Component testing with jsdom environment (56 test files, 661 tests)
 - **Playwright** — E2E tests with auto-started dev server
 - **react-hot-toast** — Global toast notification system
 - **Query Cache** — In-memory TTL cache with max-size eviction & request deduplication for Supabase API calls

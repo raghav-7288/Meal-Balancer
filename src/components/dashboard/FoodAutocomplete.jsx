@@ -19,6 +19,7 @@ function FoodAutocomplete({ value, onChange, onSelect, placeholder = "Type to se
     const dropdownRef = useRef(null);
 
     // Virtualizer for dropdown (#76)
+    // eslint-disable-next-line react-hooks/incompatible-library
     const virtualizer = useVirtualizer({
         count: suggestions.length,
         getScrollElement: () => dropdownRef.current,

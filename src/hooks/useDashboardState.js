@@ -74,7 +74,6 @@ export function useDashboardState() {
             protein: 60,
             fat: 65,
             sugar: APP_CONFIG.addedSugarLimitG,
-            salt: APP_CONFIG.saltLimitG,
             fibre: 30,
         }
     );
@@ -261,9 +260,8 @@ export function useDashboardState() {
     useEffect(() => {
         viewDayRef.current = viewDay;
     }, [viewDay]);
-    // eslint-disable-next-line react-hooks/immutability
     useEffect(() => {
-        activePlanIdRef.current = activePlanId;
+        activePlanIdRef.current = activePlanId; // eslint-disable-line react-hooks/immutability
     }, [activePlanId]);
     useEffect(() => {
         majorGroupsRef.current = majorGroups;
@@ -284,9 +282,17 @@ export function useDashboardState() {
 
                     if (!food) {
                         const result = await fetchFoodNutrients(ing.foodId);
-                        if (result) {
-                            nutrients = result.nutrients;
-                        }
+                        // Use fetched nutrients or fallback to zeros so the item
+                        // still participates in food group tracking (vegetablesG, visibleFat, etc.)
+                        nutrients = result?.nutrients || {
+                            kcal: 0,
+                            carbs: 0,
+                            protein: 0,
+                            fat: 0,
+                            fibre: 0,
+                            vitamins: 0,
+                            minerals: 0,
+                        };
                         if (ing.foodGroupId && majorGroupsRef.current.length > 0) {
                             const group = majorGroupsRef.current.find(
                                 (g) => g.major_group_id === ing.foodGroupId
@@ -472,24 +478,28 @@ export function useDashboardState() {
     // Keyboard shortcuts (#34) — memoized to avoid listener re-registration
     const isPresetActiveRef = useRef(isPresetActive);
     const copyModalRef2 = useRef(copyModal);
+    const saveNewPlanRef = useRef(saveNewPlan);
+    const saveGuidelinesRef = useRef(saveGuidelines);
     useEffect(() => {
         isPresetActiveRef.current = isPresetActive;
         copyModalRef2.current = copyModal;
-    }, [isPresetActive, copyModal]);
+        saveNewPlanRef.current = saveNewPlan;
+        saveGuidelinesRef.current = saveGuidelines;
+    }, [isPresetActive, copyModal, saveNewPlan, saveGuidelines]);
 
     const shortcuts = useMemo(
         () => ({
             "ctrl+s": () => {
-                if (!isPresetActiveRef.current) saveGuidelines();
+                if (!isPresetActiveRef.current) saveGuidelinesRef.current();
             },
-            "ctrl+n": () => saveNewPlan(),
+            "ctrl+n": () => saveNewPlanRef.current(),
             "ctrl+p": () => navigate("/weekly-planner"),
             escape: () => {
                 if (copyModalRef2.current) setCopyModal(null);
             },
         }),
-        []
-    ); // eslint-disable-line react-hooks/exhaustive-deps
+        [navigate]
+    );
     useHotkeys(shortcuts);
 
     return {

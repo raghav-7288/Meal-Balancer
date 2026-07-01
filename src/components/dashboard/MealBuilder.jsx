@@ -133,9 +133,6 @@ function MealBuilder({
                                                                       "-";
                                                                 const isEditing =
                                                                     editingItemId === item.id;
-                                                                const displayGrams = isEditing
-                                                                    ? editValues.grams
-                                                                    : item.grams;
 
                                                                 const startEditing = () => {
                                                                     setEditingItemId(item.id);

@@ -11,7 +11,7 @@ describe("planStore", () => {
             activePlanId: "",
             viewDay: "",
             planView: "preset",
-            nutrientLimits: { carbs: 300, protein: 60, fat: 65, sugar: 25, salt: 5, fibre: 30 },
+            nutrientLimits: { carbs: 300, protein: 60, fat: 65, sugar: 25, fibre: 30 },
             isAddingFood: false,
             copyModal: null,
             copyPlanName: "",
@@ -31,7 +31,7 @@ describe("planStore", () => {
         expect(state.deleteToast).toBeNull();
         expect(state.guidelines).toBe("");
         expect(state.nutrientLimits).toEqual({
-            carbs: 300, protein: 60, fat: 65, sugar: 25, salt: 5, fibre: 30,
+            carbs: 300, protein: 60, fat: 65, sugar: 25, fibre: 30,
         });
     });
 
@@ -51,7 +51,7 @@ describe("planStore", () => {
     });
 
     it("setNutrientLimits with object replaces limits", () => {
-        const newLimits = { carbs: 200, protein: 80, fat: 50, sugar: 20, salt: 4, fibre: 25 };
+        const newLimits = { carbs: 200, protein: 80, fat: 50, sugar: 20, fibre: 25 };
         usePlanStore.getState().setNutrientLimits(newLimits);
         expect(usePlanStore.getState().nutrientLimits).toEqual(newLimits);
     });
