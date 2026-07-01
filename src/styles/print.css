@@ -1,0 +1,252 @@
+/* ─── Print-Friendly Styles (#90) ─────────────────────────────────────────── */
+/* Activated only when user prints the page (Ctrl+P / ⌘+P) */
+
+@media print {
+    /* Hide non-essential UI elements */
+    .top-nav,
+    .nav-hamburger,
+    .nav-mobile-overlay,
+    .nav-theme-toggle,
+    .app-footer,
+    .skip-to-content,
+    .verification-banner,
+    .delete-toast-popup,
+    .day-selector-row .planner-nav-actions,
+    .sync-badge,
+    .log-today-btn,
+    .planner-nav-link,
+    .plan-toggle,
+    .button-row,
+    .plan-action-btns,
+    .copy-btn,
+    .icon-btn.danger,
+    .ingredient-add-form,
+    .inline-add-row,
+    .nutrient-limits-strip,
+    .modal-overlay,
+    #score-announcer,
+    .joyride-overlay,
+    .__floater {
+        display: none !important;
+    }
+
+    /* Reset page layout */
+    body {
+        background: #fff !important;
+        color: #000 !important;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 11pt;
+        line-height: 1.4;
+        margin: 0;
+        padding: 0;
+    }
+
+    .app-shell {
+        display: block;
+        min-height: auto;
+    }
+
+    /* Remove background colors and shadows */
+    .dashboard-page,
+    .dashboard,
+    .sidebar,
+    .content,
+    .meal-card,
+    .kpi-grid,
+    .section-card,
+    .weekly-planner-page,
+    .progress-page {
+        background: #fff !important;
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 4pt !important;
+    }
+
+    /* Dashboard layout — stack for print */
+    .dashboard {
+        display: block !important;
+    }
+
+    .sidebar {
+        width: 100% !important;
+        max-width: none !important;
+        border-right: none !important;
+        page-break-after: always;
+    }
+
+    .content {
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    /* KPI grid — compact print layout */
+    .kpi-grid {
+        display: flex !important;
+        gap: 8pt !important;
+        flex-wrap: wrap;
+    }
+
+    .kpi-card {
+        border: 1px solid #ccc !important;
+        padding: 6pt !important;
+        border-radius: 4pt !important;
+        flex: 1 !important;
+        min-width: 80pt !important;
+    }
+
+    /* Meal cards */
+    .meal-card {
+        page-break-inside: avoid;
+        border: 1px solid #ddd !important;
+        margin-bottom: 8pt !important;
+        padding: 8pt !important;
+    }
+
+    .meal-head {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 4pt;
+        margin-bottom: 4pt;
+    }
+
+    /* Tables */
+    table {
+        width: 100% !important;
+        border-collapse: collapse;
+        font-size: 10pt;
+    }
+
+    th, td {
+        border: 1px solid #ddd !important;
+        padding: 3pt 6pt !important;
+        text-align: left;
+    }
+
+    th {
+        background: #f5f5f5 !important;
+        font-weight: bold;
+    }
+
+    /* Score pill — print as text */
+    .score-pill {
+        background: none !important;
+        color: #000 !important;
+        border: 1px solid #999 !important;
+        font-weight: bold;
+    }
+
+    /* Charts — show as they are (SVGs print well) */
+    .recharts-wrapper {
+        page-break-inside: avoid;
+    }
+
+    /* Weekly planner grid */
+    .weekly-grid-scroll {
+        overflow: visible !important;
+    }
+
+    .weekly-grid {
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        gap: 2pt !important;
+        font-size: 8pt;
+    }
+
+    .weekly-day-col {
+        border: 1px solid #ddd !important;
+        padding: 4pt !important;
+        page-break-inside: avoid;
+    }
+
+    /* Section headers */
+    .section-header h2 {
+        font-size: 13pt !important;
+        color: #000 !important;
+    }
+
+    /* Links — show URL */
+    a[href]::after {
+        content: none; /* Don't pollute print with URLs */
+    }
+
+    /* Guidelines text */
+    .plan-guidelines-text {
+        border: 1px solid #eee;
+        padding: 6pt;
+        font-style: italic;
+    }
+
+    /* Day selector — show current day as heading */
+    .day-selector-row {
+        padding: 4pt 0 !important;
+        border-bottom: 2px solid #000;
+        margin-bottom: 8pt;
+    }
+
+    .day-chips {
+        gap: 4pt !important;
+    }
+
+    .day-chip {
+        border: 1px solid #ccc !important;
+        padding: 2pt 6pt !important;
+        font-size: 9pt !important;
+        background: #fff !important;
+        color: #000 !important;
+    }
+
+    .day-chip.active {
+        background: #000 !important;
+        color: #fff !important;
+        font-weight: bold;
+    }
+
+    /* Progress page stats */
+    .progress-stats-row {
+        display: flex !important;
+        gap: 8pt !important;
+        flex-wrap: wrap;
+    }
+
+    .progress-stat-card {
+        border: 1px solid #ccc !important;
+        padding: 6pt !important;
+        flex: 1;
+        min-width: 60pt;
+    }
+
+    /* Page header for printed output */
+    .dashboard-page::before {
+        content: "Diet Specifix — Meal Plan Report";
+        display: block;
+        font-size: 16pt;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 12pt;
+        padding-bottom: 6pt;
+        border-bottom: 2px solid #000;
+    }
+
+    .weekly-planner-page::before {
+        content: "Diet Specifix — Weekly Meal Plan";
+        display: block;
+        font-size: 16pt;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 12pt;
+        padding-bottom: 6pt;
+        border-bottom: 2px solid #000;
+    }
+
+    .progress-page::before {
+        content: "Diet Specifix — Progress Report";
+        display: block;
+        font-size: 16pt;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 12pt;
+        padding-bottom: 6pt;
+        border-bottom: 2px solid #000;
+    }
+}
+

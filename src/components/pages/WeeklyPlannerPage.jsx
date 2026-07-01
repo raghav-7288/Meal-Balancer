@@ -366,7 +366,11 @@ function WeeklyPlannerPage() {
 
             {/* Weekly Score Chart */}
             <Section title="Daily scores across the week" icon={<BarChart3 size={16} />}>
-                <div style={{ width: "100%", height: 220 }}>
+                <div
+                    style={{ width: "100%", height: 220 }}
+                    role="img"
+                    aria-label={`Weekly score bar chart. ${chartData.map((d) => `${d.day}: ${d.score}`).join(", ")}.`}
+                >
                     <ResponsiveContainer>
                         <BarChart data={chartData} barCategoryGap="20%">
                             <XAxis dataKey="day" tick={{ fontSize: 12 }} />
@@ -387,6 +391,17 @@ function WeeklyPlannerPage() {
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
+                {/* Screen-reader accessible data alternative */}
+                <table className="sr-only" aria-label="Daily scores across the week">
+                    <thead>
+                        <tr><th>Day</th><th>Score</th></tr>
+                    </thead>
+                    <tbody>
+                        {chartData.map((d, i) => (
+                            <tr key={i}><td>{d.day}</td><td>{d.score}</td></tr>
+                        ))}
+                    </tbody>
+                </table>
             </Section>
         </div>
     );

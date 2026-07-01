@@ -80,6 +80,7 @@ export function useDashboardState() {
     const [isAddingFood, setIsAddingFood] = useState(false);
     const [majorGroups, setMajorGroups] = useState([]);
     const [deleteToast, setDeleteToast] = useState(null);
+    const [itemDeleteToast, setItemDeleteToast] = useState(null);
     const [newPlanName, setNewPlanName] = useState("");
     const [userGoalNames, setUserGoalNames] = useState([]);
     const [copyModal, setCopyModal] = useState(null);
@@ -103,6 +104,13 @@ export function useDashboardState() {
             return () => clearTimeout(timer);
         }
     }, [deleteToast]);
+
+    useEffect(() => {
+        if (itemDeleteToast) {
+            const timer = setTimeout(() => setItemDeleteToast(null), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [itemDeleteToast]);
 
     useEffect(() => {
         async function loadUserGoals() {
@@ -234,6 +242,11 @@ export function useDashboardState() {
 
     const removeMealItem = useCallback(
         (mealName, itemId) => {
+            // Find the item being removed for undo
+            const currentPlans = userPlansRef.current;
+            const currentPlan = currentPlans.find((p) => p.id === activePlanId);
+            const removedItem = currentPlan?.meals?.[mealName]?.find((item) => item.id === itemId);
+
             setUserPlans((prev) =>
                 prev.map((plan) =>
                     plan.id === activePlanId
@@ -249,6 +262,34 @@ export function useDashboardState() {
                         : plan
                 )
             );
+
+            // Show undo toast notification
+            if (removedItem) {
+                const foodLabel = removedItem.foodName || removedItem.foodId || "Item";
+                setItemDeleteToast({
+                    foodLabel,
+                    undoAction: () => {
+                        setUserPlans((prev) =>
+                            prev.map((plan) =>
+                                plan.id === activePlanId
+                                    ? {
+                                          ...plan,
+                                          meals: {
+                                              ...(plan.meals || {}),
+                                              [mealName]: [
+                                                  ...(plan.meals?.[mealName] || []),
+                                                  removedItem,
+                                              ],
+                                          },
+                                      }
+                                    : plan
+                            )
+                        );
+                        setItemDeleteToast(null);
+                        toast.success(`"${foodLabel}" restored`);
+                    },
+                });
+            }
         },
         [activePlanId, setUserPlans]
     );
@@ -559,6 +600,9 @@ export function useDashboardState() {
         // Delete toast
         deleteToast,
         setDeleteToast,
+        // Item delete undo
+        itemDeleteToast,
+        setItemDeleteToast,
         // Other
         visibleFatLimit,
         userGoalNames,
