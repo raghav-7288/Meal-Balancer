@@ -6,7 +6,7 @@ A React 19 single-page application for **Indian diet planning**. Build meals in 
 
 ## ✨ Features
 
-- **Meal Builder** — Add foods (7 meal slots per day) with gram quantities
+- **Meal Builder** — Add foods (7 meal slots per day) with gram quantities; inline editing of ingredients, grams, and menu/instructions with undo support
 - **Scoring Engine** — 0-100 score with detailed reasons (Excellent / Good / Moderate / Poor)
 - **Food Explorer** — Google-style search across 500+ foods with nutrient-ranked results
 - **Weekly Planner** — Plan meals across 7 days with per-day scoring
@@ -21,10 +21,10 @@ A React 19 single-page application for **Indian diet planning**. Build meals in 
 - **Health Goals** — Personalised goals fetched from Supabase
 - **Auth** — Email/password sign-up & sign-in via Supabase
 - **Profile Management** — Body measurements, diet preferences & health goals (synced to Supabase)
-- **Onboarding Flow** — Guided first-time user setup
+- **Preset Plan Admin** — Manage pre-saved template plans with full inline editing
 - **Water Tracker** — Daily water intake logging with streaks (synced to Supabase)
 - **Step Tracker** — Daily step count with goal progress (synced to Supabase)
-- **Dark Mode** — System-aware + manual toggle (flash-free)
+- **Dark Mode** — System-aware + manual toggle (flash-free), dark-mode-aware toasts
 - **Keyboard Shortcuts** — `Ctrl+S` save, `Ctrl+N` new plan, `Ctrl+P` export, `Esc` close modals
 - **Accessibility** — Focus traps, `aria-live` regions, skip navigation link
 - **Toast Notifications** — Global feedback via react-hot-toast
@@ -148,10 +148,9 @@ SPA routing is handled by `vercel.json` rewrites. Set environment variables (`VI
 │   ├── diagnostic-queries.sql
 │   └── SUPABASE_AUDIT.md
 ├── tests/                   Unit & component tests (Vitest, 56 test files, 661 tests)
-├── COMPLETED.md             Implemented changes log
 ├── CONTEXT.md               Auto-generated project context
 ├── DATABASE_SCHEMA.md       Full Supabase schema documentation
-├── SUGGESTIONS.md           Improvement suggestions & roadmap
+├── SUGGESTIONS.md           Pending improvement suggestions & roadmap
 ├── package.json
 ├── tsconfig.json
 └── vite.config.js
@@ -267,7 +266,7 @@ See [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) for full schema details including
 - [ ] Meal templates (save & reuse)
 - [ ] Barcode scanner (Open Food Facts API)
 
-See [SUGGESTIONS.md](./SUGGESTIONS.md) for full details and [COMPLETED.md](./COMPLETED.md) for finished work.
+See [SUGGESTIONS.md](./SUGGESTIONS.md) for full details on pending improvements.
 
 ## 📄 License
 
