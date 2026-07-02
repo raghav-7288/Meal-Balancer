@@ -12,7 +12,6 @@ import ComparisonSection from "../dashboard/ComparisonSection";
 import DaySelector from "../dashboard/DaySelector";
 import CopyPlanModal from "../dashboard/CopyPlanModal";
 import PlanGuidelines from "../dashboard/PlanGuidelines";
-import DashboardTour from "../dashboard/DashboardTour";
 import { VerificationBanner } from "../VerificationStatus";
 
 function DashboardPage() {
@@ -83,7 +82,6 @@ function DashboardPage() {
 
     return (
         <div className="dashboard-page">
-            <DashboardTour />
             <VerificationBanner />
 
             {deleteToast && (
