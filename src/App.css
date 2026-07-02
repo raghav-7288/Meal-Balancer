@@ -58,6 +58,8 @@ fieldset > legend {
     font-size: 18px;
     font-weight: 800;
     color: #0f172a;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 .nav-logo-img {
@@ -1203,6 +1205,62 @@ th:last-child {
     padding: 24px;
 }
 
+/* ─── Editable fields in meal table ─── */
+.table-wrap td input[type="text"],
+.table-wrap td input[type="number"] {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fff;
+    color: #1e293b;
+    transition: border-color 0.15s;
+}
+
+.table-wrap td input[type="text"]:focus,
+.table-wrap td input[type="number"]:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.table-wrap td input[type="number"] {
+    width: 70px;
+    text-align: center;
+}
+
+.table-wrap td .food-autocomplete input {
+    padding: 8px 10px;
+    font-size: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.table-wrap td .food-autocomplete input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+body.dark-mode .table-wrap td input[type="text"],
+body.dark-mode .table-wrap td input[type="number"] {
+    background: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+body.dark-mode .table-wrap td input[type="text"]:focus,
+body.dark-mode .table-wrap td input[type="number"]:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+}
+
+body.dark-mode .table-wrap td .food-autocomplete input {
+    background: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
 .icon-row {
     display: flex;
     gap: 8px;
@@ -1570,6 +1628,29 @@ body.dark-mode .add-inline-btn:hover:not(:disabled) {
         opacity: 1;
         transform: translateX(-50%) translateY(0);
     }
+}
+
+/* Dark mode: custom delete toast popup */
+body.dark-mode .delete-toast-popup {
+    background: #334155;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .delete-toast-popup .undo-btn {
+    background: #60a5fa;
+    color: #0f172a;
+}
+
+body.dark-mode .delete-toast-popup .undo-btn:hover {
+    background: #93c5fd;
+}
+
+body.dark-mode .delete-toast-popup .close-btn {
+    color: #64748b;
+}
+
+body.dark-mode .delete-toast-popup .close-btn:hover {
+    color: #f1f5f9;
 }
 
 .modal-overlay {
@@ -4752,6 +4833,7 @@ body.dark-mode .calorie-info-box p {
 .onboarding-back-btn:hover {
     background: #e2e8f0;
 }
+
 
 /* ─── Dark Mode: Onboarding ─── */
 body.dark-mode .onboarding-card {

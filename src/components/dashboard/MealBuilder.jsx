@@ -1,9 +1,11 @@
 import { memo, useState } from "react";
-import { Plus, Pencil, Check, Trash2, ChevronDown } from "lucide-react";
+import { Plus, Pencil, Check, Trash2, ChevronDown, X } from "lucide-react";
+import toast from "react-hot-toast";
 import { MEALS } from "../../data/presetPlans";
 import { foodById } from "../../engines/nutrientEngine";
 import Section from "../ui/Section";
 import IngredientAddForm from "./IngredientAddForm";
+import FoodAutocomplete from "./FoodAutocomplete";
 import "./FoodAutocomplete.css";
 import "./IngredientAddForm.css";
 
@@ -19,7 +21,20 @@ function MealBuilder({
 }) {
     const [collapsedSlots, setCollapsedSlots] = useState({});
     const [editingItemId, setEditingItemId] = useState(null);
-    const [editValues, setEditValues] = useState({ grams: "", instructions: "" });
+    const [editValues, setEditValues] = useState({
+        grams: "",
+        instructions: "",
+        ingredients: [],
+        foodId: "",
+        foodName: "",
+        foodGroupId: null,
+    });
+    const [editNewIngredient, setEditNewIngredient] = useState({
+        foodId: "",
+        foodName: "",
+        foodGroupId: null,
+        grams: "",
+    });
 
     const toggleSlot = (meal) => {
         setCollapsedSlots((prev) => ({ ...prev, [meal]: !prev[meal] }));
@@ -78,13 +93,7 @@ function MealBuilder({
                                             }
                                         }}
                                     >
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                gap: 8,
-                                            }}
-                                        >
+                                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                             <ChevronDown
                                                 size={18}
                                                 className={`meal-collapse-arrow ${collapsedSlots[meal] ? "meal-collapse-arrow--collapsed" : ""}`}
@@ -128,34 +137,139 @@ function MealBuilder({
                                                                     ? item.ingredients
                                                                           .map((ing) => ing.foodName)
                                                                           .join(", ")
-                                                                    : food?.name ||
-                                                                      item.foodName ||
-                                                                      "-";
-                                                                const isEditing =
-                                                                    editingItemId === item.id;
+                                                                    : food?.name || item.foodName || "-";
+                                                                const isEditing = editingItemId === item.id;
 
                                                                 const startEditing = () => {
                                                                     setEditingItemId(item.id);
+                                                                    // Always populate ingredients — for non-composite, convert single food to first ingredient
+                                                                    const initialIngredients = isComposite
+                                                                        ? [...item.ingredients]
+                                                                        : [{
+                                                                            foodId: item.foodId || "",
+                                                                            foodName: food?.name || item.foodName || "",
+                                                                            foodGroupId: item.foodGroupId || null,
+                                                                            grams: item.grams || 0,
+                                                                        }];
                                                                     setEditValues({
                                                                         grams: item.grams,
-                                                                        instructions:
-                                                                            item.instructions || "",
+                                                                        instructions: item.instructions || "",
+                                                                        ingredients: initialIngredients,
+                                                                        foodId: item.foodId || "",
+                                                                        foodName: food?.name || item.foodName || "",
+                                                                        foodGroupId: item.foodGroupId || null,
                                                                     });
+                                                                    setEditNewIngredient({ foodId: "", foodName: "", foodGroupId: null, grams: "" });
                                                                 };
 
                                                                 const saveEditing = () => {
-                                                                    onUpdateMealItem(
-                                                                        meal,
-                                                                        item.id,
-                                                                        {
-                                                                            grams: Number(
-                                                                                editValues.grams
-                                                                            ),
-                                                                            instructions:
-                                                                                editValues.instructions,
-                                                                        }
-                                                                    );
+                                                                    if (editValues.ingredients.length === 0) {
+                                                                        toast.error("Add at least one ingredient");
+                                                                        return;
+                                                                    }
+                                                                    const updates = { instructions: editValues.instructions };
+                                                                    if (editValues.ingredients.length > 1) {
+                                                                        // Multiple ingredients — save as composite
+                                                                        updates.ingredients = editValues.ingredients;
+                                                                        updates.grams = editValues.ingredients.reduce(
+                                                                            (sum, ing) => sum + Number(ing.grams), 0
+                                                                        );
+                                                                    } else {
+                                                                        // Single ingredient — save as non-composite
+                                                                        const single = editValues.ingredients[0];
+                                                                        updates.grams = Number(single.grams);
+                                                                        updates.foodId = single.foodId;
+                                                                        updates.foodName = single.foodName;
+                                                                        updates.foodGroupId = single.foodGroupId;
+                                                                        updates.ingredients = null;
+                                                                    }
+                                                                    onUpdateMealItem(meal, item.id, updates);
                                                                     setEditingItemId(null);
+                                                                    toast.success("Changes saved");
+                                                                };
+
+                                                                const cancelEditing = () => {
+                                                                    setEditingItemId(null);
+                                                                    toast("Edit cancelled", { icon: "✕" });
+                                                                };
+
+                                                                const updateIngredientGrams = (idx, newGrams) => {
+                                                                    setEditValues((v) => ({
+                                                                        ...v,
+                                                                        ingredients: v.ingredients.map((ing, i) =>
+                                                                            i === idx ? { ...ing, grams: newGrams } : ing
+                                                                        ),
+                                                                    }));
+                                                                };
+
+                                                                const removeIngredient = (idx) => {
+                                                                    const removed = editValues.ingredients[idx];
+                                                                    setEditValues((v) => ({
+                                                                        ...v,
+                                                                        ingredients: v.ingredients.filter((_, i) => i !== idx),
+                                                                    }));
+                                                                    if (removed) {
+                                                                        toast((t) => (
+                                                                            <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                                                                🗑️ Removed "{removed.foodName}"
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        setEditValues((v) => ({
+                                                                                            ...v,
+                                                                                            ingredients: [
+                                                                                                ...v.ingredients.slice(0, idx),
+                                                                                                removed,
+                                                                                                ...v.ingredients.slice(idx),
+                                                                                            ],
+                                                                                        }));
+                                                                                        toast.dismiss(t.id);
+                                                                                    }}
+                                                                                    style={{
+                                                                                        padding: "4px 10px",
+                                                                                        borderRadius: "6px",
+                                                                                        background: "#3b82f6",
+                                                                                        color: "#fff",
+                                                                                        border: "none",
+                                                                                        fontWeight: 600,
+                                                                                        fontSize: "12px",
+                                                                                        cursor: "pointer",
+                                                                                    }}
+                                                                                >
+                                                                                    Undo
+                                                                                </button>
+                                                                            </span>
+                                                                        ), { duration: 4000 });
+                                                                    }
+                                                                };
+
+                                                                const updateIngredientFood = (idx, foodData) => {
+                                                                    setEditValues((v) => ({
+                                                                        ...v,
+                                                                        ingredients: v.ingredients.map((ing, i) =>
+                                                                            i === idx
+                                                                                ? { ...ing, foodId: foodData.foodId, foodName: foodData.foodName, foodGroupId: foodData.foodGroupId }
+                                                                                : ing
+                                                                        ),
+                                                                    }));
+                                                                };
+
+                                                                const addEditIngredient = () => {
+                                                                    if (!editNewIngredient.foodId || !editNewIngredient.grams || Number(editNewIngredient.grams) <= 0) return;
+                                                                    const newName = editNewIngredient.foodName;
+                                                                    setEditValues((v) => ({
+                                                                        ...v,
+                                                                        ingredients: [
+                                                                            ...v.ingredients,
+                                                                            {
+                                                                                foodId: editNewIngredient.foodId,
+                                                                                foodName: editNewIngredient.foodName,
+                                                                                foodGroupId: editNewIngredient.foodGroupId,
+                                                                                grams: Number(editNewIngredient.grams),
+                                                                            },
+                                                                        ],
+                                                                    }));
+                                                                    setEditNewIngredient({ foodId: "", foodName: "", foodGroupId: null, grams: "" });
+                                                                    toast.success(`"${newName}" added`);
                                                                 };
 
                                                                 return (
@@ -164,76 +278,101 @@ function MealBuilder({
                                                                             {isEditing ? (
                                                                                 <input
                                                                                     type="text"
-                                                                                    value={
-                                                                                        editValues.instructions
-                                                                                    }
-                                                                                    onChange={(e) =>
-                                                                                        setEditValues(
-                                                                                            (
-                                                                                                v
-                                                                                            ) => ({
-                                                                                                ...v,
-                                                                                                instructions:
-                                                                                                    e
-                                                                                                        .target
-                                                                                                        .value,
-                                                                                            })
-                                                                                        )
-                                                                                    }
+                                                                                    value={editValues.instructions}
+                                                                                    onChange={(e) => setEditValues((v) => ({ ...v, instructions: e.target.value }))}
                                                                                     aria-label={`Edit instructions for ${foodName}`}
                                                                                     placeholder="Menu/Instructions"
                                                                                 />
                                                                             ) : (
-                                                                                item.instructions ||
-                                                                                "-"
+                                                                                item.instructions || "-"
                                                                             )}
                                                                         </td>
                                                                         <td>
-                                                                            {isComposite ? (
+                                                                            {isEditing ? (
+                                                                                <div className="edit-ingredients-panel">
+                                                                                    <div className="edit-ingredients-list">
+                                                                                        {editValues.ingredients.map((ing, idx) => (
+                                                                                            <div key={idx} className="edit-ingredient-row">
+                                                                                                <div className="edit-ingredient-food">
+                                                                                                    <FoodAutocomplete
+                                                                                                        value={ing.foodName}
+                                                                                                        onChange={(val) => {
+                                                                                                            setEditValues((v) => ({
+                                                                                                                ...v,
+                                                                                                                ingredients: v.ingredients.map((item, i) =>
+                                                                                                                    i === idx ? { ...item, foodName: val, ...(val ? {} : { foodId: "", foodGroupId: null }) } : item
+                                                                                                                ),
+                                                                                                            }));
+                                                                                                        }}
+                                                                                                        onSelect={(selected) => updateIngredientFood(idx, { foodId: String(selected.food_id), foodName: selected.food_name, foodGroupId: selected.major_group_id })}
+                                                                                                        placeholder="Search food…"
+                                                                                                    />
+                                                                                                </div>
+                                                                                                <input
+                                                                                                    type="number"
+                                                                                                    min="1"
+                                                                                                    value={ing.grams}
+                                                                                                    onChange={(e) => updateIngredientGrams(idx, e.target.value)}
+                                                                                                    className="edit-ingredient-grams"
+                                                                                                    aria-label={`Grams for ${ing.foodName}`}
+                                                                                                />
+                                                                                                <span className="edit-ingredient-unit">g</span>
+                                                                                                <button
+                                                                                                    type="button"
+                                                                                                    className="icon-btn danger edit-ingredient-remove"
+                                                                                                    onClick={() => removeIngredient(idx)}
+                                                                                                    aria-label={`Remove ${ing.foodName}`}
+                                                                                                >
+                                                                                                    <X size={12} />
+                                                                                                </button>
+                                                                                            </div>
+                                                                                        ))}
+                                                                                    </div>
+                                                                                    <div className="edit-ingredient-add-row">
+                                                                                        <FoodAutocomplete
+                                                                                            value={editNewIngredient.foodName}
+                                                                                            onChange={(val) => setEditNewIngredient((prev) => ({ ...prev, foodName: val, ...(val ? {} : { foodId: "", foodGroupId: null }) }))}
+                                                                                            onSelect={(selected) => setEditNewIngredient((prev) => ({ ...prev, foodId: String(selected.food_id), foodName: selected.food_name, foodGroupId: selected.major_group_id }))}
+                                                                                            placeholder="Add ingredient…"
+                                                                                        />
+                                                                                        <input
+                                                                                            type="number"
+                                                                                            min="1"
+                                                                                            value={editNewIngredient.grams}
+                                                                                            placeholder="g"
+                                                                                            onChange={(e) => setEditNewIngredient((prev) => ({ ...prev, grams: e.target.value }))}
+                                                                                            className="edit-ingredient-grams"
+                                                                                            aria-label="Grams for new ingredient"
+                                                                                        />
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            className="icon-btn add-ingredient-btn"
+                                                                                            onClick={addEditIngredient}
+                                                                                            disabled={!editNewIngredient.foodId || !editNewIngredient.grams || Number(editNewIngredient.grams) <= 0}
+                                                                                            aria-label="Add ingredient"
+                                                                                        >
+                                                                                            <Plus size={12} />
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            ) : isComposite ? (
                                                                                 <div className="ingredients-summary">
-                                                                                    {item.ingredients.map(
-                                                                                        (ing, idx) => (
-                                                                                            <span
-                                                                                                key={idx}
-                                                                                                className="ingredients-summary__item"
-                                                                                            >
-                                                                                                {ing.foodName}
-                                                                                                <span style={{ opacity: 0.7, marginLeft: 2 }}>
-                                                                                                    ({ing.grams}g)
-                                                                                                </span>
-                                                                                            </span>
-                                                                                        )
-                                                                                    )}
+                                                                                    {item.ingredients.map((ing, idx) => (
+                                                                                        <span key={idx} className="ingredients-summary__item">
+                                                                                            {ing.foodName}
+                                                                                            <span style={{ opacity: 0.7, marginLeft: 2 }}>({ing.grams}g)</span>
+                                                                                        </span>
+                                                                                    ))}
                                                                                 </div>
                                                                             ) : (
                                                                                 foodName
                                                                             )}
                                                                         </td>
                                                                         <td>
-                                                                            {isEditing && !isComposite ? (
-                                                                                <input
-                                                                                    type="number"
-                                                                                    min="0"
-                                                                                    value={
-                                                                                        editValues.grams
-                                                                                    }
-                                                                                    onChange={(e) =>
-                                                                                        setEditValues(
-                                                                                            (
-                                                                                                v
-                                                                                            ) => ({
-                                                                                                ...v,
-                                                                                                grams: e
-                                                                                                    .target
-                                                                                                    .value,
-                                                                                            })
-                                                                                        )
-                                                                                    }
-                                                                                    aria-label={`Edit grams for ${foodName}`}
-                                                                                    style={{
-                                                                                        width: "60px",
-                                                                                    }}
-                                                                                />
+                                                                            {isEditing ? (
+                                                                                <span className="edit-total-grams">
+                                                                                    {editValues.ingredients.reduce((sum, ing) => sum + Number(ing.grams || 0), 0)}
+                                                                                </span>
                                                                             ) : (
                                                                                 item.grams
                                                                             )}
@@ -241,51 +380,25 @@ function MealBuilder({
                                                                         {!isPresetActive && (
                                                                             <td>
                                                                                 <div className="icon-row">
-                                                                                    <button
-                                                                                        type="button"
-                                                                                        className="icon-btn"
-                                                                                        onClick={
-                                                                                            isEditing
-                                                                                                ? saveEditing
-                                                                                                : startEditing
-                                                                                        }
-                                                                                        aria-label={
-                                                                                            isEditing
-                                                                                                ? `Save ${foodName}`
-                                                                                                : `Edit ${foodName}`
-                                                                                        }
-                                                                                    >
-                                                                                        {isEditing ? (
-                                                                                            <Check
-                                                                                                size={
-                                                                                                    14
-                                                                                                }
-                                                                                            />
-                                                                                        ) : (
-                                                                                            <Pencil
-                                                                                                size={
-                                                                                                    14
-                                                                                                }
-                                                                                            />
-                                                                                        )}
-                                                                                    </button>
-                                                                                    <button
-                                                                                        type="button"
-                                                                                        className="icon-btn danger"
-                                                                                        onClick={() =>
-                                                                                            onRemoveMealItem(
-                                                                                                meal,
-                                                                                                item.id
-                                                                                            )
-                                                                                        }
-                                                                                        aria-label={`Remove ${foodName}`}
-                                                                                    >
-                                                                                        <Trash2
-                                                                                            size={
-                                                                                                14
-                                                                                            }
-                                                                                        />
-                                                                                    </button>
+                                                                                    {isEditing ? (
+                                                                                        <>
+                                                                                            <button type="button" className="icon-btn" onClick={saveEditing} aria-label={`Save ${foodName}`}>
+                                                                                                <Check size={14} />
+                                                                                            </button>
+                                                                                            <button type="button" className="icon-btn" onClick={cancelEditing} aria-label="Cancel edit">
+                                                                                                <X size={14} />
+                                                                                            </button>
+                                                                                        </>
+                                                                                    ) : (
+                                                                                        <>
+                                                                                            <button type="button" className="icon-btn" onClick={startEditing} aria-label={`Edit ${foodName}`}>
+                                                                                                <Pencil size={14} />
+                                                                                            </button>
+                                                                                            <button type="button" className="icon-btn danger" onClick={() => onRemoveMealItem(meal, item.id)} aria-label={`Remove ${foodName}`}>
+                                                                                                <Trash2 size={14} />
+                                                                                            </button>
+                                                                                        </>
+                                                                                    )}
                                                                                 </div>
                                                                             </td>
                                                                         )}
@@ -294,10 +407,7 @@ function MealBuilder({
                                                             })
                                                         ) : (
                                                             <tr>
-                                                                <td
-                                                                    colSpan={isPresetActive ? 3 : 4}
-                                                                    className="empty-cell"
-                                                                >
+                                                                <td colSpan={isPresetActive ? 3 : 4} className="empty-cell">
                                                                     No items for {viewDay}.
                                                                 </td>
                                                             </tr>
@@ -314,11 +424,7 @@ function MealBuilder({
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            <div
-                                                className="reason-box"
-                                                role="status"
-                                                aria-live="polite"
-                                            >
+                                            <div className="reason-box" role="status" aria-live="polite">
                                                 <strong>Reasons for imbalance</strong>
                                                 <ul>
                                                     {mealReasons.map((reason) => (
