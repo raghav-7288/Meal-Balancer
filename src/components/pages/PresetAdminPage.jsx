@@ -544,21 +544,23 @@ function PresetAdminPage() {
                                                                         };
 
                                                                         const saveEditing = () => {
+                                                                            if (editValues.ingredients.length === 0) {
+                                                                                toast.error("Add at least one ingredient");
+                                                                                return;
+                                                                            }
                                                                             const updates = { instructions: editValues.instructions };
                                                                             if (editValues.ingredients.length > 1) {
                                                                                 updates.ingredients = editValues.ingredients;
                                                                                 updates.grams = editValues.ingredients.reduce(
                                                                                     (sum, ing) => sum + Number(ing.grams), 0
                                                                                 );
-                                                                            } else if (editValues.ingredients.length === 1) {
+                                                                            } else {
                                                                                 const single = editValues.ingredients[0];
                                                                                 updates.grams = Number(single.grams);
                                                                                 updates.foodId = single.foodId;
                                                                                 updates.foodName = single.foodName;
                                                                                 updates.foodGroupId = single.foodGroupId;
                                                                                 updates.ingredients = null;
-                                                                            } else {
-                                                                                updates.grams = 0;
                                                                             }
                                                                             updateMealItem(meal, item.id, updates);
                                                                             setEditingItemId(null);
