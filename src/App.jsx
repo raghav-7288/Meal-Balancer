@@ -4,6 +4,7 @@ import {
     Routes,
     Route,
     NavLink,
+    Link,
     Navigate,
     useNavigate,
     useLocation,
@@ -74,26 +75,32 @@ function PageLoader() {
 
 const CURRENT_YEAR = new Date().getFullYear();
 
-const TOAST_OPTIONS = {
-    duration: 3000,
-    style: {
-        borderRadius: "14px",
-        padding: "14px 22px",
-        fontSize: "14px",
-        fontWeight: 600,
-        boxShadow: "0 10px 32px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06)",
-        maxWidth: "400px",
-        backdropFilter: "blur(8px)",
-    },
-    success: {
-        style: { background: "#059669", color: "#fff" },
-        iconTheme: { primary: "#fff", secondary: "#059669" },
-    },
-    error: {
-        style: { background: "#dc2626", color: "#fff" },
-        iconTheme: { primary: "#fff", secondary: "#dc2626" },
-    },
-};
+function getToastOptions(isDark) {
+    return {
+        duration: 3000,
+        style: {
+            borderRadius: "14px",
+            padding: "14px 22px",
+            fontSize: "14px",
+            fontWeight: 600,
+            boxShadow: isDark
+                ? "0 10px 32px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.2)"
+                : "0 10px 32px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06)",
+            maxWidth: "400px",
+            backdropFilter: "blur(8px)",
+            background: isDark ? "#1e293b" : "#ffffff",
+            color: isDark ? "#f1f5f9" : "#1e293b",
+        },
+        success: {
+            style: { background: "#059669", color: "#fff" },
+            iconTheme: { primary: "#fff", secondary: "#059669" },
+        },
+        error: {
+            style: { background: "#dc2626", color: "#fff" },
+            iconTheme: { primary: "#fff", secondary: "#dc2626" },
+        },
+    };
+}
 
 function App() {
     const { isAuthenticated, loading: authLoading } = useAuth();
@@ -162,13 +169,13 @@ function AppShell() {
             </a>
 
             <nav className="top-nav" role="navigation" aria-label="Main navigation">
-                <div className="nav-brand">
+                <Link to="/" className="nav-brand" aria-label="Go to home">
                     <img
                         src={darkMode ? "/logo-dark.svg" : "/logo.svg"}
                         alt="Diet Specifix by Dt. Bhakti Shrivastava"
                         className="nav-logo-img"
                     />
-                </div>
+                </Link>
 
                 {/* Hamburger toggle for mobile (#29) */}
                 <button
@@ -251,7 +258,7 @@ function AppShell() {
             </nav>
 
             {/* Global toast container (#32) */}
-            <Toaster position="bottom-center" toastOptions={TOAST_OPTIONS} />
+            <Toaster position="bottom-center" toastOptions={getToastOptions(darkMode)} />
 
             {/* aria-live region for dynamic score updates (#35) */}
             <div id="score-announcer" className="sr-only" aria-live="polite" aria-atomic="true" />

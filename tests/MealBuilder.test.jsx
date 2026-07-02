@@ -139,8 +139,8 @@ describe("MealBuilder", () => {
         const editBtn = screen.getByLabelText("Edit Rice");
         fireEvent.click(editBtn);
 
-        // Should show editable grams input
-        const gramsInput = screen.getByLabelText("Edit grams for Rice");
+        // Should show editable grams input for the ingredient
+        const gramsInput = screen.getByLabelText("Grams for Rice");
         expect(gramsInput).toBeInTheDocument();
 
         // Change grams
@@ -153,6 +153,10 @@ describe("MealBuilder", () => {
         expect(defaultProps.onUpdateMealItem).toHaveBeenCalledWith("Breakfast", "item-1", {
             grams: 200,
             instructions: "Steamed",
+            foodId: "101",
+            foodName: "Rice",
+            foodGroupId: null,
+            ingredients: null,
         });
     });
 
@@ -249,6 +253,10 @@ describe("MealBuilder", () => {
         expect(defaultProps.onUpdateMealItem).toHaveBeenCalledWith("Breakfast", "item-1", {
             grams: 150,
             instructions: "Boiled rice",
+            foodId: "101",
+            foodName: "Rice",
+            foodGroupId: null,
+            ingredients: null,
         });
     });
 
