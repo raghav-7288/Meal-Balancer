@@ -1,5 +1,7 @@
 # 🍽️ Diet Specifix
 
+![CI](https://github.com/user/diet-specifix/actions/workflows/ci.yml/badge.svg)
+
 A React 19 single-page application for **Indian diet planning**. Build meals in grams, convert to exchange-style categories, score dietary patterns with transparent reasons, and export styled PDF reports — all backed by Supabase.
 
 🔗 **Live App:** [https://diet-specifix.vercel.app/](https://diet-specifix.vercel.app/)
@@ -246,9 +248,12 @@ See [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) for full schema details including
 - **TypeScript** — Typed engines (`config.ts`, `scoringEngine.ts`, `nutrientEngine.ts`) with full interface definitions
 - **Prettier** — Auto-formats code on save/commit
 - **Husky + lint-staged** — Pre-commit hooks run format + lint on staged files
+- **CI/CD** — GitHub Actions pipeline: format → lint → typecheck → test with coverage → build → E2E
 - **@testing-library/react** — Component testing with jsdom environment (56 test files, 661 tests)
-- **Playwright** — E2E tests with auto-started dev server
-- **react-hot-toast** — Global toast notification system
+- **Coverage Thresholds** — Vitest v8 provider enforces 70% lines, 65% functions, 60% branches
+- **Playwright** — E2E tests + visual regression snapshots + accessibility audits (axe-core)
+- **Accessibility Testing** — Automated WCAG 2.1 AA compliance via `@axe-core/playwright`
+- **react-hot-toast** — Global toast notification system (dark-mode-aware)
 - **Query Cache** — In-memory TTL cache with max-size eviction & request deduplication for Supabase API calls
 - **Error Boundary** — Catches React render errors with recovery option
 - **Code Splitting** — React.lazy with retry logic for stale deploys
