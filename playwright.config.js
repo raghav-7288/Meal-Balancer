@@ -15,6 +15,15 @@ export default defineConfig({
     reporter: "html",
     timeout: 30_000,
 
+    /* Snapshot configuration for visual regression tests */
+    snapshotDir: "./e2e/snapshots",
+    expect: {
+        toHaveScreenshot: {
+            maxDiffPixelRatio: 0.02,
+            animations: "disabled",
+        },
+    },
+
     use: {
         baseURL: "http://localhost:5173",
         trace: "on-first-retry",

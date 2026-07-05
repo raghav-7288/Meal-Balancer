@@ -41,5 +41,25 @@ export default defineConfig({
         environment: 'jsdom',
         setupFiles: ['./tests/setup.js'],
         exclude: ['node_modules', 'e2e/**'],
+        coverage: {
+            provider: 'v8',
+            reporter: ['text', 'lcov', 'clover'],
+            reportsDirectory: './coverage',
+            thresholds: {
+                lines: 70,
+                functions: 65,
+                branches: 60,
+                statements: 70,
+            },
+            exclude: [
+                'node_modules/',
+                'tests/',
+                'e2e/',
+                'scripts/',
+                'coverage/',
+                '**/*.config.{js,ts}',
+                'src/main.jsx',
+            ],
+        },
     },
 })
