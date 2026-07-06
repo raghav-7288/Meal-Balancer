@@ -1670,7 +1670,7 @@ body.dark-mode .delete-toast-popup .close-btn:hover {
     background: #fff;
     border-radius: 20px;
     padding: 32px;
-    min-width: 340px;
+    min-width: min(340px, calc(100vw - 48px));
     max-width: 420px;
     width: 100%;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
