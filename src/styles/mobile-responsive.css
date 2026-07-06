@@ -63,6 +63,15 @@ video,
         padding: 10px 12px;
         padding-top: calc(10px + var(--safe-area-top));
         gap: 8px;
+        /* Remove backdrop-filter on mobile — it creates a containing block
+           that breaks position:fixed on the nav drawer (.nav-links) */
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: #ffffff !important;
+    }
+
+    body.dark-mode .top-nav {
+        background: #1e293b !important;
     }
 
     .nav-logo-img {
