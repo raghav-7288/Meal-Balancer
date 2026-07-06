@@ -730,6 +730,25 @@ body.dark-mode .food-nutrient-unit {
     }
 }
 
+@media (max-width: 380px) {
+    .food-search-results-panel {
+        max-height: 38vh;
+        padding: 0.5rem;
+    }
+
+    .food-detail-panel {
+        padding: 0.75rem;
+    }
+
+    .food-search-bar-container {
+        padding: 0.75rem 0.75rem 0.5rem;
+    }
+
+    .food-search-bar {
+        padding: 0.625rem 0.75rem;
+    }
+}
+
 /* Show more button for search results */
 .food-show-more-btn {
     display: block;

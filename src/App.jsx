@@ -188,15 +188,6 @@ function AppShell() {
                     {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
                 </button>
 
-                {/* Mobile overlay */}
-                {mobileMenuOpen && (
-                    <div
-                        className="nav-mobile-overlay"
-                        onClick={() => setMobileMenuOpen(false)}
-                        aria-hidden="true"
-                    />
-                )}
-
                 <div className={`nav-links ${mobileMenuOpen ? "nav-links--open" : ""}`}>
                     <NavLink
                         to="/"
@@ -256,6 +247,15 @@ function AppShell() {
                     )}
                 </button>
             </nav>
+
+            {/* Mobile overlay - outside nav to escape backdrop-filter containing block */}
+            {mobileMenuOpen && (
+                <div
+                    className="nav-mobile-overlay"
+                    onClick={() => setMobileMenuOpen(false)}
+                    aria-hidden="true"
+                />
+            )}
 
             {/* Global toast container (#32) */}
             <Toaster position="bottom-center" toastOptions={getToastOptions(darkMode)} />

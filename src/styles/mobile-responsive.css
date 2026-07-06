@@ -1,0 +1,1716 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Mobile Responsive Fixes
+   Targets: 320px, 360px, 375px, 390px, 414px, 430px, 768px
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Safe Area / Viewport ─── */
+:root {
+    --safe-area-top: env(safe-area-inset-top, 0px);
+    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-left: env(safe-area-inset-left, 0px);
+    --safe-area-right: env(safe-area-inset-right, 0px);
+}
+
+/* Prevent horizontal overflow globally */
+html,
+body {
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+}
+
+#root {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+/* Prevent any child from breaking the viewport */
+* {
+    max-width: 100%;
+}
+
+/* Exceptions: elements that intentionally overflow or have special positioning */
+table,
+.weekly-grid,
+pre,
+code,
+svg,
+canvas,
+img,
+video,
+[style*="position: fixed"],
+[style*="position:fixed"] {
+    max-width: none;
+}
+
+/* Fixed/absolute positioned elements need max-width reset */
+.modal-overlay,
+.ds-modal-overlay,
+.nav-links,
+.nav-mobile-overlay,
+.toast-popup,
+.delete-toast-popup,
+.pro-toast,
+.food-autocomplete-dropdown {
+    max-width: none;
+}
+
+/* ═══════════════════════════════════════════
+   NAVIGATION FIXES
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .top-nav {
+        padding: 10px 12px;
+        padding-top: calc(10px + var(--safe-area-top));
+        gap: 8px;
+        /* Remove backdrop-filter on mobile — it creates a containing block
+           that breaks position:fixed on the nav drawer (.nav-links) */
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: #ffffff !important;
+    }
+
+    body.dark-mode .top-nav {
+        background: #1e293b !important;
+    }
+
+    .nav-logo-img {
+        height: 36px;
+    }
+
+    /* Theme toggle on mobile: keep visible in top bar */
+    .nav-theme-toggle {
+        width: 40px;
+        height: 40px;
+        order: 0;
+    }
+
+    .nav-theme-toggle::after {
+        display: none; /* Hide tooltip on mobile */
+    }
+
+    /* Better mobile nav links */
+    .nav-links {
+        top: calc(57px + var(--safe-area-top));
+        padding: 12px;
+        padding-bottom: calc(12px + var(--safe-area-bottom));
+    }
+
+    .nav-link {
+        min-height: 48px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   MODAL & DIALOG FIXES
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 420px) {
+    .modal-overlay {
+        padding: 16px;
+        align-items: flex-end;
+    }
+
+    .modal-content {
+        min-width: unset;
+        max-width: 100%;
+        width: 100%;
+        padding: 24px 20px;
+        border-radius: 20px 20px 0 0;
+        margin-bottom: 0;
+        max-height: 85vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .modal-actions {
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+
+    .modal-actions button {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   TOAST FIXES
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .toast-popup {
+        left: 16px;
+        right: 16px;
+        transform: none;
+        max-width: none;
+    }
+
+    .delete-toast-popup {
+        left: 12px;
+        right: 12px;
+        transform: none;
+        max-width: none;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 12px 16px;
+        bottom: calc(16px + var(--safe-area-bottom));
+    }
+}
+
+/* ═══════════════════════════════════════════
+   TABLE RESPONSIVENESS
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -4px;
+        padding: 0 4px;
+    }
+
+    .table-wrap table {
+        min-width: 480px;
+    }
+
+    /* Smaller padding in table cells on mobile */
+    .table-wrap th,
+    .table-wrap td {
+        padding: 10px 10px;
+        font-size: 13px;
+    }
+
+    .table-wrap td input[type="number"] {
+        width: 60px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   DASHBOARD PAGE FIXES
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .dashboard-page {
+        padding: 12px;
+    }
+
+    /* KPI grid: 2 columns on tablet */
+    .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .kpi,
+    .stat-card {
+        padding: 14px;
+        min-height: 100px;
+        border-radius: 16px;
+    }
+
+    .kpi-value {
+        font-size: 28px;
+    }
+
+    /* Meal panels spacing */
+    .meal-card {
+        padding: 14px;
+        border-radius: 14px;
+    }
+
+    .meal-head h3 {
+        font-size: 16px;
+    }
+
+    /* Section padding */
+    .section {
+        padding: 16px;
+        border-radius: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-page {
+        padding: 10px;
+    }
+
+    .kpi-value {
+        font-size: 24px;
+    }
+
+    .stat-input {
+        font-size: 26px;
+        width: 65px;
+    }
+
+    .stat-unit {
+        font-size: 15px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   BUILDER ROW / FORM FIXES
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+    .builder-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .builder-row--no-day {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Make buttons in builder full-width */
+    .builder-row button,
+    .builder-row .add-inline-btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+    }
+
+    /* Form fields on mobile */
+    .field input,
+    .field select,
+    .builder-row input,
+    .builder-row select,
+    .meal-card input {
+        height: 44px;
+        font-size: 16px; /* Prevents iOS zoom on focus */
+    }
+
+    .inline-add-row td {
+        padding: 6px 4px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   INGREDIENT ADD FORM MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .ingredient-add-form__input-row {
+        flex-wrap: wrap;
+    }
+
+    .ingredient-add-form__input-row .food-autocomplete-wrapper {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+
+    .ingredient-add-form__grams {
+        width: 70px;
+        flex-shrink: 0;
+    }
+
+    .add-ingredient-btn {
+        flex: 1;
+        min-height: 44px;
+        justify-content: center;
+    }
+
+    .edit-ingredient-row {
+        flex-wrap: wrap;
+    }
+
+    .edit-ingredient-food {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+
+    .edit-ingredient-add-row {
+        flex-wrap: wrap;
+    }
+
+    .edit-ingredient-add-row .food-autocomplete-wrapper,
+    .edit-ingredient-add-row .food-autocomplete {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   DAY SELECTOR / CHIPS
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .day-selector-row {
+        gap: 10px;
+    }
+
+    .day-chips {
+        padding: 3px;
+        border-radius: 10px;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .day-chips::-webkit-scrollbar {
+        display: none;
+    }
+
+    .day-chip {
+        padding: 8px 12px;
+        font-size: 12px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-height: 36px;
+    }
+
+    .planner-nav-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .planner-nav-link {
+        flex: 1;
+        justify-content: center;
+        padding: 10px 12px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   WEEKLY PLANNER MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .weekly-planner-page {
+        padding: 12px;
+    }
+
+    .weekly-header {
+        gap: 10px;
+    }
+
+    .weekly-header-left h1 {
+        font-size: 20px;
+    }
+
+    .weekly-header-right {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .weekly-plan-select {
+        width: 100%;
+    }
+
+    .weekly-summary-bar {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding-bottom: 4px;
+    }
+
+    .weekly-summary-bar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .weekly-summary-stat {
+        min-width: 100px;
+        flex-shrink: 0;
+    }
+
+    .weekly-guidelines-section {
+        padding: 14px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .weekly-stat-value {
+        font-size: 16px;
+    }
+
+    .weekly-stat-label {
+        font-size: 10px;
+    }
+
+    .planner-download-btn,
+    .planner-edit-btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   PROGRESS PAGE MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .progress-page {
+        padding: 12px;
+    }
+
+    .progress-header-left h1 {
+        font-size: 20px;
+    }
+
+    .progress-stats-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .progress-stat-card {
+        padding: 14px 8px;
+        border-radius: 12px;
+    }
+
+    .progress-stat-value {
+        font-size: 20px;
+    }
+
+    .progress-stat-label {
+        font-size: 10px;
+    }
+
+    .progress-trend-banner {
+        font-size: 13px;
+        padding: 12px 14px;
+    }
+
+    .progress-clear-confirm {
+        flex-wrap: wrap;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   HEALTH TOOLS PAGE MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .health-tools-page {
+        padding: 12px;
+    }
+
+    .health-tools-tabs {
+        padding: 3px;
+        gap: 3px;
+        border-radius: 12px;
+    }
+
+    .health-tools-tab {
+        padding: 10px 8px;
+        min-height: 44px;
+    }
+
+    .water-tracker-tool,
+    .calorie-calc-tool,
+    .step-tracker-tool {
+        padding: 20px 14px;
+        border-radius: 18px;
+    }
+
+    .water-tracker-header h2,
+    .calorie-calc-header h2,
+    .step-tracker-header h2 {
+        font-size: 22px;
+    }
+
+    /* Water tracker */
+    .water-progress-ring,
+    .step-progress-ring {
+        width: 140px;
+        height: 140px;
+    }
+
+    .water-ring-count {
+        font-size: 34px;
+    }
+
+    .water-controls {
+        gap: 8px;
+    }
+
+    .water-ctrl-btn {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+
+    .water-glass-grid {
+        gap: 6px;
+    }
+
+    .water-glass-icon {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        min-height: 42px;
+    }
+
+    /* Step tracker */
+    .step-stats-row {
+        gap: 16px;
+    }
+
+    .step-custom-input {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .step-custom-input input {
+        width: 100%;
+        flex: 1;
+    }
+
+    /* Calorie calculator */
+    .calorie-kpi-row {
+        gap: 8px;
+    }
+
+    .calorie-kpi {
+        padding: 14px 8px;
+    }
+
+    .calorie-kpi-value {
+        font-size: 24px;
+    }
+
+    .calorie-macro-cards {
+        gap: 8px;
+    }
+
+    .calorie-macro-card {
+        padding: 10px;
+    }
+
+    .calorie-option-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .calorie-option-grid--goals {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   BMI CALCULATOR MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .bmi-calculator-embedded {
+        padding: 16px 8px;
+    }
+
+    .bmi-calculator-card {
+        padding: 24px 16px;
+        border-radius: 18px;
+    }
+
+    .bmi-calc-header h1 {
+        font-size: 22px;
+    }
+
+    .bmi-calc-inputs {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .bmi-calc-inputs--us {
+        grid-template-columns: 1fr;
+    }
+
+    .bmi-result-number {
+        font-size: 36px;
+    }
+
+    .bmi-scale-segment {
+        padding: 8px 4px;
+    }
+
+    .bmi-scale-label {
+        font-size: 9px;
+    }
+
+    .bmi-scale-range {
+        font-size: 8px;
+    }
+
+    .bmi-input-group input {
+        font-size: 16px; /* Prevents iOS zoom */
+    }
+}
+
+/* ═══════════════════════════════════════════
+   WELCOME / ONBOARDING PAGE MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .welcome-page {
+        padding: 20px 12px;
+        min-height: calc(100vh - 57px);
+    }
+
+    .welcome-card {
+        padding: 24px 16px;
+        border-radius: 18px;
+    }
+
+    .welcome-card h1 {
+        font-size: 22px;
+    }
+
+    .welcome-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+    }
+
+    .welcome-cta {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 20px;
+        font-size: 15px;
+    }
+
+    .welcome-highlight-item {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .onboarding-overlay {
+        padding: 12px;
+        align-items: flex-start;
+    }
+
+    .onboarding-card {
+        padding: 20px 16px;
+    }
+
+    .onboarding-progress {
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .onboarding-step-dot {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+
+    .onboarding-score-section {
+        padding: 20px 16px;
+    }
+
+    .onboarding-score-value {
+        font-size: 32px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   PROFILE PAGE MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .profile-page {
+        padding: 12px;
+    }
+
+    .profile-page-grid {
+        gap: 14px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   AUTH PAGE MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 420px) {
+    .auth-page {
+        padding: 16px;
+        min-height: 100vh;
+        align-items: flex-start;
+        padding-top: 60px;
+    }
+
+    .auth-card {
+        padding: 28px 20px;
+        border-radius: 18px;
+    }
+
+    .auth-title {
+        font-size: 24px;
+    }
+
+    .auth-field input {
+        padding: 14px;
+        font-size: 16px; /* Prevents iOS zoom */
+    }
+
+    .auth-btn {
+        min-height: 48px;
+        font-size: 16px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   FOOD SEARCH PAGE MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .food-search-bar-container {
+        padding: 12px 12px 8px;
+    }
+
+    .food-search-bar {
+        padding: 10px 12px;
+    }
+
+    .food-search-input {
+        font-size: 16px; /* Prevents iOS zoom */
+    }
+}
+
+/* ═══════════════════════════════════════════
+   COMPARISON / TWO-COL FIXES
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+    .comparison-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .two-col {
+        grid-template-columns: 1fr;
+    }
+
+    .compare-card {
+        padding: 14px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   MACRO CHART MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .macro-chart-legend {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   SCORE GAUGE MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .score-gauge-value {
+        font-size: 22px;
+    }
+
+    .dashboard-score-row {
+        gap: 12px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   PLAN SIDEBAR MOBILE (within dashboard)
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 1100px) {
+    .sidebar {
+        max-width: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .plan-row-wrapper {
+        flex-wrap: nowrap;
+    }
+
+    .plan-row {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    .plan-action-btns .download-btn,
+    .plan-action-btns .delete-btn {
+        width: 40px;
+        min-width: 40px;
+    }
+
+    .new-plan-row {
+        flex-direction: column;
+    }
+
+    .new-plan-row button {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   NUTRIENT LIMITS MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .nutrient-limits-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .nutrient-limits-header {
+        padding: 10px 12px;
+    }
+
+    .nutrient-limits-body {
+        padding: 0 12px 12px;
+    }
+
+    .nutrient-limit-item {
+        padding: 8px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   FOOD AUTOCOMPLETE DROPDOWN MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .food-autocomplete-dropdown {
+        max-height: 200px;
+        font-size: 13px;
+    }
+
+    .food-autocomplete-dropdown li {
+        padding: 10px 12px;
+        min-height: 40px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS & TOUCH TARGETS
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    /* Ensure minimum touch targets */
+    button,
+    [role="button"],
+    .nav-link,
+    .day-chip,
+    .calorie-option-btn,
+    .onboarding-chip,
+    .step-quick-btn,
+    .water-ctrl-btn {
+        min-height: 44px;
+    }
+
+    .icon-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    /* Better spacing between adjacent tap targets */
+    .icon-row {
+        gap: 10px;
+    }
+
+    .button-row {
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .button-row button {
+        flex: 1;
+        min-width: 120px;
+        justify-content: center;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   TYPOGRAPHY SCALING
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 360px) {
+    .welcome-card h1 {
+        font-size: 20px;
+    }
+
+    .kpi-value {
+        font-size: 22px;
+    }
+
+    .section-title h2 {
+        font-size: 16px;
+    }
+
+    .bmi-result-number {
+        font-size: 32px;
+    }
+
+    .calorie-kpi-value {
+        font-size: 22px;
+    }
+
+    .progress-stat-value {
+        font-size: 18px;
+    }
+
+    .weekly-stat-value {
+        font-size: 15px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   PREVENT iOS INPUT ZOOM (font-size < 16px)
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="url"],
+    select,
+    textarea {
+        font-size: 16px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR HIDING FOR HORIZONTAL SCROLLS
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .weekly-grid-scroll::-webkit-scrollbar,
+    .day-chips::-webkit-scrollbar {
+        height: 0;
+        display: none;
+    }
+
+    .weekly-grid-scroll,
+    .day-chips {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   FOOTER MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .app-footer {
+        padding: 20px 16px;
+        padding-bottom: calc(20px + var(--safe-area-bottom));
+        margin-top: 32px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   ORIENTATION: LANDSCAPE ON PHONES
+   ═══════════════════════════════════════════ */
+
+@media (max-height: 500px) and (orientation: landscape) {
+    .welcome-page {
+        min-height: auto;
+        padding: 16px;
+    }
+
+    .auth-page {
+        min-height: auto;
+        padding: 16px;
+    }
+
+    .bmi-calculator-embedded {
+        min-height: auto;
+    }
+
+    .onboarding-overlay {
+        min-height: auto;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   VERY SMALL SCREENS (320px)
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 320px) {
+    .top-nav {
+        padding: 8px 8px !important;
+        gap: 4px;
+    }
+
+    .nav-logo-img {
+        height: 32px !important;
+    }
+
+    .nav-hamburger {
+        width: 36px;
+        height: 36px;
+    }
+
+    .nav-theme-toggle {
+        width: 36px;
+        height: 36px;
+    }
+
+    .dashboard-page,
+    .weekly-planner-page,
+    .progress-page,
+    .health-tools-page,
+    .profile-page {
+        padding: 8px;
+    }
+
+    .section {
+        padding: 12px !important;
+        border-radius: 12px !important;
+    }
+
+    .kpi,
+    .stat-card {
+        padding: 10px;
+        border-radius: 12px;
+        min-height: 80px;
+    }
+
+    .meal-card {
+        padding: 10px !important;
+        border-radius: 12px !important;
+    }
+
+    .welcome-card {
+        padding: 20px 12px;
+    }
+
+    .auth-card {
+        padding: 24px 14px !important;
+    }
+
+    .modal-content {
+        padding: 20px 14px;
+    }
+
+    button {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   COPY PLAN MODAL MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .modal-content {
+        min-width: unset;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   WEEKLY PLANNER: READONLY BADGES & ACTIONS
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .weekly-header-left {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .weekly-readonly-badge {
+        font-size: 10px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   NUTRIENT SUMMARY / CHART RESPONSIVENESS
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .nutrient-chart-wrap {
+        margin: 0 -12px;
+    }
+
+    .nutrient-row {
+        padding: 10px 12px;
+    }
+
+    .nutrient-top {
+        font-size: 13px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   RECHARTS / CHART CONTAINERS MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .recharts-wrapper {
+        font-size: 11px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   PRESET ADMIN PAGE MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .preset-guidelines-textarea {
+        min-height: 100px;
+        font-size: 16px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   PLAN TOGGLE (My Plans / Preset) MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .plan-toggle .toggle-btn {
+        padding: 10px 8px;
+        font-size: 11px;
+        min-height: 40px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   FOOD SEARCH PAGE MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .food-search-page {
+        height: calc(100vh - 57px);
+        height: calc(100dvh - 57px);
+    }
+
+    .food-search-results-panel {
+        max-height: 40vh;
+        min-width: unset;
+        padding: 0.75rem;
+    }
+
+    .food-detail-panel {
+        padding: 0.75rem;
+    }
+
+    .food-detail-header {
+        padding: 1rem;
+    }
+
+    .food-detail-name {
+        font-size: 1.2rem;
+        word-break: break-word;
+    }
+
+    .food-detail-meta {
+        gap: 0.5rem;
+    }
+
+    .food-result-card {
+        padding: 0.75rem;
+    }
+
+    .food-result-name {
+        font-size: 0.875rem;
+    }
+
+    .food-nutrient-table td,
+    .food-nutrient-table thead th {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8125rem;
+    }
+
+    .food-nutrient-group-header {
+        padding: 0.875rem 1rem;
+    }
+
+    .food-filter-chips {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+    }
+
+    .food-filter-chips::-webkit-scrollbar {
+        display: none;
+    }
+
+    .food-filter-chip {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   PROFILE PAGE MOBILE (Professional)
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .pro-profile-page {
+        padding: 14px 12px 40px;
+    }
+
+    .pro-profile-header-content {
+        padding: 36px 16px 16px;
+    }
+
+    .pro-avatar {
+        width: 52px;
+        height: 52px;
+    }
+
+    .pro-avatar-info h1 {
+        font-size: 17px;
+    }
+
+    .pro-avatar-email {
+        font-size: 12px;
+    }
+
+    .pro-stats-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .pro-stat-card {
+        padding: 12px;
+    }
+
+    .pro-stat-value {
+        font-size: 18px;
+    }
+
+    .pro-card-body {
+        padding: 14px;
+    }
+
+    .pro-card-header {
+        padding: 14px;
+    }
+
+    /* Phone field: Country code selector shrinks on mobile */
+    .pro-country-code-select {
+        width: 140px !important;
+        min-width: 140px;
+        font-size: 12px !important;
+    }
+
+    .pro-phone-field {
+        gap: 6px;
+    }
+
+    .pro-signout-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .pro-save-btn {
+        padding: 14px 20px;
+    }
+
+    .pro-fat-display {
+        padding: 12px;
+    }
+
+    .pro-fat-value strong {
+        font-size: 24px;
+    }
+
+    .pro-detail-row {
+        padding: 10px 2px;
+    }
+
+    .pro-detail-label {
+        font-size: 12px;
+    }
+
+    .pro-detail-value {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 360px) {
+    .pro-stats-row {
+        grid-template-columns: 1fr;
+    }
+
+    .pro-country-code-select {
+        width: 120px !important;
+        min-width: 120px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   PROGRESS PAGE SMALL SCREENS
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 360px) {
+    .progress-stats-row {
+        grid-template-columns: 1fr;
+    }
+
+    .progress-stat-card {
+        padding: 12px;
+    }
+
+    .progress-stat-value {
+        font-size: 16px;
+    }
+
+    .progress-trend-banner {
+        font-size: 12px;
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .progress-month-card {
+        padding: 12px;
+    }
+
+    .progress-month-score,
+    .progress-month-kcal {
+        font-size: 18px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   NAVIGATION CONSISTENCY FIX
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    /* Ensure nav-links drawer aligns below actual nav height */
+    .nav-links {
+        top: calc(57px + var(--safe-area-top)) !important;
+    }
+
+    /* Make sure hamburger & theme toggle are accessible touch targets */
+    .nav-hamburger {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   DAY CHIPS INDIVIDUAL FIX
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+    /* Prevent individual chips from compressing during horizontal scroll */
+    .day-chip {
+        flex-shrink: 0;
+    }
+
+    /* Day chips container must allow overflow */
+    .day-chips {
+        flex-wrap: nowrap;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   WEEKLY PLANNER HEADER MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .weekly-header-right {
+        width: 100%;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .weekly-header-right > * {
+        width: 100%;
+    }
+
+    .weekly-header-right .planner-download-btn,
+    .weekly-header-right .planner-edit-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   ONBOARDING OPTION CHIPS MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 360px) {
+    .onboarding-chip {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    .onboarding-chip .chip-emoji {
+        font-size: 16px;
+    }
+
+    .onboarding-chip div strong {
+        font-size: 12px;
+    }
+
+    .onboarding-plan-card {
+        padding: 12px 14px;
+    }
+
+    .onboarding-plan-name {
+        font-size: 14px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   PLAN GUIDELINES MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .plan-guidelines-section {
+        padding: 14px 12px;
+        border-radius: 14px;
+    }
+
+    .plan-guidelines-input {
+        font-size: 16px; /* Prevent iOS zoom */
+        min-height: 70px;
+    }
+
+    .plan-guidelines-actions {
+        flex-direction: column;
+    }
+
+    .plan-guidelines-save-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   INLINE ADD ROW MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .inline-add-row input[type="number"] {
+        width: 55px;
+    }
+
+    .inline-add-row .food-autocomplete input {
+        font-size: 16px; /* Prevent iOS zoom */
+    }
+}
+
+/* ═══════════════════════════════════════════
+   HEALTH TOOLS TABS SCROLL
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 380px) {
+    .health-tools-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex-wrap: nowrap;
+    }
+
+    .health-tools-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .health-tools-tab {
+        flex-shrink: 0;
+        flex: none;
+        min-width: fit-content;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   COMPARISON / RADAR CHART MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .comparison-radar-wrap {
+        margin: 0 -8px;
+    }
+
+    .compare-head {
+        flex-direction: column;
+        gap: 4px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   DYNAMIC VIEWPORT HEIGHT (dvh)
+   Modern browsers support for notched phones
+   ═══════════════════════════════════════════ */
+
+@supports (height: 100dvh) {
+    @media (max-width: 768px) {
+        .food-search-page {
+            height: calc(100dvh - 57px);
+        }
+
+        .auth-page {
+            min-height: 100dvh;
+        }
+
+        .welcome-page {
+            min-height: calc(100dvh - 57px);
+        }
+    }
+}
+
+/* ═══════════════════════════════════════════
+   TOUCH DEVICE SPECIFICS
+   ═══════════════════════════════════════════ */
+
+@media (hover: none) and (pointer: coarse) {
+    /* Disable hover effects that can stick on touch */
+    .kpi:hover,
+    .stat-card:hover,
+    .section:hover,
+    .meal-card:hover,
+    .compare-card:hover,
+    .welcome-card:hover,
+    .welcome-highlight-item:hover,
+    .food-result-card:hover,
+    .weekly-day-col:hover,
+    .weekly-summary-stat:hover,
+    .progress-stat-card:hover,
+    .pro-stat-card:hover,
+    .pro-card:hover {
+        transform: none !important;
+    }
+
+    /* Tooltips don't work on touch - hide them */
+    .tooltip-btn::after,
+    .nav-theme-toggle::after {
+        display: none !important;
+    }
+
+    /* Larger spacing between tap targets */
+    .icon-row {
+        gap: 12px;
+    }
+
+    .plan-action-btns .download-btn,
+    .plan-action-btns .delete-btn {
+        min-width: 48px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   WORD BREAK FOR LONG CONTENT
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .food-detail-name,
+    .weekly-guidelines-text,
+    .onboarding-score-reasons ul,
+    .reason-box ul,
+    .nutrient-top,
+    .plan-row {
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   ERROR BOUNDARY MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .error-boundary {
+        padding: 1.5rem 1rem;
+        min-height: 40vh;
+    }
+
+    .error-boundary h2 {
+        font-size: 1.1rem;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   EMPTY STATE MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .empty-state,
+    .ds-empty-state {
+        padding: 36px 16px;
+        min-height: 200px;
+    }
+
+    .empty-state-icon,
+    .ds-empty-state-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+    }
+
+    .empty-state-title,
+    .ds-empty-state-title {
+        font-size: 16px;
+    }
+
+    .empty-state-desc,
+    .ds-empty-state-desc {
+        font-size: 13px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   CALORIE CALCULATOR SMALL MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 360px) {
+    .calorie-option-btn {
+        padding: 10px 8px;
+    }
+
+    .calorie-option-btn strong {
+        font-size: 12px;
+    }
+
+    .calorie-option-btn span {
+        font-size: 10px;
+    }
+
+    .calorie-kpi-value {
+        font-size: 20px;
+    }
+
+    .calorie-macro-segment {
+        font-size: 10px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   WEEKLY PLANNER GUIDELINES MOBILE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .weekly-guidelines-section {
+        padding: 12px 14px;
+        border-radius: 12px;
+    }
+
+    .weekly-guidelines-text {
+        font-size: 13px;
+    }
+
+    .weekly-guidelines-header h3 {
+        font-size: 13px;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   PREVENT LAYOUT SHIFT ON KEYBOARD OPEN
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .app-shell {
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+
+    /* When virtual keyboard opens, prevent footer from pushing up */
+    .app-footer {
+        position: relative;
+    }
+}
+

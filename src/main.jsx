@@ -9,6 +9,7 @@ import "@fontsource/inter/900.css";
 import "./index.css";
 import "./styles/professional-ui.css";
 import "./styles/profile-page.css";
+import "./styles/mobile-responsive.css";
 import "./styles/print.css";
 import App from "./App.jsx";
 import { AuthProvider } from "./context/AuthContext";
