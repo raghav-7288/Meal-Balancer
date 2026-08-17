@@ -1,5 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+// Snapshot any OAuth redirect error from the URL as early as possible, before
+// supabase-js's async session detection can strip it from the hash.
+import "./lib/oauthError";
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
 import "@fontsource/inter/600.css";

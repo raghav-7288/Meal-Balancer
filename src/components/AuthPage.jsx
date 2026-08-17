@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { LogIn, UserPlus, Loader2, UtensilsCrossed, Sun, Moon } from "lucide-react";
+import GoogleSignInButton from "./auth/GoogleSignInButton";
+import { getOAuthError, clearOAuthError } from "../lib/oauthError";
 
 function AuthPage() {
+    const { signInWithGoogle } = useAuth();
     const [mode, setMode] = useState("signin"); // "signin" | "signup"
+    // Pure read of any OAuth redirect error captured at page load (safe in a
+    // lazy initializer — no side effects).
+    const [oauthError] = useState(() => getOAuthError());
     const [darkMode, setDarkMode] = useState(() => {
         return localStorage.getItem("diet-specifix-dark-mode") === "true";
     });
@@ -12,6 +18,17 @@ function AuthPage() {
         document.body.classList.toggle("dark-mode", darkMode);
         localStorage.setItem("diet-specifix-dark-mode", String(darkMode));
     }, [darkMode]);
+
+    // If an OAuth error was shown, clear the captured value and strip the error
+    // params from the URL so a refresh won't re-surface it.
+    useEffect(() => {
+        if (oauthError) {
+            clearOAuthError();
+            if (window.history?.replaceState) {
+                window.history.replaceState(null, "", window.location.pathname);
+            }
+        }
+    }, [oauthError]);
 
     return (
         <div className="app-shell">
@@ -64,7 +81,17 @@ function AuthPage() {
                         {mode === "signin" ? "Sign in to your account" : "Create a new account"}
                     </p>
 
+                    {oauthError && (
+                        <div className="auth-error" role="alert">
+                            {oauthError}
+                        </div>
+                    )}
+
                     {mode === "signin" ? <SignInForm /> : <SignUpForm />}
+
+                    <div className="auth-divider">or</div>
+
+                    <GoogleSignInButton onClick={signInWithGoogle} />
 
                     <div className="auth-switch">
                         {mode === "signin" ? (

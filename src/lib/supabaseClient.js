@@ -10,4 +10,13 @@ if (!supabaseUrl || !supabaseKey) {
     );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        // Required so the Google OAuth redirect back to the app is exchanged
+        // for a session automatically (no dedicated /auth/callback route needed).
+        detectSessionInUrl: true,
+        storageKey: "diet-specifix-auth",
+    },
+});

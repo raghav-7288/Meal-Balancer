@@ -25,6 +25,7 @@ vi.mock("../src/lib/supabaseClient", () => ({
         auth: {
             signUp: vi.fn(() => Promise.resolve(authResult)),
             signInWithPassword: vi.fn(() => Promise.resolve(authResult)),
+            signInWithOAuth: vi.fn(() => Promise.resolve(authResult)),
             signOut: vi.fn(() => Promise.resolve(authResult)),
             getUser: vi.fn(() => Promise.resolve(authResult)),
             getSession: vi.fn(() => Promise.resolve(authResult)),
@@ -43,6 +44,7 @@ import {
     updateUserProfile,
     createUserProfile,
     onAuthStateChange,
+    signInWithGoogle,
 } from "../src/services/authService";
 
 describe("AuthService", () => {
@@ -227,6 +229,26 @@ describe("AuthService", () => {
             const subscription = onAuthStateChange(callback);
             expect(subscription).toBeDefined();
             expect(subscription.unsubscribe).toBeDefined();
+        });
+    });
+
+    // ─── signInWithGoogle ────────────────────────────────────────────
+    describe("signInWithGoogle", () => {
+        it("should return the OAuth redirect data on success", async () => {
+            authResult = {
+                data: { provider: "google", url: "https://accounts.google.com/o/oauth2/auth" },
+                error: null,
+            };
+
+            const result = await signInWithGoogle();
+            expect(result.provider).toBe("google");
+            expect(result.url).toContain("google.com");
+        });
+
+        it("should throw when the OAuth call returns an error", async () => {
+            authResult = { data: null, error: { message: "Provider not enabled" } };
+
+            await expect(signInWithGoogle()).rejects.toThrow("Provider not enabled");
         });
     });
 });

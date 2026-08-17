@@ -190,7 +190,21 @@ function ProfilePage() {
                 <div className="pro-profile-header-content">
                     <div className="pro-avatar-section">
                         <div className="pro-avatar" aria-hidden="true">
-                            <User size={28} />
+                            {dbProfile?.avatar_url ? (
+                                <img
+                                    src={dbProfile.avatar_url}
+                                    alt=""
+                                    referrerPolicy="no-referrer"
+                                    style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "cover",
+                                        borderRadius: "inherit",
+                                    }}
+                                />
+                            ) : (
+                                <User size={28} />
+                            )}
                         </div>
                         <div className="pro-avatar-info">
                             <h1>{dbProfile?.full_name || dbProfile?.username || "User"}</h1>
