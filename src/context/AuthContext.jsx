@@ -4,6 +4,7 @@ import {
     fetchUserProfile,
     updateUserProfile as authUpdateProfile,
     signIn as authSignIn,
+    signInWithGoogle as authSignInWithGoogle,
     signUp as authSignUp,
     signOut as authSignOut,
     createUserProfile,
@@ -135,6 +136,18 @@ export function AuthProvider({ children }) {
         setProfile(null);
     }, []);
 
+    // Kick off the Google OAuth redirect. On success the browser navigates away
+    // to Google, so state is picked up later via onAuthStateChange after the
+    // redirect back. Returns { error } so callers can surface failures inline.
+    const signInWithGoogle = useCallback(async () => {
+        try {
+            await authSignInWithGoogle();
+            return { error: null };
+        } catch (err) {
+            return { error: err instanceof Error ? err : new Error(String(err)) };
+        }
+    }, []);
+
     const updateProfile = useCallback(
         async (fields) => {
             if (!user?.id) throw new Error("No authenticated user");
@@ -162,6 +175,7 @@ export function AuthProvider({ children }) {
             loading,
             signUp,
             signIn,
+            signInWithGoogle,
             signOut,
             updateProfile,
             refreshProfile,
@@ -174,6 +188,7 @@ export function AuthProvider({ children }) {
             loading,
             signUp,
             signIn,
+            signInWithGoogle,
             signOut,
             updateProfile,
             refreshProfile,

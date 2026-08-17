@@ -12,6 +12,7 @@ vi.mock("../src/services/authService", () => ({
     fetchUserProfile: vi.fn(),
     updateUserProfile: vi.fn(),
     signIn: vi.fn(),
+    signInWithGoogle: vi.fn(),
     signUp: vi.fn(),
     signOut: vi.fn(),
     createUserProfile: vi.fn(),
@@ -23,6 +24,7 @@ import {
     fetchUserProfile,
     updateUserProfile,
     signIn as authSignIn,
+    signInWithGoogle as authSignInWithGoogle,
     signUp as authSignUp,
     signOut as authSignOut,
     createUserProfile,
@@ -174,6 +176,64 @@ describe("AuthContext", () => {
 
         expect(contextValue.isAuthenticated).toBe(true);
         expect(contextValue.user.email).toBe("[REDACTED_EMAIL_ADDRESS_8]");
+    });
+
+    it("provides signInWithGoogle that resolves to { error: null } on success", async () => {
+        getSession.mockResolvedValue(null);
+        authSignInWithGoogle.mockResolvedValue({ provider: "google", url: "https://google" });
+
+        let contextValue;
+        function Spy() {
+            contextValue = useContext(AuthContext);
+            return null;
+        }
+
+        render(
+            <AuthProvider>
+                <Spy />
+            </AuthProvider>
+        );
+
+        await act(async () => {
+            await vi.runAllTimersAsync();
+        });
+
+        let result;
+        await act(async () => {
+            result = await contextValue.signInWithGoogle();
+        });
+
+        expect(authSignInWithGoogle).toHaveBeenCalled();
+        expect(result).toEqual({ error: null });
+    });
+
+    it("provides signInWithGoogle that returns { error } when the service throws", async () => {
+        getSession.mockResolvedValue(null);
+        authSignInWithGoogle.mockRejectedValue(new Error("Provider not enabled"));
+
+        let contextValue;
+        function Spy() {
+            contextValue = useContext(AuthContext);
+            return null;
+        }
+
+        render(
+            <AuthProvider>
+                <Spy />
+            </AuthProvider>
+        );
+
+        await act(async () => {
+            await vi.runAllTimersAsync();
+        });
+
+        let result;
+        await act(async () => {
+            result = await contextValue.signInWithGoogle();
+        });
+
+        expect(result.error).toBeInstanceOf(Error);
+        expect(result.error.message).toBe("Provider not enabled");
     });
 
     it("should provide signOut function that clears state", async () => {
