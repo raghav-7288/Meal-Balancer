@@ -4,6 +4,8 @@ import toast from "react-hot-toast";
 import { MEALS } from "../../data/presetPlans";
 import { foodById } from "../../engines/nutrientEngine";
 import Section from "../ui/Section";
+import MealTimeRange from "../ui/MealTimeRange";
+import CopyToDaysMenu from "../ui/CopyToDaysMenu";
 import IngredientAddForm from "./IngredientAddForm";
 import FoodAutocomplete from "./FoodAutocomplete";
 import "./FoodAutocomplete.css";
@@ -14,15 +16,19 @@ function MealBuilder({
     activeSummary,
     isPresetActive,
     viewDay,
+    mealTimes,
     onAddFood,
     isAddingFood,
     onUpdateMealItem,
+    onUpdateMealTime,
     onRemoveMealItem,
+    onCopyMealItem,
 }) {
     const [collapsedSlots, setCollapsedSlots] = useState({});
     const [editingItemId, setEditingItemId] = useState(null);
     const [editValues, setEditValues] = useState({
         grams: "",
+        menu: "",
         instructions: "",
         ingredients: [],
         foodId: "",
@@ -41,9 +47,9 @@ function MealBuilder({
     };
 
     /** Handler for IngredientAddForm submit */
-    const handleAddIngredients = (meal, instructions, ingredients) => {
+    const handleAddIngredients = (meal, menu, instructions, ingredients) => {
         if (!ingredients || ingredients.length === 0) return;
-        onAddFood(meal, instructions, ingredients);
+        onAddFood(meal, menu, instructions, ingredients);
     };
 
     return (
@@ -103,11 +109,21 @@ function MealBuilder({
                                                 <p>{mealItems.length} item(s)</p>
                                             </div>
                                         </div>
-                                        <div
-                                            className={`score-pill ${mealScore >= 70 ? "good" : mealScore >= 50 ? "warn" : "bad"}`}
-                                            aria-label={`${meal} score: ${mealScore} out of 100, ${mealBand}`}
-                                        >
-                                            {mealScore} / 100 · {mealBand}
+                                        <div className="meal-head__right">
+                                            <MealTimeRange
+                                                slot={meal}
+                                                mealTimes={mealTimes}
+                                                readOnly={isPresetActive}
+                                                onChange={(range) =>
+                                                    onUpdateMealTime?.(meal, range)
+                                                }
+                                            />
+                                            <div
+                                                className={`score-pill ${mealScore >= 70 ? "good" : mealScore >= 50 ? "warn" : "bad"}`}
+                                                aria-label={`${meal} score: ${mealScore} out of 100, ${mealBand}`}
+                                            >
+                                                {mealScore} / 100 · {mealBand}
+                                            </div>
                                         </div>
                                     </div>
                                     {!collapsedSlots[meal] && (
@@ -116,7 +132,8 @@ function MealBuilder({
                                                 <table>
                                                     <thead>
                                                         <tr>
-                                                            <th scope="col">Menu/Instructions</th>
+                                                            <th scope="col">Menu</th>
+                                                            <th scope="col">Instructions</th>
                                                             <th scope="col">Food</th>
                                                             <th scope="col">g</th>
                                                             {!isPresetActive && (
@@ -153,6 +170,7 @@ function MealBuilder({
                                                                         }];
                                                                     setEditValues({
                                                                         grams: item.grams,
+                                                                        menu: item.menu || (isComposite ? item.foodName || "" : ""),
                                                                         instructions: item.instructions || "",
                                                                         ingredients: initialIngredients,
                                                                         foodId: item.foodId || "",
@@ -167,13 +185,15 @@ function MealBuilder({
                                                                         toast.error("Add at least one ingredient");
                                                                         return;
                                                                     }
-                                                                    const updates = { instructions: editValues.instructions };
+                                                                    const updates = { menu: editValues.menu, instructions: editValues.instructions };
                                                                     if (editValues.ingredients.length > 1) {
                                                                         // Multiple ingredients — save as composite
                                                                         updates.ingredients = editValues.ingredients;
                                                                         updates.grams = editValues.ingredients.reduce(
                                                                             (sum, ing) => sum + Number(ing.grams), 0
                                                                         );
+                                                                        // Keep foodName in sync with the menu (used in PDF/planner labels)
+                                                                        updates.foodName = editValues.menu || editValues.ingredients.map((i) => i.foodName).join(" + ");
                                                                     } else {
                                                                         // Single ingredient — save as non-composite
                                                                         const single = editValues.ingredients[0];
@@ -211,7 +231,7 @@ function MealBuilder({
                                                                     if (removed) {
                                                                         toast((t) => (
                                                                             <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                                                                🗑️ Removed "{removed.foodName}"
+                                                                                ️ Removed "{removed.foodName}"
                                                                                 <button
                                                                                     onClick={() => {
                                                                                         setEditValues((v) => ({
@@ -274,6 +294,19 @@ function MealBuilder({
 
                                                                 return (
                                                                     <tr key={item.id}>
+                                                                        <td className="menu-cell">
+                                                                            {isEditing ? (
+                                                                                <input
+                                                                                    type="text"
+                                                                                    value={editValues.menu}
+                                                                                    onChange={(e) => setEditValues((v) => ({ ...v, menu: e.target.value }))}
+                                                                                    aria-label={`Edit menu for ${foodName}`}
+                                                                                    placeholder="Menu"
+                                                                                />
+                                                                            ) : (
+                                                                                item.menu || (isComposite ? item.foodName : "") || "-"
+                                                                            )}
+                                                                        </td>
                                                                         <td className="instructions-cell">
                                                                             {isEditing ? (
                                                                                 <input
@@ -281,7 +314,7 @@ function MealBuilder({
                                                                                     value={editValues.instructions}
                                                                                     onChange={(e) => setEditValues((v) => ({ ...v, instructions: e.target.value }))}
                                                                                     aria-label={`Edit instructions for ${foodName}`}
-                                                                                    placeholder="Menu/Instructions"
+                                                                                    placeholder="Instructions"
                                                                                 />
                                                                             ) : (
                                                                                 item.instructions || "-"
@@ -361,11 +394,29 @@ function MealBuilder({
                                                                                         <span key={idx} className="ingredients-summary__item">
                                                                                             {ing.foodName}
                                                                                             <span style={{ opacity: 0.7, marginLeft: 2 }}>({ing.grams}g)</span>
+                                                                                            {ing.isCustom && (
+                                                                                                <span
+                                                                                                    className="custom-food-badge custom-food-badge--sm"
+                                                                                                    title={ing.equivalentFoodName ? `Custom food · nutrition based on ${ing.equivalentFoodName}` : "Custom food"}
+                                                                                                >
+                                                                                                    custom
+                                                                                                </span>
+                                                                                            )}
                                                                                         </span>
                                                                                     ))}
                                                                                 </div>
                                                                             ) : (
-                                                                                foodName
+                                                                                <span className="food-name-cell">
+                                                                                    {foodName}
+                                                                                    {item.isCustom && (
+                                                                                        <span
+                                                                                            className="custom-food-badge"
+                                                                                            title={item.equivalentFoodName ? `Custom food · nutrition based on ${item.equivalentFoodName}` : "Custom food"}
+                                                                                        >
+                                                                                            custom{item.equivalentFoodName ? ` ≈ ${item.equivalentFoodName}` : ""}
+                                                                                        </span>
+                                                                                    )}
+                                                                                </span>
                                                                             )}
                                                                         </td>
                                                                         <td>
@@ -394,6 +445,13 @@ function MealBuilder({
                                                                                             <button type="button" className="icon-btn" onClick={startEditing} aria-label={`Edit ${foodName}`}>
                                                                                                 <Pencil size={14} />
                                                                                             </button>
+                                                                                            {onCopyMealItem && (
+                                                                                                <CopyToDaysMenu
+                                                                                                    sourceDay={item.day || viewDay}
+                                                                                                    itemLabel={foodName}
+                                                                                                    onCopy={(days) => onCopyMealItem(meal, item.id, days)}
+                                                                                                />
+                                                                                            )}
                                                                                             <button type="button" className="icon-btn danger" onClick={() => onRemoveMealItem(meal, item.id)} aria-label={`Remove ${foodName}`}>
                                                                                                 <Trash2 size={14} />
                                                                                             </button>
@@ -407,7 +465,7 @@ function MealBuilder({
                                                             })
                                                         ) : (
                                                             <tr>
-                                                                <td colSpan={isPresetActive ? 3 : 4} className="empty-cell">
+                                                                <td colSpan={isPresetActive ? 4 : 5} className="empty-cell">
                                                                     No items for {viewDay}.
                                                                 </td>
                                                             </tr>
@@ -419,6 +477,8 @@ function MealBuilder({
                                                                 meal={meal}
                                                                 onAdd={handleAddIngredients}
                                                                 disabled={isAddingFood}
+                                                                allowCustom
+                                                                colSpan={5}
                                                             />
                                                         )}
                                                     </tbody>

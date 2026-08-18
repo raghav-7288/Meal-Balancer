@@ -1,0 +1,147 @@
+/* ─── Copy-to-days popover ────────────────────────────────────── */
+.copy-days {
+    position: relative;
+    display: inline-flex;
+}
+
+.copy-days__popover {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 50;
+    box-sizing: border-box;
+    width: 230px;
+    max-width: calc(100vw - 24px);
+    padding: 10px;
+    background: var(--ds-card-bg);
+    border: 1px solid var(--ds-border-input);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+    animation: copy-days-pop 0.12s ease-out;
+    text-align: left;
+}
+
+@keyframes copy-days-pop {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.copy-days__title {
+    margin: 0 0 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ds-text);
+}
+
+.copy-days__row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 4px;
+    font-size: 0.82rem;
+    color: var(--ds-text);
+    cursor: pointer;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.copy-days__row:hover {
+    background: var(--ds-surface-hover);
+}
+
+.copy-days__row input {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    accent-color: var(--ds-accent-hover);
+    cursor: pointer;
+}
+
+.copy-days__row--all {
+    font-weight: 600;
+}
+
+.copy-days__row--source {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.copy-days__row--source:hover {
+    background: transparent;
+}
+
+.copy-days__hint {
+    font-size: 0.72rem;
+    color: var(--ds-text-tertiary);
+}
+
+.copy-days__divider {
+    height: 1px;
+    margin: 6px 0;
+    background: var(--ds-border-input);
+}
+
+.copy-days__list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.copy-days__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.copy-days__cancel {
+    background: transparent;
+    color: var(--ds-text-tertiary);
+    border: 1px solid var(--ds-border-input);
+}
+
+.copy-days__cancel:hover {
+    background: var(--ds-surface-hover);
+}
+
+/* ─── Dark mode ───────────────────────────────────────────────── */
+body.dark-mode .copy-days__popover {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .copy-days__title {
+    color: #e2e8f0;
+}
+
+body.dark-mode .copy-days__row {
+    color: #cbd5e1;
+}
+
+body.dark-mode .copy-days__row:hover {
+    background: #0f172a;
+}
+
+body.dark-mode .copy-days__hint {
+    color: #94a3b8;
+}
+
+body.dark-mode .copy-days__divider {
+    background: #334155;
+}
+
+body.dark-mode .copy-days__cancel {
+    color: #94a3b8;
+    border-color: #334155;
+}
+
+body.dark-mode .copy-days__cancel:hover {
+    background: #0f172a;
+}

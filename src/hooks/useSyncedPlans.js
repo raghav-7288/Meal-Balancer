@@ -46,6 +46,7 @@ function mergePlans(localPlans, remotePlans) {
             id: remotePlan.id,
             name: remotePlan.name,
             meals: remotePlan.meals || {},
+            mealTimes: remotePlan.meal_times || {},
             guidelines: remotePlan.guidelines || "",
         });
     }

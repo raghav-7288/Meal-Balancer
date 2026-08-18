@@ -12,9 +12,11 @@ import { useProfile } from "../context/ProfileContext";
 import { useLocalStorageState } from "./useLocalStorage";
 import { useSyncedPlans } from "./useSyncedPlans";
 import { usePresetPlans } from "./usePresetPlans";
+import { useNutrientResolver } from "./useNutrientResolver";
 import { useMealHistory } from "./useMealHistory";
 import useHotkeys from "./useHotkeys";
 import useFocusTrap from "./useFocusTrap";
+import { buildDayCopies } from "../utils/copyMealItem";
 
 /** Get today's weekday name (Monday–Sunday). */
 function getTodayName() {
@@ -22,8 +24,8 @@ function getTodayName() {
     return DAYS[idx === 0 ? 6 : idx - 1];
 }
 
-function createPlan(name, meals, guidelines = "") {
-    return { id: crypto.randomUUID(), name, meals, guidelines };
+function createPlan(name, meals, guidelines = "", mealTimes = {}) {
+    return { id: crypto.randomUUID(), name, meals, guidelines, mealTimes };
 }
 
 export function useDashboardState() {
@@ -163,6 +165,10 @@ export function useDashboardState() {
 
     const activePlan = plans.find((p) => p.id === activePlanId) || plans[0];
 
+    // Hydrate nutrients for DB foods that don't store them inline (e.g. preset
+    // plans built via the admin UI) so scores/KPIs aren't stuck at zero.
+    const resolveNutrients = useNutrientResolver(plans);
+
     // ── Helper to compute a single plan's summary for the current day ──
     const computePlanSummary = (plan) => {
         const mealTotals = {};
@@ -172,7 +178,7 @@ export function useDashboardState() {
         for (const mealName of MEALS) {
             const allItems = meals[mealName] || [];
             const dayItems = allItems.filter((i) => i.day === viewDay || !i.day);
-            const totals = aggregateMeal(dayItems);
+            const totals = aggregateMeal(dayItems, resolveNutrients);
             mealTotals[mealName] = totals;
             mealScores[mealName] = scoreMeal({
                 cerealEnergyPct: totals.cerealEnergyPct,
@@ -201,12 +207,12 @@ export function useDashboardState() {
     const activeSummary = useMemo(() => {
         if (!activePlan) return null;
         return computePlanSummary(activePlan);
-    }, [activePlan, viewDay]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [activePlan, viewDay, resolveNutrients]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // ── All plan summaries (computed lazily for comparison section) ──
     const summaries = useMemo(() => {
         return plans.map(computePlanSummary);
-    }, [plans, viewDay]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [plans, viewDay, resolveNutrients]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const bestSummary = useMemo(() => {
         return [...summaries].sort((a, b) => b.dayScore.score - a.dayScore.score)[0];
@@ -232,6 +238,22 @@ export function useDashboardState() {
                                       item.id === itemId ? { ...item, ...updates } : item
                                   ),
                               },
+                          }
+                        : plan
+                )
+            );
+        },
+        [activePlanId, setUserPlans]
+    );
+
+    const updateMealTime = useCallback(
+        (mealName, time) => {
+            setUserPlans((prev) =>
+                prev.map((plan) =>
+                    plan.id === activePlanId
+                        ? {
+                              ...plan,
+                              mealTimes: { ...(plan.mealTimes || {}), [mealName]: time },
                           }
                         : plan
                 )
@@ -309,7 +331,7 @@ export function useDashboardState() {
     }, [majorGroups]);
 
     const addFood = useCallback(
-        async (selectedMeal, instructionsVal, ingredients) => {
+        async (selectedMeal, menuVal, instructionsVal, ingredients) => {
             if (!selectedMeal || !ingredients || ingredients.length === 0) return;
             setIsAddingFood(true);
 
@@ -351,6 +373,10 @@ export function useDashboardState() {
                         foodGroupId: ing.foodGroupId || null,
                         foodGroup,
                         ...(nutrients && { nutrients }),
+                        ...(ing.isCustom && {
+                            isCustom: true,
+                            equivalentFoodName: ing.equivalentFoodName || "",
+                        }),
                     });
                 }
 
@@ -367,16 +393,22 @@ export function useDashboardState() {
                           foodName: singleIng.foodName,
                           grams: singleIng.grams,
                           day: viewDayRef.current,
+                          menu: menuVal || "",
                           instructions: instructionsVal || "",
                           ...(singleIng.nutrients && { nutrients: singleIng.nutrients }),
                           ...(singleIng.foodGroup && { foodGroup: singleIng.foodGroup }),
+                          ...(singleIng.isCustom && {
+                              isCustom: true,
+                              equivalentFoodName: singleIng.equivalentFoodName || "",
+                          }),
                       }
                     : {
                           id: crypto.randomUUID(),
                           foodId: "composite",
-                          foodName: instructionsVal || resolvedIngredients.map((i) => i.foodName).join(" + "),
+                          foodName: menuVal || resolvedIngredients.map((i) => i.foodName).join(" + "),
                           grams: totalGrams,
                           day: viewDayRef.current,
+                          menu: menuVal || "",
                           instructions: instructionsVal || "",
                           ingredients: resolvedIngredients,
                       };
@@ -405,6 +437,48 @@ export function useDashboardState() {
             } finally {
                 setIsAddingFood(false);
             }
+        },
+        [setUserPlans]
+    );
+
+    /**
+     * Copy a meal item to one or more other days within the active plan.
+     * Clones with fresh ids, skips the source day, and de-dupes days that
+     * already have an identical item so re-running "copy to all" is idempotent.
+     */
+    const copyMealItemToDays = useCallback(
+        (mealName, itemId, targetDays) => {
+            if (!mealName || !itemId || !targetDays || targetDays.length === 0) return;
+            const planId = activePlanIdRef.current;
+            const plan = userPlansRef.current.find((p) => p.id === planId);
+            const slotItems = plan?.meals?.[mealName] || [];
+            const source = slotItems.find((it) => it.id === itemId);
+            if (!source) return;
+
+            const additions = buildDayCopies(source, slotItems, targetDays);
+            if (additions.length === 0) {
+                toast("Already added to the selected day(s)", { icon: "ℹ️" });
+                return;
+            }
+
+            setUserPlans((prev) =>
+                prev.map((p) =>
+                    p.id === planId
+                        ? {
+                              ...p,
+                              meals: {
+                                  ...(p.meals || {}),
+                                  [mealName]: [...(p.meals?.[mealName] || []), ...additions],
+                              },
+                          }
+                        : p
+                )
+            );
+
+            const label = source.foodName || source.menu || "Item";
+            toast.success(
+                `Copied "${label}" to ${additions.length} day${additions.length > 1 ? "s" : ""}`
+            );
         },
         [setUserPlans]
     );
@@ -464,7 +538,9 @@ export function useDashboardState() {
                 id: crypto.randomUUID(),
             }));
         }
-        const newPlan = createPlan(name, newMeals, copyModal.guidelines || "");
+        const newPlan = createPlan(name, newMeals, copyModal.guidelines || "", {
+            ...(copyModal.mealTimes || {}),
+        });
         setUserPlans((prev) => [...prev, newPlan]);
         setActivePlanId(newPlan.id);
         setPlanView("user");
@@ -501,7 +577,7 @@ export function useDashboardState() {
             vegetablesG: dt?.vegetablesG ?? 0,
             visibleFat: dt?.visibleFat ?? 0,
         });
-        toast.success("Today's score logged to Progress! 📊");
+        toast.success("Today's score logged to Progress! ");
     }, [activeSummary, activePlan?.name, logDay]);
 
     const dayScore = activeSummary?.dayScore?.score || 0;
@@ -578,7 +654,9 @@ export function useDashboardState() {
         isAddingFood,
         addFood,
         updateMealItem,
+        updateMealTime,
         removeMealItem,
+        copyMealItemToDays,
         // Plan management
         newPlanName,
         setNewPlanName,

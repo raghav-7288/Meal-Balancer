@@ -4,8 +4,8 @@
     flex-direction: column;
     gap: 8px;
     padding: 10px 8px;
-    border-top: 1px dashed var(--border, #e2e8f0);
-    background: var(--surface-alt, #f8fafc);
+    border-top: 1px dashed var(--ds-border-input);
+    background: var(--ds-surface-alt);
     border-radius: 6px;
 }
 
@@ -14,14 +14,15 @@
     gap: 8px;
 }
 
+.ingredient-add-form__menu,
 .ingredient-add-form__instructions {
     flex: 1;
     padding: 6px 10px;
-    border: 1px solid var(--border, #e2e8f0);
+    border: 1px solid var(--ds-border-input);
     border-radius: 4px;
     font-size: 0.85rem;
-    background: var(--input-bg, #fff);
-    color: var(--text, #334155);
+    background: var(--ds-input-bg);
+    color: var(--ds-text);
 }
 
 .ingredient-add-form__list {
@@ -36,11 +37,11 @@
     align-items: center;
     gap: 4px;
     padding: 4px 10px;
-    background: var(--primary-soft, #e0e7ff);
+    background: #e0e7ff;
     border-radius: 12px;
     font-size: 0.8rem;
-    color: var(--text, #334155);
-    border: 1px solid var(--primary-border, #c7d2fe);
+    color: var(--ds-text);
+    border: 1px solid #c7d2fe;
 }
 
 .ingredient-chip__text {
@@ -55,7 +56,7 @@
     height: 16px;
     border: none;
     background: transparent;
-    color: var(--danger, #ef4444);
+    color: var(--ds-danger);
     cursor: pointer;
     border-radius: 50%;
     padding: 0;
@@ -63,7 +64,7 @@
 }
 
 .ingredient-chip__remove:hover {
-    background: var(--danger-soft, #fee2e2);
+    background: var(--ds-danger-bg);
 }
 
 .ingredient-add-form__input-row {
@@ -79,15 +80,99 @@
 .ingredient-add-form__grams {
     width: 60px;
     padding: 6px 8px;
-    border: 1px solid var(--border, #e2e8f0);
+    border: 1px solid var(--ds-border-input);
     border-radius: 4px;
     font-size: 0.85rem;
-    background: var(--input-bg, #fff);
-    color: var(--text, #334155);
+    background: var(--ds-input-bg);
+    color: var(--ds-text);
 }
 
 .add-ingredient-btn {
     flex-shrink: 0;
+}
+
+/* ─── Custom food mode ────────────────────────────────────────── */
+.ingredient-add-form__mode {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    background: var(--ds-surface-hover);
+    border: 1px solid var(--ds-border-input);
+    border-radius: 8px;
+    width: fit-content;
+}
+
+.mode-toggle {
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--ds-text-tertiary);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.mode-toggle:hover {
+    color: var(--ds-text);
+}
+
+.mode-toggle--active {
+    background: var(--ds-accent-hover);
+    color: #fff;
+}
+
+.ingredient-add-form__input-row--custom .food-autocomplete-wrapper,
+.ingredient-add-form__input-row--custom .food-autocomplete {
+    flex: 1;
+}
+
+.ingredient-add-form__custom-name {
+    flex: 1;
+    min-width: 100px;
+    padding: 6px 10px;
+    border: 1px solid var(--ds-border-input);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    background: var(--ds-input-bg);
+    color: var(--ds-text);
+}
+
+.ingredient-chip__custom {
+    font-style: italic;
+    opacity: 0.75;
+}
+
+/* Badge shown on custom meal items (table view) and chips */
+.custom-food-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 6px;
+    padding: 1px 7px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+    color: #9a3412;
+    background: #ffedd5;
+    border: 1px solid #fed7aa;
+    border-radius: 10px;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.custom-food-badge--sm {
+    margin-left: 4px;
+    padding: 0 5px;
+    font-size: 0.6rem;
+}
+
+.food-name-cell {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px;
 }
 
 .ingredient-add-form__actions {
@@ -110,7 +195,7 @@
 }
 
 .btn--primary {
-    background: var(--primary, #2563eb);
+    background: var(--ds-accent-hover);
     color: #fff;
 }
 
@@ -161,11 +246,11 @@
     align-items: center;
     gap: 3px;
     padding: 2px 8px;
-    background: var(--primary-soft, #e0e7ff);
-    border: 1px solid var(--primary-border, #c7d2fe);
+    background: #e0e7ff;
+    border: 1px solid #c7d2fe;
     border-radius: 10px;
     font-size: 0.75rem;
-    color: var(--chip-text, #3730a3);
+    color: #3730a3;
     font-weight: 600;
     white-space: nowrap;
 }
@@ -189,8 +274,8 @@
     align-items: center;
     gap: 8px;
     padding: 6px 10px;
-    background: var(--primary-soft, #e0e7ff);
-    border: 1px solid var(--primary-border, #c7d2fe);
+    background: #e0e7ff;
+    border: 1px solid #c7d2fe;
     border-radius: 8px;
     font-size: 0.85rem;
 }
@@ -210,16 +295,16 @@
     width: 100%;
     font-size: 0.85rem;
     padding: 6px 10px;
-    border: 1px solid var(--border, #e2e8f0);
+    border: 1px solid var(--ds-border-input);
     border-radius: 6px;
-    background: var(--input-bg, #fff);
-    color: var(--text, #334155);
+    background: var(--ds-input-bg);
+    color: var(--ds-text);
 }
 
 .edit-ingredient-name {
     flex: 1;
     font-weight: 600;
-    color: var(--text, #334155);
+    color: var(--ds-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -229,17 +314,17 @@
 .edit-ingredient-grams {
     width: 60px;
     padding: 6px 8px;
-    border: 1px solid var(--border, #e2e8f0);
+    border: 1px solid var(--ds-border-input);
     border-radius: 6px;
     font-size: 0.85rem;
     text-align: center;
-    background: var(--input-bg, #fff);
-    color: var(--text, #334155);
+    background: var(--ds-input-bg);
+    color: var(--ds-text);
 }
 
 .edit-ingredient-unit {
     font-size: 0.8rem;
-    color: var(--text-secondary, #64748b);
+    color: var(--ds-text-tertiary);
     font-weight: 500;
 }
 
@@ -255,7 +340,7 @@
     align-items: center;
     gap: 8px;
     padding-top: 6px;
-    border-top: 1px dashed var(--border, #e2e8f0);
+    border-top: 1px dashed var(--ds-border-input);
 }
 
 .edit-ingredient-add-row .food-autocomplete-wrapper,
@@ -272,7 +357,7 @@
 .edit-total-grams {
     font-weight: 600;
     font-size: 0.85rem;
-    color: var(--text-secondary, #64748b);
+    color: var(--ds-text-tertiary);
 }
 
 /* ─── Dark Mode ───────────────────────────────────────────────── */
@@ -281,6 +366,7 @@ body.dark-mode .ingredient-add-form {
     border-top-color: #334155;
 }
 
+body.dark-mode .ingredient-add-form__menu,
 body.dark-mode .ingredient-add-form__instructions,
 body.dark-mode .ingredient-add-form__grams {
     background: #0f172a;
@@ -288,12 +374,14 @@ body.dark-mode .ingredient-add-form__grams {
     color: #e2e8f0;
 }
 
+body.dark-mode .ingredient-add-form__menu:focus,
 body.dark-mode .ingredient-add-form__instructions:focus,
 body.dark-mode .ingredient-add-form__grams:focus {
     border-color: #60a5fa;
     box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
 }
 
+body.dark-mode .ingredient-add-form__menu::placeholder,
 body.dark-mode .ingredient-add-form__instructions::placeholder,
 body.dark-mode .ingredient-add-form__grams::placeholder {
     color: #64748b;
@@ -357,4 +445,39 @@ body.dark-mode .edit-ingredient-grams {
 body.dark-mode .edit-ingredient-add-row {
     border-top-color: #334155;
 }
+
+body.dark-mode .ingredient-add-form__mode {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+body.dark-mode .mode-toggle {
+    color: #94a3b8;
+}
+
+body.dark-mode .mode-toggle:hover {
+    color: #e2e8f0;
+}
+
+body.dark-mode .mode-toggle--active {
+    background: #2563eb;
+    color: #fff;
+}
+
+body.dark-mode .ingredient-add-form__custom-name {
+    background: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+body.dark-mode .ingredient-add-form__custom-name::placeholder {
+    color: #64748b;
+}
+
+body.dark-mode .custom-food-badge {
+    color: #fdba74;
+    background: rgba(124, 45, 18, 0.4);
+    border-color: #9a3412;
+}
+
 

@@ -57,6 +57,7 @@ describe("PresetPlanService — Admin Functions", () => {
             expect(result).toHaveLength(2);
             expect(result[0]).toEqual({
                 id: "plan-1", name: "Active Plan", meals: { Breakfast: [] },
+                mealTimes: {},
                 guidelines: "Eat well", displayOrder: 1, isActive: true,
                 createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-02T00:00:00Z",
             });

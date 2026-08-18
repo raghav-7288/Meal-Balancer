@@ -69,6 +69,7 @@ describe("usePresetPlanAdmin", () => {
         expect(result.current.plans).toHaveLength(3);
         expect(result.current.activePlanId).toBe("p3");
         expect(toast.success).toHaveBeenCalledWith('Created "Plan C"');
+        expect(upsertPresetPlan).toHaveBeenCalledWith(expect.objectContaining({ mealTimes: {} }));
     });
 
     it("createPlan shows error toast on empty name", async () => {
@@ -218,7 +219,7 @@ describe("usePresetPlanAdmin", () => {
         await waitFor(() => expect(result.current.isLoading).toBe(false));
 
         act(() => {
-            result.current.addFood("Lunch", "Steamed", [
+            result.current.addFood("Lunch", "Lunch Special", "Steamed", [
                 { foodId: "123", foodName: "Rice", grams: 200, foodGroupId: 2, foodGroup: "" }
             ]);
         });
@@ -228,6 +229,7 @@ describe("usePresetPlanAdmin", () => {
         expect(lunchItems[0].foodId).toBe("123");
         expect(lunchItems[0].foodName).toBe("Rice");
         expect(lunchItems[0].grams).toBe(200);
+        expect(lunchItems[0].menu).toBe("Lunch Special");
         expect(lunchItems[0].instructions).toBe("Steamed");
         expect(lunchItems[0].day).toBe("Monday"); // default viewDay
     });
@@ -238,7 +240,7 @@ describe("usePresetPlanAdmin", () => {
 
         act(() => { result.current.setViewDay("Friday"); });
         act(() => {
-            result.current.addFood("Dinner", "", [
+            result.current.addFood("Dinner", "", "", [
                 { foodId: "456", foodName: "Dal", grams: 150, foodGroupId: null, foodGroup: "" }
             ]);
         });
@@ -253,10 +255,142 @@ describe("usePresetPlanAdmin", () => {
         await waitFor(() => expect(result.current.isLoading).toBe(false));
 
         act(() => {
-            result.current.addFood("Lunch", "", [
+            result.current.addFood("Lunch", "", "", [
                 { foodId: "123", foodName: "Rice", grams: 200, foodGroupId: null, foodGroup: "" }
             ]);
         });
+        expect(result.current.activePlan).toBeNull();
+    });
+
+    // ─── addFood: custom foods (database equivalent) ─────────────────
+    it("addFood propagates isCustom/equivalentFoodName onto a single custom item", async () => {
+        const { result } = renderHook(() => usePresetPlanAdmin());
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+        act(() => {
+            result.current.addFood("Lunch", "Homemade", "", [
+                {
+                    // foodId points at the database "equivalent" so nutrition reuses the pipeline
+                    foodId: "999",
+                    foodName: "Grandma's dal",
+                    grams: 150,
+                    foodGroupId: 5,
+                    foodGroup: "pulses",
+                    isCustom: true,
+                    equivalentFoodName: "Dal, cooked",
+                },
+            ]);
+        });
+
+        const item = result.current.activePlan.meals.Lunch[0];
+        expect(item.foodId).toBe("999");
+        expect(item.foodName).toBe("Grandma's dal");
+        expect(item.menu).toBe("Homemade");
+        expect(item.isCustom).toBe(true);
+        expect(item.equivalentFoodName).toBe("Dal, cooked");
+    });
+
+    it("addFood does not add isCustom to regular (non-custom) items", async () => {
+        const { result } = renderHook(() => usePresetPlanAdmin());
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+        act(() => {
+            result.current.addFood("Lunch", "", "", [
+                { foodId: "123", foodName: "Rice", grams: 200, foodGroupId: 2, foodGroup: "cereals" },
+            ]);
+        });
+
+        const item = result.current.activePlan.meals.Lunch[0];
+        expect(item).not.toHaveProperty("isCustom");
+        expect(item).not.toHaveProperty("equivalentFoodName");
+    });
+
+    it("addFood preserves per-ingredient isCustom flags in a composite item", async () => {
+        const { result } = renderHook(() => usePresetPlanAdmin());
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+        act(() => {
+            result.current.addFood("Dinner", "Mixed bowl", "", [
+                { foodId: "123", foodName: "Rice", grams: 100, foodGroupId: 2, foodGroup: "cereals" },
+                {
+                    foodId: "999",
+                    foodName: "Grandma's dal",
+                    grams: 80,
+                    foodGroupId: 5,
+                    foodGroup: "pulses",
+                    isCustom: true,
+                    equivalentFoodName: "Dal, cooked",
+                },
+            ]);
+        });
+
+        const item = result.current.activePlan.meals.Dinner[0];
+        expect(item.foodId).toBe("composite");
+        expect(item.menu).toBe("Mixed bowl");
+        expect(item.ingredients).toHaveLength(2);
+        // Regular ingredient — no custom flags
+        expect(item.ingredients[0]).not.toHaveProperty("isCustom");
+        // Custom ingredient — flags preserved
+        expect(item.ingredients[1].isCustom).toBe(true);
+        expect(item.ingredients[1].equivalentFoodName).toBe("Dal, cooked");
+    });
+
+    it("addFood stores menu and instructions as separate fields", async () => {
+        const { result } = renderHook(() => usePresetPlanAdmin());
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+        act(() => {
+            result.current.addFood("Lunch", "Veg Thali", "Serve hot", [
+                { foodId: "123", foodName: "Rice", grams: 200, foodGroupId: 2, foodGroup: "cereals" },
+            ]);
+        });
+
+        const item = result.current.activePlan.meals.Lunch[0];
+        expect(item.menu).toBe("Veg Thali");
+        expect(item.instructions).toBe("Serve hot");
+        // Food name stays the food (not the menu) for single items
+        expect(item.foodName).toBe("Rice");
+    });
+
+    // ─── updateMealTime ──────────────────────────────────────────────
+    it("updateMealTime sets the clock-time range for a meal slot and marks dirty", async () => {
+        const { result } = renderHook(() => usePresetPlanAdmin());
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+        act(() => {
+            result.current.updateMealTime("Breakfast", { start: "08:00", end: "10:00" });
+        });
+
+        expect(result.current.activePlan.mealTimes.Breakfast).toEqual({
+            start: "08:00",
+            end: "10:00",
+        });
+        expect(result.current.isDirty).toBe(true);
+    });
+
+    it("updateMealTime preserves other slot times", async () => {
+        const { result } = renderHook(() => usePresetPlanAdmin());
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+        act(() => {
+            result.current.updateMealTime("Breakfast", { start: "08:00", end: "10:00" });
+        });
+        act(() => {
+            result.current.updateMealTime("Lunch", { start: "13:00", end: "14:00" });
+        });
+
+        expect(result.current.activePlan.mealTimes).toEqual({
+            Breakfast: { start: "08:00", end: "10:00" },
+            Lunch: { start: "13:00", end: "14:00" },
+        });
+    });
+
+    it("updateMealTime does nothing when no active plan", async () => {
+        fetchAllPresetPlans.mockResolvedValue([]);
+        const { result } = renderHook(() => usePresetPlanAdmin());
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+        act(() => { result.current.updateMealTime("Breakfast", "08:00"); });
         expect(result.current.activePlan).toBeNull();
     });
 
@@ -305,6 +439,102 @@ describe("usePresetPlanAdmin", () => {
 
         act(() => { result.current.removeMealItem("Breakfast", "item-1"); });
         expect(result.current.activePlan).toBeNull();
+    });
+
+    // ─── copyMealItemToDays ──────────────────────────────────────────
+    it("copyMealItemToDays clones an item to selected days with fresh ids and marks dirty", async () => {
+        const { result } = renderHook(() => usePresetPlanAdmin());
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+        act(() => {
+            result.current.copyMealItemToDays("Breakfast", "item-1", ["Tuesday", "Wednesday"]);
+        });
+
+        const items = result.current.activePlan.meals.Breakfast;
+        expect(items).toHaveLength(3); // original + 2 copies
+        const copies = items.filter((i) => i.id !== "item-1");
+        expect(copies.map((c) => c.day).sort()).toEqual(["Tuesday", "Wednesday"]);
+        expect(copies.every((c) => c.id && c.id !== "item-1")).toBe(true);
+        expect(copies.every((c) => c.foodId === "banana" && c.grams === 100)).toBe(true);
+        expect(result.current.isDirty).toBe(true);
+    });
+
+    it("copyMealItemToDays skips the source day", async () => {
+        const { result } = renderHook(() => usePresetPlanAdmin());
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+        act(() => {
+            result.current.copyMealItemToDays("Breakfast", "item-1", ["Monday", "Thursday"]);
+        });
+
+        const items = result.current.activePlan.meals.Breakfast;
+        expect(items).toHaveLength(2); // only Thursday added
+        expect(items.filter((i) => i.day === "Monday")).toHaveLength(1);
+        expect(items.filter((i) => i.day === "Thursday")).toHaveLength(1);
+    });
+
+    it("copyMealItemToDays de-dupes days that already have an identical item", async () => {
+        const { result } = renderHook(() => usePresetPlanAdmin());
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+        act(() => {
+            result.current.copyMealItemToDays("Breakfast", "item-1", ["Tuesday"]);
+        });
+        expect(result.current.activePlan.meals.Breakfast).toHaveLength(2);
+
+        // Re-run for Tuesday + Wednesday → Tuesday skipped, Wednesday added
+        act(() => {
+            result.current.copyMealItemToDays("Breakfast", "item-1", ["Tuesday", "Wednesday"]);
+        });
+        const items = result.current.activePlan.meals.Breakfast;
+        expect(items).toHaveLength(3);
+        expect(items.filter((i) => i.day === "Tuesday")).toHaveLength(1);
+        expect(items.filter((i) => i.day === "Wednesday")).toHaveLength(1);
+    });
+
+    it("copyMealItemToDays clones composite ingredients into a new array", async () => {
+        const { result } = renderHook(() => usePresetPlanAdmin());
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+        // Build a composite item on Monday (default viewDay)
+        act(() => {
+            result.current.addFood("Lunch", "Mixed bowl", "", [
+                { foodId: "1", foodName: "Rice", grams: 100, foodGroupId: 2, foodGroup: "cereals" },
+                { foodId: "2", foodName: "Dal", grams: 80, foodGroupId: 5, foodGroup: "pulses" },
+            ]);
+        });
+        const source = result.current.activePlan.meals.Lunch[0];
+
+        act(() => {
+            result.current.copyMealItemToDays("Lunch", source.id, ["Sunday"]);
+        });
+
+        const copy = result.current.activePlan.meals.Lunch.find((i) => i.day === "Sunday");
+        expect(copy).toBeTruthy();
+        expect(copy.id).not.toBe(source.id);
+        expect(copy.ingredients).toHaveLength(2);
+        expect(copy.ingredients).not.toBe(source.ingredients); // new array reference
+        expect(copy.ingredients[0]).not.toBe(source.ingredients[0]); // new object reference
+    });
+
+    it("copyMealItemToDays does nothing when there is no active plan", async () => {
+        fetchAllPresetPlans.mockResolvedValue([]);
+        const { result } = renderHook(() => usePresetPlanAdmin());
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+        act(() => { result.current.copyMealItemToDays("Breakfast", "item-1", ["Tuesday"]); });
+        expect(result.current.activePlan).toBeNull();
+    });
+
+    it("copyMealItemToDays does nothing for empty target days or unknown item", async () => {
+        const { result } = renderHook(() => usePresetPlanAdmin());
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+        act(() => { result.current.copyMealItemToDays("Breakfast", "item-1", []); });
+        expect(result.current.activePlan.meals.Breakfast).toHaveLength(1);
+
+        act(() => { result.current.copyMealItemToDays("Breakfast", "missing-id", ["Tuesday"]); });
+        expect(result.current.activePlan.meals.Breakfast).toHaveLength(1);
     });
 
     // ─── setActivePlanId ─────────────────────────────────────────────

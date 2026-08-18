@@ -1,11 +1,18 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, BarChart3, AlertCircle, Info, BookOpen, Download, Edit3 } from "lucide-react";
+import toast from "react-hot-toast";
 import { MEALS, DAYS, getTodayName } from "../../data/presetPlans";
-import { aggregateMeal, combineDay, foodById } from "../../engines/nutrientEngine";
-import { scoreDay } from "../../engines/scoringEngine";
+import { foodById } from "../../engines/nutrientEngine";
+import { formatMealTimeRange, getMealTimeRange } from "../../utils/mealTime";
+import { computeDaySummaries } from "../../utils/planSummary";
 import { useSyncedPlans } from "../../hooks/useSyncedPlans";
 import { usePresetPlans } from "../../hooks/usePresetPlans";
+import {
+    useNutrientResolver,
+    hydratePlanNutrients,
+    resolvePlanNutrients,
+} from "../../hooks/useNutrientResolver";
 import { useAuth } from "../../hooks/useAuth";
 import { useProfile } from "../../context/ProfileContext";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
@@ -40,6 +47,10 @@ function WeeklyPlannerPage() {
     const activePlan = allPlans.find((p) => p.id === activePlanId) || allPlans[0];
     const isPresetPlan = presetPlans.some((p) => p.id === activePlanId);
 
+    // Hydrate nutrients for DB foods that don't store them inline (e.g. preset
+    // plans built via the admin UI) so day scores/averages aren't stuck at zero.
+    const resolveNutrients = useNutrientResolver(allPlans);
+
     // Get items for a specific day and meal slot
     const getItems = useCallback(
         (day, meal) => {
@@ -50,30 +61,11 @@ function WeeklyPlannerPage() {
         [activePlan]
     );
 
-    // Per-day summaries
-    const daySummaries = useMemo(() => {
-        if (!activePlan) return {};
-        const summaries = {};
-        const planMeals = activePlan.meals || {};
-        for (const day of DAYS) {
-            const mealTotals = {};
-            for (const meal of MEALS) {
-                const items = (planMeals[meal] || []).filter((i) => i.day === day || !i.day);
-                mealTotals[meal] = aggregateMeal(items);
-            }
-            const dayTotals = combineDay(mealTotals);
-            const dayScoreResult = scoreDay({
-                cerealEnergyPct: dayTotals.cerealEnergyPct,
-                vegetablesG: dayTotals.vegetablesG,
-                protein: dayTotals.protein,
-                fibre: dayTotals.fibre,
-                addedSugar: dayTotals.addedSugar,
-                visibleFat: dayTotals.visibleFat,
-            });
-            summaries[day] = { dayTotals, dayScore: dayScoreResult };
-        }
-        return summaries;
-    }, [activePlan]);
+    // Per-day summaries (shared with the PDF export so numbers match exactly)
+    const daySummaries = useMemo(
+        () => computeDaySummaries(activePlan, resolveNutrients),
+        [activePlan, resolveNutrients]
+    );
 
     // Weekly averages
     const weeklyAvg = useMemo(() => {
@@ -103,25 +95,46 @@ function WeeklyPlannerPage() {
     }, [daySummaries]);
 
     // Download handler
+    const [isDownloading, setIsDownloading] = useState(false);
     async function handleDownloadPdf() {
-        if (!activePlan) return;
-        // Build a combined summary for the plan using today's day
-        const todayName = getTodayName();
-        const summary = daySummaries[todayName] || Object.values(daySummaries)[0];
+        if (!activePlan || isDownloading) return;
+        setIsDownloading(true);
+        try {
+            // Resolve nutrients for DB foods that don't embed them (e.g. admin-built
+            // preset plans) BEFORE generating — otherwise those items aggregate to
+            // zero and every day fails the "has food" gate, yielding an empty PDF.
+            // Fetches are cached, so already-loaded ids resolve without a round-trip.
+            const resolver = await resolvePlanNutrients([activePlan]);
 
-        const userInfo = {
-            fullName: dbProfile?.full_name || dbProfile?.username || "",
-            email: user?.email || "",
-            age: dbProfile?.age || "",
-            heightCm: dbProfile?.height_cm || "",
-            weightKg: dbProfile?.weight_kg || "",
-            bmi: dbProfile?.current_bmi ? String(dbProfile.current_bmi) : "",
-            contactNumber: dbProfile?.contact_number || "",
-        };
+            // Embed resolved nutrients so the PDF's per-item rows match the totals,
+            // then compute day summaries from the hydrated plan so both are consistent.
+            const exportPlan = hydratePlanNutrients(activePlan, resolver);
+            const exportDaySummaries = computeDaySummaries(exportPlan, resolver);
 
-        // Lazy-load PDF module to keep initial bundle small
-        const { downloadPlanAsPdf } = await import("../../utils/generatePlanPdf");
-        downloadPlanAsPdf(activePlan, summary, userInfo, profile, daySummaries);
+            // Single-day summary fallback (today, else first planned day)
+            const todayName = getTodayName();
+            const summary =
+                exportDaySummaries[todayName] || Object.values(exportDaySummaries)[0];
+
+            const userInfo = {
+                fullName: dbProfile?.full_name || dbProfile?.username || "",
+                email: user?.email || "",
+                age: dbProfile?.age || "",
+                heightCm: dbProfile?.height_cm || "",
+                weightKg: dbProfile?.weight_kg || "",
+                bmi: dbProfile?.current_bmi ? String(dbProfile.current_bmi) : "",
+                contactNumber: dbProfile?.contact_number || "",
+            };
+
+            // Lazy-load PDF module to keep initial bundle small
+            const { downloadPlanAsPdf } = await import("../../utils/generatePlanPdf");
+            downloadPlanAsPdf(exportPlan, summary, userInfo, profile, exportDaySummaries);
+        } catch (err) {
+            if (import.meta.env.DEV) console.error("PDF download failed:", err);
+            toast.error("Could not generate the PDF. Please try again.");
+        } finally {
+            setIsDownloading(false);
+        }
     }
 
     // Bar chart data
@@ -185,7 +198,7 @@ function WeeklyPlannerPage() {
                             ))}
                         </optgroup>
                         {userPlans.length > 0 && (
-                            <optgroup label="👤 My Plans">
+                            <optgroup label=" My Plans">
                                 {userPlans.map((plan) => (
                                     <option key={plan.id} value={plan.id}>
                                         {plan.name}
@@ -197,9 +210,10 @@ function WeeklyPlannerPage() {
                     <button
                         className="planner-nav-link planner-download-btn"
                         onClick={handleDownloadPdf}
+                        disabled={isDownloading}
                         aria-label="Download plan as PDF"
                     >
-                        <Download size={14} /> Download PDF
+                        <Download size={14} /> {isDownloading ? "Preparing…" : "Download PDF"}
                     </button>
                     {!isPresetPlan && (
                         <Link
@@ -291,10 +305,18 @@ function WeeklyPlannerPage() {
                                 {/* Meal slots */}
                                 {MEALS.map((meal) => {
                                     const items = getItems(day, meal);
+                                    const mealTimeLabel = formatMealTimeRange(
+                                        getMealTimeRange(activePlan?.mealTimes, meal)
+                                    );
                                     return (
                                         <div key={meal} className="weekly-meal-slot">
                                             <div className="weekly-meal-label">
                                                 <span>{meal}</span>
+                                                {mealTimeLabel && (
+                                                    <span className="weekly-meal-time">
+                                                        {mealTimeLabel}
+                                                    </span>
+                                                )}
                                             </div>
                                             {items.length > 0 ? (
                                                 <div className="weekly-items">
@@ -309,7 +331,7 @@ function WeeklyPlannerPage() {
                                                                 className={`weekly-item ${hasInstructions ? "has-instructions" : ""}`}
                                                                 title={
                                                                     hasInstructions
-                                                                        ? `📝 ${item.instructions}`
+                                                                        ? ` ${item.instructions}`
                                                                         : ""
                                                                 }
                                                             >

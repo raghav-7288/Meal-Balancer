@@ -665,7 +665,7 @@ body.dark-mode .sync-badge--idle {
     outline: none;
     padding: 0;
     color: inherit;
-    -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 .stat-input::-webkit-outer-spin-button,
@@ -759,7 +759,6 @@ body.dark-mode .sync-badge--idle {
 .field select,
 .builder-row select {
     -webkit-appearance: none;
-    -moz-appearance: none;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -1100,6 +1099,16 @@ button.secondary {
     line-height: 1.4;
 }
 
+.menu-cell {
+    max-width: 200px;
+    white-space: normal;
+    word-break: break-word;
+    color: #1e293b;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
 .meal-panels {
     display: grid;
     gap: 16px;
@@ -1116,6 +1125,15 @@ button.secondary {
 .meal-card:has(.food-autocomplete-dropdown) {
     z-index: 10;
 }
+
+.meal-card:has(.copy-days__popover) {
+    z-index: 20;
+}
+
+.meal-card:has(.meal-time-popover) {
+    z-index: 20;
+}
+
 
 .meal-head {
     display: flex;
@@ -1149,6 +1167,127 @@ button.secondary {
     margin: 2px 0 0;
     color: #6b7280;
     font-size: 12px;
+}
+
+.meal-head__right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+
+.meal-time-display {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    white-space: nowrap;
+}
+
+/* Shared meal-time field styling (used inside the meal-time popover) */
+.meal-time-input {
+    padding: 3px 6px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    line-height: 1.2;
+    color: #334155;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    cursor: pointer;
+    color-scheme: light;
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.meal-time-input:hover {
+    border-color: #cbd5e1;
+}
+
+.meal-time-input:focus,
+.meal-time-input:focus-visible {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Keep the time text consistent across every slot, incl. empty/partial values
+   (UA renders empty datetime-edit text in a lighter placeholder tint otherwise).
+   Target the fields-wrapper — it holds every hour/minute/AM-PM field + separators. */
+.meal-time-input::-webkit-datetime-edit-fields-wrapper {
+    color: #334155;
+}
+
+/* Neutralize Chrome autofill tint so a single field never differs in color. */
+.meal-time-input:-webkit-autofill,
+.meal-time-input:-webkit-autofill:hover {
+    -webkit-text-fill-color: #334155;
+    caret-color: #334155;
+    -webkit-box-shadow: 0 0 0 1000px #f8fafc inset;
+    box-shadow: 0 0 0 1000px #f8fafc inset;
+}
+
+.meal-time-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #334155;
+    caret-color: #334155;
+    -webkit-box-shadow:
+        0 0 0 1000px #f8fafc inset,
+        0 0 0 2px rgba(59, 130, 246, 0.2);
+    box-shadow:
+        0 0 0 1000px #f8fafc inset,
+        0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+
+.weekly-meal-time {
+    margin-left: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #2563eb;
+    white-space: nowrap;
+}
+
+
+body.dark-mode .meal-time-display {
+    color: #94a3b8;
+}
+
+body.dark-mode .meal-time-input {
+    background: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+    /* dark UA time picker + spinner/clock icon */
+    color-scheme: dark;
+}
+
+body.dark-mode .meal-time-input::-webkit-datetime-edit-fields-wrapper {
+    color: #e2e8f0;
+}
+
+body.dark-mode .meal-time-input:-webkit-autofill,
+body.dark-mode .meal-time-input:-webkit-autofill:hover {
+    -webkit-text-fill-color: #e2e8f0;
+    caret-color: #e2e8f0;
+    -webkit-box-shadow: 0 0 0 1000px #0f172a inset;
+    box-shadow: 0 0 0 1000px #0f172a inset;
+}
+
+body.dark-mode .meal-time-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #e2e8f0;
+    caret-color: #e2e8f0;
+    -webkit-box-shadow:
+        0 0 0 1000px #0f172a inset,
+        0 0 0 2px rgba(59, 130, 246, 0.2);
+    box-shadow:
+        0 0 0 1000px #0f172a inset,
+        0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+
+body.dark-mode .weekly-meal-time {
+    color: #60a5fa;
 }
 
 .score-pill {
@@ -2230,6 +2369,10 @@ body.dark-mode td {
 }
 
 body.dark-mode .instructions-cell {
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .menu-cell {
     color: #f1f5f9 !important;
 }
 

@@ -7,12 +7,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // We need a mock that properly chains ANY sequence of calls.
 // We'll capture the final "terminal" call result.
 let terminalResult;
+let lastUpsertPayload;
 
 function createChainableMock() {
     const mock = {};
     const chainFn = () => mock;
     const methods = ["from","select","insert","update","upsert","delete","eq","neq","in","ilike","order","limit","not","gt"];
     for (const m of methods) { mock[m] = chainFn; }
+    // Capture upsert payloads so tests can assert the mapped row shape
+    mock.upsert = (payload) => { lastUpsertPayload = payload; return mock; };
     mock.single = () => Promise.resolve(terminalResult);
     mock.then = (resolve, reject) => Promise.resolve(terminalResult).then(resolve, reject);
     mock.catch = (rej) => Promise.resolve(terminalResult).catch(rej);
@@ -30,6 +33,7 @@ import { fetchUserPlans, upsertPlan, upsertPlans, deletePlan } from "../src/serv
 describe("PlanSyncService", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        lastUpsertPayload = undefined;
     });
 
     // ─── fetchUserPlans ──────────────────────────────────────────────
@@ -79,6 +83,27 @@ describe("PlanSyncService", () => {
             expect(result.guidelines).toBe("");
         });
 
+        it("should write mealTimes to the meal_times column", async () => {
+            const plan = {
+                id: "plan-1",
+                name: "Timed Plan",
+                meals: {},
+                mealTimes: { Breakfast: "08:00", Lunch: "13:00" },
+            };
+            terminalResult = { data: { ...plan, user_id: "user-1" }, error: null };
+
+            await upsertPlan("user-1", plan);
+            expect(lastUpsertPayload.meal_times).toEqual({ Breakfast: "08:00", Lunch: "13:00" });
+        });
+
+        it("should default meal_times to {} when mealTimes is absent", async () => {
+            const plan = { id: "plan-1", name: "No Times", meals: {} };
+            terminalResult = { data: { ...plan, user_id: "user-1" }, error: null };
+
+            await upsertPlan("user-1", plan);
+            expect(lastUpsertPayload.meal_times).toEqual({});
+        });
+
         it("should throw on upsert failure", async () => {
             const plan = { id: "plan-1", name: "Fail Plan", meals: {} };
             terminalResult = { data: null, error: { message: "Insert conflict" } };
@@ -105,6 +130,19 @@ describe("PlanSyncService", () => {
         it("should return empty array for empty plans input", async () => {
             const result = await upsertPlans("user-1", []);
             expect(result).toEqual([]);
+        });
+
+        it("should map mealTimes to meal_times for each row", async () => {
+            const plans = [
+                { id: "p1", name: "A", meals: {}, mealTimes: { Dinner: "20:00" } },
+                { id: "p2", name: "B", meals: {} },
+            ];
+            terminalResult = { data: plans, error: null };
+
+            await upsertPlans("user-1", plans);
+            expect(lastUpsertPayload).toHaveLength(2);
+            expect(lastUpsertPayload[0].meal_times).toEqual({ Dinner: "20:00" });
+            expect(lastUpsertPayload[1].meal_times).toEqual({});
         });
 
         it("should throw on batch upsert failure", async () => {

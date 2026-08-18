@@ -152,6 +152,7 @@ Junction table linking users to their selected health goals.
 | `user_id` | `uuid` | NO | FK → `auth.users.id` ON DELETE CASCADE |
 | `name` | `text` | NO | — |
 | `meals` | `jsonb` | NO | `'{}'::jsonb` |
+| `meal_times` | `jsonb` | NO | `'{}'::jsonb` (per-slot clock times, e.g. `{"Breakfast":"08:00"}`) |
 | `guidelines` | `text` | YES | `''` |
 | `created_at` | `timestamptz` | NO | `now()` |
 | `updated_at` | `timestamptz` | NO | `now()` (auto-updated via trigger) |
@@ -168,6 +169,7 @@ Junction table linking users to their selected health goals.
 | `id` | `uuid` | NO | `gen_random_uuid()` (PK) |
 | `name` | `text` | NO | — |
 | `meals` | `jsonb` | NO | `'{}'::jsonb` |
+| `meal_times` | `jsonb` | NO | `'{}'::jsonb` (per-slot clock times, e.g. `{"Breakfast":"08:00"}`) |
 | `guidelines` | `text` | YES | `''` |
 | `display_order` | `integer` | NO | `0` |
 | `is_active` | `boolean` | NO | `true` |
@@ -176,6 +178,30 @@ Junction table linking users to their selected health goals.
 
 **RLS:** ✅ Enabled  
 **Grant:** SELECT to `authenticated` and `anon`
+
+---
+
+## `meals` JSONB item shape (user_plans & preset_plans)
+
+Both `user_plans.meals` and `preset_plans.meals` are JSONB maps keyed by meal slot
+(`"Breakfast"`, `"Lunch"`, …), each holding an array of meal items. Item shape:
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `id` | string (uuid) | Client-generated |
+| `foodId` | string | DB food id, `"composite"`, or a local food key |
+| `foodName` | string | Food name (single) or composite dish name |
+| `grams` | number | Quantity |
+| `day` | string | Weekday the item belongs to (e.g. `"Monday"`) |
+| `menu` | string | **Dish / menu name** (e.g. `"Banana Shake"`) — separate from instructions |
+| `instructions` | string | **Preparation notes** — separate from the menu name |
+| `foodGroup` / `foodGroupId` | string / number | Group name / DB `major_group_id` |
+| `nutrients` | object | Per-100g `{ kcal, carbs, protein, fat, fibre, … }` (optional; hydrated from `food_nutrient_values` when absent) |
+| `ingredients` | array | Present for composite items; each ingredient mirrors the fields above |
+| `isCustom` / `equivalentFoodName` | boolean / string | Custom food using a DB "nutrition equivalent" |
+
+> `menu` and `instructions` are stored as **separate fields**. No migration is
+> required — `meals` is JSONB, so new fields ride along in the document.
 
 ---
 

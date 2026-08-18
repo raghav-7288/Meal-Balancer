@@ -37,6 +37,18 @@ export const UserPlanSchema = z.object({
         .record(z.string(), z.array(z.object({}).passthrough()))
         .nullable()
         .default({}),
+    meal_times: z
+        .record(
+            z.string(),
+            z.union([
+                z.string(),
+                z
+                    .object({ start: z.string().optional(), end: z.string().optional() })
+                    .passthrough(),
+            ])
+        )
+        .nullable()
+        .optional(),
     guidelines: z.string().nullable().optional(),
     created_at: z.string().nullable().optional(),
     updated_at: z.string().nullable().optional(),

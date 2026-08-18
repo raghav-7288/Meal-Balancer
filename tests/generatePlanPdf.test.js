@@ -187,6 +187,119 @@ describe("generatePlanPdf — pure functions", () => {
         });
     });
 
+    describe("buildMealTableRow — menu column & custom foods", () => {
+        const mockLookup = vi.fn(() => null);
+
+        it("prepends the Menu column when includeMenu is set", () => {
+            const item = {
+                foodId: "f1",
+                foodName: "Rice",
+                menu: "Veg Pulao",
+                grams: 200,
+                instructions: "Cooked",
+                nutrients: { kcal: 130, protein: 2.7, carbs: 28, fat: 0.3, fibre: 0.4 },
+            };
+
+            const row = buildMealTableRow(item, mockLookup, { includeMenu: true });
+
+            expect(row[0]).toBe("Veg Pulao"); // menu is first
+            expect(row[1]).toBe("Rice"); // then food name
+            expect(row[2]).toBe("200g");
+            expect(row[3]).toBe("Cooked");
+            expect(row.length).toBe(8); // menu + name + qty + instr + 4 macros (no fibre)
+        });
+
+        it("includes menu + fibre together (full dashboard-parity row)", () => {
+            const item = {
+                foodId: "f1",
+                foodName: "Oats",
+                menu: "Oats Bowl",
+                grams: 100,
+                nutrients: { kcal: 389, protein: 16.9, carbs: 66.3, fat: 6.9, fibre: 10.6 },
+            };
+
+            const row = buildMealTableRow(item, mockLookup, { includeMenu: true, includeFibre: true });
+
+            expect(row[0]).toBe("Oats Bowl");
+            expect(row.length).toBe(9);
+            expect(row[8]).toBe("10.6"); // fibre last
+        });
+
+        it("uses an empty menu cell for a single food with no explicit menu", () => {
+            const item = { foodId: "f1", foodName: "Apple", grams: 100, nutrients: { kcal: 52 } };
+
+            const row = buildMealTableRow(item, mockLookup, { includeMenu: true });
+
+            expect(row[0]).toBe(""); // no menu provided
+            expect(row[1]).toBe("Apple");
+        });
+
+        it("marks a custom single food with its database equivalent", () => {
+            const item = {
+                foodId: "f1",
+                foodName: "Grandma's Laddoo",
+                grams: 50,
+                isCustom: true,
+                equivalentFoodName: "Besan Laddoo",
+                nutrients: { kcal: 400, protein: 8, carbs: 50, fat: 18, fibre: 3 },
+            };
+
+            const row = buildMealTableRow(item, mockLookup);
+
+            expect(row[0]).toBe("Grandma's Laddoo (custom \u2248 Besan Laddoo)");
+        });
+
+        it("marks a custom single food without an equivalent", () => {
+            const item = {
+                foodId: "f1",
+                foodName: "Secret Snack",
+                grams: 30,
+                isCustom: true,
+                nutrients: { kcal: 100 },
+            };
+
+            const row = buildMealTableRow(item, mockLookup);
+
+            expect(row[0]).toBe("Secret Snack (custom)");
+        });
+
+        it("derives the menu from the dish name for composite items", () => {
+            const item = {
+                foodId: "composite",
+                foodName: "Rajma Chawal",
+                grams: 300,
+                instructions: "Serve hot",
+                ingredients: [
+                    { foodName: "Rajma", grams: 150, nutrients: { kcal: 100, protein: 7, carbs: 18, fat: 0.5, fibre: 6 } },
+                    { foodName: "Rice", grams: 150, nutrients: { kcal: 130, protein: 2.7, carbs: 28, fat: 0.3, fibre: 0.4 } },
+                ],
+            };
+
+            const row = buildMealTableRow(item, mockLookup, { includeMenu: true });
+
+            expect(row[0]).toBe("Rajma Chawal"); // menu = dish name
+            expect(row[1]).toBe("Rajma 150g, Rice 150g"); // ingredient list
+            expect(row[2]).toBe("300g");
+            expect(row[3]).toBe("Serve hot");
+        });
+
+        it("flags custom ingredients inside a composite item", () => {
+            const item = {
+                foodId: "composite",
+                foodName: "Special Thali",
+                grams: 200,
+                ingredients: [
+                    { foodName: "Homemade Sabzi", grams: 100, isCustom: true, nutrients: { kcal: 80, protein: 3, carbs: 10, fat: 3, fibre: 4 } },
+                    { foodName: "Roti", grams: 100, nutrients: { kcal: 250, protein: 8, carbs: 50, fat: 3, fibre: 5 } },
+                ],
+            };
+
+            const row = buildMealTableRow(item, mockLookup, { includeMenu: true });
+
+            expect(row[1]).toBe("Homemade Sabzi (custom) 100g, Roti 100g");
+        });
+    });
+
     describe("buildDailySummaryRows", () => {
         it("formats all nutrient rows correctly", () => {
             const dayTotals = {

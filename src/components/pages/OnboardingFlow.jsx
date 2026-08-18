@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useProfile } from "../../context/ProfileContext";
 import { usePresetPlans } from "../../hooks/usePresetPlans";
+import { useNutrientResolver } from "../../hooks/useNutrientResolver";
 import { MEALS } from "../../data/presetPlans";
 import { aggregateMeal, combineDay } from "../../engines/nutrientEngine";
 import { scoreDay } from "../../engines/scoringEngine";
@@ -65,16 +66,17 @@ function OnboardingFlow({ onComplete }) {
 
     // Computed score for selected plan (Step 3)
     const selectedPlan = presetPlans[selectedPlanIdx];
+    const resolveNutrients = useNutrientResolver(presetPlans);
     const planScore = useMemo(() => {
         if (!selectedPlan) return null;
         const mealTotals = {};
         for (const meal of MEALS) {
             const items = selectedPlan.meals[meal] || [];
-            mealTotals[meal] = aggregateMeal(items);
+            mealTotals[meal] = aggregateMeal(items, resolveNutrients);
         }
         const dayTotals = combineDay(mealTotals);
         return scoreDay(dayTotals);
-    }, [selectedPlan]);
+    }, [selectedPlan, resolveNutrients]);
 
     function handleStep1Next() {
         // Save profile

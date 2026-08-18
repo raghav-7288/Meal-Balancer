@@ -19,6 +19,8 @@ import { MEALS, DAYS } from "../../data/presetPlans";
 import { usePresetPlanAdmin } from "../../hooks/usePresetPlanAdmin";
 import { getMajorGroups } from "../../services/databaseService";
 import Section from "../ui/Section";
+import MealTimeRange from "../ui/MealTimeRange";
+import CopyToDaysMenu from "../ui/CopyToDaysMenu";
 import IngredientAddForm from "../dashboard/IngredientAddForm";
 import FoodAutocomplete from "../dashboard/FoodAutocomplete";
 import "../dashboard/FoodAutocomplete.css";
@@ -47,7 +49,9 @@ function PresetAdminPage() {
         updatePlanField,
         addFood,
         updateMealItem,
+        updateMealTime,
         removeMealItem,
+        copyMealItemToDays,
     } = usePresetPlanAdmin();
 
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -56,6 +60,7 @@ function PresetAdminPage() {
     const [editingItemId, setEditingItemId] = useState(null);
     const [editValues, setEditValues] = useState({
         grams: "",
+        menu: "",
         instructions: "",
         ingredients: [],
         foodId: "",
@@ -88,14 +93,14 @@ function PresetAdminPage() {
     };
 
     /** Handler for IngredientAddForm submit */
-    const handleAddIngredients = (meal, instructions, ingredients) => {
+    const handleAddIngredients = (meal, menu, instructions, ingredients) => {
         if (!ingredients || ingredients.length === 0) return;
         // Resolve foodGroup names from majorGroups for each ingredient
         const enriched = ingredients.map((ing) => ({
             ...ing,
             foodGroup: groupNameById(ing.foodGroupId),
         }));
-        addFood(meal, instructions, enriched);
+        addFood(meal, menu, instructions, enriched);
     };
 
     const handleCreatePlan = () => {
@@ -176,7 +181,7 @@ function PresetAdminPage() {
 
             {itemDeleteToast && (
                 <div className="delete-toast-popup" role="alert" aria-live="assertive">
-                    <span>🗑️ Removed &ldquo;{itemDeleteToast.foodLabel}&rdquo;</span>
+                    <span>️ Removed &ldquo;{itemDeleteToast.foodLabel}&rdquo;</span>
                     <div className="delete-toast-actions">
                         <button type="button" className="undo-btn" onClick={itemDeleteToast.undoAction}>
                             Undo
@@ -497,8 +502,17 @@ function PresetAdminPage() {
                                                             <p>{items.length} item(s)</p>
                                                         </div>
                                                     </div>
-                                                    <div className="score-pill">
-                                                        {items.length} items
+                                                    <div className="meal-head__right">
+                                                        <MealTimeRange
+                                                            slot={meal}
+                                                            mealTimes={activePlan.mealTimes}
+                                                            onChange={(range) =>
+                                                                updateMealTime(meal, range)
+                                                            }
+                                                        />
+                                                        <div className="score-pill">
+                                                            {items.length} items
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 {!collapsedSlots[meal] && (
@@ -506,7 +520,8 @@ function PresetAdminPage() {
                                                         <table>
                                                             <thead>
                                                                 <tr>
-                                                                    <th>Menu/Instructions</th>
+                                                                    <th>Menu</th>
+                                                                    <th>Instructions</th>
                                                                     <th>Food</th>
                                                                     <th>g</th>
                                                                     <th>Actions</th>
@@ -534,6 +549,7 @@ function PresetAdminPage() {
                                                                                 }];
                                                                             setEditValues({
                                                                                 grams: item.grams,
+                                                                                menu: item.menu || (isComposite ? item.foodName || "" : ""),
                                                                                 instructions: item.instructions || "",
                                                                                 ingredients: initialIngredients,
                                                                                 foodId: item.foodId || "",
@@ -548,12 +564,14 @@ function PresetAdminPage() {
                                                                                 toast.error("Add at least one ingredient");
                                                                                 return;
                                                                             }
-                                                                            const updates = { instructions: editValues.instructions };
+                                                                            const updates = { menu: editValues.menu, instructions: editValues.instructions };
                                                                             if (editValues.ingredients.length > 1) {
                                                                                 updates.ingredients = editValues.ingredients;
                                                                                 updates.grams = editValues.ingredients.reduce(
                                                                                     (sum, ing) => sum + Number(ing.grams), 0
                                                                                 );
+                                                                                // Keep foodName in sync with the menu (used in PDF/planner labels)
+                                                                                updates.foodName = editValues.menu || editValues.ingredients.map((i) => i.foodName).join(" + ");
                                                                             } else {
                                                                                 const single = editValues.ingredients[0];
                                                                                 updates.grams = Number(single.grams);
@@ -590,7 +608,7 @@ function PresetAdminPage() {
                                                                             if (removed) {
                                                                                 toast((t) => (
                                                                                     <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                                                                        🗑️ Removed "{removed.foodName}"
+                                                                                        ️ Removed "{removed.foodName}"
                                                                                         <button
                                                                                             onClick={() => {
                                                                                                 setEditValues((v) => ({
@@ -653,6 +671,19 @@ function PresetAdminPage() {
 
                                                                         return (
                                                                             <tr key={item.id}>
+                                                                                <td className="menu-cell">
+                                                                                    {isEditing ? (
+                                                                                        <input
+                                                                                            type="text"
+                                                                                            value={editValues.menu}
+                                                                                            onChange={(e) => setEditValues((v) => ({ ...v, menu: e.target.value }))}
+                                                                                            aria-label={`Edit menu for ${item.foodName || item.foodId}`}
+                                                                                            placeholder="Menu"
+                                                                                        />
+                                                                                    ) : (
+                                                                                        item.menu || (isComposite ? item.foodName : "") || "-"
+                                                                                    )}
+                                                                                </td>
                                                                                 <td className="instructions-cell">
                                                                                     {isEditing ? (
                                                                                         <input
@@ -660,7 +691,7 @@ function PresetAdminPage() {
                                                                                             value={editValues.instructions}
                                                                                             onChange={(e) => setEditValues((v) => ({ ...v, instructions: e.target.value }))}
                                                                                             aria-label={`Edit instructions for ${item.foodName || item.foodId}`}
-                                                                                            placeholder="Menu/Instructions"
+                                                                                            placeholder="Instructions"
                                                                                         />
                                                                                     ) : (
                                                                                         item.instructions || "-"
@@ -740,11 +771,29 @@ function PresetAdminPage() {
                                                                                                 <span key={idx} className="ingredients-summary__item">
                                                                                                     {ing.foodName}
                                                                                                     <span style={{ opacity: 0.7, marginLeft: 2 }}>({ing.grams}g)</span>
+                                                                                                    {ing.isCustom && (
+                                                                                                        <span
+                                                                                                            className="custom-food-badge custom-food-badge--sm"
+                                                                                                            title={ing.equivalentFoodName ? `Custom food · nutrition based on ${ing.equivalentFoodName}` : "Custom food"}
+                                                                                                        >
+                                                                                                            custom
+                                                                                                        </span>
+                                                                                                    )}
                                                                                                 </span>
                                                                                             ))}
                                                                                         </div>
                                                                                     ) : (
-                                                                                        item.foodName || item.foodId
+                                                                                        <span className="food-name-cell">
+                                                                                            {item.foodName || item.foodId}
+                                                                                            {item.isCustom && (
+                                                                                                <span
+                                                                                                    className="custom-food-badge"
+                                                                                                    title={item.equivalentFoodName ? `Custom food · nutrition based on ${item.equivalentFoodName}` : "Custom food"}
+                                                                                                >
+                                                                                                    custom{item.equivalentFoodName ? ` ≈ ${item.equivalentFoodName}` : ""}
+                                                                                                </span>
+                                                                                            )}
+                                                                                        </span>
                                                                                     )}
                                                                                 </td>
                                                                                 <td>
@@ -772,6 +821,11 @@ function PresetAdminPage() {
                                                                                                 <button type="button" className="icon-btn" onClick={startEditing} aria-label="Edit">
                                                                                                     <Pencil size={14} />
                                                                                                 </button>
+                                                                                                <CopyToDaysMenu
+                                                                                                    sourceDay={item.day || viewDay}
+                                                                                                    itemLabel={item.foodName || item.foodId}
+                                                                                                    onCopy={(days) => copyMealItemToDays(meal, item.id, days)}
+                                                                                                />
                                                                                                 <button type="button" className="icon-btn danger" onClick={() => removeMealItem(meal, item.id)} aria-label={`Remove ${item.foodName || item.foodId}`}>
                                                                                                     <Trash2 size={14} />
                                                                                                 </button>
@@ -784,7 +838,7 @@ function PresetAdminPage() {
                                                                     })
                                                                 ) : (
                                                                     <tr>
-                                                                        <td colSpan={4} className="empty-cell">
+                                                                        <td colSpan={5} className="empty-cell">
                                                                             No items for {viewDay}.
                                                                         </td>
                                                                     </tr>
@@ -795,6 +849,8 @@ function PresetAdminPage() {
                                                                     meal={meal}
                                                                     onAdd={handleAddIngredients}
                                                                     disabled={saving}
+                                                                    allowCustom
+                                                                    colSpan={5}
                                                                 />
                                                             </tbody>
                                                         </table>
