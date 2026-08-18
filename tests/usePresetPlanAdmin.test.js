@@ -15,7 +15,7 @@ vi.mock("react-hot-toast", () => ({
     default: { success: vi.fn(), error: vi.fn() },
 }));
 
-import { fetchAllPresetPlans, upsertPresetPlan } from "../src/services/presetPlanService";
+import { fetchAllPresetPlans, upsertPresetPlan, deletePresetPlan } from "../src/services/presetPlanService";
 import toast from "react-hot-toast";
 import { usePresetPlanAdmin } from "../src/hooks/usePresetPlanAdmin";
 
@@ -120,42 +120,60 @@ describe("usePresetPlanAdmin", () => {
 
     // ─── removePlan ──────────────────────────────────────────────────
     it("removePlan removes a plan from state and shows undo toast", async () => {
+        deletePresetPlan.mockResolvedValue();
         const { result } = renderHook(() => usePresetPlanAdmin());
         await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-        act(() => { result.current.removePlan("p2"); });
+        await act(async () => { await result.current.removePlan("p2"); });
 
         expect(result.current.plans).toHaveLength(1);
         expect(result.current.plans[0].id).toBe("p1");
         expect(result.current.deleteToast).not.toBeNull();
         expect(result.current.deleteToast.planName).toBe("Plan B");
+        expect(deletePresetPlan).toHaveBeenCalledWith("p2");
     });
 
     it("removePlan switches active plan when deleting active plan", async () => {
+        deletePresetPlan.mockResolvedValue();
         const { result } = renderHook(() => usePresetPlanAdmin());
         await waitFor(() => expect(result.current.isLoading).toBe(false));
         expect(result.current.activePlanId).toBe("p1");
 
-        act(() => { result.current.removePlan("p1"); });
+        await act(async () => { await result.current.removePlan("p1"); });
 
         expect(result.current.plans).toHaveLength(1);
         expect(result.current.activePlanId).toBe("p2");
     });
 
-    it("removePlan undo restores plan", async () => {
+    it("removePlan undo restores plan by re-inserting into DB", async () => {
+        deletePresetPlan.mockResolvedValue();
+        upsertPresetPlan.mockImplementation(async (plan) => plan);
         const { result } = renderHook(() => usePresetPlanAdmin());
         await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-        act(() => { result.current.removePlan("p2"); });
+        await act(async () => { await result.current.removePlan("p2"); });
 
         expect(result.current.plans).toHaveLength(1);
         expect(result.current.deleteToast).not.toBeNull();
 
-        // Undo the delete
-        act(() => { result.current.deleteToast.undoAction(); });
+        // Undo the delete — should re-insert into DB
+        await act(async () => { await result.current.deleteToast.undoAction(); });
 
         expect(result.current.plans).toHaveLength(2);
         expect(result.current.deleteToast).toBeNull();
+        expect(upsertPresetPlan).toHaveBeenCalled();
+    });
+
+    it("removePlan restores plan to local state when DB delete fails", async () => {
+        deletePresetPlan.mockRejectedValue(new Error("DB error"));
+        const { result } = renderHook(() => usePresetPlanAdmin());
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+        await act(async () => { await result.current.removePlan("p2"); });
+
+        // Plan should be restored since DB delete failed
+        expect(result.current.plans).toHaveLength(2);
+        expect(toast.error).toHaveBeenCalledWith("Failed to delete plan from database");
     });
 
     // ─── toggleActive ────────────────────────────────────────────────

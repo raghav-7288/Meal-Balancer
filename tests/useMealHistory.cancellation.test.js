@@ -36,6 +36,7 @@ const {
     clearMealHistory,
 } = await import("../src/services/mealHistoryService");
 const { useMealHistory } = await import("../src/hooks/useMealHistory");
+const { getLocalDateKey } = await import("../src/utils/dateKey");
 
 function createWrapper(authValue) {
     return ({ children }) =>
@@ -95,11 +96,11 @@ describe("useMealHistory — cancellation and operations", () => {
         const entry = result.current.history[0];
         expect(entry.planName).toBe("Test Plan");
         expect(entry.score).toBe(82);
-        expect(entry.date).toBe(new Date().toISOString().split("T")[0]);
+        expect(entry.date).toBe(getLocalDateKey());
     });
 
     it("logDay replaces existing entry for today", () => {
-        const today = new Date().toISOString().split("T")[0];
+        const today = getLocalDateKey();
         const existing = [{ id: "old-id", date: today, score: 50, planName: "Old" }];
         localStorage.setItem("diet-specifix-meal-history", JSON.stringify(existing));
 

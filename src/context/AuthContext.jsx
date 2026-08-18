@@ -84,9 +84,21 @@ export function AuthProvider({ children }) {
     }, []);
 
     const signUp = useCallback(async (email, password, username, fullName, contactNumber) => {
-        const data = await authSignUp(email, password);
+        // Persist the typed details as auth metadata so the profile can still be
+        // created after email confirmation (see the backfill in signIn), when no
+        // session exists yet to insert the user_profiles row directly.
+        const data = await authSignUp(email, password, {
+            username,
+            full_name: fullName,
+            contact_number: contactNumber,
+        });
 
-        if (data.user) {
+        // When email confirmation is enabled, Supabase returns a user object but
+        // NO session — the account is not active yet. Do NOT authenticate in that
+        // case: there is no access token, so every RLS query would fail and the
+        // "check your email" screen would be skipped entirely. Only sign the user
+        // in when a real session is present.
+        if (data.user && data.session) {
             // Clear onboarding flag so new users always see the onboarding flow
             localStorage.removeItem("diet-specifix-onboarding-done");
             // Reset browser URL to "/" so BrowserRouter mounts at home (onboarding)
@@ -118,7 +130,21 @@ export function AuthProvider({ children }) {
             setUser(data.user);
             setSession(data.session);
             try {
-                const userProfile = await fetchUserProfile(data.user.id);
+                let userProfile = await fetchUserProfile(data.user.id);
+                // Backfill: an email-confirmation sign-up has no profile row yet
+                // (it couldn't be created at sign-up without a session). Now that a
+                // session exists, recreate it from the metadata captured at sign-up.
+                if (!userProfile) {
+                    const meta = data.user.user_metadata || {};
+                    if (meta.username) {
+                        userProfile = await createUserProfile(
+                            data.user.id,
+                            meta.username,
+                            meta.full_name,
+                            meta.contact_number
+                        );
+                    }
+                }
                 setProfile(userProfile);
             } catch (profileErr) {
                 // Auth succeeded but profile fetch failed — user can still use the app

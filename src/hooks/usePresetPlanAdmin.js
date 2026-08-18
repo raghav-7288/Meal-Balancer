@@ -109,16 +109,10 @@ export function usePresetPlanAdmin() {
         }
     }, [activePlan]);
 
-    // ─── Auto-dismiss delete toast and perform actual deletion ────────────
+    // ─── Auto-dismiss delete toast after undo window ─────────────────────
     useEffect(() => {
         if (deleteToast) {
-            deleteTimerRef.current = setTimeout(async () => {
-                try {
-                    await deletePresetPlan(deleteToast.planId);
-                } catch (err) {
-                    console.error("Failed to delete plan:", err.message);
-                    toast.error("Failed to delete plan from database");
-                }
+            deleteTimerRef.current = setTimeout(() => {
                 setDeleteToast(null);
             }, 10000);
             return () => {
@@ -126,6 +120,14 @@ export function usePresetPlanAdmin() {
             };
         }
     }, [deleteToast]);
+
+    /**
+     * Dismiss the delete toast immediately (e.g. ✕ button).
+     */
+    const confirmDelete = useCallback(() => {
+        if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
+        setDeleteToast(null);
+    }, []);
 
     // ─── Auto-dismiss item delete toast ──────────────────────────────────
     useEffect(() => {
@@ -190,7 +192,7 @@ export function usePresetPlanAdmin() {
 
     // ─── Delete a preset plan (with undo) ──────────────────────────────
     const removePlan = useCallback(
-        (id) => {
+        async (id) => {
             const deletedPlan = plans.find((p) => p.id === id);
             if (!deletedPlan) return;
 
@@ -206,15 +208,34 @@ export function usePresetPlanAdmin() {
                 clearTimeout(deleteTimerRef.current);
             }
 
-            // Show undo toast — actual Supabase deletion happens on auto-dismiss
+            // Delete from database IMMEDIATELY
+            try {
+                await deletePresetPlan(id);
+            } catch (err) {
+                console.error("Failed to delete plan:", err.message);
+                toast.error("Failed to delete plan from database");
+                // Restore the plan in local state since DB delete failed
+                setPlans((prev) => [...prev, deletedPlan]);
+                setActivePlanId(deletedPlan.id);
+                return;
+            }
+
+            // Show undo toast — undo will re-insert the plan into the DB
             setDeleteToast({
                 planId: id,
                 planName: deletedPlan.name,
-                undoAction: () => {
-                    setPlans((prev) => [...prev, deletedPlan]);
-                    setActivePlanId(deletedPlan.id);
-                    setDeleteToast(null);
+                undoAction: async () => {
                     if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
+                    setDeleteToast(null);
+                    try {
+                        await upsertPresetPlan(deletedPlan);
+                        setPlans((prev) => [...prev, deletedPlan]);
+                        setActivePlanId(deletedPlan.id);
+                        toast.success(`"${deletedPlan.name}" restored`);
+                    } catch (err) {
+                        console.error("Failed to restore plan:", err.message);
+                        toast.error("Failed to restore plan");
+                    }
                 },
             });
         },
@@ -458,6 +479,7 @@ export function usePresetPlanAdmin() {
         createPlan,
         savePlan,
         removePlan,
+        confirmDelete,
         toggleActive,
         updatePlanField,
         addFood,

@@ -153,9 +153,14 @@ export function useDashboardState() {
     }, [guidelines]);
 
     const saveGuidelines = useCallback(() => {
+        const planId = activePlanIdRef.current;
+        // Only save if the active plan is actually a user plan
+        const isUserPlan = userPlansRef.current.some((p) => p.id === planId);
+        if (!isUserPlan) return;
+
         setUserPlans((prev) =>
             prev.map((plan) =>
-                plan.id === activePlanIdRef.current
+                plan.id === planId
                     ? { ...plan, guidelines: guidelinesRef.current }
                     : plan
             )
@@ -180,25 +185,11 @@ export function useDashboardState() {
             const dayItems = allItems.filter((i) => i.day === viewDay || !i.day);
             const totals = aggregateMeal(dayItems, resolveNutrients);
             mealTotals[mealName] = totals;
-            mealScores[mealName] = scoreMeal({
-                cerealEnergyPct: totals.cerealEnergyPct,
-                vegetablesG: totals.vegetablesG,
-                protein: totals.protein,
-                fibre: totals.fibre,
-                addedSugar: totals.addedSugar,
-                visibleFat: totals.visibleFat,
-            });
+            mealScores[mealName] = scoreMeal(totals);
         }
 
         const dayTotals = combineDay(mealTotals);
-        const dayScore = scoreDay({
-            cerealEnergyPct: dayTotals.cerealEnergyPct,
-            vegetablesG: dayTotals.vegetablesG,
-            protein: dayTotals.protein,
-            fibre: dayTotals.fibre,
-            addedSugar: dayTotals.addedSugar,
-            visibleFat: dayTotals.visibleFat,
-        });
+        const dayScore = scoreDay(dayTotals);
 
         return { plan, mealTotals, mealScores, dayTotals, dayScore };
     };

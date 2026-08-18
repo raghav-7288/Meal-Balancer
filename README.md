@@ -146,10 +146,10 @@ SPA routing is handled by `vercel.json` rewrites. Set environment variables (`VI
 │   ├── index.css            Tailwind imports + base styles
 │   └── main.jsx             Entry point
 ├── supabase/
-│   ├── migrations/          SQL migration files (001–012)
+│   ├── migrations/          SQL migration files (001–016)
 │   ├── diagnostic-queries.sql
 │   └── SUPABASE_AUDIT.md
-├── tests/                   Unit & component tests (Vitest, 56 test files, 661 tests)
+├── tests/                   Unit & component tests (Vitest, 75 test files, 968 tests)
 ├── CONTEXT.md               Auto-generated project context
 ├── DATABASE_SCHEMA.md       Full Supabase schema documentation
 ├── SUGGESTIONS.md           Pending improvement suggestions & roadmap
@@ -249,7 +249,7 @@ See [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) for full schema details including
 - **Prettier** — Auto-formats code on save/commit
 - **Husky + lint-staged** — Pre-commit hooks run format + lint on staged files
 - **CI/CD** — GitHub Actions pipeline: format → lint → typecheck → test with coverage → build → E2E
-- **@testing-library/react** — Component testing with jsdom environment (56 test files, 661 tests)
+- **@testing-library/react** — Component testing with jsdom environment (75 test files, 968 tests)
 - **Coverage Thresholds** — Vitest v8 provider enforces 70% lines, 65% functions, 60% branches
 - **Playwright** — E2E tests + visual regression snapshots + accessibility audits (axe-core)
 - **Accessibility Testing** — Automated WCAG 2.1 AA compliance via `@axe-core/playwright`

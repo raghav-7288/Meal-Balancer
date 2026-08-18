@@ -1,9 +1,25 @@
-import { memo } from "react";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { memo, useRef, useState, useEffect } from "react";
+import { PieChart, Pie, Cell, Tooltip } from "recharts";
 
 const COLORS = ["#6366f1", "#10b981", "#ef4444", "#f59e0b"];
 
 function MacroChart({ dayTotals }) {
+    // Measure container width directly (ResponsiveContainer is unreliable in sidebar)
+    const containerRef = useRef(null);
+    const [chartWidth, setChartWidth] = useState(220);
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+        const ro = new ResizeObserver((entries) => {
+            const w = entries[0]?.contentRect?.width;
+            if (w && w > 0) setChartWidth(Math.round(w));
+        });
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0) setChartWidth(Math.round(rect.width));
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, []);
+
     if (!dayTotals || dayTotals.kcal === 0) {
         return (
             <div className="macro-chart-empty">
@@ -27,38 +43,37 @@ function MacroChart({ dayTotals }) {
 
     return (
         <div className="macro-chart" role="img" aria-label="Macronutrient distribution pie chart">
-            <div className="macro-chart-ring-area">
-                <ResponsiveContainer width="100%" height={160}>
-                    <PieChart>
-                        <Pie
-                            data={data}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={38}
-                            outerRadius={62}
-                            paddingAngle={3}
-                            dataKey="value"
-                            label={false}
-                            labelLine={false}
-                        >
-                            {data.map((entry, index) => (
-                                <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                        </Pie>
-                        <Tooltip
-                            formatter={(value, name) => {
-                                const item = legendData.find((d) => d.name === name);
-                                return [`${value} kcal (${item?.pct || 0}%)`, name];
-                            }}
-                            wrapperStyle={{ zIndex: 10 }}
-                            contentStyle={{
-                                borderRadius: "10px",
-                                border: "1px solid #e5e7eb",
-                                fontSize: "12px",
-                            }}
-                        />
-                    </PieChart>
-                </ResponsiveContainer>
+            <div className="macro-chart-ring-area" ref={containerRef}>
+                <PieChart width={chartWidth} height={160}>
+                    <Pie
+                        data={data}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={38}
+                        outerRadius={62}
+                        paddingAngle={3}
+                        dataKey="value"
+                        nameKey="name"
+                        label={false}
+                        labelLine={false}
+                    >
+                        {data.map((entry, index) => (
+                            <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                    </Pie>
+                    <Tooltip
+                        formatter={(value, name) => {
+                            const item = legendData.find((d) => d.name === name);
+                            return [`${value} kcal (${item?.pct || 0}%)`, name];
+                        }}
+                        wrapperStyle={{ zIndex: 10 }}
+                        contentStyle={{
+                            borderRadius: "10px",
+                            border: "1px solid #e5e7eb",
+                            fontSize: "12px",
+                        }}
+                    />
+                </PieChart>
                 <div className="macro-chart-center-label">
                     <span className="macro-center-value">{Math.round(dayTotals.kcal)}</span>
                     <span className="macro-center-unit">kcal</span>

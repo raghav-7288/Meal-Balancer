@@ -15,7 +15,7 @@ import {
 } from "../../hooks/useNutrientResolver";
 import { useAuth } from "../../hooks/useAuth";
 import { useProfile } from "../../context/ProfileContext";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from "recharts";
 import Section from "../ui/Section";
 
 function WeeklyPlannerPage() {
@@ -93,6 +93,23 @@ function WeeklyPlannerPage() {
             daysPlanned: daysWithFood.length,
         };
     }, [daySummaries]);
+
+    // ── Chart container width (replaces ResponsiveContainer for reliability) ──
+    const chartContainerRef = useRef(null);
+    const [chartWidth, setChartWidth] = useState(600);
+    useEffect(() => {
+        const el = chartContainerRef.current;
+        if (!el) return;
+        const ro = new ResizeObserver((entries) => {
+            const w = entries[0]?.contentRect?.width;
+            if (w && w > 0) setChartWidth(Math.round(w));
+        });
+        // Measure immediately
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0) setChartWidth(Math.round(rect.width));
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, []);
 
     // Download handler
     const [isDownloading, setIsDownloading] = useState(false);
@@ -389,29 +406,28 @@ function WeeklyPlannerPage() {
             {/* Weekly Score Chart */}
             <Section title="Daily scores across the week" icon={<BarChart3 size={16} />}>
                 <div
-                    style={{ width: "100%", height: 220 }}
+                    ref={chartContainerRef}
+                    style={{ width: "100%", minHeight: 220 }}
                     role="img"
                     aria-label={`Weekly score bar chart. ${chartData.map((d) => `${d.day}: ${d.score}`).join(", ")}.`}
                 >
-                    <ResponsiveContainer>
-                        <BarChart data={chartData} barCategoryGap="20%">
-                            <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-                            <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
-                            <Tooltip
-                                formatter={(value) => [`${value}`, "Score"]}
-                                contentStyle={{
-                                    borderRadius: 10,
-                                    fontSize: 13,
-                                    border: "1px solid #e5e7eb",
-                                }}
-                            />
-                            <Bar dataKey="score" radius={[6, 6, 0, 0]}>
-                                {chartData.map((entry, i) => (
-                                    <Cell key={i} fill={scoreColor(entry.score)} />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
+                    <BarChart width={chartWidth} height={220} data={chartData} barCategoryGap="20%">
+                        <XAxis dataKey="day" tick={{ fontSize: 12 }} />
+                        <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
+                        <Tooltip
+                            formatter={(value) => [`${value}`, "Score"]}
+                            contentStyle={{
+                                borderRadius: 10,
+                                fontSize: 13,
+                                border: "1px solid #e5e7eb",
+                            }}
+                        />
+                        <Bar dataKey="score" radius={[6, 6, 0, 0]}>
+                            {chartData.map((entry, i) => (
+                                <Cell key={i} fill={scoreColor(entry.score)} />
+                            ))}
+                        </Bar>
+                    </BarChart>
                 </div>
                 {/* Screen-reader accessible data alternative */}
                 <table className="sr-only" aria-label="Daily scores across the week">

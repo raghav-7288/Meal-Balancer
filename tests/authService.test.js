@@ -46,6 +46,7 @@ import {
     onAuthStateChange,
     signInWithGoogle,
 } from "../src/services/authService";
+import { supabase } from "../src/lib/supabaseClient";
 
 describe("AuthService", () => {
     beforeEach(() => {
@@ -79,6 +80,35 @@ describe("AuthService", () => {
             authResult = { data: null, error: { message: "Password should be at least 6 characters" } };
 
             await expect(signUp("[REDACTED_EMAIL_ADDRESS_2]", "12")).rejects.toThrow("Password should be at least 6 characters");
+        });
+
+        it("should forward profile details as user_metadata (options.data)", async () => {
+            authResult = { data: { user: { id: "u" }, session: null }, error: null };
+
+            await signUp("[REDACTED_EMAIL_ADDRESS_2]", "password123", {
+                username: "john",
+                full_name: "John Doe",
+                contact_number: "555",
+            });
+
+            expect(supabase.auth.signUp).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    email: "[REDACTED_EMAIL_ADDRESS_2]",
+                    password: "password123",
+                    options: { data: { username: "john", full_name: "John Doe", contact_number: "555" } },
+                })
+            );
+        });
+
+        it("should omit options when no metadata is provided", async () => {
+            authResult = { data: { user: { id: "u" }, session: { access_token: "t" } }, error: null };
+
+            await signUp("[REDACTED_EMAIL_ADDRESS_2]", "password123");
+
+            expect(supabase.auth.signUp).toHaveBeenCalledWith({
+                email: "[REDACTED_EMAIL_ADDRESS_2]",
+                password: "password123",
+            });
         });
     });
 

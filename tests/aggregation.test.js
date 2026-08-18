@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { aggregateMeal, combineDay, foodById } from "../src/engines/nutrientEngine";
+import { scoreDay } from "../src/engines/scoringEngine";
 
 describe("foodById", () => {
     it("returns a known food by id", () => {
@@ -97,6 +98,73 @@ describe("aggregateMeal", () => {
         expect(result.vegetablesG).toBe(150);
     });
 
+    it("tracks addedSugar grams for DB items in the sugar group (by name)", () => {
+        const result = aggregateMeal([
+            {
+                foodId: "2000",
+                foodName: "Sugar",
+                grams: 30,
+                nutrients: { kcal: 120, carbs: 30, protein: 0, fat: 0, fibre: 0, vitamins: 0, minerals: 0 },
+                foodGroup: "sugar",
+            },
+        ]);
+        expect(result.addedSugar).toBe(30);
+    });
+
+    it("tracks addedSugar grams for DB items in the sugar group (by group id 9)", () => {
+        const result = aggregateMeal([
+            {
+                foodId: "2001",
+                foodName: "Jaggery",
+                grams: 20,
+                nutrients: { kcal: 76, carbs: 19, protein: 0, fat: 0, fibre: 0, vitamins: 0, minerals: 1 },
+                foodGroupId: 9,
+            },
+        ]);
+        expect(result.addedSugar).toBe(20);
+    });
+
+    it("does not count non-sugar foods toward addedSugar", () => {
+        const result = aggregateMeal([
+            { foodId: "rice", grams: 100 },
+            {
+                foodId: "1000",
+                foodName: "DB Veggie",
+                grams: 150,
+                nutrients: { kcal: 25, carbs: 5, protein: 1, fat: 0, fibre: 3, vitamins: 4, minerals: 3 },
+                foodGroup: "vegetables",
+            },
+        ]);
+        expect(result.addedSugar).toBe(0);
+    });
+
+    it("accumulates addedSugar from composite item ingredients", () => {
+        const result = aggregateMeal([
+            {
+                foodId: "composite",
+                foodName: "Sweet Tea",
+                grams: 40,
+                ingredients: [
+                    {
+                        foodId: "2002",
+                        foodName: "Sugar",
+                        grams: 15,
+                        nutrients: { kcal: 60, carbs: 15, protein: 0, fat: 0, fibre: 0, vitamins: 0, minerals: 0 },
+                        foodGroup: "sugar",
+                    },
+                    {
+                        foodId: "2003",
+                        foodName: "Milk",
+                        grams: 25,
+                        nutrients: { kcal: 15, carbs: 1, protein: 1, fat: 1, fibre: 0, vitamins: 0, minerals: 0 },
+                        foodGroup: "dairy",
+                    },
+                ],
+            },
+        ]);
+        expect(result.addedSugar).toBe(15);
+    });
+
     it("mixes DB items and local items correctly", () => {
         const result = aggregateMeal([
             { foodId: "rice", grams: 100 }, // local: kcal=130
@@ -144,6 +212,59 @@ describe("combineDay", () => {
 
         const day = combineDay(meals);
         expect(day.exchangeTotals.cereals).toBe(3); // 1 + 2
+    });
+
+    it("sums addedSugar across meals for the day total", () => {
+        const sugarItem = (grams) => ({
+            foodId: "2000",
+            foodName: "Sugar",
+            grams,
+            nutrients: { kcal: grams * 4, carbs: grams, protein: 0, fat: 0, fibre: 0, vitamins: 0, minerals: 0 },
+            foodGroup: "sugar",
+        });
+        const meals = {
+            Breakfast: aggregateMeal([sugarItem(10)]),
+            Lunch: aggregateMeal([sugarItem(20)]),
+        };
+
+        const day = combineDay(meals);
+        expect(day.addedSugar).toBe(30);
+    });
+});
+
+describe("addedSugar → scoreDay integration", () => {
+    // A balanced day (enough veg/protein/fibre, no cereal/fat penalties) so the
+    // ONLY differentiator is the added-sugar rule. Proves the tracked value flows
+    // through aggregateMeal → combineDay → scoreDay (the dashboard score KPI).
+    const balancedVeg = {
+        foodId: "3000",
+        foodName: "Rich Veg",
+        grams: 400,
+        nutrients: { kcal: 40, carbs: 5, protein: 8, fat: 0, fibre: 6, vitamins: 4, minerals: 3 },
+        foodGroup: "vegetables",
+    };
+    const sugar = {
+        foodId: "3001",
+        foodName: "Sugar",
+        grams: 30,
+        nutrients: { kcal: 400, carbs: 100, protein: 0, fat: 0, fibre: 0, vitamins: 0, minerals: 0 },
+        foodGroup: "sugar",
+    };
+
+    it("applies the added-sugar penalty when sugar exceeds the daily limit", () => {
+        const day = combineDay({ Meal: aggregateMeal([balancedVeg, sugar]) });
+        expect(day.addedSugar).toBe(30); // > APP_CONFIG.addedSugarLimitG (25)
+
+        const result = scoreDay(day);
+        expect(result.reasons).toContain("Added sugar exceeds the limit.");
+    });
+
+    it("scores an otherwise-identical day higher without the sugar", () => {
+        const withSugar = scoreDay(combineDay({ Meal: aggregateMeal([balancedVeg, sugar]) }));
+        const withoutSugar = scoreDay(combineDay({ Meal: aggregateMeal([balancedVeg]) }));
+
+        expect(withoutSugar.reasons).not.toContain("Added sugar exceeds the limit.");
+        expect(withSugar.score).toBeLessThan(withoutSugar.score);
     });
 });
 

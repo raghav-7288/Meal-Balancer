@@ -381,6 +381,17 @@ body.dark-mode .nav-theme-toggle::after {
     white-space: nowrap;
 }
 
+/* When rendered as a button, inherit same styling */
+button.sync-badge {
+    cursor: pointer;
+    font-family: inherit;
+    line-height: inherit;
+}
+
+button.sync-badge:hover {
+    filter: brightness(0.95);
+}
+
 .sync-badge--syncing {
     background: #fef3c7;
     color: #92400e;

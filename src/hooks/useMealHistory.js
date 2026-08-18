@@ -7,6 +7,7 @@ import {
     clearMealHistory as clearMealHistoryDb,
     dbRowToEntry,
 } from "../services/mealHistoryService";
+import { getLocalDateKey } from "../utils/dateKey";
 
 const LOCAL_STORAGE_KEY = "diet-specifix-meal-history";
 
@@ -115,7 +116,7 @@ export function useMealHistory() {
      * If an entry for today already exists, it is replaced.
      */
     function logDay(entryData) {
-        const today = new Date().toISOString().split("T")[0];
+        const today = getLocalDateKey();
 
         setHistory((prev) => {
             const existingIdx = prev.findIndex((e) => e.date === today);

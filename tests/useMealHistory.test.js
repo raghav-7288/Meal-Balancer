@@ -38,6 +38,7 @@ import {
     clearMealHistory,
 } from "../src/services/mealHistoryService";
 import { useMealHistory } from "../src/hooks/useMealHistory";
+import { getLocalDateKey } from "../src/utils/dateKey";
 
 describe("useMealHistory", () => {
     beforeEach(() => {
@@ -94,11 +95,11 @@ describe("useMealHistory", () => {
         const entry = result.current.history[0];
         expect(entry.planName).toBe("My Plan");
         expect(entry.score).toBe(78);
-        expect(entry.date).toBe(new Date().toISOString().split("T")[0]);
+        expect(entry.date).toBe(getLocalDateKey());
     });
 
     it("logDay replaces existing entry for today", () => {
-        const today = new Date().toISOString().split("T")[0];
+        const today = getLocalDateKey();
         const existing = [
             { id: "old-entry", date: today, score: 50, planName: "Old Plan" },
         ];
