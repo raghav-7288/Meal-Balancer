@@ -215,6 +215,7 @@ export function accumulateNutrients(
  * In addition to macro/micro sums, tracks:
  * - `vegetablesG` — total grams from "vegetables" group
  * - `visibleFat` — total grams from "fats" group (added oils/ghee)
+ * - `addedSugar` — total grams from "sugar" group (added sugars/jaggery)
  * - `cerealEnergy` — kcal contributed by "cereals" group
  * - `cerealEnergyPct` — cereal kcal as % of total meal kcal
  * - `exchangeTotals` — exchange count per food group (factor = grams / reference)
@@ -264,6 +265,9 @@ export function aggregateMeal(
     };
 
     for (const item of flatItems) {
+        // Guard against undefined/NaN/non-numeric grams — coerce to 0
+        const grams = Number.isFinite(item.grams) ? item.grams : 0;
+
         // Prefer embedded nutrients; otherwise hydrate DB items via the resolver.
         const nutrients =
             item.nutrients ||
@@ -271,12 +275,13 @@ export function aggregateMeal(
 
         if (nutrients) {
             // DB items: nutrients are per 100g
-            const factor = item.grams / 100;
+            const factor = grams / 100;
             const kcal = accumulateNutrients(totals, nutrients, factor);
 
             const group = normalizeFoodGroup(item.foodGroup, item.foodGroupId);
-            totals.visibleFat += group === "fats" ? item.grams : 0;
-            totals.vegetablesG += group === "vegetables" ? item.grams : 0;
+            totals.visibleFat += group === "fats" ? grams : 0;
+            totals.vegetablesG += group === "vegetables" ? grams : 0;
+            totals.addedSugar += group === "sugar" ? grams : 0;
             totals.cerealEnergy += group === "cereals" ? kcal : 0;
             if (group) {
                 totals.exchangeTotals[group] = (totals.exchangeTotals[group] || 0) + factor;
@@ -286,12 +291,13 @@ export function aggregateMeal(
             const food = foodById(item.foodId);
             if (!food) continue;
             const gramsPerExch = food.gramsPerExchange || 1; // guard against 0/undefined
-            const factor = item.grams / gramsPerExch;
+            const factor = grams / gramsPerExch;
             const kcal = accumulateNutrients(totals, food, factor);
 
             const group = normalizeFoodGroup(food.group);
-            totals.visibleFat += group === "fats" ? item.grams : 0;
-            totals.vegetablesG += group === "vegetables" ? item.grams : 0;
+            totals.visibleFat += group === "fats" ? grams : 0;
+            totals.vegetablesG += group === "vegetables" ? grams : 0;
+            totals.addedSugar += group === "sugar" ? grams : 0;
             totals.cerealEnergy += group === "cereals" ? kcal : 0;
             totals.exchangeTotals[group] = (totals.exchangeTotals[group] || 0) + factor;
         }

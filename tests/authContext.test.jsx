@@ -302,6 +302,164 @@ describe("AuthContext", () => {
         expect(createUserProfile).toHaveBeenCalledWith("u3", "newuser", "New User", "9876543210");
     });
 
+    it("does NOT authenticate when sign up needs email confirmation (no session)", async () => {
+        getSession.mockResolvedValue(null);
+
+        // Email confirmation enabled: Supabase returns a user but no session.
+        authSignUp.mockResolvedValue({
+            user: { id: "u7", email: "[REDACTED_EMAIL_ADDRESS_12]" },
+            session: null,
+        });
+
+        let contextValue;
+        function Spy() {
+            contextValue = useContext(AuthContext);
+            return null;
+        }
+
+        render(
+            <AuthProvider>
+                <Spy />
+            </AuthProvider>
+        );
+
+        await act(async () => {
+            await vi.runAllTimersAsync();
+        });
+
+        let result;
+        await act(async () => {
+            result = await contextValue.signUp(
+                "[REDACTED_EMAIL_ADDRESS_12]",
+                "pass123",
+                "pending",
+                "Pending User",
+                ""
+            );
+        });
+
+        // Must stay signed out until the email is confirmed
+        expect(contextValue.isAuthenticated).toBe(false);
+        expect(contextValue.user).toBeNull();
+        // No session → profile creation must not be attempted (RLS would reject it)
+        expect(createUserProfile).not.toHaveBeenCalled();
+        // Data is still returned so the form can show "check your email"
+        expect(result.user).toBeTruthy();
+        expect(result.session).toBeNull();
+    });
+
+    it("forwards typed profile details to signUp as metadata", async () => {
+        getSession.mockResolvedValue(null);
+        authSignUp.mockResolvedValue({ user: { id: "u7b" }, session: null });
+
+        let contextValue;
+        function Spy() {
+            contextValue = useContext(AuthContext);
+            return null;
+        }
+
+        render(
+            <AuthProvider>
+                <Spy />
+            </AuthProvider>
+        );
+
+        await act(async () => {
+            await vi.runAllTimersAsync();
+        });
+
+        await act(async () => {
+            await contextValue.signUp("[REDACTED_EMAIL_ADDRESS_12]", "pass123", "pending", "Pending User", "555");
+        });
+
+        expect(authSignUp).toHaveBeenCalledWith("[REDACTED_EMAIL_ADDRESS_12]", "pass123", {
+            username: "pending",
+            full_name: "Pending User",
+            contact_number: "555",
+        });
+    });
+
+    it("backfills a missing profile on sign in from sign-up metadata", async () => {
+        getSession.mockResolvedValue(null);
+
+        authSignIn.mockResolvedValue({
+            user: {
+                id: "u8",
+                email: "[REDACTED_EMAIL_ADDRESS_13]",
+                user_metadata: {
+                    username: "confirmed",
+                    full_name: "Confirmed User",
+                    contact_number: "12345",
+                },
+            },
+            session: { access_token: "t8" },
+        });
+        // Confirmed user has no profile row yet
+        fetchUserProfile.mockResolvedValue(null);
+        createUserProfile.mockResolvedValue({
+            user_id: "u8",
+            username: "confirmed",
+            full_name: "Confirmed User",
+        });
+
+        let contextValue;
+        function Spy() {
+            contextValue = useContext(AuthContext);
+            return null;
+        }
+
+        render(
+            <AuthProvider>
+                <Spy />
+            </AuthProvider>
+        );
+
+        await act(async () => {
+            await vi.runAllTimersAsync();
+        });
+
+        await act(async () => {
+            await contextValue.signIn("[REDACTED_EMAIL_ADDRESS_13]", "pass123");
+        });
+
+        expect(contextValue.isAuthenticated).toBe(true);
+        expect(createUserProfile).toHaveBeenCalledWith("u8", "confirmed", "Confirmed User", "12345");
+        expect(contextValue.profile.full_name).toBe("Confirmed User");
+    });
+
+    it("does NOT recreate the profile on sign in when one already exists", async () => {
+        getSession.mockResolvedValue(null);
+
+        authSignIn.mockResolvedValue({
+            user: { id: "u9", email: "[REDACTED_EMAIL_ADDRESS_14]", user_metadata: { username: "existing" } },
+            session: { access_token: "t9" },
+        });
+        fetchUserProfile.mockResolvedValue({ user_id: "u9", full_name: "Existing" });
+
+        let contextValue;
+        function Spy() {
+            contextValue = useContext(AuthContext);
+            return null;
+        }
+
+        render(
+            <AuthProvider>
+                <Spy />
+            </AuthProvider>
+        );
+
+        await act(async () => {
+            await vi.runAllTimersAsync();
+        });
+
+        await act(async () => {
+            await contextValue.signIn("[REDACTED_EMAIL_ADDRESS_14]", "pass123");
+        });
+
+        expect(createUserProfile).not.toHaveBeenCalled();
+        expect(contextValue.profile.full_name).toBe("Existing");
+    });
+
     it("should provide updateProfile function", async () => {
         const mockSession = { user: { id: "u1", email: "[REDACTED_EMAIL_ADDRESS_7]" }, access_token: "t" };
         getSession.mockResolvedValue(mockSession);

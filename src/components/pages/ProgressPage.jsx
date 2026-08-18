@@ -20,6 +20,7 @@ import {
     AreaChart,
 } from "recharts";
 import { useMealHistory } from "../../hooks/useMealHistory";
+import { calculateStreak } from "../../utils/progressStats";
 import Section from "../ui/Section";
 import EmptyState from "../ui/EmptyState";
 import LazyChart from "../ui/LazyChart";
@@ -73,24 +74,8 @@ function ProgressPage() {
         const avg = Math.round(scores.reduce((s, v) => s + v, 0) / scores.length);
 
         // Streak: count consecutive dates backwards from most recent entry
-        // Only count if the most recent entry is from today or yesterday
-        let streak = 0;
-        if (sorted.length > 0) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const mostRecent = new Date(sorted[sorted.length - 1].date + "T00:00:00");
-            const daysSinceLast = Math.round((today.getTime() - mostRecent.getTime()) / 86400000);
-            if (daysSinceLast <= 1) {
-                streak = 1;
-                for (let i = sorted.length - 1; i > 0; i--) {
-                    const curr = new Date(sorted[i].date + "T00:00:00");
-                    const prev = new Date(sorted[i - 1].date + "T00:00:00");
-                    const diff = Math.round((curr.getTime() - prev.getTime()) / 86400000);
-                    if (diff === 1) streak++;
-                    else break;
-                }
-            }
-        }
+        // Only count if the most recent entry is from today or yesterday.
+        const streak = calculateStreak(sorted);
 
         // Trend: compare last 7 entries avg vs previous 7
         let trend = "flat";

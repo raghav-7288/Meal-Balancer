@@ -37,7 +37,6 @@ function PresetAdminPage() {
         saving,
         isDirty,
         deleteToast,
-        setDeleteToast,
         itemDeleteToast,
         setItemDeleteToast,
         viewDay,
@@ -45,6 +44,7 @@ function PresetAdminPage() {
         createPlan,
         savePlan,
         removePlan,
+        confirmDelete,
         toggleActive,
         updatePlanField,
         addFood,
@@ -172,7 +172,7 @@ function PresetAdminPage() {
                         <button type="button" className="undo-btn" onClick={deleteToast.undoAction}>
                             Undo
                         </button>
-                        <button type="button" className="close-btn" onClick={() => setDeleteToast(null)}>
+                        <button type="button" className="close-btn" onClick={confirmDelete}>
                             ✕
                         </button>
                     </div>

@@ -4,10 +4,18 @@ import { supabase } from "../lib/supabaseClient";
  * Sign up a new user with email and password.
  * @param {string} email
  * @param {string} password
+ * @param {object} [metadata] - Optional profile details (username, full_name,
+ *   contact_number) persisted as auth user_metadata. This lets the profile row be
+ *   recreated after email confirmation, when no session exists at sign-up time to
+ *   insert it directly.
  * @returns {Promise<{user: object, session: object}>}
  */
-export async function signUp(email, password) {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+export async function signUp(email, password, metadata) {
+    const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        ...(metadata ? { options: { data: metadata } } : {}),
+    });
 
     if (error) {
         throw new Error(error.message);

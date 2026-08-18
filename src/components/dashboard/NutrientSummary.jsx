@@ -1,6 +1,6 @@
-import { memo, useMemo } from "react";
+import { memo, useMemo, useRef, useState, useEffect } from "react";
 import { BarChart3, Leaf } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from "recharts";
 import { foodById } from "../../engines/nutrientEngine";
 import Section from "../ui/Section";
 
@@ -14,6 +14,22 @@ const NUTRIENT_COLORS = {
 };
 
 function NutrientSummary({ activeSummary, activePlan, viewDay }) {
+    // Measure container width directly (bypasses ResponsiveContainer issues)
+    const chartContainerRef = useRef(null);
+    const [chartWidth, setChartWidth] = useState(400);
+    useEffect(() => {
+        const el = chartContainerRef.current;
+        if (!el) return;
+        const ro = new ResizeObserver((entries) => {
+            const w = entries[0]?.contentRect?.width;
+            if (w && w > 0) setChartWidth(Math.round(w));
+        });
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0) setChartWidth(Math.round(rect.width));
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, []);
+
     const nutrients = useMemo(
         () =>
             [
@@ -31,7 +47,18 @@ function NutrientSummary({ activeSummary, activePlan, viewDay }) {
         const allItems = Object.values(activePlan?.meals || {})
             .flat()
             .filter((i) => i.day === viewDay || !i.day);
-        return allItems.map((item) => {
+        // Flatten composite items so each ingredient gets its own exchange row
+        const flatItems = [];
+        for (const item of allItems) {
+            if (item.ingredients && item.ingredients.length > 0) {
+                for (const ing of item.ingredients) {
+                    flatItems.push({ ...ing, id: `${item.id}-${ing.foodId}` });
+                }
+            } else {
+                flatItems.push(item);
+            }
+        }
+        return flatItems.map((item) => {
             const food = foodById(item.foodId);
             const exchange = food ? item.grams / food.gramsPerExchange : 0;
             return { item, food, exchange };
@@ -45,38 +72,39 @@ function NutrientSummary({ activeSummary, activePlan, viewDay }) {
             <Section title="Daily nutrient-category summary" icon={<BarChart3 size={16} />}>
                 {hasData ? (
                     <div
+                        ref={chartContainerRef}
                         className="nutrient-chart-wrap"
                         role="img"
                         aria-label="Daily nutrient bar chart"
                     >
-                        <ResponsiveContainer width="100%" height={240}>
-                            <BarChart
-                                data={nutrients}
-                                layout="vertical"
-                                margin={{ top: 4, right: 30, left: 10, bottom: 4 }}
-                            >
-                                <XAxis type="number" tick={{ fontSize: 11 }} />
-                                <YAxis
-                                    type="category"
-                                    dataKey="name"
-                                    tick={{ fontSize: 12, fontWeight: 600 }}
-                                    width={70}
-                                />
-                                <Tooltip
-                                    formatter={(value) => [`${value} g`, "Amount"]}
-                                    contentStyle={{
-                                        borderRadius: "12px",
-                                        border: "1px solid #e5e7eb",
-                                        fontSize: "13px",
-                                    }}
-                                />
-                                <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={20}>
-                                    {nutrients.map((entry) => (
-                                        <Cell key={entry.name} fill={NUTRIENT_COLORS[entry.name]} />
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
+                        <BarChart
+                            width={chartWidth}
+                            height={240}
+                            data={nutrients}
+                            layout="vertical"
+                            margin={{ top: 4, right: 30, left: 10, bottom: 4 }}
+                        >
+                            <XAxis type="number" tick={{ fontSize: 11 }} />
+                            <YAxis
+                                type="category"
+                                dataKey="name"
+                                tick={{ fontSize: 12, fontWeight: 600 }}
+                                width={70}
+                            />
+                            <Tooltip
+                                formatter={(value) => [`${value} g`, "Amount"]}
+                                contentStyle={{
+                                    borderRadius: "12px",
+                                    border: "1px solid #e5e7eb",
+                                    fontSize: "13px",
+                                }}
+                            />
+                            <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={20}>
+                                {nutrients.map((entry) => (
+                                    <Cell key={entry.name} fill={NUTRIENT_COLORS[entry.name]} />
+                                ))}
+                            </Bar>
+                        </BarChart>
                     </div>
                 ) : (
                     <p className="small-copy" style={{ textAlign: "center", padding: "2rem 0" }}>

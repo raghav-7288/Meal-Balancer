@@ -24,8 +24,13 @@ const LBS_PER_KG = 2.20462;
 
 function cmToFtIn(cm) {
     const totalInches = cm / CM_PER_INCH;
-    const ft = Math.floor(totalInches / 12);
-    const inches = Math.round(totalInches % 12);
+    let ft = Math.floor(totalInches / 12);
+    let inches = Math.round(totalInches % 12);
+    // When rounding pushes remainder to 12, roll over to the next foot
+    if (inches >= 12) {
+        ft += 1;
+        inches = 0;
+    }
     return { ft, inches };
 }
 

@@ -63,8 +63,9 @@ export function buildMealTableRow(item, lookupFood, options = {}) {
         let kcal = 0, protein = 0, carbs = 0, fat = 0, fibre = 0;
 
         for (const ing of item.ingredients) {
+            const ingGrams = Number.isFinite(ing.grams) ? ing.grams : 0;
             if (ing.nutrients) {
-                const factor = ing.grams / 100;
+                const factor = ingGrams / 100;
                 kcal += (ing.nutrients.kcal || 0) * factor;
                 protein += (ing.nutrients.protein || 0) * factor;
                 carbs += (ing.nutrients.carbs || 0) * factor;
@@ -73,7 +74,7 @@ export function buildMealTableRow(item, lookupFood, options = {}) {
             } else {
                 const food = lookupFood(ing.foodId);
                 if (food) {
-                    const factor = ing.grams / food.gramsPerExchange;
+                    const factor = ingGrams / (food.gramsPerExchange || 1);
                     kcal += food.kcal * factor;
                     protein += food.protein * factor;
                     carbs += food.carbs * factor;
@@ -97,7 +98,7 @@ export function buildMealTableRow(item, lookupFood, options = {}) {
             ? ` (custom \u2248 ${item.equivalentFoodName})`
             : " (custom)";
     }
-    const grams = item.grams;
+    const grams = Number.isFinite(item.grams) ? item.grams : 0;
     const instructions = item.instructions || "";
     let kcal = 0,
         protein = "0",
@@ -113,7 +114,7 @@ export function buildMealTableRow(item, lookupFood, options = {}) {
         fat = ((item.nutrients.fat || 0) * factor).toFixed(1);
         fibre = ((item.nutrients.fibre || 0) * factor).toFixed(1);
     } else if (food) {
-        const factor = grams / food.gramsPerExchange;
+        const factor = grams / (food.gramsPerExchange || 1);
         kcal = Math.round(food.kcal * factor);
         protein = (food.protein * factor).toFixed(1);
         carbs = (food.carbs * factor).toFixed(1);

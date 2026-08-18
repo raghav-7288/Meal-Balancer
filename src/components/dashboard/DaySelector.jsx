@@ -58,53 +58,52 @@ function DaySelector({
                 ))}
             </div>
             <div className="planner-nav-actions">
-                {isAuthenticated && (
+                {isAuthenticated && syncStatus === "syncing" && (
                     <span
+                        className="sync-badge sync-badge--syncing"
+                        role="status"
+                        aria-live="polite"
+                        aria-label="Syncing plans"
+                    >
+                        <Loader size={12} className="spin" aria-hidden="true" /> Syncing
+                    </span>
+                )}
+                {isAuthenticated && syncStatus !== "syncing" && (
+                    <button
+                        type="button"
                         className={`sync-badge sync-badge--${syncStatus}`}
                         role="status"
                         aria-live="polite"
                         aria-label={
-                            syncStatus === "syncing"
-                                ? "Syncing plans"
-                                : syncStatus === "synced"
-                                  ? "Plans synced to cloud"
-                                  : syncStatus === "error"
-                                    ? `Sync failed — ${syncError ?? "using local data"}`
-                                    : "Plans stored locally"
+                            syncStatus === "synced"
+                                ? "Plans synced to cloud — click to re-sync"
+                                : syncStatus === "error"
+                                  ? `Sync failed — ${syncError ?? "using local data"}. Click to retry`
+                                  : "Plans stored locally — click to sync"
                         }
+                        onClick={retrySync}
+                        style={{
+                            cursor: "pointer",
+                            border: "1px solid",
+                            borderColor: "inherit",
+                        }}
                     >
-                        {syncStatus === "syncing" && (
-                            <>
-                                <Loader size={12} className="spin" aria-hidden="true" /> Syncing
-                            </>
-                        )}
                         {syncStatus === "synced" && (
                             <>
                                 <Cloud size={12} aria-hidden="true" /> Synced
                             </>
                         )}
                         {syncStatus === "error" && (
-                            <button
-                                type="button"
-                                className="sync-retry-btn"
-                                onClick={retrySync}
-                                aria-label="Retry syncing plans"
-                                style={{
-                                    background: "none",
-                                    border: "none",
-                                    cursor: "pointer",
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    gap: "4px",
-                                    color: "inherit",
-                                    fontSize: "inherit",
-                                    padding: 0,
-                                }}
-                            >
+                            <>
                                 <CloudOff size={12} aria-hidden="true" /> Retry
-                            </button>
+                            </>
                         )}
-                    </span>
+                        {syncStatus !== "synced" && syncStatus !== "error" && (
+                            <>
+                                <Cloud size={12} aria-hidden="true" /> Sync
+                            </>
+                        )}
+                    </button>
                 )}
                 {isAuthenticated && (
                     <Link

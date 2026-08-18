@@ -7,11 +7,12 @@ import {
     upsertDailyHealth,
     dbRowsToWaterData,
 } from "../../services/dailyHealthService";
+import { getLocalDateKey } from "../../utils/dateKey";
 
 const DEFAULT_TARGET = 8;
 
 function getTodayKey() {
-    return new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+    return getLocalDateKey(); // local "YYYY-MM-DD"
 }
 
 function WaterTrackerPage() {
@@ -127,7 +128,7 @@ function WaterTrackerPage() {
         for (let i = isComplete ? 0 : 1; i < 365; i++) {
             const d = new Date(today);
             d.setDate(d.getDate() - i);
-            const key = d.toISOString().slice(0, 10);
+            const key = getLocalDateKey(d);
             if ((waterData[key] || 0) >= target) {
                 streak++;
             } else {

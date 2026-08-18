@@ -1,38 +1,18 @@
 /**
  * Progress Page streak calculation logic tests.
  * Verifies the streak logic that counts consecutive days from the most recent entry.
+ *
+ * Imports the REAL implementation from src/utils/progressStats.js (previously this
+ * test re-implemented a copy, which could silently drift from the component code).
  */
 import { describe, it, expect } from "vitest";
-
-/**
- * Extracted streak calculation logic matching ProgressPage's implementation.
- * Returns 0 if no entries or most recent entry is more than 1 day old.
- */
-function calculateStreak(sorted) {
-    if (sorted.length === 0) return 0;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const mostRecent = new Date(sorted[sorted.length - 1].date + "T00:00:00");
-    const daysSinceLast = Math.round((today.getTime() - mostRecent.getTime()) / 86400000);
-
-    if (daysSinceLast > 1) return 0;
-
-    let streak = 1;
-    for (let i = sorted.length - 1; i > 0; i--) {
-        const curr = new Date(sorted[i].date + "T00:00:00");
-        const prev = new Date(sorted[i - 1].date + "T00:00:00");
-        const diff = Math.round((curr.getTime() - prev.getTime()) / 86400000);
-        if (diff === 1) streak++;
-        else break;
-    }
-    return streak;
-}
+import { calculateStreak } from "../src/utils/progressStats";
+import { getLocalDateKey } from "../src/utils/dateKey";
 
 function dateStr(daysAgo) {
     const d = new Date();
     d.setDate(d.getDate() - daysAgo);
-    return d.toISOString().split("T")[0];
+    return getLocalDateKey(d);
 }
 
 describe("Progress Streak Calculation", () => {

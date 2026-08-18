@@ -7,12 +7,13 @@ import {
     upsertDailyHealth,
     dbRowsToStepData,
 } from "../../services/dailyHealthService";
+import { getLocalDateKey } from "../../utils/dateKey";
 
 const DEFAULT_TARGET = 10000;
 const QUICK_ADD_OPTIONS = [500, 1000, 2000, 5000];
 
 function getTodayKey() {
-    return new Date().toISOString().slice(0, 10);
+    return getLocalDateKey();
 }
 
 function StepTrackerPage() {
@@ -132,7 +133,7 @@ function StepTrackerPage() {
         for (let i = isComplete ? 0 : 1; i < 365; i++) {
             const d = new Date(today);
             d.setDate(d.getDate() - i);
-            const key = d.toISOString().slice(0, 10);
+            const key = getLocalDateKey(d);
             if ((stepData[key] || 0) >= target) {
                 streak++;
             } else {
@@ -150,7 +151,7 @@ function StepTrackerPage() {
         for (let i = 0; i < 7; i++) {
             const d = new Date(today);
             d.setDate(d.getDate() - i);
-            const key = d.toISOString().slice(0, 10);
+            const key = getLocalDateKey(d);
             if (stepData[key] !== undefined) {
                 total += stepData[key];
                 days++;
@@ -353,7 +354,7 @@ function StepTrackerPage() {
                     {Array.from({ length: 7 }).map((_, i) => {
                         const d = new Date();
                         d.setDate(d.getDate() - (6 - i));
-                        const key = d.toISOString().slice(0, 10);
+                        const key = getLocalDateKey(d);
                         const daySteps = stepData[key] || 0;
                         const dayPercent = Math.min((daySteps / target) * 100, 100);
                         const dayLabel = d.toLocaleDateString("en", { weekday: "short" });
