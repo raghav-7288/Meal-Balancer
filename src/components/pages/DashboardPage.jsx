@@ -43,7 +43,9 @@ function DashboardPage() {
         isAddingFood,
         addFood,
         updateMealItem,
+        updateMealTime,
         removeMealItem,
+        copyMealItemToDays,
         newPlanName,
         setNewPlanName,
         saveNewPlan,
@@ -105,7 +107,7 @@ function DashboardPage() {
 
             {itemDeleteToast && (
                 <div className="delete-toast-popup" role="alert" aria-live="assertive">
-                    <span>🗑️ Removed &ldquo;{itemDeleteToast.foodLabel}&rdquo;</span>
+                    <span>️ Removed &ldquo;{itemDeleteToast.foodLabel}&rdquo;</span>
                     <div className="delete-toast-actions">
                         <button type="button" className="undo-btn" onClick={itemDeleteToast.undoAction}>
                             Undo
@@ -199,10 +201,13 @@ function DashboardPage() {
                         activeSummary={activeSummary}
                         isPresetActive={isPresetActive}
                         viewDay={viewDay}
+                        mealTimes={activePlan?.mealTimes}
                         onAddFood={addFood}
                         isAddingFood={isAddingFood}
                         onUpdateMealItem={updateMealItem}
+                        onUpdateMealTime={updateMealTime}
                         onRemoveMealItem={removeMealItem}
+                        onCopyMealItem={copyMealItemToDays}
                     />
 
                     <PlanGuidelines

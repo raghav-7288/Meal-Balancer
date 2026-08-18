@@ -178,6 +178,48 @@ describe("FoodSearchService", () => {
             expect(result.rawNutrients["energy"]).toEqual({ value: 130, unit: "kcal", code: "ENER" });
         });
 
+        it("should map IFCT names 'Fats' and 'Total Fibre'", async () => {
+            // The live IFCT dataset uses "Fats" and "Total Fibre" (not "Fat"/"Fibre").
+            const mockNutrientData = [
+                { value: 14.59, nutrient_definitions: { nutrient_name: "Carbohydrate", nutrient_code: "carbs", unit: "gram" } },
+                { value: 5.74, nutrient_definitions: { nutrient_name: "Protein", nutrient_code: "prot", unit: "gram" } },
+                { value: 7.02, nutrient_definitions: { nutrient_name: "Fats", nutrient_code: "fat", unit: "gram" } },
+                { value: 59.98, nutrient_definitions: { nutrient_name: "Total Fibre", nutrient_code: "fibre", unit: "gram" } },
+            ];
+            terminalResult = { data: mockNutrientData, error: null };
+
+            const result = await fetchFoodNutrients(1);
+            expect(result.nutrients.fat).toBe(7.02);
+            expect(result.nutrients.fibre).toBe(59.98);
+        });
+
+        it("should derive kcal from macros when no energy row exists", async () => {
+            // IFCT has no energy row — kcal is derived via Atwater factors (4/4/9).
+            const mockNutrientData = [
+                { value: 20, nutrient_definitions: { nutrient_name: "Carbohydrate", nutrient_code: "carbs", unit: "gram" } },
+                { value: 5, nutrient_definitions: { nutrient_name: "Protein", nutrient_code: "prot", unit: "gram" } },
+                { value: 10, nutrient_definitions: { nutrient_name: "Fats", nutrient_code: "fat", unit: "gram" } },
+            ];
+            terminalResult = { data: mockNutrientData, error: null };
+
+            const result = await fetchFoodNutrients(1);
+            // 4*20 + 4*5 + 9*10 = 190
+            expect(result.nutrients.kcal).toBe(190);
+        });
+
+        it("should prefer an explicit energy value over the derived one", async () => {
+            const mockNutrientData = [
+                { value: 250, nutrient_definitions: { nutrient_name: "Energy", nutrient_code: "ENER", unit: "kcal" } },
+                { value: 20, nutrient_definitions: { nutrient_name: "Carbohydrate", nutrient_code: "carbs", unit: "gram" } },
+                { value: 5, nutrient_definitions: { nutrient_name: "Protein", nutrient_code: "prot", unit: "gram" } },
+                { value: 10, nutrient_definitions: { nutrient_name: "Fats", nutrient_code: "fat", unit: "gram" } },
+            ];
+            terminalResult = { data: mockNutrientData, error: null };
+
+            const result = await fetchFoodNutrients(1);
+            expect(result.nutrients.kcal).toBe(250);
+        });
+
         it("should handle nutrient rows with null definitions gracefully", async () => {
             const mockNutrientData = [
                 { value: 100, nutrient_definitions: null },

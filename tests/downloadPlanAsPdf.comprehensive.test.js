@@ -253,6 +253,66 @@ describe("downloadPlanAsPdf — full PDF generation", () => {
             expect(mockDoc.addPage).toHaveBeenCalled();
         });
 
+        it("renders menu, custom foods, meal times and day score in the weekly PDF", () => {
+            const plan = {
+                id: "wp6",
+                name: "Rich Week",
+                mealTimes: { Breakfast: { start: "08:00", end: "10:00" } },
+                meals: {
+                    Breakfast: [
+                        {
+                            foodId: "rice",
+                            menu: "Veg Pulao",
+                            grams: 200,
+                            day: "Monday",
+                            instructions: "Cook well",
+                        },
+                        {
+                            foodId: "custom-1",
+                            foodName: "Grandma Poha",
+                            grams: 120,
+                            day: "Monday",
+                            isCustom: true,
+                            equivalentFoodName: "Poha",
+                            nutrients: { kcal: 130, protein: 3, carbs: 27, fat: 1, fibre: 1 },
+                        },
+                        {
+                            foodId: "composite",
+                            foodName: "Thali",
+                            grams: 200,
+                            day: "Monday",
+                            ingredients: [
+                                { foodName: "Dal", grams: 100, nutrients: { kcal: 120, protein: 8, carbs: 18, fat: 1, fibre: 5 } },
+                                { foodName: "Roti", grams: 100, isCustom: true, nutrients: { kcal: 250, protein: 8, carbs: 50, fat: 3, fibre: 5 } },
+                            ],
+                        },
+                    ],
+                    Lunch: [],
+                    Dinner: [],
+                },
+            };
+            const summary = { dayTotals: null };
+            const daySummaries = {
+                Monday: {
+                    dayTotals: { kcal: 1800, protein: 70, carbs: 220, fat: 50, fibre: 25 },
+                    dayScore: { score: 82 },
+                },
+            };
+
+            downloadPlanAsPdf(plan, summary, {}, {}, daySummaries);
+
+            const textCalls = mockDoc.text.mock.calls.map((c) => c[0]);
+            // Day balance score rendered in the day header
+            expect(textCalls).toContain("Balance Score: 82 / 100");
+            // Meal subheader includes the meal-time range next to the slot name
+            expect(
+                textCalls.some(
+                    (t) => typeof t === "string" && t.includes("Breakfast") && t.includes("8")
+                )
+            ).toBe(true);
+            expect(mockDoc.save).toHaveBeenCalledWith("Rich Week.pdf");
+        });
+
         it("handles page overflow within a day (yPos > 240)", () => {
             mockDoc.lastAutoTable = { finalY: 245 };
             const plan = {

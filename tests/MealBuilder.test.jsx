@@ -27,6 +27,8 @@ vi.mock("../src/components/dashboard/FoodAutocomplete", () => ({
 
 vi.mock("../src/components/dashboard/FoodAutocomplete.css", () => ({}));
 vi.mock("../src/components/dashboard/IngredientAddForm.css", () => ({}));
+vi.mock("../src/components/ui/CopyToDaysMenu.css", () => ({}));
+vi.mock("../src/components/ui/MealTimeRange.css", () => ({}));
 
 // Mock IngredientAddForm to simplify testing MealBuilder
 vi.mock("../src/components/dashboard/IngredientAddForm", () => ({
@@ -36,7 +38,7 @@ vi.mock("../src/components/dashboard/IngredientAddForm", () => ({
                 <button
                     data-testid={`add-to-meal-${meal}`}
                     disabled={disabled}
-                    onClick={() => onAdd(meal, "Test shake", [{ foodId: "101", foodName: "Rice", grams: 100 }])}
+                    onClick={() => onAdd(meal, "Shake menu", "Test instr", [{ foodId: "101", foodName: "Rice", grams: 100 }])}
                     title="Add to meal"
                     aria-label={`Add food to ${meal}`}
                 >
@@ -75,10 +77,13 @@ const defaultProps = {
     },
     isPresetActive: false,
     viewDay: "Monday",
+    mealTimes: {},
     onAddFood: vi.fn(),
     isAddingFood: false,
     onUpdateMealItem: vi.fn(),
+    onUpdateMealTime: vi.fn(),
     onRemoveMealItem: vi.fn(),
+    onCopyMealItem: vi.fn(),
 };
 
 describe("MealBuilder", () => {
@@ -152,6 +157,7 @@ describe("MealBuilder", () => {
 
         expect(defaultProps.onUpdateMealItem).toHaveBeenCalledWith("Breakfast", "item-1", {
             grams: 200,
+            menu: "",
             instructions: "Steamed",
             foodId: "101",
             foodName: "Rice",
@@ -252,7 +258,57 @@ describe("MealBuilder", () => {
 
         expect(defaultProps.onUpdateMealItem).toHaveBeenCalledWith("Breakfast", "item-1", {
             grams: 150,
+            menu: "",
             instructions: "Boiled rice",
+            foodId: "101",
+            foodName: "Rice",
+            foodGroupId: null,
+            ingredients: null,
+        });
+    });
+
+    it("shows the menu name and instructions in separate columns", () => {
+        const props = {
+            ...defaultProps,
+            activePlan: {
+                ...defaultProps.activePlan,
+                meals: {
+                    ...defaultProps.activePlan.meals,
+                    Breakfast: [
+                        {
+                            id: "m1",
+                            foodId: "101",
+                            foodName: "Rice",
+                            grams: 100,
+                            day: "Monday",
+                            menu: "Breakfast Bowl",
+                            instructions: "Serve warm",
+                        },
+                    ],
+                },
+            },
+        };
+        render(<MealBuilder {...props} />);
+
+        expect(screen.getByText("Breakfast Bowl")).toBeInTheDocument();
+        expect(screen.getByText("Serve warm")).toBeInTheDocument();
+    });
+
+    it("edits the menu field separately from instructions", () => {
+        render(<MealBuilder {...defaultProps} />);
+
+        fireEvent.click(screen.getByLabelText("Edit Rice"));
+
+        // Menu input is distinct from the instructions input
+        const menuInput = screen.getByLabelText("Edit menu for Rice");
+        fireEvent.change(menuInput, { target: { value: "Rice Bowl" } });
+
+        fireEvent.click(screen.getByLabelText("Save Rice"));
+
+        expect(defaultProps.onUpdateMealItem).toHaveBeenCalledWith("Breakfast", "item-1", {
+            grams: 150,
+            menu: "Rice Bowl",
+            instructions: "Steamed",
             foodId: "101",
             foodName: "Rice",
             foodGroupId: null,
@@ -279,6 +335,70 @@ describe("MealBuilder", () => {
         expect(screen.getByText("200")).toBeInTheDocument();
     });
 
+    it("renders editable meal-time range inputs and calls onUpdateMealTime with the full range", () => {
+        render(<MealBuilder {...defaultProps} />);
+
+        // Empty mealTimes → Breakfast falls back to its default range (08:00–10:00).
+        // The chip shows the friendly label; open the popover to reveal the inputs.
+        fireEvent.click(screen.getByRole("button", { name: "Meal time for Breakfast" }));
+
+        const startInput = screen.getByLabelText("Meal time for Breakfast start");
+        expect(startInput).toHaveValue("08:00");
+
+        // Editing the start keeps the (default) end and emits the whole range
+        fireEvent.change(startInput, { target: { value: "07:30" } });
+        expect(defaultProps.onUpdateMealTime).toHaveBeenCalledWith("Breakfast", {
+            start: "07:30",
+            end: "10:00",
+        });
+    });
+
+    it("shows meal time as a read-only range label when isPresetActive", () => {
+        render(
+            <MealBuilder
+                {...defaultProps}
+                isPresetActive={true}
+                mealTimes={{ Breakfast: { start: "08:00", end: "10:00" } }}
+            />
+        );
+
+        // No editable inputs under preset (read-only) mode
+        expect(
+            screen.queryByLabelText("Meal time for Breakfast start")
+        ).not.toBeInTheDocument();
+        // Compact range label is displayed instead
+        expect(screen.getByText("8\u201310 AM")).toBeInTheDocument();
+    });
+
+    it("renders a custom badge with the equivalent food for custom items", () => {
+        const props = {
+            ...defaultProps,
+            activePlan: {
+                ...defaultProps.activePlan,
+                meals: {
+                    ...defaultProps.activePlan.meals,
+                    Breakfast: [
+                        {
+                            id: "item-c",
+                            foodId: "999",
+                            foodName: "Homemade Poha",
+                            grams: 120,
+                            day: "Monday",
+                            instructions: "",
+                            isCustom: true,
+                            equivalentFoodName: "Rice",
+                            nutrients: { kcal: 130, carbs: 28, protein: 2.7, fat: 0.3, fibre: 0.4, vitamins: 0, minerals: 0 },
+                        },
+                    ],
+                },
+            },
+        };
+        render(<MealBuilder {...props} />);
+
+        expect(screen.getByText("Homemade Poha")).toBeInTheDocument();
+        expect(screen.getByText(/custom\s*≈\s*Rice/)).toBeInTheDocument();
+    });
+
     it("fills inline add form and submits food via IngredientAddForm", () => {
         const onAddFood = vi.fn();
         render(<MealBuilder {...defaultProps} onAddFood={onAddFood} />);
@@ -287,10 +407,11 @@ describe("MealBuilder", () => {
         const addBtn = screen.getByTestId("add-to-meal-Early morning");
         fireEvent.click(addBtn);
 
-        // onAddFood should be called with (meal, instructions, ingredients)
+        // onAddFood should be called with (meal, menu, instructions, ingredients)
         expect(onAddFood).toHaveBeenCalledWith(
             "Early morning",
-            "Test shake",
+            "Shake menu",
+            "Test instr",
             [{ foodId: "101", foodName: "Rice", grams: 100 }]
         );
     });
@@ -320,6 +441,40 @@ describe("MealBuilder", () => {
         for (const btn of addBtns) {
             expect(btn).toBeDisabled();
         }
+    });
+
+    it("renders a copy-to-days control for each item when not preset", () => {
+        render(<MealBuilder {...defaultProps} />);
+
+        expect(screen.getByLabelText("Copy Rice to other days")).toBeInTheDocument();
+        expect(screen.getByLabelText("Copy Dal to other days")).toBeInTheDocument();
+    });
+
+    it("hides the copy-to-days control when isPresetActive", () => {
+        render(<MealBuilder {...defaultProps} isPresetActive={true} />);
+
+        expect(screen.queryByLabelText("Copy Rice to other days")).not.toBeInTheDocument();
+    });
+
+    it("does not render the copy control when onCopyMealItem is not provided", () => {
+        render(<MealBuilder {...defaultProps} onCopyMealItem={undefined} />);
+
+        expect(screen.queryByLabelText("Copy Rice to other days")).not.toBeInTheDocument();
+    });
+
+    it("copies an item to selected days via onCopyMealItem(meal, itemId, days)", () => {
+        const onCopyMealItem = vi.fn();
+        render(<MealBuilder {...defaultProps} onCopyMealItem={onCopyMealItem} />);
+
+        // Open the copy popover for Rice (item-1)
+        fireEvent.click(screen.getByLabelText("Copy Rice to other days"));
+
+        // Pick two days and confirm
+        fireEvent.click(screen.getByLabelText("Wednesday"));
+        fireEvent.click(screen.getByLabelText("Friday"));
+        fireEvent.click(screen.getByRole("button", { name: /copy to selected days/i }));
+
+        expect(onCopyMealItem).toHaveBeenCalledWith("Breakfast", "item-1", ["Wednesday", "Friday"]);
     });
 });
 

@@ -108,6 +108,7 @@ export interface MealItem {
         minerals?: number;
     };
     foodGroup?: string;
+    foodGroupId?: number | null;
     day?: string;
     /** If present, this is a composite item (e.g., "Banana Shake") with multiple ingredients */
     ingredients?: Ingredient[];

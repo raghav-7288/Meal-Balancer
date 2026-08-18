@@ -72,6 +72,105 @@ export function foodById(id: string): LocalFood | undefined {
     return (FOODS as LocalFood[]).find((f) => f.id === id);
 }
 
+/** Per-100g nutrient values as stored on DB-backed meal items. */
+export type NutrientValues = NonNullable<MealItem["nutrients"]>;
+
+/**
+ * Resolver that provides per-100g nutrients for a DB food id.
+ * Used so meal items that only reference a `foodId` (no embedded `nutrients`)
+ * — e.g. preset plans built through the admin UI — can still be aggregated.
+ */
+export type NutrientResolver = (foodId: string) => NutrientValues | undefined;
+
+// ── Food-group normalisation ────────────────────────────────────────────────
+// DB foods carry ICMR/IFCT major-group names (e.g. "Green Leafy Vegetables") or
+// ids (1–20), while the scoring engine reasons in terms of a handful of semantic
+// categories ("vegetables", "fats", "cereals", …). Map both representations onto
+// those categories so vegetable/visible-fat/cereal tracking works for DB foods.
+
+/** Semantic categories the engine already understands (identity-mapped). */
+const KNOWN_CATEGORIES = new Set([
+    "cereals",
+    "pulses",
+    "vegetables",
+    "fats",
+    "fruit",
+    "roots",
+    "condiments",
+    "nuts",
+    "sugar",
+    "misc",
+    "dairy",
+    "egg",
+    "meat",
+    "fish",
+]);
+
+/** DB major_group_id → semantic category. */
+const GROUP_ID_TO_CATEGORY: Record<number, string> = {
+    1: "cereals", // Cereals and Millets
+    2: "pulses", // Grain Legumes
+    3: "vegetables", // Green Leafy Vegetables
+    4: "vegetables", // Other Vegetables
+    5: "fruit", // Fruits
+    6: "roots", // Roots and Tubers
+    7: "condiments", // Condiments and Spices
+    8: "nuts", // Nuts and Oil Seeds
+    9: "sugar", // Sugars
+    10: "vegetables", // Mushrooms
+    11: "misc", // Miscellaneous Foods
+    12: "dairy", // Milk and Milk Products
+    13: "egg", // Egg and Egg Products
+    14: "meat", // Poultry
+    15: "meat", // Animal Meat
+    16: "fish", // Marine Fish
+    17: "fish", // Marine Shellfish
+    18: "fish", // Marine Mollusks
+    19: "fish", // Fresh Water Fish and Shellfish
+    20: "fats", // Edible Oils and Fats
+};
+
+/** DB major_group_name (lowercased) → semantic category. */
+const GROUP_NAME_TO_CATEGORY: Record<string, string> = {
+    "cereals and millets": "cereals",
+    "grain legumes": "pulses",
+    "green leafy vegetables": "vegetables",
+    "other vegetables": "vegetables",
+    fruits: "fruit",
+    "roots and tubers": "roots",
+    "condiments and spices": "condiments",
+    "nuts and oil seeds": "nuts",
+    sugars: "sugar",
+    mushrooms: "vegetables",
+    "miscellaneous foods": "misc",
+    "milk and milk products": "dairy",
+    "egg and egg products": "egg",
+    poultry: "meat",
+    "animal meat": "meat",
+    "marine fish": "fish",
+    "marine shellfish": "fish",
+    "marine mollusks": "fish",
+    "fresh water fish and shellfish": "fish",
+    "edible oils and fats": "fats",
+};
+
+/**
+ * Normalise a food group (name and/or DB id) to a semantic category the scoring
+ * engine understands. Already-normalised values (e.g. "vegetables") pass through
+ * unchanged, so legacy/local foods are unaffected.
+ *
+ * @param group - Group name (semantic category or DB major-group name)
+ * @param groupId - Optional DB major_group_id (1–20)
+ * @returns A semantic category string (may be "" when unknown/empty)
+ */
+export function normalizeFoodGroup(group?: string | null, groupId?: number | null): string {
+    const g = (group || "").trim().toLowerCase();
+    if (KNOWN_CATEGORIES.has(g)) return g;
+    if (groupId != null && GROUP_ID_TO_CATEGORY[groupId]) return GROUP_ID_TO_CATEGORY[groupId];
+    if (g && GROUP_NAME_TO_CATEGORY[g]) return GROUP_NAME_TO_CATEGORY[g];
+    return g;
+}
+
 /**
  * Shared helper to accumulate nutrient values into totals.
  * Eliminates duplication between DB-item and legacy-item branches.
@@ -121,9 +220,14 @@ export function accumulateNutrients(
  * - `exchangeTotals` — exchange count per food group (factor = grams / reference)
  *
  * @param items - Array of meal items, each with `foodId`, `grams`, and optionally `nutrients` / `foodGroup`
+ * @param resolveNutrients - Optional resolver providing per-100g nutrients for a DB `foodId`
+ *   when an item has no embedded `nutrients` (e.g. admin-built preset plans).
  * @returns NutrientTotals object with all macros, micros, exchange info, and derived percentages
  */
-export function aggregateMeal(items: MealItem[]): NutrientTotals {
+export function aggregateMeal(
+    items: MealItem[],
+    resolveNutrients?: NutrientResolver
+): NutrientTotals {
     // Flatten composite items: expand ingredients into virtual MealItems
     const flatItems: MealItem[] = [];
     for (const item of items) {
@@ -134,6 +238,7 @@ export function aggregateMeal(items: MealItem[]): NutrientTotals {
                     grams: ing.grams,
                     nutrients: ing.nutrients,
                     foodGroup: ing.foodGroup,
+                    foodGroupId: ing.foodGroupId,
                     day: item.day,
                 });
             }
@@ -159,12 +264,17 @@ export function aggregateMeal(items: MealItem[]): NutrientTotals {
     };
 
     for (const item of flatItems) {
-        if (item.nutrients) {
+        // Prefer embedded nutrients; otherwise hydrate DB items via the resolver.
+        const nutrients =
+            item.nutrients ||
+            (resolveNutrients && item.foodId ? resolveNutrients(item.foodId) : undefined);
+
+        if (nutrients) {
             // DB items: nutrients are per 100g
             const factor = item.grams / 100;
-            const kcal = accumulateNutrients(totals, item.nutrients, factor);
+            const kcal = accumulateNutrients(totals, nutrients, factor);
 
-            const group = item.foodGroup || "";
+            const group = normalizeFoodGroup(item.foodGroup, item.foodGroupId);
             totals.visibleFat += group === "fats" ? item.grams : 0;
             totals.vegetablesG += group === "vegetables" ? item.grams : 0;
             totals.cerealEnergy += group === "cereals" ? kcal : 0;
@@ -179,10 +289,11 @@ export function aggregateMeal(items: MealItem[]): NutrientTotals {
             const factor = item.grams / gramsPerExch;
             const kcal = accumulateNutrients(totals, food, factor);
 
-            totals.visibleFat += food.group === "fats" ? item.grams : 0;
-            totals.vegetablesG += food.group === "vegetables" ? item.grams : 0;
-            totals.cerealEnergy += food.group === "cereals" ? kcal : 0;
-            totals.exchangeTotals[food.group] = (totals.exchangeTotals[food.group] || 0) + factor;
+            const group = normalizeFoodGroup(food.group);
+            totals.visibleFat += group === "fats" ? item.grams : 0;
+            totals.vegetablesG += group === "vegetables" ? item.grams : 0;
+            totals.cerealEnergy += group === "cereals" ? kcal : 0;
+            totals.exchangeTotals[group] = (totals.exchangeTotals[group] || 0) + factor;
         }
     }
 

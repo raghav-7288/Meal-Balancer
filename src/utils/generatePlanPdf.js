@@ -2,6 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { foodById } from "../engines/nutrientEngine";
 import { MEALS, DAYS } from "../data/presetPlans";
+import { formatMealTimeRange, getMealTimeRange } from "./mealTime";
 
 /* ─── Exported Pure Functions (testable layout logic) ─── */
 
@@ -39,18 +40,24 @@ export function computeWeeklyAverages(daySummaries, days) {
 /**
  * Build a single table row for a meal item.
  * Supports composite items (with `ingredients` array) and single-food items.
- * @param {object} item - Meal item { foodId, foodName, grams, instructions, nutrients, ingredients? }
+ * @param {object} item - Meal item { foodId, foodName, menu, grams, instructions, nutrients, isCustom, equivalentFoodName, ingredients? }
  * @param {function} lookupFood - Function to look up food by ID (e.g., foodById)
- * @param {object} [options] - { includeFibre: boolean }
- * @returns {Array} Table row array: [name, qty, instructions, kcal, protein, carbs, fat, ...fibre?]
+ * @param {object} [options] - { includeFibre: boolean, includeMenu: boolean }
+ * @returns {Array} Table row array: [...menu?, name, qty, instructions, kcal, protein, carbs, fat, ...fibre?]
  */
 export function buildMealTableRow(item, lookupFood, options = {}) {
-    const { includeFibre = false } = options;
+    const { includeFibre = false, includeMenu = false } = options;
     const isComposite = item.ingredients && item.ingredients.length > 0;
+
+    // "Menu" column (matches the dashboard): explicit menu, else the composite dish name.
+    const menu = item.menu || (isComposite ? item.foodName || "" : "") || "";
+    const withMenu = (row) => (includeMenu ? [menu, ...row] : row);
 
     if (isComposite) {
         // Composite item: aggregate nutrients from all ingredients
-        const name = item.ingredients.map((ing) => `${ing.foodName} ${ing.grams}g`).join(", ");
+        const name = item.ingredients
+            .map((ing) => `${ing.foodName}${ing.isCustom ? " (custom)" : ""} ${ing.grams}g`)
+            .join(", ");
         const grams = item.grams || item.ingredients.reduce((s, ing) => s + ing.grams, 0);
         const instructions = item.instructions || "";
         let kcal = 0, protein = 0, carbs = 0, fat = 0, fibre = 0;
@@ -77,14 +84,19 @@ export function buildMealTableRow(item, lookupFood, options = {}) {
         }
 
         if (includeFibre) {
-            return [name, `${grams}g`, instructions, Math.round(kcal), protein.toFixed(1), carbs.toFixed(1), fat.toFixed(1), fibre.toFixed(1)];
+            return withMenu([name, `${grams}g`, instructions, Math.round(kcal), protein.toFixed(1), carbs.toFixed(1), fat.toFixed(1), fibre.toFixed(1)]);
         }
-        return [name, `${grams}g`, instructions, Math.round(kcal), protein.toFixed(1), carbs.toFixed(1), fat.toFixed(1)];
+        return withMenu([name, `${grams}g`, instructions, Math.round(kcal), protein.toFixed(1), carbs.toFixed(1), fat.toFixed(1)]);
     }
 
     // Single food item (original behavior)
     const food = lookupFood(item.foodId);
-    const name = food?.name || item.foodName || item.foodId;
+    let name = food?.name || item.foodName || item.foodId;
+    if (item.isCustom) {
+        name += item.equivalentFoodName
+            ? ` (custom \u2248 ${item.equivalentFoodName})`
+            : " (custom)";
+    }
     const grams = item.grams;
     const instructions = item.instructions || "";
     let kcal = 0,
@@ -110,9 +122,9 @@ export function buildMealTableRow(item, lookupFood, options = {}) {
     }
 
     if (includeFibre) {
-        return [name, `${grams}g`, instructions, kcal, protein, carbs, fat, fibre];
+        return withMenu([name, `${grams}g`, instructions, kcal, protein, carbs, fat, fibre]);
     }
-    return [name, `${grams}g`, instructions, kcal, protein, carbs, fat];
+    return withMenu([name, `${grams}g`, instructions, kcal, protein, carbs, fat]);
 }
 
 /**
@@ -567,6 +579,14 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
             doc.setFont("helvetica", "bold");
             doc.setTextColor(...COLORS.white);
             doc.text(`${day}`, 20, yPos + 1);
+            // Day balance score on the right (mirrors the planner's day badge)
+            const dayScoreVal = daySummary?.dayScore?.score;
+            if (typeof dayScoreVal === "number") {
+                doc.setFontSize(9);
+                doc.text(`Balance Score: ${dayScoreVal} / 100`, pageWidth - 20, yPos + 1, {
+                    align: "right",
+                });
+            }
             doc.setTextColor(0);
             yPos += 14;
 
@@ -595,19 +615,27 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
                 doc.setFontSize(9.5);
                 doc.setFont("helvetica", "bold");
                 doc.setTextColor(...COLORS.dark);
-                doc.text(mealName, 25, yPos);
+                const weeklyMealTime = formatMealTimeRange(
+                    getMealTimeRange(plan.mealTimes, mealName)
+                );
+                doc.text(
+                    weeklyMealTime ? `${mealName}  \u2014  ${weeklyMealTime}` : mealName,
+                    25,
+                    yPos
+                );
                 doc.setTextColor(0);
                 yPos += 6;
 
-                // Build table data
+                // Build table data — Menu + Instructions + full macros (mirrors dashboard)
                 const tableBody = items.map((item) =>
-                    buildMealTableRow(item, foodById, { includeFibre: false })
+                    buildMealTableRow(item, foodById, { includeFibre: true, includeMenu: true })
                 );
 
                 autoTable(doc, {
                     startY: yPos,
                     head: [
                         [
+                            "Menu",
                             "Food Item",
                             "Qty",
                             "Instructions",
@@ -615,6 +643,7 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
                             "Protein (g)",
                             "Carbs (g)",
                             "Fat (g)",
+                            "Fibre (g)",
                         ],
                     ],
                     body: tableBody,
@@ -622,24 +651,26 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
                     headStyles: {
                         fillColor: [15, 23, 42], // Slate-900 (dark contrast)
                         textColor: COLORS.white,
-                        fontSize: 7.5,
+                        fontSize: 7,
                         fontStyle: "bold",
-                        cellPadding: 2.5,
+                        cellPadding: 2,
                         halign: "center",
                     },
                     bodyStyles: {
-                        fontSize: 7.5,
+                        fontSize: 7,
                         textColor: COLORS.text,
-                        cellPadding: 2.5,
+                        cellPadding: 2,
                     },
                     columnStyles: {
-                        0: { halign: "left", cellWidth: 40 },
-                        1: { halign: "center", cellWidth: 14 },
-                        2: { halign: "left", cellWidth: 36 },
-                        3: { halign: "center" },
-                        4: { halign: "center" },
-                        5: { halign: "center" },
-                        6: { halign: "center" },
+                        0: { halign: "left", cellWidth: 28 }, // Menu
+                        1: { halign: "left", cellWidth: 30 }, // Food Item
+                        2: { halign: "center", cellWidth: 11 }, // Qty
+                        3: { halign: "left", cellWidth: 30 }, // Instructions
+                        4: { halign: "center" }, // Kcal
+                        5: { halign: "center" }, // Protein
+                        6: { halign: "center" }, // Carbs
+                        7: { halign: "center" }, // Fat
+                        8: { halign: "center" }, // Fibre
                     },
                     styles: {
                         lineColor: COLORS.border,
@@ -648,7 +679,7 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
                     alternateRowStyles: {
                         fillColor: [248, 250, 252], // Slate-50
                     },
-                    margin: { left: 18, right: 18 },
+                    margin: { left: 14, right: 14 },
                 });
 
                 yPos = doc.lastAutoTable.finalY + 8;
@@ -692,17 +723,25 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
             doc.setFontSize(13);
             doc.setFont("helvetica", "bold");
             doc.setTextColor(...COLORS.dark);
-            doc.text(mealName, 20, yPos);
+            const singleMealTime = formatMealTimeRange(
+                getMealTimeRange(plan.mealTimes, mealName)
+            );
+            doc.text(
+                singleMealTime ? `${mealName}  \u2014  ${singleMealTime}` : mealName,
+                20,
+                yPos
+            );
             doc.setTextColor(0);
             yPos += 4;
 
             const tableBody = items.map((item) =>
-                buildMealTableRow(item, foodById, { includeFibre: true })
+                buildMealTableRow(item, foodById, { includeFibre: true, includeMenu: true })
             );
 
             const mealTotals = summary?.mealTotals?.[mealName];
             if (mealTotals) {
                 tableBody.push([
+                    "",
                     "TOTAL",
                     "",
                     "",
@@ -718,6 +757,7 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
                 startY: yPos,
                 head: [
                     [
+                        "Menu",
                         "Food Item",
                         "Qty",
                         "Instructions",
@@ -733,25 +773,26 @@ export function downloadPlanAsPdf(plan, summary, userInfo = {}, profile = {}, da
                 headStyles: {
                     fillColor: COLORS.headerBg,
                     textColor: COLORS.white,
-                    fontSize: 8,
+                    fontSize: 7.5,
                     fontStyle: "bold",
-                    cellPadding: 3,
+                    cellPadding: 2.5,
                     halign: "center",
                 },
                 bodyStyles: {
-                    fontSize: 8,
+                    fontSize: 7.5,
                     textColor: COLORS.text,
                     cellPadding: 2.5,
                 },
                 columnStyles: {
-                    0: { halign: "left", cellWidth: 38 },
-                    1: { halign: "center", cellWidth: 15 },
-                    2: { halign: "left", cellWidth: 34 },
-                    3: { halign: "center" },
-                    4: { halign: "center" },
-                    5: { halign: "center" },
-                    6: { halign: "center" },
-                    7: { halign: "center" },
+                    0: { halign: "left", cellWidth: 28 }, // Menu
+                    1: { halign: "left", cellWidth: 30 }, // Food Item
+                    2: { halign: "center", cellWidth: 12 }, // Qty
+                    3: { halign: "left", cellWidth: 30 }, // Instructions
+                    4: { halign: "center" }, // Kcal
+                    5: { halign: "center" }, // Protein
+                    6: { halign: "center" }, // Carbs
+                    7: { halign: "center" }, // Fat
+                    8: { halign: "center" }, // Fibre
                 },
                 styles: {
                     lineColor: COLORS.border,

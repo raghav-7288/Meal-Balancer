@@ -86,20 +86,25 @@ export async function fetchFoodNutrients(foodId) {
             }
         }
 
-        // Map DB nutrient names to the app's internal nutrient keys (values are per 100g)
+        // Map DB nutrient names to the app's internal nutrient keys (values are per 100g).
+        // NOTE: the IFCT dataset uses names like "Fats" and "Total Fibre" (not "Fat"/"Fibre"),
+        // so the alias lists below must include those exact variants or the values read as 0.
         const nutrients = {
             kcal: findNutrientValue(rawNutrients, ["energy", "energy (kcal)", "calories", "kcal"]),
             carbs: findNutrientValue(rawNutrients, [
                 "carbohydrate",
+                "carbohydrates",
                 "carbs",
                 "total carbohydrate",
                 "carbohydrate, total",
             ]),
-            protein: findNutrientValue(rawNutrients, ["protein", "total protein"]),
-            fat: findNutrientValue(rawNutrients, ["fat", "total fat", "fat, total"]),
+            protein: findNutrientValue(rawNutrients, ["protein", "total protein", "proteins"]),
+            fat: findNutrientValue(rawNutrients, ["fat", "fats", "total fat", "fat, total"]),
             fibre: findNutrientValue(rawNutrients, [
                 "fibre",
                 "fiber",
+                "total fibre",
+                "total fiber",
                 "dietary fibre",
                 "dietary fiber",
                 "total dietary fibre",
@@ -107,6 +112,14 @@ export async function fetchFoodNutrients(foodId) {
             vitamins: findNutrientValue(rawNutrients, ["total vitamins", "vitamins"]),
             minerals: findNutrientValue(rawNutrients, ["total minerals", "minerals", "mineral"]),
         };
+
+        // The IFCT dataset has no explicit energy row. When an energy value isn't
+        // present, derive kcal from macros using Atwater factors (4/4/9) so the
+        // energy KPI and cereal-energy ratio aren't stuck at zero.
+        if (!nutrients.kcal) {
+            nutrients.kcal =
+                4 * nutrients.carbs + 4 * nutrients.protein + 9 * nutrients.fat;
+        }
 
         return { nutrients, rawNutrients };
     });

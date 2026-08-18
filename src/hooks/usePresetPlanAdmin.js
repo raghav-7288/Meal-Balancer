@@ -6,6 +6,7 @@ import {
     deletePresetPlan,
 } from "../services/presetPlanService";
 import toast from "react-hot-toast";
+import { buildDayCopies } from "../utils/copyMealItem";
 
 /**
  * Hook for managing preset plans in the admin page.
@@ -150,6 +151,7 @@ export function usePresetPlanAdmin() {
                 const newPlan = await upsertPresetPlan({
                     name: name.trim(),
                     meals: emptyMeals,
+                    mealTimes: {},
                     guidelines: "",
                     displayOrder: plans.length + 1,
                     isActive: true,
@@ -253,7 +255,7 @@ export function usePresetPlanAdmin() {
 
     // ─── Add a food item to a meal slot (supports multi-ingredient) ──
     const addFood = useCallback(
-        (meal, instructions, ingredients) => {
+        (meal, menuVal, instructions, ingredients) => {
             if (!activePlanId || !ingredients || ingredients.length === 0) return;
 
             const totalGrams = ingredients.reduce((sum, ing) => sum + Number(ing.grams), 0);
@@ -266,16 +268,24 @@ export function usePresetPlanAdmin() {
                       foodId: String(singleIng.foodId),
                       foodName: singleIng.foodName,
                       grams: Number(singleIng.grams),
+                      menu: menuVal || "",
                       instructions: instructions || "",
                       foodGroupId: singleIng.foodGroupId || null,
                       foodGroup: singleIng.foodGroup || "",
                       day: viewDay,
+                      // Custom foods store the database "equivalent" as foodId (above);
+                      // these flags carry the custom label + equivalent for display.
+                      ...(singleIng.isCustom && {
+                          isCustom: true,
+                          equivalentFoodName: singleIng.equivalentFoodName || "",
+                      }),
                   }
                 : {
                       id: crypto.randomUUID(),
                       foodId: "composite",
-                      foodName: instructions || ingredients.map((i) => i.foodName).join(" + "),
+                      foodName: menuVal || ingredients.map((i) => i.foodName).join(" + "),
                       grams: totalGrams,
+                      menu: menuVal || "",
                       instructions: instructions || "",
                       day: viewDay,
                       ingredients: ingredients.map((ing) => ({
@@ -284,6 +294,10 @@ export function usePresetPlanAdmin() {
                           grams: Number(ing.grams),
                           foodGroupId: ing.foodGroupId || null,
                           foodGroup: ing.foodGroup || "",
+                          ...(ing.isCustom && {
+                              isCustom: true,
+                              equivalentFoodName: ing.equivalentFoodName || "",
+                          }),
                       })),
                   };
 
@@ -300,6 +314,22 @@ export function usePresetPlanAdmin() {
             toast.success(`${label} added to ${meal} (${viewDay})`);
         },
         [activePlanId, viewDay, markDirty]
+    );
+
+    // ─── Update the clock time for a meal slot ────────────────────────
+    const updateMealTime = useCallback(
+        (meal, time) => {
+            if (!activePlanId) return;
+            setPlans((prev) =>
+                prev.map((p) =>
+                    p.id === activePlanId
+                        ? { ...p, mealTimes: { ...(p.mealTimes || {}), [meal]: time } }
+                        : p
+                )
+            );
+            markDirty();
+        },
+        [activePlanId, markDirty]
     );
 
     // ─── Update a meal item's grams or instructions ───────────────────
@@ -319,6 +349,38 @@ export function usePresetPlanAdmin() {
             markDirty();
         },
         [activePlanId, markDirty]
+    );
+
+    // ─── Copy a meal item to one or more other days ───────────────────
+    const copyMealItemToDays = useCallback(
+        (meal, itemId, targetDays) => {
+            if (!activePlanId || !itemId || !targetDays || targetDays.length === 0) return;
+            const plan = plans.find((p) => p.id === activePlanId);
+            const slotItems = plan?.meals?.[meal] || [];
+            const source = slotItems.find((it) => it.id === itemId);
+            if (!source) return;
+
+            const additions = buildDayCopies(source, slotItems, targetDays);
+            if (additions.length === 0) {
+                toast("Already added to the selected day(s)", { icon: "ℹ️" });
+                return;
+            }
+
+            setPlans((prev) =>
+                prev.map((p) => {
+                    if (p.id !== activePlanId) return p;
+                    const meals = { ...p.meals };
+                    meals[meal] = [...(meals[meal] || []), ...additions];
+                    return { ...p, meals };
+                })
+            );
+            markDirty();
+            const label = source.foodName || source.menu || "Item";
+            toast.success(
+                `Copied "${label}" to ${additions.length} day${additions.length > 1 ? "s" : ""}`
+            );
+        },
+        [activePlanId, plans, markDirty]
     );
 
     // ─── Remove a meal item (with undo) ────────────────────────────────
@@ -400,7 +462,9 @@ export function usePresetPlanAdmin() {
         updatePlanField,
         addFood,
         updateMealItem,
+        updateMealTime,
         removeMealItem,
+        copyMealItemToDays,
         reload,
     };
 }

@@ -14,7 +14,7 @@ export async function fetchPresetPlans() {
     return cachedFetch("preset_plans", async () => {
         const { data, error } = await supabase
             .from("preset_plans")
-            .select("id, name, meals, guidelines, display_order, created_at")
+            .select("id, name, meals, meal_times, guidelines, display_order, created_at")
             .eq("is_active", true)
             .order("display_order", { ascending: true });
 
@@ -23,6 +23,7 @@ export async function fetchPresetPlans() {
             id: plan.id,
             name: plan.name,
             meals: plan.meals || {},
+            mealTimes: plan.meal_times || {},
             guidelines: plan.guidelines || "",
             isPreset: true,
         }));
@@ -38,7 +39,7 @@ export async function fetchPresetPlans() {
 export async function fetchAllPresetPlans() {
     const { data, error } = await supabase
         .from("preset_plans")
-        .select("id, name, meals, guidelines, display_order, is_active, created_at, updated_at")
+        .select("id, name, meals, meal_times, guidelines, display_order, is_active, created_at, updated_at")
         .order("display_order", { ascending: true });
 
     if (error) throw new Error(`Failed to fetch preset plans: ${error.message}`);
@@ -46,6 +47,7 @@ export async function fetchAllPresetPlans() {
         id: plan.id,
         name: plan.name,
         meals: plan.meals || {},
+        mealTimes: plan.meal_times || {},
         guidelines: plan.guidelines || "",
         displayOrder: plan.display_order,
         isActive: plan.is_active,
@@ -63,6 +65,7 @@ export async function upsertPresetPlan(plan) {
     const row = {
         name: plan.name,
         meals: plan.meals || {},
+        meal_times: plan.mealTimes || {},
         guidelines: plan.guidelines || "",
         display_order: plan.displayOrder ?? 0,
         is_active: plan.isActive !== false,
@@ -75,7 +78,7 @@ export async function upsertPresetPlan(plan) {
     const { data, error } = await supabase
         .from("preset_plans")
         .upsert(row, { onConflict: "id" })
-        .select("id, name, meals, guidelines, display_order, is_active, created_at, updated_at")
+        .select("id, name, meals, meal_times, guidelines, display_order, is_active, created_at, updated_at")
         .single();
 
     if (error) throw new Error(`Failed to save preset plan: ${error.message}`);
@@ -87,6 +90,7 @@ export async function upsertPresetPlan(plan) {
         id: data.id,
         name: data.name,
         meals: data.meals || {},
+        mealTimes: data.meal_times || {},
         guidelines: data.guidelines || "",
         displayOrder: data.display_order,
         isActive: data.is_active,

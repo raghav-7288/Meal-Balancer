@@ -16,7 +16,7 @@ export async function fetchUserPlans(userId) {
         async () => {
             const { data, error } = await supabase
                 .from("user_plans")
-                .select("id, user_id, name, meals, guidelines, created_at, updated_at")
+                .select("id, user_id, name, meals, meal_times, guidelines, created_at, updated_at")
                 .eq("user_id", userId)
                 .order("created_at", { ascending: true });
 
@@ -41,6 +41,7 @@ export async function upsertPlan(userId, plan) {
                 user_id: userId,
                 name: plan.name,
                 meals: plan.meals,
+                meal_times: plan.mealTimes || {},
                 guidelines: plan.guidelines || "",
             };
 
@@ -73,6 +74,7 @@ export async function upsertPlans(userId, plans) {
                 user_id: userId,
                 name: plan.name,
                 meals: plan.meals,
+                meal_times: plan.mealTimes || {},
                 guidelines: plan.guidelines || "",
             }));
 
